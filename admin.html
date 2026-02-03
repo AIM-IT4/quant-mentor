@@ -369,21 +369,26 @@
                 return;
             }
 
-            if (data.length === 0) {
-                list.innerHTML = '<p class="text-muted">No products found.</p>';
-                return;
+                if (data.length === 0) {
+                    list.innerHTML = '<p class="text-muted">No products found.</p>';
+                    return;
+                }
+
+                list.innerHTML = data.map(p => `
+                    <div class="product-item">
+                        <div>
+                            <strong>${p.name}</strong><br>
+                            <span style="color: var(--text-muted); font-size: 0.9em;">₹${p.price}</span>
+                        </div>
+                        <a href="${p.file_url}" target="_blank" style="color: var(--primary);">Download</a>
+                    </div>
+                `).join('');
             }
 
-            list.innerHTML = data.map(p => `
-                <div class="product-item">
-                    <div>
-                        <strong>${p.name}</strong><br>
-                        <span style="color: var(--text-muted); font-size: 0.9em;">₹${p.price}</span>
-                    </div>
-                    <a href="${p.file_url}" target="_blank" style="color: var(--primary);">Download</a>
-                </div>
-            `).join('');
-        }
+            // Make checkPassword globally accessible
+            window.checkPassword = checkPassword;
+            window.loadProducts = loadProducts;
+        }); // End of DOMContentLoaded
     </script>
 </body>
 
