@@ -12,6 +12,8 @@
         rel="stylesheet">
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <style>
         :root {
             --primary: #6366f1;
@@ -467,6 +469,15 @@ Brief Q&A"></textarea>
             } catch (e) {
                 console.error('Supabase initialization failed:', e);
             }
+
+            // EmailJS Configuration
+            const EMAILJS_USER_ID = 'qDPRKM4ROa6YKvqWL';
+            const EMAILJS_SERVICE_ID = 'service_t71bulx';
+            const EMAILJS_TEMPLATE_ID = 'template_ddficic';
+            
+            // Initialize EmailJS
+            emailjs.init(EMAILJS_USER_ID);
+            console.log('✅ EmailJS initialized');
 
             // Handle Form Submission
             document.getElementById('uploadForm').addEventListener('submit', async (e) => {
@@ -933,16 +944,12 @@ Brief Q&A"></textarea>
 
                 if (updateError) throw updateError;
 
-                // Notify user via Formspree
-                const FORMSPREE_ID = 'mjgozran';
-                await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        _subject: `Reschedule Approved - Booking ${bookingId}`,
-                        email: email,
-                        booking_id: bookingId,
-                        message: `
+                // Notify user via EmailJS
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                    to_email: email,
+                    to_name: email.split('@')[0],
+                    subject: `Reschedule Approved - Booking ${bookingId}`,
+                    message: `
 ✅ RESCHEDULE REQUEST APPROVED
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
@@ -955,8 +962,7 @@ New Schedule:
 
 Your session is now confirmed for the new date/time.
 ━━━━━━━━━━━━━━━━━━━━
-                        `.trim()
-                    })
+                    `.trim()
                 });
 
                 alert('✅ Reschedule request approved!\n\nUser has been notified.');
@@ -1018,16 +1024,12 @@ Your session is now confirmed for the new date/time.
 
                 if (updateError) throw updateError;
 
-                // Notify user
-                const FORMSPREE_ID = 'mjgozran';
-                await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        _subject: `Alternative Date Suggested - Booking ${bookingId}`,
-                        email: booking.email,
-                        booking_id: bookingId,
-                        message: `
+                // Notify user via EmailJS
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                    to_email: booking.email,
+                    to_name: booking.email.split('@')[0],
+                    subject: `Alternative Date Suggested - Booking ${bookingId}`,
+                    message: `
 📅 ALTERNATIVE DATE SUGGESTED
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
@@ -1038,11 +1040,9 @@ New Schedule:
 • Date: ${altDate}
 • Time: ${altTime}
 
-${message ? `Message from admin:\n${message}\n` : ''}
-If this doesn't work for you, please contact us to reschedule.
+${message ? `Message from admin:\n${message}\n` : ''}If this doesn't work for you, please contact us to reschedule.
 ━━━━━━━━━━━━━━━━━━━━
-                        `.trim()
-                    })
+                    `.trim()
                 });
 
                 alert('✅ Alternative date sent to user!');
@@ -1077,16 +1077,12 @@ If this doesn't work for you, please contact us to reschedule.
 
                 if (updateError) throw updateError;
 
-                // Notify user
-                const FORMSPREE_ID = 'mjgozran';
-                await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        _subject: `Reschedule Request Rejected - Booking ${bookingId}`,
-                        email: email,
-                        booking_id: bookingId,
-                        message: `
+                // Notify user via EmailJS
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                    to_email: email,
+                    to_name: email.split('@')[0],
+                    subject: `Reschedule Request Rejected - Booking ${bookingId}`,
+                    message: `
 ❌ RESCHEDULE REQUEST REJECTED
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
@@ -1098,8 +1094,7 @@ ${reason ? `\nReason: ${reason}` : ''}
 
 Please contact us if you need further assistance.
 ━━━━━━━━━━━━━━━━━━━━
-                        `.trim()
-                    })
+                    `.trim()
                 });
 
                 alert('✅ Reschedule request rejected.\n\nUser has been notified.');
