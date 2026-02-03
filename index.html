@@ -58,6 +58,7 @@
                 <li><a href="#products">Products</a></li>
                 <li><a href="#testimonials">Reviews</a></li>
                 <li><a href="#contact" class="nav-cta">Book Now</a></li>
+                <li><a href="#admin">Admin</a></li>
             </ul>
             <button class="mobile-menu-btn" id="mobileMenuBtn">
                 <i class="fas fa-bars"></i>
@@ -597,6 +598,71 @@
         </div>
     </section>
 
+    <!-- Admin Panel (Product Management) -->
+    <section class="admin" id="admin">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-tag">Admin</span>
+                <h2 class="section-title">Admin Panel</h2>
+                <p class="section-subtitle">Add new products with coupon codes and edit existing products</p>
+            </div>
+
+            <div class="admin-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
+                <!-- Add Product Card -->
+                <div class="admin-card" style="padding: 20px; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--bg-card);">
+                    <h3 style="margin-bottom: 12px;">Add New Product</h3>
+                    <form id="adminAddProductForm">
+                        <div class="form-group" style="margin-bottom:12px;">
+                            <label>Product Name</label>
+                            <input type="text" id="adminProductName" required placeholder="e.g. Advanced Options Bundle">
+                        </div>
+                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="form-group">
+                                <label>Price (INR)</label>
+                                <input type="number" id="adminProductPrice" required placeholder="e.g. 499">
+                            </div>
+                            <div class="form-group">
+                                <label>Coupon Percent</label>
+                                <input type="number" id="adminCouponPercent" min="0" max="100" value="0" placeholder="0-100">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom:12px;">
+                            <label>Description</label>
+                            <input type="text" id="adminProductDescription" placeholder="Short description">
+                        </div>
+                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="form-group">
+                                <label>Coupon Code (optional)</label>
+                                <input type="text" id="adminCouponCode" placeholder="e.g. QUANT10">
+                            </div>
+                            <div class="form-group"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full" style="margin-top:8px;">Add Product</button>
+                    </form>
+                </div>
+
+                <!-- Existing Products for Admin -->
+                <div class="admin-card" style="padding: 20px; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--bg-card);">
+                    <h3 style="margin-bottom: 12px;">Existing Products</h3>
+                    <table id="adminProductsTable" class="admin-table" style="width:100%; border-collapse: collapse; font-size: .92rem;">
+                        <thead>
+                            <tr>
+                                <th style="border-bottom: 1px solid var(--border-subtle); padding: 8px; text-align:left;">ID</th>
+                                <th style="border-bottom: 1px solid var(--border-subtle); padding: 8px; text-align:left;">Name</th>
+                                <th style="border-bottom: 1px solid var(--border-subtle); padding: 8px; text-align:left;">Price</th>
+                                <th style="border-bottom: 1px solid var(--border-subtle); padding: 8px; text-align:left;">Coupon</th>
+                                <th style="border-bottom: 1px solid var(--border-subtle); padding: 8px; text-align:left;">Description</th>
+                                <th style="border-bottom: 1px solid var(--border-subtle); padding: 8px; text-align:left;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <p style="margin-top:8px; color:var(--text-muted); font-size:.85rem;">Tip: Use coupon fields to enable discounts on checkout.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Contact/Booking Section -->
     <section class="contact" id="contact">
         <div class="section-container">
@@ -783,6 +849,10 @@
             <div class="modal-body">
                 <p id="modalDescription">Product description goes here.</p>
                 <div class="modal-price" id="modalPrice">₹499</div>
+                <div class="coupon-row" style="margin-top:8px; display:flex; align-items:center; gap:8px;">
+                    <input id="couponInput" placeholder="Coupon code" style="flex:1; padding:8px;" />
+                    <button id="applyCouponBtn" class="btn btn-secondary" type="button">Apply Coupon</button>
+                </div>
             </div>
             <div class="modal-footer">
                 <p class="modal-note">

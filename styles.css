@@ -1523,3 +1523,15 @@ h3 {
         padding: 24px;
     }
 }
+
+/* Admin panel quick styling */
+.admin {
+    padding: 60px 0;
+    background: var(--bg-primary);
+}
+.admin-grid {
+    align-items: start;
+}
+.admin-card h3 { margin-bottom: 8px; }
+.admin-table th, .admin-table td { padding: 8px; border-bottom: 1px solid var(--border-subtle); }
+.admin-table tbody tr:hover { background: rgba(255,255,255,0.03); }

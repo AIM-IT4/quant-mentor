@@ -118,16 +118,53 @@ document.addEventListener('DOMContentLoaded', function () {
             modalTitle.textContent = product;
             modalDescription.textContent = productDescriptions[product] || 'Premium digital product for quant professionals.';
             modalPrice.textContent = '₹' + price;
-
+            // Reset any previous discount state for a new product
+            window.currentDiscountedPrice = undefined;
+            // Keep track of product-specific coupon for this modal
+            window.activeModalCoupon = {
+                code: this.dataset.couponCode || '',
+                percent: parseInt(this.dataset.couponPercent) || 0
+            };
+            // Clear coupon input
+            const couponInput = document.getElementById('couponInput');
+            if (couponInput) couponInput.value = '';
+            // Clear any previously applied discount price shown
+            // (the price text will be used if discount is not applied)
+            
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
             console.log('✅ Modal opened for:', product);
         });
     });
 
+    // Apply coupon for the current product in modal
+    const applyCouponBtn = document.getElementById('applyCouponBtn');
+    if (applyCouponBtn) {
+        applyCouponBtn.addEventListener('click', function() {
+            const inputCode = document.getElementById('couponInput')?.value.trim() || '';
+            const couponInfo = window.activeModalCoupon || { code: '', percent: 0 };
+            const modalPriceEl = document.getElementById('modalPrice');
+            const basePriceText = modalPriceEl?.textContent || '₹0';
+            const basePrice = parseInt(basePriceText.replace(/[^0-9]/g, ''));
+
+            if (inputCode && couponInfo.code && inputCode.toLowerCase() === couponInfo.code.toLowerCase()) {
+                const discount = parseInt(couponInfo.percent) || 0;
+                const discounted = Math.max(0, Math.round(basePrice * (100 - discount) / 100));
+                modalPriceEl.textContent = '₹' + discounted;
+                window.currentDiscountedPrice = discounted;
+                alert('Coupon applied: ' + discount + '% off');
+            } else {
+                alert('Invalid coupon for this product');
+                // Do not change price
+            }
+        });
+    }
+
     // Close modal functions
     function closeModal() {
         modal.classList.remove('active');
+        window.currentDiscountedPrice = undefined;
+        window.activeModalCoupon = { code: '', percent: 0 };
         document.body.style.overflow = '';
     }
 
@@ -288,7 +325,7 @@ const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0'; // Using 
 
 // Use global supabase reference (avoid local declaration)
 // Initialize Supabase with delay to ensure SDK is loaded
-setTimeout(function() {
+    setTimeout(function() {
     try {
         // Check if Supabase SDK is available
         if (typeof window.supabase !== 'undefined') {
@@ -306,6 +343,8 @@ setTimeout(function() {
             loadProductsFromSupabase();
             // Load sessions from Supabase
             loadSessionsFromSupabase();
+            // Load Admin panel data
+            fetchAdminProducts();
         } else {
             console.error('❌ Supabase SDK not loaded');
             console.log('⚠️ Continuing without Supabase - using default links');
@@ -313,8 +352,8 @@ setTimeout(function() {
     } catch (e) {
         console.error('Supabase initialization failed:', e);
         console.log('⚠️ Continuing without Supabase - using default links');
-    }
-}, 500);
+        }
+    }, 500);
 
 // Load and display products from Supabase
 async function loadProductsFromSupabase() {
@@ -377,13 +416,14 @@ function displaySupabaseProducts(products) {
             <div class="product-content">
                 <h3 class="product-title">${product.name}</h3>
                 <p class="product-description">${product.description || 'Premium digital product for quant professionals.'}</p>
+                ${product.coupon_code && product.coupon_percent ? `<div class="product-coupon" style="font-size: .8rem; color: #22c55e;">Coupon ${product.coupon_code}: ${product.coupon_percent}% off</div>` : ''}
                 <div class="product-meta">
                     <span><i class="fas fa-file-pdf"></i> ${product.file_url.includes('.pdf') ? 'PDF Document' : 'Digital File'}</span>
                     <span><i class="fas fa-check"></i> Instant Download</span>
                 </div>
                 <div class="product-footer">
                     <div class="product-price">₹${product.price}</div>
-                    <button class="btn btn-product" data-product="${product.name}" data-price="${product.price}">
+                    <button class="btn btn-product" data-product="${product.name}" data-price="${product.price}" data-coupon-code="${product.coupon_code || ''}" data-coupon-percent="${product.coupon_percent || 0}">
                         Buy Now
                     </button>
                 </div>
@@ -564,8 +604,8 @@ const PRODUCT_DOWNLOAD_LINKS = {
     'Free Sample - Quant Cheatsheet': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing'
 };
 
-// Fetch dynamic links from Supabase
-async function fetchProductLinks() {
+    // Fetch dynamic links from Supabase
+    async function fetchProductLinks() {
     try {
         if (!window.supabaseClient) {
             console.error('Supabase client not initialized');
@@ -601,6 +641,130 @@ async function fetchProductLinks() {
     } catch (err) {
         console.error('Failed to fetch product links:', err);
         console.log('📚 Continuing with default download links');
+    }
+
+    // ---------------- Admin Panel Helpers ----------------
+    // Admin: fetch and render products in Admin panel
+    async function fetchAdminProducts() {
+        if (typeof window.supabaseClient === 'undefined') return;
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('products')
+                .select('*')
+                .order('id', { ascending: false });
+            if (error) {
+                console.error('Admin: error loading products:', error);
+                return;
+            }
+            if (data && data.length > 0) {
+                renderAdminProductsTable(data);
+            }
+        } catch (e) {
+            console.error('Admin: failed to fetch products', e);
+        }
+    }
+
+    // Admin: handle Add Product form
+    const adminAddForm = document.getElementById('adminAddProductForm');
+    if (adminAddForm) {
+        adminAddForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (typeof window.supabaseClient === 'undefined') return;
+            const name = (document.getElementById('adminProductName').value || '').trim();
+            const price = parseFloat(document.getElementById('adminProductPrice').value || '0');
+            const description = (document.getElementById('adminProductDescription').value || '').trim();
+            const couponCode = (document.getElementById('adminCouponCode').value || '').trim();
+            const couponPercent = parseInt(document.getElementById('adminCouponPercent').value || '0');
+
+            if (!name) {
+                alert('Please enter a product name.');
+                return;
+            }
+
+            const payload = {
+                name,
+                price: isNaN(price) ? 0 : price,
+                description,
+                coupon_code: couponCode || null,
+                coupon_percent: isNaN(couponPercent) ? 0 : couponPercent
+            };
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('products')
+                    .insert(payload)
+                    .select();
+                if (error) {
+                    alert('Error adding product: ' + error.message);
+                    return;
+                }
+                fetchAdminProducts();
+                adminAddForm.reset();
+            } catch (err) {
+                console.error('Admin: add product failed', err);
+            }
+        });
+    }
+
+    // Render admin products in the admin table
+    function renderAdminProductsTable(products) {
+        const tbody = document.querySelector('#adminProductsTable tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        products.forEach(p => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="padding:8px 6px;">${p.id ?? ''}</td>
+                <td style="padding:8px 6px;">${p.name ?? ''}</td>
+                <td style="padding:8px 6px;">₹${p.price ?? 0}</td>
+                <td style="padding:8px 6px;">${p.coupon_code ?? ''} (${p.coupon_percent ?? 0}%)</td>
+                <td style="padding:8px 6px;">${p.description ?? ''}</td>
+                <td style="padding:8px 6px;">
+                    <button class="btn btn-secondary" data-id="${p.id}" data-name="${p.name ?? ''}" data-price="${p.price ?? 0}" data-description="${p.description ?? ''}" data-code="${p.coupon_code ?? ''}" data-percent="${p.coupon_percent ?? 0}" onclick="adminEditProduct(this)">Edit</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Called when user clicks Edit in Admin panel. Simple prompt-based editor.
+    window.adminEditProduct = async function(button) {
+        const id = button.getAttribute('data-id');
+        const currentName = button.getAttribute('data-name') || '';
+        const currentPrice = button.getAttribute('data-price') || 0;
+        const currentDescription = button.getAttribute('data-description') || '';
+        const currentCode = button.getAttribute('data-code') || '';
+        const currentPercent = button.getAttribute('data-percent') || 0;
+
+        const name = prompt('Product Name', currentName) || currentName;
+        const price = parseFloat(prompt('Price (INR)', currentPrice) || currentPrice);
+        const description = prompt('Description', currentDescription) || currentDescription;
+        const code = prompt('Coupon Code', currentCode) || '';
+        const percent = parseInt(prompt('Coupon Percent', currentPercent) || currentPercent);
+
+        // Persist only if id exists and user provided changes
+        if (!id) return;
+        try {
+            const payload = {
+                name,
+                price: isNaN(price) ? 0 : price,
+                description,
+                coupon_code: code,
+                coupon_percent: isNaN(percent) ? 0 : percent
+            };
+            const { data, error } = await window.supabaseClient
+                .from('products')
+                .update(payload)
+                .eq('id', id)
+                .select();
+            if (error) {
+                alert('Failed to update product: ' + error.message);
+                return;
+            }
+            // Refresh admin table
+            fetchAdminProducts();
+        } catch (e) {
+            console.error('Admin: update failed', e);
+        }
     }
 }
 
@@ -837,7 +1001,11 @@ if (modalPayBtn) {
         const priceText = document.getElementById('modalPrice').textContent;
         console.log('Payment Request:', { productName, priceText });
 
-        const price = parseInt(priceText.replace(/[^\d]/g, ''));
+        // Use discounted price if coupon applied
+        let price = parseInt(priceText.replace(/[^\d]/g, ''));
+        if (typeof window.currentDiscountedPrice !== 'undefined' && window.currentDiscountedPrice != null) {
+            price = window.currentDiscountedPrice;
+        }
         console.log('Parsed Price:', price);
 
         if (isNaN(price)) {
