@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // ================================
 
 // ⚠️ ADD YOUR RAZORPAY KEY ID BELOW
-const RAZORPAY_KEY_ID = 'rzp_live_SBbq38M84PSrrG';
+const RAZORPAY_KEY_ID = 'rzp_test_1DWpRLqKKMWMgY';
 
 // Your business name
 const BUSINESS_NAME = 'QuantMentor';
@@ -353,8 +353,19 @@ function initRazorpayCheckout(productName, amount) {
 
     // Check if Razorpay SDK is loaded
     if (typeof Razorpay === 'undefined') {
-        alert('❌ Payment System Error: Razorpay SDK not loaded.\nPlease check your internet connection or try disabling ad blockers.');
+        alert('❌ Payment System Loading...\nPlease wait a moment and try again.\nIf the issue persists, refresh the page.');
         console.error('Razorpay SDK not found!');
+        
+        // Try to load Razorpay SDK dynamically
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = function() {
+            alert('✅ Payment system loaded!\nPlease click "Buy Now" again.');
+        };
+        script.onerror = function() {
+            alert('❌ Unable to load payment system.\nPlease check your internet connection.');
+        };
+        document.head.appendChild(script);
         return;
     }
 
