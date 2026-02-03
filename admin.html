@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantMentor Admin</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #a855f7;
+            --background: #0a0a0f;
+            --surface: #13131f;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0.5;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .product-list {
+            margin-top: 40px;
+        }
+
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+            text-align: center;
+        }
+
+        .status.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            display: block;
+        }
+
+        .status.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            display: block;
+        }
+
+        /* Login Overlay */
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Login Overlay -->
+    <div id="loginOverlay">
+        <div class="card" style="width: 300px; text-align: center;">
+            <h2>Admin Access</h2>
+            <div class="form-group">
+                <input type="password" id="adminPassword" placeholder="Enter Password">
+            </div>
+            <button onclick="checkPassword()">Login</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <div>
+                <h1>Admin Panel</h1>
+                <p style="color: var(--text-muted); margin: 0;">Upload resources & manage products</p>
+            </div>
+            <a href="index.html" style="color: var(--primary); text-decoration: none;">View Site →</a>
+        </header>
+
+        <div class="card">
+            <h2 style="margin-top: 0;">Add New Product</h2>
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="productName" required placeholder="e.g. Advanced C++ Guide">
+                </div>
+
+                <div class="form-group">
+                    <label>Price (₹)</label>
+                    <input type="number" id="productPrice" required placeholder="e.g. 499">
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="productDesc" rows="3" placeholder="Brief description..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Upload PDF Resource</label>
+                    <input type="file" id="productFile" accept=".pdf,.zip,.rar" required>
+                </div>
+
+                <button type="submit" id="submitBtn">Upload & Save Product</button>
+            </form>
+            <div id="uploadStatus" class="status"></div>
+        </div>
+
+        <div class="product-list">
+            <h2>Active Products</h2>
+            <div class="card" id="productsList">
+                <p style="color: var(--text-muted); text-align: center;">Loading products...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Config
+        const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
+        const SUPABASE_KEY = 'sb_secret_IWfTFpvaZloE12VJpQJ8fw_NHa1Jf7V'; // Using provided secret
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Basic Authentication
+        function checkPassword() {
+            const pwd = document.getElementById('adminPassword').value;
+            if (pwd === 'admin123') { // Simple password
+                document.getElementById('loginOverlay').style.display = 'none';
+                loadProducts();
+            } else {
+                alert('Incorrect password');
+            }
+        }
+
+        // Handle Form Submission
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const status = document.getElementById('uploadStatus');
+
+            btn.disabled = true;
+            btn.textContent = 'Uploading...';
+            status.className = 'status';
+
+            try {
+                const name = document.getElementById('productName').value;
+                const price = document.getElementById('productPrice').value;
+                const desc = document.getElementById('productDesc').value;
+                const file = document.getElementById('productFile').files[0];
+
+                if (!file) throw new Error('Please select a file');
+
+                // 1. Upload File to Storage
+                // Create a clean filename
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.${fileExt}`;
+
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('resources')
+                    .upload(fileName, file);
+
+                if (uploadError) throw uploadError;
+
+                // 2. Get Public URL
+                const { data: publicUrlData } = supabase.storage
+                    .from('resources')
+                    .getPublicUrl(fileName);
+
+                const fileUrl = publicUrlData.publicUrl;
+
+                // 3. Save Metadata to Database
+                const { error: dbError } = await supabase
+                    .from('products')
+                    .insert([
+                        {
+                            name: name,
+                            price: parseFloat(price),
+                            description: desc,
+                            file_url: fileUrl
+                        }
+                    ]);
+
+                if (dbError) throw dbError;
+
+                // Success
+                status.textContent = '✅ Product added successfully!';
+                status.classList.add('success');
+                document.getElementById('uploadForm').reset();
+                loadProducts();
+
+            } catch (error) {
+                console.error('Error:', error);
+                status.textContent = '❌ Error: ' + error.message;
+                status.classList.add('error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Upload & Save Product';
+            }
+        });
+
+        // Load Products
+        async function loadProducts() {
+            const list = document.getElementById('productsList');
+
+            const { data, error } = await supabase
+                .from('products')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                list.innerHTML = `<p style="color: red">Error loading products: ${error.message}</p>`;
+                return;
+            }
+
+            if (data.length === 0) {
+                list.innerHTML = '<p class="text-muted">No products found.</p>';
+                return;
+            }
+
+            list.innerHTML = data.map(p => `
+                <div class="product-item">
+                    <div>
+                        <strong>${p.name}</strong><br>
+                        <span style="color: var(--text-muted); font-size: 0.9em;">₹${p.price}</span>
+                    </div>
+                    <a href="${p.file_url}" target="_blank" style="color: var(--primary);">Download</a>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+
+</html>
