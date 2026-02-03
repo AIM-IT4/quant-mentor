@@ -315,6 +315,11 @@ setTimeout(function() {
 // Default links (fallback) - will be updated from Supabase
 const PRODUCT_DOWNLOAD_LINKS = {
     'Python for Quants': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
+    'C++ for Quants': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
+    'XVA Derivatives Primer': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
+    'Quant Projects Bundle': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
+    'Interview Bible': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
+    'Complete Quant Bundle': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
     'Test Product': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
     'Free Sample - Quant Cheatsheet': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing'
 };
@@ -324,6 +329,7 @@ async function fetchProductLinks() {
     try {
         if (!window.supabaseClient) {
             console.error('Supabase client not initialized');
+            console.log('📚 Using default download links');
             return;
         }
 
@@ -332,7 +338,13 @@ async function fetchProductLinks() {
             .select('name, file_url');
 
         if (error) {
-            console.error('Error fetching Supabase products:', error);
+            if (error.status === 401) {
+                console.error('❌ Supabase authentication failed (401): Invalid API key');
+                console.log('📚 Using default download links - check Supabase configuration');
+            } else {
+                console.error('Error fetching Supabase products:', error);
+            }
+            console.log('📚 Continuing with default download links');
             return;
         }
 
@@ -343,9 +355,12 @@ async function fetchProductLinks() {
                 // Log for debugging
                 console.log(`🔗 Link updated for: ${product.name}`);
             });
+        } else {
+            console.log('📚 No products found in Supabase, using default links');
         }
     } catch (err) {
         console.error('Failed to fetch product links:', err);
+        console.log('📚 Continuing with default download links');
     }
 }
 
