@@ -426,27 +426,45 @@
                 return;
             }
 
-            // Send reschedule request via Formspree
-            const FORMSPREE_ID = 'mjgozran';
-            
             try {
-                const response = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+                // Update booking in Supabase database
+                const { data, error } = await supabase
+                    .from('bookings')
+                    .update({
+                        booking_date: newDate,
+                        booking_time: newTime,
+                        status: 'rescheduled'
+                    })
+                    .eq('id', bookingId)
+                    .select();
+
+                if (error) {
+                    console.error('❌ Database update failed:', error);
+                    throw error;
+                }
+
+                console.log('✅ Booking rescheduled in database:', data);
+
+                // Send reschedule notification via Formspree
+                const FORMSPREE_ID = 'mjgozran';
+                
+                await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        _subject: `Reschedule Request - Booking ${bookingId}`,
+                        _subject: `Rescheduled Booking - ${bookingId}`,
                         email: email,
                         booking_id: bookingId,
                         new_date: newDate,
                         new_time: newTime,
                         reason: reason,
                         message: `
-📅 RESCHEDULE REQUEST
+📅 BOOKING RESCHEDULED
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
 Customer Email: ${email}
 
-Requested New Schedule:
+Updated Schedule:
 • Date: ${newDate}
 • Time: ${newTime}
 ${reason ? `• Reason: ${reason}` : ''}
@@ -455,14 +473,13 @@ ${reason ? `• Reason: ${reason}` : ''}
                     })
                 });
 
-                if (response.ok) {
-                    alert('✅ Reschedule request submitted successfully!\n\nWe will review your request and send a confirmation email within 24 hours.');
-                    toggleRescheduleForm(bookingId);
-                } else {
-                    throw new Error('Failed to submit request');
-                }
+                alert('✅ Session rescheduled successfully!\n\nYour booking has been updated. A confirmation email has been sent.');
+                toggleRescheduleForm(bookingId);
+                searchBookings(); // Refresh the list to show updated date/time
+
             } catch (error) {
-                alert('❌ Error submitting reschedule request. Please email us directly at jha.8@alumni.iitj.ac.in');
+                console.error('❌ Reschedule failed:', error);
+                alert('❌ Error rescheduling session. Please email us directly at jha.8@alumni.iitj.ac.in');
             }
         }
 
