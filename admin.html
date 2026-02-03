@@ -941,6 +941,12 @@ Brief Q&A"></textarea>
 
                 if (fetchError) throw fetchError;
 
+                // Check if reschedule was requested
+                if (!booking.requested_date || !booking.requested_time) {
+                    alert('❌ Error: No reschedule request found for this booking.');
+                    return;
+                }
+
                 // Update the booking
                 const { error: updateError } = await window.supabaseAdminClient
                     .from('bookings')
