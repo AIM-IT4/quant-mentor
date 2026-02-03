@@ -444,6 +444,8 @@ async function loadSessionsFromSupabase() {
 
         if (data && data.length > 0) {
             console.log('🎯 Loading ' + data.length + ' sessions from Supabase');
+            // Store sessions globally for booking form reference
+            window.dynamicSessions = data;
             updateServicesSection(data);
             updateBookingForm(data);
         }
@@ -919,7 +921,32 @@ if (bookingForm) {
         }
 
         const [sessionType, price, duration] = serviceValue.split('|');
-        const sessionInfo = SESSION_TYPES[sessionType];
+        
+        // Try to find session info from multiple sources
+        let sessionInfo = SESSION_TYPES[sessionType];
+        
+        // If not found in hardcoded types, try to find by matching session name in dynamic sessions
+        if (!sessionInfo && window.dynamicSessions) {
+            sessionInfo = window.dynamicSessions.find(s => 
+                s.name.toLowerCase().replace(/\s+/g, '_') === sessionType ||
+                s.name.toLowerCase() === sessionType.replace(/_/g, ' ')
+            );
+        }
+        
+        // If still not found, create session info from the dropdown text
+        if (!sessionInfo) {
+            const selectedOption = bookingService.options[bookingService.selectedIndex];
+            if (selectedOption && selectedOption.text) {
+                // Extract session name from option text (format: "🆓 Session Name (duration min) - Price")
+                const match = selectedOption.text.match(/[🆓\s]*([^\(]+)/);
+                const sessionName = match ? match[1].trim() : 'Session';
+                sessionInfo = {
+                    name: sessionName,
+                    price: parseInt(price) || 0,
+                    duration: parseInt(duration) || 60
+                };
+            }
+        }
 
         // Check if session info was found
         if (!sessionInfo) {
