@@ -1055,33 +1055,42 @@ async function handleSessionPaymentSuccess(response) {
         payment_id: paymentId
     });
     
-    try {
-        const { data, error } = await window.supabaseClient
-            .from('bookings')
-            .insert({
-                email: booking.email,
-                name: booking.name,
-                phone: booking.phone,
-                service_name: booking.sessionType,
-                service_price: booking.price,
-                service_duration: booking.duration,
-                booking_date: booking.date,
-                booking_time: booking.time,
-                message: booking.message,
-                status: 'confirmed',
-                payment_id: paymentId
-            })
-            .select();
+    // Check if Supabase client is available
+    if (!window.supabaseClient) {
+        console.error('❌ window.supabaseClient is undefined! Cannot store booking.');
+        alert('Error: Database connection not available. Please refresh the page and try again.');
+    } else {
+        console.log('✅ window.supabaseClient is defined, attempting insert...');
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('bookings')
+                .insert({
+                    email: booking.email,
+                    name: booking.name,
+                    phone: booking.phone,
+                    service_name: booking.sessionType,
+                    service_price: booking.price,
+                    service_duration: booking.duration,
+                    booking_date: booking.date,
+                    booking_time: booking.time,
+                    message: booking.message,
+                    status: 'confirmed',
+                    payment_id: paymentId
+                })
+                .select();
+                
+            if (error) {
+                console.error('❌ Supabase insert failed:', error);
+                console.error('Error details:', JSON.stringify(error, null, 2));
+                throw error;
+            }
             
-        if (error) {
-            console.error('❌ Supabase insert failed:', error);
-            throw error;
+            console.log('✅ Booking stored in Supabase:', data);
+        } catch (error) {
+            console.error('❌ Error storing booking in database:', error);
+            console.error('Full error:', error.message, error.stack);
+            // Continue with email notifications even if database insert fails
         }
-        
-        console.log('✅ Booking stored in Supabase:', data);
-    } catch (error) {
-        console.error('❌ Error storing booking in database:', error);
-        // Continue with email notifications even if database insert fails
     }
 
     // Create email body for admin notification
