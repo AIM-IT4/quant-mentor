@@ -284,7 +284,7 @@ const EMAILJS_TEMPLATE_ID = 'template_ddficic';        // ✅ Your template ID
 // SUPABASE INTEGRATION (for dynamic file links)
 // ================================
 const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
-const SUPABASE_KEY = 'sb_secret_IWfTFpvaZloE12VJpQJ8fw_NHa1Jf7V'; // Using provided secret
+const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0'; // Using provided public key
 
 // Use global supabase reference (avoid local declaration)
 // Initialize Supabase with delay to ensure SDK is loaded
