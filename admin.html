@@ -227,13 +227,7 @@
     </div>
 
     <script>
-        // Supabase Config
-        const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0'; // Using provided public key
-
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // Basic Authentication
+        // Basic Authentication - Define function first
         function checkPassword() {
             console.log('Login button clicked');
             const pwd = document.getElementById('adminPassword').value;
@@ -249,8 +243,11 @@
             }
         }
 
-        // Add event listener as backup
+        // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Admin page DOM loaded');
+            
+            // Add event listener as backup
             const loginBtn = document.getElementById('loginBtn');
             const passwordInput = document.getElementById('adminPassword');
             
@@ -270,10 +267,26 @@
                 });
                 console.log('✅ Password input Enter key listener added');
             }
-        });
 
-        // Handle Form Submission
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            // Initialize Supabase
+            try {
+                const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
+                const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
+                
+                if (typeof window.supabase !== 'undefined') {
+                    if (!window.supabaseAdminClient) {
+                        window.supabaseAdminClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                        console.log('✅ Supabase admin client initialized');
+                    }
+                } else {
+                    console.error('❌ Supabase SDK not loaded');
+                }
+            } catch (e) {
+                console.error('Supabase initialization failed:', e);
+            }
+
+            // Handle Form Submission
+            document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const status = document.getElementById('uploadStatus');
@@ -295,21 +308,21 @@
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.${fileExt}`;
 
-                const { data: uploadData, error: uploadError } = await supabase.storage
+                const { data: uploadData, error: uploadError } = await window.supabaseAdminClient.storage
                     .from('resources')
                     .upload(fileName, file);
 
                 if (uploadError) throw uploadError;
 
                 // 2. Get Public URL
-                const { data: publicUrlData } = supabase.storage
+                const { data: publicUrlData } = window.supabaseAdminClient.storage
                     .from('resources')
                     .getPublicUrl(fileName);
 
                 const fileUrl = publicUrlData.publicUrl;
 
                 // 3. Save Metadata to Database
-                const { error: dbError } = await supabase
+                const { error: dbError } = await window.supabaseAdminClient
                     .from('products')
                     .insert([
                         {
@@ -336,16 +349,20 @@
                 btn.disabled = false;
                 btn.textContent = 'Upload & Save Product';
             }
-        });
 
-        // Load Products
-        async function loadProducts() {
-            const list = document.getElementById('productsList');
+            // Load Products
+            async function loadProducts() {
+                const list = document.getElementById('productsList');
 
-            const { data, error } = await supabase
-                .from('products')
-                .select('*')
-                .order('created_at', { ascending: false });
+                if (!window.supabaseAdminClient) {
+                    list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
+                    return;
+                }
+
+                const { data, error } = await window.supabaseAdminClient
+                    .from('products')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
             if (error) {
                 list.innerHTML = `<p style="color: red">Error loading products: ${error.message}</p>`;
