@@ -921,6 +921,7 @@ if (bookingForm) {
         }
 
         const [sessionType, price, duration] = serviceValue.split('|');
+        console.log('Debug: serviceValue =', serviceValue, 'sessionType =', sessionType);
         
         // Try to find session info from multiple sources
         let sessionInfo = SESSION_TYPES[sessionType];
@@ -951,7 +952,7 @@ if (bookingForm) {
         // Check if session info was found
         if (!sessionInfo) {
             alert('Error: Invalid session type. Please refresh and try again.');
-            console.error('Session type not found:', sessionType, 'Available:', Object.keys(SESSION_TYPES));
+            console.error('Session type not found:', sessionType, 'Available:', Object.keys(SESSION_TYPES), 'Service value:', serviceValue);
             return;
         }
 
