@@ -286,21 +286,40 @@ const EMAILJS_TEMPLATE_ID = 'template_ddficic';        // ✅ Your template ID
 const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
 const SUPABASE_KEY = 'sb_secret_IWfTFpvaZloE12VJpQJ8fw_NHa1Jf7V'; // Using provided secret
 
-// Initialize Supabase
+// Initialize Supabase (avoid duplicate declaration)
 let supabase;
-try {
-    if (typeof window.supabase !== 'undefined') {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        console.log('✅ Supabase initialized');
 
-        // Fetch products immediately on load
-        fetchProductLinks();
-    } else {
-        console.error('❌ Supabase SDK not loaded');
+function initializeSupabase() {
+    try {
+        // Try multiple ways to access Supabase
+        const supabaseLib = window.supabase || window.Supabase;
+        
+        if (supabaseLib) {
+            // Check if already initialized
+            if (!window.supabaseClient) {
+                window.supabaseClient = supabaseLib.createClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log('✅ Supabase initialized');
+            } else {
+                console.log('✅ Supabase already initialized');
+            }
+            supabase = window.supabaseClient;
+
+            // Fetch products immediately on load
+            fetchProductLinks();
+        } else {
+            console.error('❌ Supabase SDK not loaded');
+            // Retry after delay
+            setTimeout(initializeSupabase, 1000);
+        }
+    } catch (e) {
+        console.error('Supabase initialization failed:', e);
+        // Continue without Supabase
+        console.log('⚠️ Continuing without Supabase - using default links');
     }
-} catch (e) {
-    console.error('Supabase initialization failed:', e);
 }
+
+// Initialize Supabase with delay to ensure SDK is loaded
+setTimeout(initializeSupabase, 500);
 
 // Default links (fallback) - will be updated from Supabase
 const PRODUCT_DOWNLOAD_LINKS = {
