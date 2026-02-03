@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Reviews & Testimonials | QuantMentor</title>
+    <link rel="icon" type="image/png" href="assets/images/logo.png">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #a855f7;
+            --background: #0a0a0f;
+            --surface: #13131f;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .testimonials-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 1.1em;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .testimonial-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .testimonial-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.1);
+        }
+
+        .testimonial-rating {
+            color: #fbbf24;
+            margin-bottom: 15px;
+        }
+
+        .testimonial-text {
+            color: var(--text);
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 1.05em;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: white;
+        }
+
+        .author-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .author-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .author-role {
+            font-size: 0.9em;
+            color: var(--text-muted);
+        }
+
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #22c55e;
+            font-size: 0.85em;
+            background: rgba(34, 197, 94, 0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="assets/images/logo.png" alt="QuantMentor" class="logo-img" style="width: 40px; height: 40px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                <span class="logo-icon" style="display:none;">📊</span>
+                <span class="logo-text">QuantMentor</span>
+            </a>
+            <a href="index.html" style="color: var(--text-secondary);">← Back to Home</a>
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 100px;">
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h1 style="margin-bottom: 20px;">What Our Students Say</h1>
+            <p style="color: var(--text-muted); font-size: 1.2em; max-width: 600px; margin: 0 auto;">
+                Real feedback from professionals and students who transformed their quant careers
+            </p>
+        </div>
+
+        <!-- Stats -->
+        <div class="testimonials-stats">
+            <div class="stat-card">
+                <div class="stat-number">25+</div>
+                <div class="stat-label">Reviews</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">5.0</div>
+                <div class="stat-label">Average Rating</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Would Recommend</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">500+</div>
+                <div class="stat-label">Students Helped</div>
+            </div>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterReviews('all')">All Reviews</button>
+            <button class="filter-btn" onclick="filterReviews('mentorship')">Mentorship</button>
+            <button class="filter-btn" onclick="filterReviews('products')">Products</button>
+            <button class="filter-btn" onclick="filterReviews('detailed')">Detailed</button>
+        </div>
+
+        <!-- Testimonials Grid -->
+        <div class="testimonials-grid" id="testimonialsGrid">
+            
+            <!-- Review 1 -->
+            <div class="testimonial-card" data-category="mentorship detailed">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">
+                    "Amit is a powerhouse of knowledge. More importantly, he is thorough and precise with his guidance. I reached out to Amit for advice on how to break into derivative pricing and I left the session with an articulated list of things to focus on. Amit tells you what happens in the industry and that has helped me chalk out a practical plan. I am definitely going to reach out to Amit again."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">Verified Mentee</span>
+                        <span class="author-role">Aspiring Quant Developer</span>
+                    </div>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified Session • Dec 14, 2025
+                </div>
+            </div>
+
+            <!-- Review 2 -->
+            <div class="testimonial-card" data-category="products detailed">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">
+                    "I completed my Financial Engineering program at WorldQuant University, which was rigorous and academically strong. What Amit does exceptionally well is bridge the exact gap between theory and real-world application. He distills hard-earned front desk experience into learning material that focuses not just on what models are, but why they exist, how they behave, and most importantly where they fail."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">Anubhab De</span>
+                        <span class="author-role">Financial Engineering Graduate</span>
+                    </div>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified Purchase • Dec 27, 2025
+                </div>
+            </div>
+
+            <!-- Review 3 -->
+            <div class="testimonial-card" data-category="products">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">
+                    "Your Quant Project Pack is the bridge between academic theory and trading desk reality that every aspiring quant needs. The 'Basic' and 'Asset Class Wise' modules were crucial for my interview prep. The inclusion of 'Resume Bullets' and 'Interview Questions' for every project makes this not just a code repository, but a complete career toolkit."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">Harshvardhan Singh</span>
+                        <span class="author-role">Quantitative Analyst</span>
+                    </div>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified Purchase • Dec 2, 2025
+                </div>
+            </div>
+
+            <!-- Review 4 -->
+            <div class="testimonial-card" data-category="mentorship">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">
+                    "Amit clarified all my doubts efficiently and gave me clear direction on how to move forward toward my goals. His guidance was practical, focused, and extremely helpful."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">Verified Mentee</span>
+                        <span class="author-role">Career Transition</span>
+                    </div>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified Session • Jan 11, 2026
+                </div>
+            </div>
+
+            <!-- Review 5 -->
+            <div class="testimonial-card" data-category="products detailed">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">
+                    "This content is aimed at a very specific audience: quants and technically strong practitioners who already know the mathematics and want to develop correct intuition, judgment, and interview-ready reasoning rather than memorizing formulas. What stands out is the consistent focus on practical failure modes such as correlation collapse, eigenvalue concentration, calibration instability, numerical blow-ups."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">Anubhab De</span>
+                        <span class="author-role">Quant Practitioner</span>
+                    </div>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified Purchase • Jan 4, 2026
+                </div>
+            </div>
+
+            <!-- Review 6 -->
+            <div class="testimonial-card" data-category="mentorship">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">
+                    "He's very friendly and helpful to have a conversation with. Loved the humble nature and got a lot of insights to how my profile is lacking and how to better build it."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">Verified Mentee</span>
+                        <span class="author-role">Profile Building</span>
+                    </div>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified Session • Dec 13, 2025
+                </div>
+            </div>
+
+            <!-- Review 7 -->
+            <div class="testimonial-card" data-category="mentorship">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">
+                    "I had a great discussion with Amit Kumar Jha on transitioning into quant finance. He offered clear, practical advice on how to prepare effectively, what skills truly matter in the industry, and how data analytics fits into quant roles. The conversation gave me much-needed clarity and direction."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">Adarsh Pandey</span>
+                        <span class="author-role">Data Analytics Professional</span>
+                    </div>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified Session • Dec 7, 2025
+                </div>
+            </div>
+
+            <!-- Review 8 -->
+            <div class="testimonial-card" data-category="products">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">
+                    "Good suggestion by amit on my doubts. Overall, the quality of projects and the attention to detail is remarkable."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">Venkat Averineni</span>
+                        <span class="author-role">Quant Developer</span>
+                    </div>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified Purchase • Dec 6, 2025
+                </div>
+            </div>
+
+            <!-- Review 9 -->
+            <div class="testimonial-card" data-category="products">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">
+                    "Concepts are very well explained in less pages. Easy language. Hope to see books on many other topics."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">Manthan Panse</span>
+                        <span class="author-role">Student</span>
+                    </div>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified Purchase • Dec 13, 2025
+                </div>
+            </div>
+
+            <!-- Review 10 -->
+            <div class="testimonial-card" data-category="products">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">
+                    "Wonderful content. Incredibly useful for building out a portfolio of quant projects. Good summary with lots of reminder notes—more like a roadmap. You still have to put in the hours."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">Guillermo Pinczuk</span>
+                        <span class="author-role">Quantitative Researcher</span>
+                    </div>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified Purchase • Dec 15, 2025
+                </div>
+            </div>
+
+            <!-- Review 11 -->
+            <div class="testimonial-card" data-category="products">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">
+                    "Great resource for getting up to speed on Derivative FX products. Well well well awesome. Definitely helpful to search my next dream job. Again Kudos to your effort."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">Verified Buyer</span>
+                        <span class="author-role">FX Derivatives</span>
+                    </div>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified Purchase • Jan 2, 2026
+                </div>
+            </div>
+
+            <!-- Review 12 -->
+            <div class="testimonial-card" data-category="mentorship">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">
+                    "Amazing content as usual! Good starting point for someone to stitch the game between Products and tech and models and AI—the underlying math, logic is always the game."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">Peter Joseph</span>
+                        <span class="author-role">Tech & Trading Professional</span>
+                    </div>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified Session • Jan 14, 2026
+                </div>
+            </div>
+
+            <!-- Review 13 -->
+            <div class="testimonial-card" data-category="products">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">
+                    "Jiaji Qu - 5/5 rating. Another satisfied student."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">Jiaji Qu</span>
+                        <span class="author-role">Student</span>
+                    </div>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified • Jan 6, 2026
+                </div>
+            </div>
+
+            <!-- Review 14 -->
+            <div class="testimonial-card" data-category="products">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">
+                    "Vamsi - 5/5 rating. Good suggestion by Amit on my doubts."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">Vamsi</span>
+                        <span class="author-role">Learner</span>
+                    </div>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified • Jan 13, 2026
+                </div>
+            </div>
+
+            <!-- Review 15 -->
+            <div class="testimonial-card" data-category="products">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">
+                    "Artyom - 5/5 rating."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="author-info">
+                        <span class="author-name">Artyom</span>
+                        <span class="author-role">Student</span>
+                    </div>
+                </div>
+                <div class="verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified • Dec 1, 2025
+                </div>
+            </div>
+
+        </div>
+
+        <div style="text-align: center; margin-top: 60px; padding: 40px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 12px;">
+            <h2 style="color: white; margin-bottom: 15px;">Ready to Join Our Success Stories?</h2>
+            <p style="color: rgba(255,255,255,0.9); margin-bottom: 25px;">
+                Start your quant journey today with personalized mentorship
+            </p>
+            <a href="index.html#contact" class="btn" style="background: white; color: var(--primary);">
+                <i class="fas fa-calendar-check"></i> Book Your Session
+            </a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-bottom" style="text-align: center; padding: 30px;">
+            <p>&copy; 2026 QuantMentor. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        function filterReviews(category) {
+            const cards = document.querySelectorAll('.testimonial-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            // Update button states
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase().includes(category)) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Show/hide cards
+            cards.forEach(card => {
+                if (category === 'all' || card.dataset.category.includes(category)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
