@@ -963,6 +963,7 @@ Brief Q&A"></textarea>
                 if (updateError) throw updateError;
 
                 // Notify user via EmailJS
+                const meetLink = booking.meet_link || 'Will be shared soon';
                 await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
                     to_email: email,
                     to_name: email.split('@')[0],
@@ -977,6 +978,8 @@ Your reschedule request has been approved!
 New Schedule:
 • Date: ${booking.requested_date}
 • Time: ${booking.requested_time}
+
+Meet Link: ${meetLink}
 
 Your session is now confirmed for the new date/time.
 ━━━━━━━━━━━━━━━━━━━━
