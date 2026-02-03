@@ -1084,12 +1084,6 @@ async function handleSessionPaymentSuccess(response) {
         console.error('❌ Error storing booking in database:', error);
         // Continue with email notifications even if database insert fails
     }
-        
-        console.log('✅ Booking stored in Supabase:', data);
-    } catch (error) {
-        console.error('❌ Error storing booking in database:', error);
-        // Continue with email notifications even if database insert fails
-    }
 
     // Create email body for admin notification
     const emailSubject = `New Session Booking: ${booking.sessionType}`;
