@@ -328,7 +328,7 @@
                 <div class="booking-card">
                     <div class="booking-header">
                         <div>
-                            <h3 style="margin: 0 0 5px 0;">${booking.service}</h3>
+                            <h3 style="margin: 0 0 5px 0;">${booking.service_name || booking.service}</h3>
                             <span style="color: var(--text-muted);">Booking ID: ${booking.id}</span>
                         </div>
                         <span class="booking-status status-${booking.status}">
@@ -339,28 +339,28 @@
                     <div class="booking-details">
                         <div class="detail-item">
                             <i class="fas fa-calendar"></i>
-                            <span>${formatDate(booking.date)}</span>
+                            <span>${formatDate(booking.booking_date || booking.date)}</span>
                         </div>
                         <div class="detail-item">
                             <i class="fas fa-clock"></i>
-                            <span>${booking.time}</span>
+                            <span>${booking.booking_time || booking.time}</span>
                         </div>
                         <div class="detail-item">
                             <i class="fas fa-hourglass-half"></i>
-                            <span>${booking.duration} minutes</span>
+                            <span>${booking.service_duration || booking.duration} minutes</span>
                         </div>
                         <div class="detail-item">
                             <i class="fas fa-tag"></i>
-                            <span>₹${booking.price}</span>
+                            <span>₹${booking.service_price || booking.price}</span>
                         </div>
                     </div>
 
-                    ${booking.status === 'upcoming' ? `
+                    ${booking.status === 'upcoming' || booking.status === 'confirmed' ? `
                         <div class="meet-link">
                             <i class="fas fa-video" style="color: var(--primary);"></i>
                             <div>
                                 <strong>Google Meet Link:</strong><br>
-                                <a href="${booking.meetLink}" target="_blank">${booking.meetLink}</a>
+                                <a href="${booking.meet_link || booking.meetLink || 'https://meet.google.com/hfp-npyq-qho'}" target="_blank">${booking.meet_link || booking.meetLink || 'https://meet.google.com/hfp-npyq-qho'}</a>
                             </div>
                         </div>
                     ` : ''}
