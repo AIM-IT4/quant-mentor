@@ -286,40 +286,31 @@ const EMAILJS_TEMPLATE_ID = 'template_ddficic';        // ✅ Your template ID
 const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
 const SUPABASE_KEY = 'sb_secret_IWfTFpvaZloE12VJpQJ8fw_NHa1Jf7V'; // Using provided secret
 
-// Initialize Supabase (avoid duplicate declaration)
-let supabase;
-
-function initializeSupabase() {
+// Use global supabase reference (avoid local declaration)
+// Initialize Supabase with delay to ensure SDK is loaded
+setTimeout(function() {
     try {
-        // Try multiple ways to access Supabase
-        const supabaseLib = window.supabase || window.Supabase;
-        
-        if (supabaseLib) {
-            // Check if already initialized
+        // Check if Supabase SDK is available
+        if (typeof window.supabase !== 'undefined') {
+            // Initialize if not already done
             if (!window.supabaseClient) {
-                window.supabaseClient = supabaseLib.createClient(SUPABASE_URL, SUPABASE_KEY);
+                window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 console.log('✅ Supabase initialized');
             } else {
                 console.log('✅ Supabase already initialized');
             }
-            supabase = window.supabaseClient;
 
             // Fetch products immediately on load
             fetchProductLinks();
         } else {
             console.error('❌ Supabase SDK not loaded');
-            // Retry after delay
-            setTimeout(initializeSupabase, 1000);
+            console.log('⚠️ Continuing without Supabase - using default links');
         }
     } catch (e) {
         console.error('Supabase initialization failed:', e);
-        // Continue without Supabase
         console.log('⚠️ Continuing without Supabase - using default links');
     }
-}
-
-// Initialize Supabase with delay to ensure SDK is loaded
-setTimeout(initializeSupabase, 500);
+}, 500);
 
 // Default links (fallback) - will be updated from Supabase
 const PRODUCT_DOWNLOAD_LINKS = {
@@ -331,7 +322,12 @@ const PRODUCT_DOWNLOAD_LINKS = {
 // Fetch dynamic links from Supabase
 async function fetchProductLinks() {
     try {
-        const { data, error } = await supabase
+        if (!window.supabaseClient) {
+            console.error('Supabase client not initialized');
+            return;
+        }
+
+        const { data, error } = await window.supabaseClient
             .from('products')
             .select('name, file_url');
 
