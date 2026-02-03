@@ -1056,7 +1056,7 @@ async function handleSessionPaymentSuccess(response) {
     });
     
     try {
-        const { data, error } = window.supabaseClient
+        const { data, error } = await window.supabaseClient
             .from('bookings')
             .insert({
                 email: booking.email,
@@ -1071,8 +1071,7 @@ async function handleSessionPaymentSuccess(response) {
                 status: 'confirmed',
                 payment_id: paymentId
             })
-            .select()
-            .single();
+            .select();
             
         if (error) {
             console.error('❌ Supabase insert failed:', error);
