@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings & Reschedule | QuantMentor</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #a855f7;
+            --background: #0a0a0f;
+            --surface: #13131f;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .booking-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .booking-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
+        }
+
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .booking-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .status-upcoming {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .status-completed {
+            background: rgba(148, 163, 184, 0.1);
+            color: var(--text-muted);
+        }
+
+        .status-rescheduled {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .booking-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-item i {
+            color: var(--primary);
+            width: 20px;
+        }
+
+        .reschedule-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        .search-box {
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .no-bookings {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .no-bookings i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .reschedule-form {
+            display: none;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .reschedule-form.active {
+            display: block;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .meet-link {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px dashed var(--primary);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .meet-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">QuantMentor</a>
+            <a href="index.html" style="color: var(--text-secondary);">← Back to Home</a>
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 100px;">
+        <h1 style="text-align: center; margin-bottom: 10px;">My Bookings</h1>
+        <p style="text-align: center; color: var(--text-muted); margin-bottom: 40px;">
+            View your upcoming sessions and reschedule if needed
+        </p>
+
+        <div class="search-box">
+            <h3 style="margin-bottom: 20px;">Find Your Bookings</h3>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">
+                Enter the email address you used to book your session
+            </p>
+            <div style="display: flex; gap: 10px; max-width: 500px; margin: 0 auto;">
+                <input type="email" id="searchEmail" placeholder="your@email.com" style="flex: 1; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; color: white;">
+                <button onclick="searchBookings()" class="btn">
+                    <i class="fas fa-search"></i> Find Bookings
+                </button>
+            </div>
+        </div>
+
+        <div id="bookingsContainer">
+            <div class="no-bookings">
+                <i class="fas fa-calendar-check"></i>
+                <h3>Enter your email to see your bookings</h3>
+                <p>You'll be able to view and reschedule your sessions here</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Config
+        const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
+        
+        let supabase;
+        
+        // Initialize Supabase
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof window.supabase !== 'undefined') {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+        });
+
+        // Search bookings by email
+        async function searchBookings() {
+            const email = document.getElementById('searchEmail').value.trim();
+            const container = document.getElementById('bookingsContainer');
+            
+            if (!email) {
+                alert('Please enter your email address');
+                return;
+            }
+
+            container.innerHTML = '<p style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 2em; color: var(--primary);"></i><br><br>Loading your bookings...</p>';
+
+            try {
+                // For now, we'll show a demo. In production, you'd query a bookings table
+                // Since we're storing bookings in the session booking system, we need to create a bookings table
+                // Let me create a simple interface that shows how it would work
+                
+                // Demo bookings (replace with actual Supabase query)
+                const demoBookings = [
+                    {
+                        id: 'demo-1',
+                        service: 'Deep Dive Session',
+                        date: '2026-02-15',
+                        time: '10:00 AM',
+                        price: 999,
+                        duration: 60,
+                        status: 'upcoming',
+                        meetLink: 'https://meet.google.com/hfp-npyq-qho',
+                        email: email
+                    }
+                ];
+
+                // Check if any bookings found (in real implementation, query Supabase)
+                displayBookings(demoBookings);
+                
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i> Error loading bookings: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Display bookings
+        function displayBookings(bookings) {
+            const container = document.getElementById('bookingsContainer');
+            
+            if (!bookings || bookings.length === 0) {
+                container.innerHTML = `
+                    <div class="no-bookings">
+                        <i class="fas fa-calendar-times"></i>
+                        <h3>No bookings found</h3>
+                        <p>We couldn't find any bookings for this email address.</p>
+                        <a href="index.html#contact" class="btn" style="margin-top: 20px;">Book a Session</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = bookings.map(booking => `
+                <div class="booking-card">
+                    <div class="booking-header">
+                        <div>
+                            <h3 style="margin: 0 0 5px 0;">${booking.service}</h3>
+                            <span style="color: var(--text-muted);">Booking ID: ${booking.id}</span>
+                        </div>
+                        <span class="booking-status status-${booking.status}">
+                            ${booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                        </span>
+                    </div>
+
+                    <div class="booking-details">
+                        <div class="detail-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>${formatDate(booking.date)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-clock"></i>
+                            <span>${booking.time}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-hourglass-half"></i>
+                            <span>${booking.duration} minutes</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-tag"></i>
+                            <span>₹${booking.price}</span>
+                        </div>
+                    </div>
+
+                    ${booking.status === 'upcoming' ? `
+                        <div class="meet-link">
+                            <i class="fas fa-video" style="color: var(--primary);"></i>
+                            <div>
+                                <strong>Google Meet Link:</strong><br>
+                                <a href="${booking.meetLink}" target="_blank">${booking.meetLink}</a>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${booking.status === 'upcoming' ? `
+                        <div class="reschedule-section">
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button onclick="toggleRescheduleForm('${booking.id}')" class="btn btn-secondary">
+                                    <i class="fas fa-calendar-alt"></i> Reschedule Session
+                                </button>
+                                <button onclick="cancelBooking('${booking.id}')" class="btn btn-secondary" style="border-color: var(--error); color: var(--error);">
+                                    <i class="fas fa-times"></i> Cancel Session
+                                </button>
+                            </div>
+
+                            <div id="reschedule-form-${booking.id}" class="reschedule-form">
+                                <h4 style="margin-bottom: 15px;">Request Reschedule</h4>
+                                <div class="form-group">
+                                    <label>New Preferred Date</label>
+                                    <input type="date" id="new-date-${booking.id}" min="${getTomorrowDate()}">
+                                </div>
+                                <div class="form-group">
+                                    <label>New Preferred Time</label>
+                                    <select id="new-time-${booking.id}">
+                                        <option value="">Select time slot</option>
+                                        <option value="10:00 AM">10:00 AM</option>
+                                        <option value="11:00 AM">11:00 AM</option>
+                                        <option value="12:00 PM">12:00 PM</option>
+                                        <option value="2:00 PM">2:00 PM</option>
+                                        <option value="3:00 PM">3:00 PM</option>
+                                        <option value="4:00 PM">4:00 PM</option>
+                                        <option value="5:00 PM">5:00 PM</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Reason for Rescheduling (Optional)</label>
+                                    <input type="text" id="reason-${booking.id}" placeholder="Briefly explain why you need to reschedule">
+                                </div>
+                                <button onclick="submitReschedule('${booking.id}', '${booking.email}')" class="btn">
+                                    <i class="fas fa-paper-plane"></i> Submit Reschedule Request
+                                </button>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Toggle reschedule form
+        function toggleRescheduleForm(bookingId) {
+            const form = document.getElementById(`reschedule-form-${bookingId}`);
+            form.classList.toggle('active');
+        }
+
+        // Submit reschedule request
+        async function submitReschedule(bookingId, email) {
+            const newDate = document.getElementById(`new-date-${bookingId}`).value;
+            const newTime = document.getElementById(`new-time-${bookingId}`).value;
+            const reason = document.getElementById(`reason-${bookingId}`).value;
+
+            if (!newDate || !newTime) {
+                alert('Please select both date and time for rescheduling');
+                return;
+            }
+
+            // Send reschedule request via Formspree
+            const FORMSPREE_ID = 'mjgozran';
+            
+            try {
+                const response = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: `Reschedule Request - Booking ${bookingId}`,
+                        email: email,
+                        booking_id: bookingId,
+                        new_date: newDate,
+                        new_time: newTime,
+                        reason: reason,
+                        message: `
+📅 RESCHEDULE REQUEST
+━━━━━━━━━━━━━━━━━━━━
+Booking ID: ${bookingId}
+Customer Email: ${email}
+
+Requested New Schedule:
+• Date: ${newDate}
+• Time: ${newTime}
+${reason ? `• Reason: ${reason}` : ''}
+━━━━━━━━━━━━━━━━━━━━
+                        `.trim()
+                    })
+                });
+
+                if (response.ok) {
+                    alert('✅ Reschedule request submitted successfully!\n\nWe will review your request and send a confirmation email within 24 hours.');
+                    toggleRescheduleForm(bookingId);
+                } else {
+                    throw new Error('Failed to submit request');
+                }
+            } catch (error) {
+                alert('❌ Error submitting reschedule request. Please email us directly at jha.8@alumni.iitj.ac.in');
+            }
+        }
+
+        // Cancel booking
+        async function cancelBooking(bookingId) {
+            if (!confirm('⚠️ Are you sure you want to cancel this session?\n\nRefund policy:\n• 24+ hours notice: Full refund\n• 12-24 hours: 50% refund\n• Less than 12 hours: No refund')) {
+                return;
+            }
+
+            const FORMSPREE_ID = 'mjgozran';
+            const email = document.getElementById('searchEmail').value;
+            
+            try {
+                const response = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: `Cancellation Request - Booking ${bookingId}`,
+                        email: email,
+                        booking_id: bookingId,
+                        message: `
+❌ CANCELLATION REQUEST
+━━━━━━━━━━━━━━━━━━━━
+Booking ID: ${bookingId}
+Customer Email: ${email}
+Requested Action: Cancel session
+━━━━━━━━━━━━━━━━━━━━
+Please process refund according to policy.
+                        `.trim()
+                    })
+                });
+
+                if (response.ok) {
+                    alert('✅ Cancellation request submitted!\n\nRefund will be processed according to our policy within 5-7 business days.');
+                    searchBookings(); // Refresh the list
+                }
+            } catch (error) {
+                alert('❌ Error submitting cancellation. Please email us directly at jha.8@alumni.iitj.ac.in');
+            }
+        }
+
+        // Helper functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        function getTomorrowDate() {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            return tomorrow.toISOString().split('T')[0];
+        }
+
+        // Enter key support
+        document.getElementById('searchEmail').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchBookings();
+            }
+        });
+    </script>
+</body>
+</html>

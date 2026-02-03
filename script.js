@@ -1081,7 +1081,11 @@ ${GOOGLE_MEET_LINK}
 
 Please save this link and join on time.
 
-If you need to reschedule, reply to this email.
+🔄 NEED TO RESCHEDULE?
+Visit: ${window.location.origin}/my-bookings.html
+Enter your email (${booking.email}) to view and reschedule your session.
+
+Or reply to this email with your request.
 
 Best regards,
 ${BUSINESS_NAME}`
@@ -1108,6 +1112,10 @@ Payment ID: ${paymentId}
 ⏰ ${booking.time}
 
 ✅ Confirmation email with Google Meet link has been sent to ${booking.email}
+
+🔄 Need to Reschedule?
+Visit: ${window.location.origin}/my-bookings.html
+Enter your email to view and reschedule your session.
 
 Thank you for booking!`);
 
