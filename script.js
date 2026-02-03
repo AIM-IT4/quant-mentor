@@ -1051,7 +1051,7 @@ async function handleSessionPaymentSuccess(response) {
         booking_date: booking.date,
         booking_time: booking.time,
         message: booking.message,
-        status: 'confirmed',
+        status: 'upcoming',
         payment_id: paymentId
     });
     
@@ -1074,7 +1074,7 @@ async function handleSessionPaymentSuccess(response) {
                     booking_date: booking.date,
                     booking_time: booking.time,
                     message: booking.message,
-                    status: 'confirmed',
+                    status: 'upcoming',
                     payment_id: paymentId
                 })
                 .select();

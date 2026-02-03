@@ -365,7 +365,7 @@
                         </div>
                     ` : ''}
 
-                    ${booking.status === 'upcoming' ? `
+                    ${booking.status === 'upcoming' || booking.status === 'confirmed' ? `
                         <div class="reschedule-section">
                             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                                 <button onclick="toggleRescheduleForm('${booking.id}')" class="btn btn-secondary">
