@@ -1056,7 +1056,7 @@ async function handleSessionPaymentSuccess(response) {
     });
     
     try {
-        const { data, error } = await supabase
+        const { data, error } = window.supabaseClient
             .from('bookings')
             .insert({
                 email: booking.email,
@@ -1078,6 +1078,12 @@ async function handleSessionPaymentSuccess(response) {
             console.error('❌ Supabase insert failed:', error);
             throw error;
         }
+        
+        console.log('✅ Booking stored in Supabase:', data);
+    } catch (error) {
+        console.error('❌ Error storing booking in database:', error);
+        // Continue with email notifications even if database insert fails
+    }
         
         console.log('✅ Booking stored in Supabase:', data);
     } catch (error) {
