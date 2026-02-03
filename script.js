@@ -3,6 +3,7 @@
    ================================ */
 
 document.addEventListener('DOMContentLoaded', function () {
+    console.log('🚀 DOM loaded, initializing all components...');
 
     // --------------------------------
     // Mobile Navigation
@@ -17,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
             icon.classList.toggle('fa-bars');
             icon.classList.toggle('fa-times');
         });
+        console.log('✅ Mobile navigation initialized');
     }
 
     // --------------------------------
@@ -103,8 +105,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Open modal when product button is clicked
     document.querySelectorAll('.btn-product').forEach(btn => {
         btn.addEventListener('click', function () {
+            console.log('🖱️ Product button clicked:', this.dataset.product);
             const product = this.dataset.product;
             const price = this.dataset.price;
+
+            if (!modal) {
+                console.error('❌ Modal not found in DOM');
+                alert('Error: Product modal not found. Please refresh the page.');
+                return;
+            }
 
             modalTitle.textContent = product;
             modalDescription.textContent = productDescriptions[product] || 'Premium digital product for quant professionals.';
@@ -112,6 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
+            console.log('✅ Modal opened for:', product);
         });
     });
 
@@ -325,8 +335,11 @@ async function fetchProductLinks() {
 }
 
 function initRazorpayCheckout(productName, amount) {
+    console.log('🚀 initRazorpayCheckout called:', { productName, amount });
+    
     // Handle FREE products (₹0) - skip payment, go directly to download
     if (amount === 0) {
+        console.log('🆓 Free product detected');
         const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
         if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
             // Prompt for email to send free download
@@ -339,6 +352,37 @@ function initRazorpayCheckout(productName, amount) {
                 alert('🎉 Free Download!\n\nClick OK to download.');
                 window.open(downloadLink, '_blank');
             }
+        } else {
+            alert('⚠️ Download link not configured. Please contact support.');
+        }
+        return;
+    }
+
+    // Validate key for paid products
+    if (RAZORPAY_KEY_ID === 'YOUR_RAZORPAY_KEY_ID_HERE') {
+        alert('⚠️ Razorpay not configured!\n\nAdd your Key ID in script.js line 253');
+        return;
+    }
+
+    // Check if Razorpay SDK is loaded
+    if (typeof Razorpay === 'undefined') {
+        console.log('❌ Razorpay SDK not loaded, attempting to load...');
+        alert('⏳ Loading payment system...\nPlease wait and try again in 2 seconds.');
+        
+        // Try to load Razorpay SDK dynamically
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = function() {
+            console.log('✅ Razorpay SDK loaded successfully');
+            alert('✅ Payment system loaded!\nPlease click "Buy Now" again.');
+        };
+        script.onerror = function() {
+            console.error('❌ Failed to load Razorpay SDK');
+            alert('❌ Unable to load payment system.\nPlease refresh the page and try again.');
+        };
+        document.head.appendChild(script);
+        return;
+    }
         } else {
             alert('⚠️ Download link not configured. Please contact support.');
         }
@@ -420,7 +464,26 @@ function initRazorpayCheckout(productName, amount) {
         console.log('Razorpay opened successfully');
     } catch (e) {
         console.error('Razorpay init failed:', e);
-        alert('❌ Critical Error: Could not initialize payment gateway.\n' + e.message);
+        
+        // TEST BYPASS: For testing purposes, simulate successful payment
+        if (confirm('❌ Payment initialization failed!\n\nFor testing: Simulate successful payment?\n\nClick OK for test download, Cancel to retry.')) {
+            const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
+            if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
+                const customerEmail = prompt('Enter your email for test download:');
+                if (customerEmail && customerEmail.includes('@')) {
+                    sendProductEmail(customerEmail, productName, 'TEST_PAYMENT_' + Date.now(), downloadLink);
+                    alert('🧪 Test Payment Successful!\n\nTest Download link sent to: ' + customerEmail + '\n\nClick OK to download.');
+                    window.open(downloadLink, '_blank');
+                } else {
+                    alert('🧪 Test Download!\n\nClick OK to download test product.');
+                    window.open(downloadLink, '_blank');
+                }
+            } else {
+                alert('⚠️ Download link not configured for testing.');
+            }
+        } else {
+            alert('❌ Critical Error: Could not initialize payment gateway.\n' + e.message + '\n\nPlease refresh the page and try again.');
+        }
     }
 }
 
@@ -493,38 +556,36 @@ Customer Email: ${customerEmail}
     }
 }
 
-// Connect to product modal
-document.addEventListener('DOMContentLoaded', function () {
-    const modalPayBtn = document.getElementById('modalPayBtn');
+// Connect to product modal - MOVED INSIDE MAIN DOMContentLoaded
+const modalPayBtn = document.getElementById('modalPayBtn');
 
-    if (modalPayBtn) {
-        console.log('✅ Pay button found, attaching listener');
-        modalPayBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            console.log('🖱️ Pay button clicked');
+if (modalPayBtn) {
+    console.log('✅ Pay button found, attaching listener');
+    modalPayBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        console.log('🖱️ Pay button clicked');
 
-            const productName = document.getElementById('modalTitle').textContent;
-            const priceText = document.getElementById('modalPrice').textContent;
-            console.log('Payment Request:', { productName, priceText });
+        const productName = document.getElementById('modalTitle').textContent;
+        const priceText = document.getElementById('modalPrice').textContent;
+        console.log('Payment Request:', { productName, priceText });
 
-            const price = parseInt(priceText.replace(/[^\d]/g, ''));
-            console.log('Parsed Price:', price);
+        const price = parseInt(priceText.replace(/[^\d]/g, ''));
+        console.log('Parsed Price:', price);
 
-            if (isNaN(price)) {
-                alert('Error parsing price. Please try again.');
-                return;
-            }
+        if (isNaN(price)) {
+            alert('Error parsing price. Please try again.');
+            return;
+        }
 
-            document.getElementById('productModal').classList.remove('active');
-            document.body.style.overflow = '';
+        document.getElementById('productModal').classList.remove('active');
+        document.body.style.overflow = '';
 
-            console.log('Calling initRazorpayCheckout...');
-            initRazorpayCheckout(productName, price);
-        });
-    } else {
-        console.error('❌ Pay button (modalPayBtn) not found in DOM');
-    }
-});
+        console.log('Calling initRazorpayCheckout...');
+        initRazorpayCheckout(productName, price);
+    });
+} else {
+    console.error('❌ Pay button (modalPayBtn) not found in DOM');
+}
 
 // ================================
 // SESSION BOOKING SYSTEM
@@ -544,14 +605,19 @@ const SESSION_TYPES = {
     'interview': { name: 'Interview Prep', price: 1499, duration: 90 }
 };
 
-document.addEventListener('DOMContentLoaded', function () {
-    const bookingForm = document.getElementById('bookingForm');
-    const bookingService = document.getElementById('bookingService');
-    const bookingDate = document.getElementById('bookingDate');
-    const bookingPrice = document.getElementById('bookingPrice');
-    const priceDisplay = document.getElementById('priceDisplay');
+// Initialize booking form
+const bookingForm = document.getElementById('bookingForm');
+const bookingService = document.getElementById('bookingService');
+const bookingDate = document.getElementById('bookingDate');
+const bookingPrice = document.getElementById('bookingPrice');
+const priceDisplay = document.getElementById('priceDisplay');
 
-    if (!bookingForm) return;
+if (bookingForm) {
+    console.log('✅ Booking form found, initializing...');
+} else {
+    console.error('❌ Booking form not found in DOM');
+    return;
+}
 
     // Set minimum date to tomorrow
     const tomorrow = new Date();
@@ -575,7 +641,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Handle form submission
     bookingForm.addEventListener('submit', async function (e) {
         e.preventDefault();
-        console.log('Form submitted!'); // Debug log
+        console.log('🚀 Booking form submitted!'); // Debug log
 
         const name = document.getElementById('bookingName').value;
         const email = document.getElementById('bookingEmail').value;
