@@ -177,7 +177,7 @@
             <div class="form-group">
                 <input type="password" id="adminPassword" placeholder="Enter Password">
             </div>
-            <button onclick="checkPassword()">Login</button>
+            <button id="loginBtn" onclick="checkPassword()">Login</button>
         </div>
     </div>
 
@@ -235,14 +235,42 @@
 
         // Basic Authentication
         function checkPassword() {
+            console.log('Login button clicked');
             const pwd = document.getElementById('adminPassword').value;
+            console.log('Password entered:', pwd ? '***' : 'empty');
+            
             if (pwd === 'admin123') { // Simple password
+                console.log('Password correct, logging in...');
                 document.getElementById('loginOverlay').style.display = 'none';
                 loadProducts();
             } else {
+                console.log('Incorrect password');
                 alert('Incorrect password');
             }
         }
+
+        // Add event listener as backup
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginBtn = document.getElementById('loginBtn');
+            const passwordInput = document.getElementById('adminPassword');
+            
+            if (loginBtn) {
+                loginBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    checkPassword();
+                });
+                console.log('✅ Login button event listener added');
+            }
+            
+            if (passwordInput) {
+                passwordInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        checkPassword();
+                    }
+                });
+                console.log('✅ Password input Enter key listener added');
+            }
+        });
 
         // Handle Form Submission
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
