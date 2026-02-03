@@ -1040,6 +1040,21 @@ async function handleSessionPaymentSuccess(response) {
     console.log('📧 Email to send to:', booking?.email);
 
     // Store booking in Supabase database
+    console.log('📋 Attempting to store booking in Supabase...');
+    console.log('📋 Booking data:', {
+        email: booking.email,
+        name: booking.name,
+        phone: booking.phone,
+        service_name: booking.sessionType,
+        service_price: booking.price,
+        service_duration: booking.duration,
+        booking_date: booking.date,
+        booking_time: booking.time,
+        message: booking.message,
+        status: 'confirmed',
+        payment_id: paymentId
+    });
+    
     try {
         const { data, error } = await supabase
             .from('bookings')
