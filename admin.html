@@ -349,41 +349,42 @@
                 btn.disabled = false;
                 btn.textContent = 'Upload & Save Product';
             }
+        });
 
-            // Load Products
-            async function loadProducts() {
-                const list = document.getElementById('productsList');
+        // Load Products - defined outside DOMContentLoaded
+        async function loadProducts() {
+            const list = document.getElementById('productsList');
 
-                if (!window.supabaseAdminClient) {
-                    list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
-                    return;
-                }
+            if (!window.supabaseAdminClient) {
+                list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
+                return;
+            }
 
-                const { data, error } = await window.supabaseAdminClient
-                    .from('products')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+            const { data, error } = await window.supabaseAdminClient
+                .from('products')
+                .select('*')
+                .order('created_at', { ascending: false });
 
             if (error) {
                 list.innerHTML = `<p style="color: red">Error loading products: ${error.message}</p>`;
                 return;
             }
 
-                if (data.length === 0) {
-                    list.innerHTML = '<p class="text-muted">No products found.</p>';
-                    return;
-                }
-
-                list.innerHTML = data.map(p => `
-                    <div class="product-item">
-                        <div>
-                            <strong>${p.name}</strong><br>
-                            <span style="color: var(--text-muted); font-size: 0.9em;">₹${p.price}</span>
-                        </div>
-                        <a href="${p.file_url}" target="_blank" style="color: var(--primary);">Download</a>
-                    </div>
-                `).join('');
+            if (data.length === 0) {
+                list.innerHTML = '<p class="text-muted">No products found.</p>';
+                return;
             }
+
+            list.innerHTML = data.map(p => `
+                <div class="product-item">
+                    <div>
+                        <strong>${p.name}</strong><br>
+                        <span style="color: var(--text-muted); font-size: 0.9em;">₹${p.price}</span>
+                    </div>
+                    <a href="${p.file_url}" target="_blank" style="color: var(--primary);">Download</a>
+                </div>
+            `).join('');
+        }
 
             // Make checkPassword globally accessible
             window.checkPassword = checkPassword;
