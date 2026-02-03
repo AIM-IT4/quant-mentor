@@ -302,6 +302,8 @@ setTimeout(function() {
 
             // Fetch products immediately on load
             fetchProductLinks();
+            // Also load and display products from Supabase
+            loadProductsFromSupabase();
         } else {
             console.error('❌ Supabase SDK not loaded');
             console.log('⚠️ Continuing without Supabase - using default links');
@@ -311,6 +313,113 @@ setTimeout(function() {
         console.log('⚠️ Continuing without Supabase - using default links');
     }
 }, 500);
+
+// Load and display products from Supabase
+async function loadProductsFromSupabase() {
+    try {
+        if (!window.supabaseClient) {
+            console.error('Supabase client not initialized');
+            return;
+        }
+
+        const { data, error } = await window.supabaseClient
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error loading products from Supabase:', error);
+            return;
+        }
+
+        if (data && data.length > 0) {
+            console.log('📦 Loading ' + data.length + ' products from Supabase:');
+            displaySupabaseProducts(data);
+        }
+    } catch (err) {
+        console.error('Failed to load products:', err);
+    }
+}
+
+// Display products from Supabase in the products grid
+function displaySupabaseProducts(products) {
+    const productsGrid = document.querySelector('.products-grid');
+    if (!productsGrid) return;
+
+    // Clear existing products (keep only hardcoded ones we want to keep)
+    const existingCards = productsGrid.querySelectorAll('.product-card');
+    const hardcodedProducts = ['Test Product']; // Keep these hardcoded products
+    
+    existingCards.forEach(card => {
+        const productName = card.querySelector('.btn-product')?.dataset.product;
+        if (!hardcodedProducts.includes(productName)) {
+            card.remove();
+        }
+    });
+
+    // Add products from Supabase
+    products.forEach(product => {
+        console.log(`📦 Adding product: ${product.name} - ₹${product.price}`);
+        
+        const productCard = document.createElement('div');
+        productCard.className = 'product-card';
+        productCard.dataset.category = 'notes'; // You can adjust this based on product type
+        
+        productCard.innerHTML = `
+            <div class="product-image">
+                <div class="product-placeholder" style="background: linear-gradient(135deg, #6366f1, #a855f7);">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+                <div class="product-badge">PDF</div>
+            </div>
+            <div class="product-content">
+                <h3 class="product-title">${product.name}</h3>
+                <p class="product-description">${product.description || 'Premium digital product for quant professionals.'}</p>
+                <div class="product-meta">
+                    <span><i class="fas fa-file-pdf"></i> ${product.file_url.includes('.pdf') ? 'PDF Document' : 'Digital File'}</span>
+                    <span><i class="fas fa-check"></i> Instant Download</span>
+                </div>
+                <div class="product-footer">
+                    <div class="product-price">₹${product.price}</div>
+                    <button class="btn btn-product" data-product="${product.name}" data-price="${product.price}">
+                        Buy Now
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        productsGrid.appendChild(productCard);
+        
+        // Add event listener for the new button
+        const buyButton = productCard.querySelector('.btn-product');
+        if (buyButton) {
+            buyButton.addEventListener('click', function () {
+                console.log('🖱️ Supabase product button clicked:', this.dataset.product);
+                const product = this.dataset.product;
+                const price = this.dataset.price;
+
+                const modal = document.getElementById('productModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalDescription = document.getElementById('modalDescription');
+                const modalPrice = document.getElementById('modalPrice');
+
+                if (!modal) {
+                    console.error('❌ Modal not found in DOM');
+                    alert('Error: Product modal not found. Please refresh the page.');
+                    return;
+                }
+
+                modalTitle.textContent = product;
+                modalDescription.textContent = product.description || 'Premium digital product for quant professionals.';
+                modalPrice.textContent = '₹' + price;
+
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                console.log('✅ Modal opened for Supabase product:', product);
+            });
+        }
+    });
+}
 
 // Default links (fallback) - will be updated from Supabase
 const PRODUCT_DOWNLOAD_LINKS = {
