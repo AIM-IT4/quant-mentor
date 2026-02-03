@@ -304,6 +304,8 @@ setTimeout(function() {
             fetchProductLinks();
             // Also load and display products from Supabase
             loadProductsFromSupabase();
+            // Load sessions from Supabase
+            loadSessionsFromSupabase();
         } else {
             console.error('❌ Supabase SDK not loaded');
             console.log('⚠️ Continuing without Supabase - using default links');
@@ -419,6 +421,133 @@ function displaySupabaseProducts(products) {
             });
         }
     });
+}
+
+// Load Sessions from Supabase and Update Services Section
+async function loadSessionsFromSupabase() {
+    try {
+        if (!window.supabaseClient) {
+            console.error('Supabase client not initialized');
+            return;
+        }
+
+        const { data, error } = await window.supabaseClient
+            .from('sessions')
+            .select('*')
+            .eq('is_active', true)
+            .order('price', { ascending: true });
+
+        if (error) {
+            console.error('Error loading sessions from Supabase:', error);
+            return;
+        }
+
+        if (data && data.length > 0) {
+            console.log('🎯 Loading ' + data.length + ' sessions from Supabase');
+            updateServicesSection(data);
+            updateBookingForm(data);
+        }
+    } catch (err) {
+        console.error('Failed to load sessions:', err);
+    }
+}
+
+// Update Services Section with Dynamic Sessions
+function updateServicesSection(sessions) {
+    const servicesContainer = document.querySelector('.services-grid');
+    if (!servicesContainer) {
+        console.error('Services container not found');
+        return;
+    }
+
+    // Clear existing services (except hardcoded structure, we'll replace content)
+    servicesContainer.innerHTML = '';
+
+    sessions.forEach((session, index) => {
+        const serviceCard = document.createElement('div');
+        serviceCard.className = session.is_popular ? 'service-card popular' : 'service-card';
+        
+        // Generate features HTML
+        const featuresHtml = session.features ? session.features.map(feature => 
+            `<li><i class="fas fa-check" style="color: #22c55e; margin-right: 8px;"></i>${feature}</li>`
+        ).join('') : '';
+
+        serviceCard.innerHTML = `
+            <div class="service-header">
+                <div class="service-icon">
+                    <i class="fas fa-${index === 0 ? 'headset' : index === 1 ? 'comments' : index === 2 ? 'graduation-cap' : 'briefcase'}"></i>
+                </div>
+                <h3 class="service-title">${session.name}</h3>
+                ${session.is_popular ? '<span class="popular-badge">Most Popular</span>' : ''}
+            </div>
+            <div class="service-content">
+                <div class="service-price">
+                    ${session.price === 0 ? '<span class="price-free">FREE</span>' : `₹${session.price}`}
+                    <span class="price-duration">/${session.duration} min</span>
+                </div>
+                <p class="service-description">${session.description || 'Personalized mentorship session.'}</p>
+                <ul class="service-features" style="list-style: none; padding: 0; margin: 0;">
+                    ${featuresHtml}
+                </ul>
+            </div>
+            <div class="service-footer">
+                <a href="#contact" class="btn btn-service" data-service="${session.name}">
+                    ${session.price === 0 ? '🆓 Book Free Session' : 'Book Session'}
+                </a>
+            </div>
+        `;
+
+        servicesContainer.appendChild(serviceCard);
+        
+        // Add event listener for the booking button
+        const bookBtn = serviceCard.querySelector('.btn-service');
+        if (bookBtn) {
+            bookBtn.addEventListener('click', function(e) {
+                const service = this.dataset.service;
+                const serviceSelect = document.getElementById('bookingService');
+                if (serviceSelect) {
+                    // Find the option with matching session name
+                    const options = Array.from(serviceSelect.options);
+                    const option = options.find(opt => opt.text.includes(service));
+                    if (option) {
+                        serviceSelect.value = option.value;
+                        // Scroll to booking form
+                        document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+        }
+    });
+
+    console.log('✅ Services section updated with ' + sessions.length + ' sessions');
+}
+
+// Update Booking Form with Dynamic Sessions
+function updateBookingForm(sessions) {
+    const bookingSelect = document.getElementById('bookingService');
+    if (!bookingSelect) {
+        console.error('Booking select not found');
+        return;
+    }
+
+    // Clear existing options (keep placeholder)
+    const placeholder = bookingSelect.options[0];
+    bookingSelect.innerHTML = '';
+    bookingSelect.appendChild(placeholder);
+
+    sessions.forEach(session => {
+        const option = document.createElement('option');
+        const valueType = session.name.toLowerCase().replace(/\s+/g, '_');
+        option.value = `${valueType}|${session.price}|${session.duration}`;
+        option.innerHTML = session.price === 0 
+            ? `🆓 ${session.name} (${session.duration} min) - FREE`
+            : `${session.name} (${session.duration} min) - ₹${session.price}`;
+        option.style.color = session.price === 0 ? '#22c55e' : '';
+        
+        bookingSelect.appendChild(option);
+    });
+
+    console.log('✅ Booking form updated with ' + sessions.length + ' sessions');
 }
 
 // Default links (fallback) - will be updated from Supabase
