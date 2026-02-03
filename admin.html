@@ -14,6 +14,18 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        // EmailJS Configuration
+        const EMAILJS_USER_ID = 'qDPRKM4ROa6YKvqWL';
+        const EMAILJS_SERVICE_ID = 'service_t71bulx';
+        const EMAILJS_TEMPLATE_ID = 'template_ddficic';
+        
+        // Initialize EmailJS
+        (function() {
+            emailjs.init(EMAILJS_USER_ID);
+            console.log('✅ EmailJS initialized in admin.html');
+        })();
+    </script>
     <style>
         :root {
             --primary: #6366f1;
