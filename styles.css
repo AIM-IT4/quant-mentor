@@ -533,6 +533,15 @@ h3 {
     border-radius: 50%;
     background: var(--accent-gradient);
     padding: 4px;
+    overflow: hidden;
+}
+
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--accent-gradient);
 }
 
 .profile-placeholder {
