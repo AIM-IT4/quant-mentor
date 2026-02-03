@@ -288,27 +288,32 @@
             container.innerHTML = '<p style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 2em; color: var(--primary);"></i><br><br>Loading your bookings...</p>';
 
             try {
-                // For now, we'll show a demo. In production, you'd query a bookings table
-                // Since we're storing bookings in the session booking system, we need to create a bookings table
-                // Let me create a simple interface that shows how it would work
-                
-                // Demo bookings (replace with actual Supabase query)
-                const demoBookings = [
-                    {
-                        id: 'demo-1',
-                        service: 'Deep Dive Session',
-                        date: '2026-02-15',
-                        time: '10:00 AM',
-                        price: 999,
-                        duration: 60,
-                        status: 'upcoming',
-                        meetLink: 'https://meet.google.com/hfp-npyq-qho',
-                        email: email
-                    }
-                ];
+                // First check if the bookings table exists
+                const { data: tables } = await supabase.rpc('tables');
+                const hasBookingsTable = tables.some(t => t.name === 'bookings');
 
-                // Check if any bookings found (in real implementation, query Supabase)
-                displayBookings(demoBookings);
+                if (!hasBookingsTable) {
+                    container.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> Bookings system not configured yet.
+                            <br><br>Please contact support to set up your booking history.
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Query the actual bookings table from Supabase
+                const { data: bookings, error } = await supabase
+                    .from('bookings')
+                    .select('*')
+                    .eq('email', email)
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    throw error;
+                }
+
+                displayBookings(bookings);
                 
             } catch (error) {
                 container.innerHTML = `
