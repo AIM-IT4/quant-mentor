@@ -286,20 +286,6 @@
             container.innerHTML = '<p style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 2em; color: var(--primary);"></i><br><br>Loading your bookings...</p>';
 
             try {
-                // First check if the bookings table exists
-                const { data: tables } = await supabase.rpc('tables');
-                const hasBookingsTable = tables.some(t => t.name === 'bookings');
-
-                if (!hasBookingsTable) {
-                    container.innerHTML = `
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i> Bookings system not configured yet.
-                            <br><br>Please contact support to set up your booking history.
-                        </div>
-                    `;
-                    return;
-                }
-
                 // Query the actual bookings table from Supabase
                 const { data: bookings, error } = await supabase
                     .from('bookings')
