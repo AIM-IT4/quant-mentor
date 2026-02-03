@@ -401,10 +401,8 @@ function initRazorpayCheckout(productName, amount) {
         };
         document.head.appendChild(script);
         return;
-    }
-        } else {
-            alert('⚠️ Download link not configured. Please contact support.');
-        }
+    } else {
+        alert('⚠️ Download link not configured. Please contact support.');
         return;
     }
 
@@ -633,11 +631,7 @@ const priceDisplay = document.getElementById('priceDisplay');
 
 if (bookingForm) {
     console.log('✅ Booking form found, initializing...');
-} else {
-    console.error('❌ Booking form not found in DOM');
-    return;
-}
-
+    
     // Set minimum date to tomorrow
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -715,7 +709,7 @@ if (bookingForm) {
         // Open Razorpay for session payment
         initSessionPayment(sessionDescription, parseInt(price), email);
     });
-});
+}
 
 /**
  * Initialize Razorpay for session booking payment
