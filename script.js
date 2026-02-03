@@ -1039,6 +1039,37 @@ async function handleSessionPaymentSuccess(response) {
     console.log('📧 Booking object:', booking);
     console.log('📧 Email to send to:', booking?.email);
 
+    // Store booking in Supabase database
+    try {
+        const { data, error } = await supabase
+            .from('bookings')
+            .insert({
+                email: booking.email,
+                name: booking.name,
+                phone: booking.phone,
+                service_name: booking.sessionType,
+                service_price: booking.price,
+                service_duration: booking.duration,
+                booking_date: booking.date,
+                booking_time: booking.time,
+                message: booking.message,
+                status: 'confirmed',
+                payment_id: paymentId
+            })
+            .select()
+            .single();
+            
+        if (error) {
+            console.error('❌ Supabase insert failed:', error);
+            throw error;
+        }
+        
+        console.log('✅ Booking stored in Supabase:', data);
+    } catch (error) {
+        console.error('❌ Error storing booking in database:', error);
+        // Continue with email notifications even if database insert fails
+    }
+
     // Create email body for admin notification
     const emailSubject = `New Session Booking: ${booking.sessionType}`;
     const emailBody = `
