@@ -152,6 +152,83 @@
             display: block;
         }
 
+        /* Reschedule Request Styles */
+        .reschedule-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .reschedule-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .reschedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .reschedule-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .date-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .date-box.current {
+            border-left: 3px solid #94a3b8;
+        }
+
+        .date-box.requested {
+            border-left: 3px solid #a855f7;
+        }
+
+        .date-label {
+            font-size: 0.8em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .date-value {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .reschedule-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .reschedule-actions button {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .btn-approve {
+            background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+        }
+
+        .btn-alternative {
+            background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+        }
+
+        .btn-reject {
+            background: transparent !important;
+            border: 1px solid #ef4444 !important;
+            color: #ef4444 !important;
+        }
+
         /* Login Overlay */
         #loginOverlay {
             position: fixed;
@@ -281,6 +358,49 @@ Brief Q&A"></textarea>
                 </div>
             </div>
         </div>
+
+        <div class="reschedule-management" style="margin-top: 60px;">
+            <h2>Reschedule Requests</h2>
+            <div class="card">
+                <h3 style="margin-top: 0;">Pending Reschedule Requests</h3>
+                <div id="rescheduleRequestsList">
+                    <p style="color: var(--text-muted); text-align: center;">Loading requests...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alternative Date Modal -->
+        <div id="alternativeModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 15, 0.95); z-index: 2000; justify-content: center; align-items: center;">
+            <div class="card" style="width: 400px; max-width: 90%;">
+                <h3 style="margin-top: 0;">Suggest Alternative Date</h3>
+                <input type="hidden" id="altBookingId">
+                <div class="form-group">
+                    <label>Alternative Date</label>
+                    <input type="date" id="altDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Alternative Time</label>
+                    <select id="altTime" required>
+                        <option value="">Select time slot</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="12:00 PM">12:00 PM</option>
+                        <option value="2:00 PM">2:00 PM</option>
+                        <option value="3:00 PM">3:00 PM</option>
+                        <option value="4:00 PM">4:00 PM</option>
+                        <option value="5:00 PM">5:00 PM</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Message to Customer (Optional)</label>
+                    <textarea id="altMessage" rows="2" placeholder="Explain why you're suggesting this alternative..."></textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="submitAlternative()" style="flex: 1;">Send Alternative</button>
+                    <button onclick="closeAlternativeModal()" style="flex: 1; background: transparent; border: 1px solid var(--border);">Cancel</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -299,6 +419,7 @@ Brief Q&A"></textarea>
                 // Call load functions after login
                 if (typeof loadProducts === 'function') loadProducts();
                 if (typeof loadSessions === 'function') loadSessions();
+                if (typeof loadRescheduleRequests === 'function') loadRescheduleRequests();
             } else {
                 console.log('Incorrect password');
                 alert('Incorrect password');
@@ -607,6 +728,14 @@ Brief Q&A"></textarea>
             window.loadProducts = loadProducts;
             window.editSession = editSession;
             window.deleteSession = deleteSession;
+
+            // Reschedule Request Functions
+            window.loadRescheduleRequests = loadRescheduleRequests;
+            window.approveReschedule = approveReschedule;
+            window.showAlternativeModal = showAlternativeModal;
+            window.closeAlternativeModal = closeAlternativeModal;
+            window.submitAlternative = submitAlternative;
+            window.rejectReschedule = rejectReschedule;
         }); // End of DOMContentLoaded
 
         // Load Sessions from Supabase
@@ -696,6 +825,301 @@ Brief Q&A"></textarea>
             } catch (error) {
                 alert('❌ Error deleting session: ' + error.message);
             }
+        }
+
+        // Load Reschedule Requests
+        async function loadRescheduleRequests() {
+            const list = document.getElementById('rescheduleRequestsList');
+            
+            if (!window.supabaseAdminClient) {
+                list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
+                return;
+            }
+
+            try {
+                const { data, error } = await window.supabaseAdminClient
+                    .from('bookings')
+                    .select('*')
+                    .eq('status', 'reschedule_requested')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    list.innerHTML = `<p style="color: red">Error loading requests: ${error.message}</p>`;
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No pending reschedule requests.</p>';
+                    return;
+                }
+
+                list.innerHTML = data.map(booking => `
+                    <div class="reschedule-item">
+                        <div class="reschedule-header">
+                            <div>
+                                <strong>${booking.service_name || booking.service || 'Session'}</strong><br>
+                                <span style="color: var(--text-muted); font-size: 0.9em;">
+                                    Booking ID: ${booking.id}<br>
+                                    Customer: ${booking.email}
+                                </span>
+                            </div>
+                            <span style="background: rgba(168, 85, 247, 0.2); color: #a855f7; padding: 4px 12px; border-radius: 20px; font-size: 0.85em;">
+                                Pending
+                            </span>
+                        </div>
+                        
+                        <div class="reschedule-details">
+                            <div class="date-box current">
+                                <div class="date-label">Current Schedule</div>
+                                <div class="date-value">${formatDate(booking.booking_date || booking.date)}</div>
+                                <div style="color: var(--text-muted); font-size: 0.9em;">${booking.booking_time || booking.time}</div>
+                            </div>
+                            <div class="date-box requested">
+                                <div class="date-label">Requested Schedule</div>
+                                <div class="date-value">${formatDate(booking.requested_date)}</div>
+                                <div style="color: var(--text-muted); font-size: 0.9em;">${booking.requested_time}</div>
+                            </div>
+                        </div>
+                        
+                        ${booking.reschedule_reason ? `<p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9em;"><strong>Reason:</strong> ${booking.reschedule_reason}</p>` : ''}
+                        
+                        <div class="reschedule-actions">
+                            <button onclick="approveReschedule('${booking.id}', '${booking.email}')" class="btn-approve" style="padding: 10px 20px; font-size: 0.9em;">
+                                ✓ Approve
+                            </button>
+                            <button onclick="showAlternativeModal('${booking.id}', '${booking.email}')" class="btn-alternative" style="padding: 10px 20px; font-size: 0.9em;">
+                                ✎ Suggest Alternative
+                            </button>
+                            <button onclick="rejectReschedule('${booking.id}', '${booking.email}')" class="btn-reject" style="padding: 10px 20px; font-size: 0.9em;">
+                                ✕ Reject
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading reschedule requests:', error);
+                list.innerHTML = `<p style="color: red">Error: ${error.message}</p>`;
+            }
+        }
+
+        // Approve Reschedule Request
+        async function approveReschedule(bookingId, email) {
+            if (!confirm('✓ Approve this reschedule request?\n\nThe booking will be updated with the requested date/time.')) {
+                return;
+            }
+
+            try {
+                // Get the current booking to retrieve requested dates
+                const { data: booking, error: fetchError } = await window.supabaseAdminClient
+                    .from('bookings')
+                    .select('*')
+                    .eq('id', bookingId)
+                    .single();
+
+                if (fetchError) throw fetchError;
+
+                // Update the booking
+                const { error: updateError } = await window.supabaseAdminClient
+                    .from('bookings')
+                    .update({
+                        booking_date: booking.requested_date,
+                        booking_time: booking.requested_time,
+                        status: 'upcoming',
+                        requested_date: null,
+                        requested_time: null,
+                        reschedule_reason: null
+                    })
+                    .eq('id', bookingId);
+
+                if (updateError) throw updateError;
+
+                // Notify user via Formspree
+                const FORMSPREE_ID = 'mjgozran';
+                await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: `Reschedule Approved - Booking ${bookingId}`,
+                        email: email,
+                        booking_id: bookingId,
+                        message: `
+✅ RESCHEDULE REQUEST APPROVED
+━━━━━━━━━━━━━━━━━━━━
+Booking ID: ${bookingId}
+
+Your reschedule request has been approved!
+
+New Schedule:
+• Date: ${booking.requested_date}
+• Time: ${booking.requested_time}
+
+Your session is now confirmed for the new date/time.
+━━━━━━━━━━━━━━━━━━━━
+                        `.trim()
+                    })
+                });
+
+                alert('✅ Reschedule request approved!\n\nUser has been notified.');
+                await loadRescheduleRequests();
+            } catch (error) {
+                console.error('Error approving reschedule:', error);
+                alert('❌ Error approving request: ' + error.message);
+            }
+        }
+
+        // Show Alternative Date Modal
+        function showAlternativeModal(bookingId, email) {
+            document.getElementById('altBookingId').value = bookingId;
+            document.getElementById('altDate').value = '';
+            document.getElementById('altTime').value = '';
+            document.getElementById('altMessage').value = '';
+            document.getElementById('alternativeModal').style.display = 'flex';
+        }
+
+        // Close Alternative Modal
+        function closeAlternativeModal() {
+            document.getElementById('alternativeModal').style.display = 'none';
+        }
+
+        // Submit Alternative Date
+        async function submitAlternative() {
+            const bookingId = document.getElementById('altBookingId').value;
+            const altDate = document.getElementById('altDate').value;
+            const altTime = document.getElementById('altTime').value;
+            const message = document.getElementById('altMessage').value;
+
+            if (!altDate || !altTime) {
+                alert('Please select both date and time');
+                return;
+            }
+
+            try {
+                // Get current booking for email
+                const { data: booking, error: fetchError } = await window.supabaseAdminClient
+                    .from('bookings')
+                    .select('*')
+                    .eq('id', bookingId)
+                    .single();
+
+                if (fetchError) throw fetchError;
+
+                // Update booking with alternative date
+                const { error: updateError } = await window.supabaseAdminClient
+                    .from('bookings')
+                    .update({
+                        booking_date: altDate,
+                        booking_time: altTime,
+                        status: 'upcoming',
+                        requested_date: null,
+                        requested_time: null,
+                        reschedule_reason: null
+                    })
+                    .eq('id', bookingId);
+
+                if (updateError) throw updateError;
+
+                // Notify user
+                const FORMSPREE_ID = 'mjgozran';
+                await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: `Alternative Date Suggested - Booking ${bookingId}`,
+                        email: booking.email,
+                        booking_id: bookingId,
+                        message: `
+📅 ALTERNATIVE DATE SUGGESTED
+━━━━━━━━━━━━━━━━━━━━
+Booking ID: ${bookingId}
+
+Your original requested date was not available. We've scheduled an alternative:
+
+New Schedule:
+• Date: ${altDate}
+• Time: ${altTime}
+
+${message ? `Message from admin:\n${message}\n` : ''}
+If this doesn't work for you, please contact us to reschedule.
+━━━━━━━━━━━━━━━━━━━━
+                        `.trim()
+                    })
+                });
+
+                alert('✅ Alternative date sent to user!');
+                closeAlternativeModal();
+                await loadRescheduleRequests();
+            } catch (error) {
+                console.error('Error submitting alternative:', error);
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        // Reject Reschedule Request
+        async function rejectReschedule(bookingId, email) {
+            const reason = prompt('Please provide a reason for rejection (optional):');
+            if (reason === null) return; // User cancelled
+
+            if (!confirm('✕ Reject this reschedule request?\n\nThe booking will remain at the original date/time.')) {
+                return;
+            }
+
+            try {
+                // Clear reschedule request fields and keep original schedule
+                const { error: updateError } = await window.supabaseAdminClient
+                    .from('bookings')
+                    .update({
+                        status: 'upcoming',
+                        requested_date: null,
+                        requested_time: null,
+                        reschedule_reason: null
+                    })
+                    .eq('id', bookingId);
+
+                if (updateError) throw updateError;
+
+                // Notify user
+                const FORMSPREE_ID = 'mjgozran';
+                await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: `Reschedule Request Rejected - Booking ${bookingId}`,
+                        email: email,
+                        booking_id: bookingId,
+                        message: `
+❌ RESCHEDULE REQUEST REJECTED
+━━━━━━━━━━━━━━━━━━━━
+Booking ID: ${bookingId}
+
+Your reschedule request could not be accommodated.
+
+Your booking remains scheduled for the original date/time.
+${reason ? `\nReason: ${reason}` : ''}
+
+Please contact us if you need further assistance.
+━━━━━━━━━━━━━━━━━━━━
+                        `.trim()
+                    })
+                });
+
+                alert('✅ Reschedule request rejected.\n\nUser has been notified.');
+                await loadRescheduleRequests();
+            } catch (error) {
+                console.error('Error rejecting reschedule:', error);
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        // Helper function to format dates
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
         }
     </script>
 </body>

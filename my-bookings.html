@@ -83,6 +83,11 @@
             color: var(--warning);
         }
 
+        .status-reschedule_requested {
+            background: rgba(168, 85, 247, 0.1);
+            color: #a855f7;
+        }
+
         .booking-details {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -355,7 +360,7 @@
                         </div>
                     </div>
 
-                    ${booking.status === 'upcoming' || booking.status === 'confirmed' ? `
+                    ${(booking.status === 'upcoming' || booking.status === 'confirmed') ? `
                         <div class="meet-link">
                             <i class="fas fa-video" style="color: var(--primary);"></i>
                             <div>
@@ -365,7 +370,18 @@
                         </div>
                     ` : ''}
 
-                    ${booking.status === 'upcoming' || booking.status === 'confirmed' ? `
+                    ${booking.status === 'reschedule_requested' ? `
+                        <div style="background: rgba(168, 85, 247, 0.1); border: 1px dashed #a855f7; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                            <i class="fas fa-clock" style="color: #a855f7;"></i>
+                            <strong>Reschedule Request Pending</strong><br>
+                            <span style="color: var(--text-muted);">
+                                Requested: ${formatDate(booking.requested_date)} at ${booking.requested_time}
+                            </span><br>
+                            <small style="color: var(--text-muted);">Waiting for admin approval...</small>
+                        </div>
+                    ` : ''}
+
+                    ${(booking.status === 'upcoming' || booking.status === 'confirmed') ? `
                         <div class="reschedule-section">
                             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                                 <button onclick="toggleRescheduleForm('${booking.id}')" class="btn btn-secondary">
@@ -427,13 +443,14 @@
             }
 
             try {
-                // Update booking in Supabase database
+                // Update booking in Supabase database - store as reschedule request
                 const { data, error } = await supabase
                     .from('bookings')
                     .update({
-                        booking_date: newDate,
-                        booking_time: newTime,
-                        status: 'rescheduled'
+                        requested_date: newDate,
+                        requested_time: newTime,
+                        reschedule_reason: reason,
+                        status: 'reschedule_requested'
                     })
                     .eq('id', bookingId)
                     .select();
@@ -443,7 +460,7 @@
                     throw error;
                 }
 
-                console.log('✅ Booking rescheduled in database:', data);
+                console.log('✅ Reschedule request submitted:', data);
 
                 // Send reschedule notification via Formspree
                 const FORMSPREE_ID = 'mjgozran';
@@ -452,34 +469,36 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        _subject: `Rescheduled Booking - ${bookingId}`,
+                        _subject: `Reschedule Request - ${bookingId}`,
                         email: email,
                         booking_id: bookingId,
-                        new_date: newDate,
-                        new_time: newTime,
+                        requested_date: newDate,
+                        requested_time: newTime,
                         reason: reason,
                         message: `
-📅 BOOKING RESCHEDULED
+📅 RESCHEDULE REQUEST PENDING
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
 Customer Email: ${email}
 
-Updated Schedule:
+Requested Schedule:
 • Date: ${newDate}
 • Time: ${newTime}
 ${reason ? `• Reason: ${reason}` : ''}
+
+Status: Pending admin approval
 ━━━━━━━━━━━━━━━━━━━━
                         `.trim()
                     })
                 });
 
-                alert('✅ Session rescheduled successfully!\n\nYour booking has been updated. A confirmation email has been sent.');
+                alert('✅ Reschedule request submitted!\n\nYour request is pending admin approval. You will be notified once approved.');
                 toggleRescheduleForm(bookingId);
-                searchBookings(); // Refresh the list to show updated date/time
+                searchBookings(); // Refresh the list to show updated status
 
             } catch (error) {
-                console.error('❌ Reschedule failed:', error);
-                alert('❌ Error rescheduling session. Please email us directly at jha.8@alumni.iitj.ac.in');
+                console.error('❌ Reschedule request failed:', error);
+                alert('❌ Error submitting reschedule request. Please email us directly at jha.8@alumni.iitj.ac.in');
             }
         }
 
