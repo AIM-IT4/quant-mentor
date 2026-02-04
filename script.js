@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (couponInput) couponInput.value = '';
             // Clear any previously applied discount price shown
             // (the price text will be used if discount is not applied)
-            
+
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
             console.log('✅ Modal opened for:', product);
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Apply coupon for the current product in modal
     const applyCouponBtn = document.getElementById('applyCouponBtn');
     if (applyCouponBtn) {
-        applyCouponBtn.addEventListener('click', function() {
+        applyCouponBtn.addEventListener('click', function () {
             const inputCode = document.getElementById('couponInput')?.value.trim() || '';
             const couponInfo = window.activeModalCoupon || { code: '', percent: 0 };
             const modalPriceEl = document.getElementById('modalPrice');
@@ -325,7 +325,7 @@ const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0'; // Using 
 
 // Use global supabase reference (avoid local declaration)
 // Initialize Supabase with delay to ensure SDK is loaded
-    setTimeout(function() {
+setTimeout(function () {
     try {
         // Check if Supabase SDK is available
         if (typeof window.supabase !== 'undefined') {
@@ -352,8 +352,8 @@ const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0'; // Using 
     } catch (e) {
         console.error('Supabase initialization failed:', e);
         console.log('⚠️ Continuing without Supabase - using default links');
-        }
-    }, 500);
+    }
+}, 500);
 
 // Load and display products from Supabase
 async function loadProductsFromSupabase() {
@@ -390,7 +390,7 @@ function displaySupabaseProducts(products) {
     // Clear existing products (keep only hardcoded ones we want to keep)
     const existingCards = productsGrid.querySelectorAll('.product-card');
     const hardcodedProducts = ['Test Product']; // Keep these hardcoded products
-    
+
     existingCards.forEach(card => {
         const productName = card.querySelector('.btn-product')?.dataset.product;
         if (!hardcodedProducts.includes(productName)) {
@@ -401,11 +401,13 @@ function displaySupabaseProducts(products) {
     // Add products from Supabase
     products.forEach(product => {
         console.log(`📦 Adding product: ${product.name} - ₹${product.price}`);
-        
+
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
         productCard.dataset.category = 'notes'; // You can adjust this based on product type
-        
+
+        const discountPercent = product.discount_percentage || 0;
+
         productCard.innerHTML = `
             <div class="product-image">
                 <div class="product-placeholder" style="background: linear-gradient(135deg, #6366f1, #a855f7);">
@@ -416,29 +418,31 @@ function displaySupabaseProducts(products) {
             <div class="product-content">
                 <h3 class="product-title">${product.name}</h3>
                 <p class="product-description">${product.description || 'Premium digital product for quant professionals.'}</p>
-                ${product.coupon_code && product.coupon_percent ? `<div class="product-coupon" style="font-size: .8rem; color: #22c55e;">Coupon ${product.coupon_code}: ${product.coupon_percent}% off</div>` : ''}
+                ${product.coupon_code && discountPercent > 0 ? `<div class="product-coupon" style="font-size: .8rem; color: #22c55e;">Coupon ${product.coupon_code}: ${discountPercent}% off</div>` : ''}
                 <div class="product-meta">
                     <span><i class="fas fa-file-pdf"></i> ${product.file_url.includes('.pdf') ? 'PDF Document' : 'Digital File'}</span>
                     <span><i class="fas fa-check"></i> Instant Download</span>
                 </div>
                 <div class="product-footer">
                     <div class="product-price">₹${product.price}</div>
-                    <button class="btn btn-product" data-product="${product.name}" data-price="${product.price}" data-coupon-code="${product.coupon_code || ''}" data-coupon-percent="${product.coupon_percent || 0}">
+                    <button class="btn btn-product" data-product="${product.name}" data-price="${product.price}" data-coupon-code="${product.coupon_code || ''}" data-coupon-percent="${discountPercent}">
                         Buy Now
                     </button>
                 </div>
             </div>
         `;
-        
+
         productsGrid.appendChild(productCard);
-        
+
         // Add event listener for the new button
         const buyButton = productCard.querySelector('.btn-product');
         if (buyButton) {
             buyButton.addEventListener('click', function () {
                 console.log('🖱️ Supabase product button clicked:', this.dataset.product);
-                const product = this.dataset.product;
+                const productName = this.dataset.product;
                 const price = this.dataset.price;
+                const couponCode = this.dataset.couponCode || '';
+                const couponPercent = parseInt(this.dataset.couponPercent) || 0;
 
                 const modal = document.getElementById('productModal');
                 const modalTitle = document.getElementById('modalTitle');
@@ -451,13 +455,24 @@ function displaySupabaseProducts(products) {
                     return;
                 }
 
-                modalTitle.textContent = product;
+                modalTitle.textContent = productName;
                 modalDescription.textContent = product.description || 'Premium digital product for quant professionals.';
                 modalPrice.textContent = '₹' + price;
 
+                // Set the active coupon for this product
+                window.currentDiscountedPrice = undefined;
+                window.activeModalCoupon = {
+                    code: couponCode,
+                    percent: couponPercent
+                };
+
+                // Clear coupon input
+                const couponInput = document.getElementById('couponInput');
+                if (couponInput) couponInput.value = '';
+
                 modal.classList.add('active');
                 document.body.style.overflow = 'hidden';
-                console.log('✅ Modal opened for Supabase product:', product);
+                console.log('✅ Modal opened for Supabase product:', productName, 'Coupon:', window.activeModalCoupon);
             });
         }
     });
@@ -508,9 +523,9 @@ function updateServicesSection(sessions) {
     sessions.forEach((session, index) => {
         const serviceCard = document.createElement('div');
         serviceCard.className = session.is_popular ? 'service-card popular' : 'service-card';
-        
+
         // Generate features HTML
-        const featuresHtml = session.features ? session.features.map(feature => 
+        const featuresHtml = session.features ? session.features.map(feature =>
             `<li><i class="fas fa-check" style="color: #22c55e; margin-right: 8px;"></i>${feature}</li>`
         ).join('') : '';
 
@@ -540,11 +555,11 @@ function updateServicesSection(sessions) {
         `;
 
         servicesContainer.appendChild(serviceCard);
-        
+
         // Add event listener for the booking button
         const bookBtn = serviceCard.querySelector('.btn-service');
         if (bookBtn) {
-            bookBtn.addEventListener('click', function(e) {
+            bookBtn.addEventListener('click', function (e) {
                 const service = this.dataset.service;
                 const serviceSelect = document.getElementById('bookingService');
                 if (serviceSelect) {
@@ -581,11 +596,11 @@ function updateBookingForm(sessions) {
         const option = document.createElement('option');
         const valueType = session.name.toLowerCase().replace(/\s+/g, '_');
         option.value = `${valueType}|${session.price}|${session.duration}`;
-        option.innerHTML = session.price === 0 
+        option.innerHTML = session.price === 0
             ? `🆓 ${session.name} (${session.duration} min) - FREE`
             : `${session.name} (${session.duration} min) - ₹${session.price}`;
         option.style.color = session.price === 0 ? '#22c55e' : '';
-        
+
         bookingSelect.appendChild(option);
     });
 
@@ -604,8 +619,8 @@ const PRODUCT_DOWNLOAD_LINKS = {
     'Free Sample - Quant Cheatsheet': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing'
 };
 
-    // Fetch dynamic links from Supabase
-    async function fetchProductLinks() {
+// Fetch dynamic links from Supabase
+async function fetchProductLinks() {
     try {
         if (!window.supabaseClient) {
             console.error('Supabase client not initialized');
@@ -667,7 +682,7 @@ const PRODUCT_DOWNLOAD_LINKS = {
     // Admin: handle Add Product form
     const adminAddForm = document.getElementById('adminAddProductForm');
     if (adminAddForm) {
-        adminAddForm.addEventListener('submit', async function(e) {
+        adminAddForm.addEventListener('submit', async function (e) {
             e.preventDefault();
             if (typeof window.supabaseClient === 'undefined') return;
             const name = (document.getElementById('adminProductName').value || '').trim();
@@ -727,7 +742,7 @@ const PRODUCT_DOWNLOAD_LINKS = {
     }
 
     // Called when user clicks Edit in Admin panel. Simple prompt-based editor.
-    window.adminEditProduct = async function(button) {
+    window.adminEditProduct = async function (button) {
         const id = button.getAttribute('data-id');
         const currentName = button.getAttribute('data-name') || '';
         const currentPrice = button.getAttribute('data-price') || 0;
@@ -770,7 +785,7 @@ const PRODUCT_DOWNLOAD_LINKS = {
 
 function initRazorpayCheckout(productName, amount) {
     console.log('🚀 initRazorpayCheckout called:', { productName, amount });
-    
+
     // Handle FREE products (₹0) - skip payment, go directly to download
     if (amount === 0) {
         console.log('🆓 Free product detected');
@@ -802,15 +817,15 @@ function initRazorpayCheckout(productName, amount) {
     if (typeof Razorpay === 'undefined') {
         console.log('❌ Razorpay SDK not loaded, attempting to load...');
         alert('⏳ Loading payment system...\nPlease wait and try again in 2 seconds.');
-        
+
         // Try to load Razorpay SDK dynamically
         const script = document.createElement('script');
         script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.onload = function() {
+        script.onload = function () {
             console.log('✅ Razorpay SDK loaded successfully');
             alert('✅ Payment system loaded!\nPlease click "Buy Now" again.');
         };
-        script.onerror = function() {
+        script.onerror = function () {
             console.error('❌ Failed to load Razorpay SDK');
             alert('❌ Unable to load payment system.\nPlease refresh the page and try again.');
         };
@@ -831,14 +846,14 @@ function initRazorpayCheckout(productName, amount) {
     if (typeof Razorpay === 'undefined') {
         alert('❌ Payment System Loading...\nPlease wait a moment and try again.\nIf the issue persists, refresh the page.');
         console.error('Razorpay SDK not found!');
-        
+
         // Try to load Razorpay SDK dynamically
         const script = document.createElement('script');
         script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.onload = function() {
+        script.onload = function () {
             alert('✅ Payment system loaded!\nPlease click "Buy Now" again.');
         };
-        script.onerror = function() {
+        script.onerror = function () {
             alert('❌ Unable to load payment system.\nPlease check your internet connection.');
         };
         document.head.appendChild(script);
@@ -896,7 +911,7 @@ function initRazorpayCheckout(productName, amount) {
         console.log('Razorpay opened successfully');
     } catch (e) {
         console.error('Razorpay init failed:', e);
-        
+
         // TEST BYPASS: For testing purposes, simulate successful payment
         if (confirm('❌ Payment initialization failed!\n\nFor testing: Simulate successful payment?\n\nClick OK for test download, Cancel to retry.')) {
             const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
@@ -1050,7 +1065,7 @@ const priceDisplay = document.getElementById('priceDisplay');
 
 if (bookingForm) {
     console.log('✅ Booking form found, initializing...');
-    
+
     // Set minimum date to tomorrow
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -1090,18 +1105,18 @@ if (bookingForm) {
 
         const [sessionType, price, duration] = serviceValue.split('|');
         console.log('Debug: serviceValue =', serviceValue, 'sessionType =', sessionType);
-        
+
         // Try to find session info from multiple sources
         let sessionInfo = SESSION_TYPES[sessionType];
-        
+
         // If not found in hardcoded types, try to find by matching session name in dynamic sessions
         if (!sessionInfo && window.dynamicSessions) {
-            sessionInfo = window.dynamicSessions.find(s => 
+            sessionInfo = window.dynamicSessions.find(s =>
                 s.name.toLowerCase().replace(/\s+/g, '_') === sessionType ||
                 s.name.toLowerCase() === sessionType.replace(/_/g, ' ')
             );
         }
-        
+
         // If still not found, create session info from the dropdown text
         if (!sessionInfo) {
             const selectedOption = bookingService.options[bookingService.selectedIndex];
@@ -1222,7 +1237,7 @@ async function handleSessionPaymentSuccess(response) {
         status: 'upcoming',
         payment_id: paymentId
     });
-    
+
     // Check if Supabase client is available
     if (!window.supabaseClient) {
         console.error('❌ window.supabaseClient is undefined! Cannot store booking.');
@@ -1246,13 +1261,13 @@ async function handleSessionPaymentSuccess(response) {
                     payment_id: paymentId
                 })
                 .select();
-                
+
             if (error) {
                 console.error('❌ Supabase insert failed:', error);
                 console.error('Error details:', JSON.stringify(error, null, 2));
                 throw error;
             }
-            
+
             console.log('✅ Booking stored in Supabase:', data);
         } catch (error) {
             console.error('❌ Error storing booking in database:', error);
