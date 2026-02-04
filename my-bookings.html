@@ -11,6 +11,19 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script>
+        // EmailJS Configuration for Cancellation Emails
+        const EMAILJS_USER_ID = 'qDPRKM4ROa6YKvqWL';
+        const EMAILJS_SERVICE_ID = 'service_t71bulx';
+        const EMAILJS_CANCELLATION_TEMPLATE_ID = 'template_ddficic';
+
+        // Initialize EmailJS
+        (function () {
+            emailjs.init(EMAILJS_USER_ID);
+        })();
+    </script>
     <style>
         :root {
             --primary: #6366f1;
@@ -609,26 +622,24 @@ Do you want to proceed with cancellation?`;
                     throw updateError;
                 }
 
-                // Send cancellation notification via Formspree
-                const FORMSPREE_ID = 'mjgozran';
-                const email = booking.email;
-
-                await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        _subject: `Cancellation Request - Booking ${bookingId}`,
-                        email: email,
-                        booking_id: bookingId,
-                        message: `
-❌ CANCELLATION REQUEST SUBMITTED
+                // Send cancellation notification via EmailJS
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CANCELLATION_TEMPLATE_ID, {
+                    to_email: booking.email,
+                    to_name: booking.name || booking.email.split('@')[0],
+                    subject: `Cancellation Request Received - Booking ${bookingId}`,
+                    booking_id: bookingId,
+                    service_name: booking.service_name,
+                    booking_date: formatDate(booking.booking_date),
+                    booking_time: booking.booking_time,
+                    original_price: booking.service_price,
+                    refund_percentage: refundInfo.percentage,
+                    refund_amount: refundInfo.amount,
+                    message: `
+❌ CANCELLATION REQUEST RECEIVED
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
-Customer: ${booking.name}
-Email: ${email}
 Session: ${booking.service_name}
-Original Date: ${booking.booking_date} at ${booking.booking_time}
-Payment ID: ${booking.payment_id || 'N/A'}
+Original Date: ${formatDate(booking.booking_date)} at ${booking.booking_time}
 
 REFUND DETAILS:
 • Original Amount: ₹${booking.service_price}
@@ -637,10 +648,14 @@ REFUND DETAILS:
 • Policy Applied: ${refundInfo.policyApplied}
 
 Status: Pending Admin Approval
+Processing Time: 5-7 business days after approval
+
+You will receive another email once your refund is processed.
 ━━━━━━━━━━━━━━━━━━━━
-                        `.trim()
-                    })
+                    `.trim()
                 });
+
+                console.log('📧 Cancellation email sent successfully');
 
                 // Show success message with refund details
                 alert(`✅ Cancellation Request Submitted!
