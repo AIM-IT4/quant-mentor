@@ -1286,9 +1286,11 @@ Please contact us if you need further assistance.
         // Load Cancellation Requests
         async function loadCancellationRequests() {
             const list = document.getElementById('cancellationRequestsList');
+            console.log('📋 Loading cancellation requests...');
 
             if (!window.supabaseAdminClient) {
                 list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
+                console.error('❌ Supabase not initialized');
                 return;
             }
 
@@ -1297,15 +1299,19 @@ Please contact us if you need further assistance.
                     .from('bookings')
                     .select('*')
                     .eq('status', 'cancellation_requested')
-                    .order('cancellation_requested_at', { ascending: false });
+                    .order('created_at', { ascending: false });
+
+                console.log('📋 Cancellation requests result:', { data, error });
 
                 if (error) {
                     list.innerHTML = `<p style="color: red">Error loading requests: ${error.message}</p>`;
+                    console.error('❌ Error:', error);
                     return;
                 }
 
                 if (!data || data.length === 0) {
                     list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No pending cancellation requests.</p>';
+                    console.log('📋 No cancellation requests found');
                     return;
                 }
 
