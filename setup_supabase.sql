@@ -6,6 +6,8 @@ create table products (
   name text not null unique,
   description text,
   price numeric not null default 0,
+  discount_percentage integer default 0,
+  coupon_code text,
   file_url text not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
