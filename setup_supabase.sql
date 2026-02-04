@@ -32,6 +32,10 @@ create policy "Enable update for everyone"
   on products for update
   using ( true );
 
+create policy "Enable delete for everyone"
+  on products for delete
+  using ( true );
+
 -- 5. Create Storage Bucket
 insert into storage.buckets (id, name, public)
 values ('resources', 'resources', true);

@@ -725,19 +725,24 @@ Brief Q&A"></textarea>
 
             // Delete Product
             async function deleteProduct(id) {
+                console.log('🗑️ Attempting to delete product:', id);
                 if (!confirm('⚠️ Are you sure you want to delete this product?')) return;
 
                 try {
-                    const { error } = await window.supabaseAdminClient
+                    const { data, error } = await window.supabaseAdminClient
                         .from('products')
                         .delete()
-                        .eq('id', id);
+                        .eq('id', id)
+                        .select();
+
+                    console.log('🗑️ Delete result:', { data, error });
 
                     if (error) throw error;
 
                     alert('✅ Product deleted successfully!');
                     await loadProducts();
                 } catch (error) {
+                    console.error('❌ Delete error:', error);
                     alert('❌ Error deleting product: ' + error.message);
                 }
             }
