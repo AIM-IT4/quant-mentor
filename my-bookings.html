@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Bookings & Reschedule | QuantMentor</title>
     <link rel="icon" type="image/png" href="assets/images/logo.png">
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -86,6 +88,17 @@
         .status-reschedule_requested {
             background: rgba(168, 85, 247, 0.1);
             color: #a855f7;
+        }
+
+        .status-cancellation_requested {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        .status-cancelled {
+            background: rgba(148, 163, 184, 0.1);
+            color: var(--text-muted);
+            text-decoration: line-through;
         }
 
         .booking-details {
@@ -230,6 +243,7 @@
         }
     </style>
 </head>
+
 <body>
     <nav class="navbar">
         <div class="nav-container">
@@ -250,7 +264,8 @@
                 Enter the email address you used to book your session
             </p>
             <div style="display: flex; gap: 10px; max-width: 500px; margin: 0 auto;">
-                <input type="email" id="searchEmail" placeholder="your@email.com" style="flex: 1; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; color: white;">
+                <input type="email" id="searchEmail" placeholder="your@email.com"
+                    style="flex: 1; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; color: white;">
                 <button onclick="searchBookings()" class="btn">
                     <i class="fas fa-search"></i> Find Bookings
                 </button>
@@ -270,9 +285,9 @@
         // Supabase Config
         const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
-        
+
         // Initialize Supabase
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             if (typeof window.supabase !== 'undefined') {
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             }
@@ -282,7 +297,7 @@
         async function searchBookings() {
             const email = document.getElementById('searchEmail').value.trim();
             const container = document.getElementById('bookingsContainer');
-            
+
             if (!email) {
                 alert('Please enter your email address');
                 return;
@@ -303,7 +318,7 @@
                 }
 
                 displayBookings(bookings);
-                
+
             } catch (error) {
                 container.innerHTML = `
                     <div class="alert alert-error">
@@ -316,7 +331,7 @@
         // Display bookings
         function displayBookings(bookings) {
             const container = document.getElementById('bookingsContainer');
-            
+
             if (!bookings || bookings.length === 0) {
                 container.innerHTML = `
                     <div class="no-bookings">
@@ -378,6 +393,37 @@
                                 Requested: ${formatDate(booking.requested_date)} at ${booking.requested_time}
                             </span><br>
                             <small style="color: var(--text-muted);">Waiting for admin approval...</small>
+                        </div>
+                    ` : ''}
+
+                    ${booking.status === 'cancellation_requested' ? `
+                        <div style="background: rgba(239, 68, 68, 0.1); border: 1px dashed var(--error); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                            <i class="fas fa-times-circle" style="color: var(--error);"></i>
+                            <strong style="color: var(--error);">Cancellation Request Pending</strong><br>
+                            <div style="margin-top: 10px; color: var(--text-muted);">
+                                <div><strong>Refund Amount:</strong> ₹${booking.refund_amount || 0}</div>
+                                <div><strong>Refund Percentage:</strong> ${booking.refund_percentage || 0}%</div>
+                                <div><strong>Status:</strong> <span style="color: var(--warning);">Pending Admin Approval</span></div>
+                            </div>
+                            <small style="color: var(--text-muted); display: block; margin-top: 10px;">
+                                You will receive an email once your refund is processed (5-7 business days after approval).
+                            </small>
+                        </div>
+                    ` : ''}
+
+                    ${booking.status === 'cancelled' ? `
+                        <div style="background: rgba(148, 163, 184, 0.1); border: 1px dashed var(--text-muted); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                            <i class="fas fa-ban" style="color: var(--text-muted);"></i>
+                            <strong style="color: var(--text-muted);">Session Cancelled</strong><br>
+                            ${booking.refund_amount > 0 ? `
+                                <div style="margin-top: 10px; color: var(--success);">
+                                    <i class="fas fa-check-circle"></i> Refund of ₹${booking.refund_amount} has been processed.
+                                </div>
+                            ` : `
+                                <div style="margin-top: 10px; color: var(--text-muted);">
+                                    No refund applicable per policy.
+                                </div>
+                            `}
                         </div>
                     ` : ''}
 
@@ -464,7 +510,7 @@
 
                 // Send reschedule notification via Formspree
                 const FORMSPREE_ID = 'mjgozran';
-                
+
                 await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -502,17 +548,67 @@ Status: Pending admin approval
             }
         }
 
-        // Cancel booking
+        // Cancel booking with refund calculation
         async function cancelBooking(bookingId) {
-            if (!confirm('⚠️ Are you sure you want to cancel this session?\n\nRefund policy:\n• 24+ hours notice: Full refund\n• 12-24 hours: 50% refund\n• Less than 12 hours: No refund')) {
+            // First, get the booking details to calculate refund
+            const { data: booking, error: fetchError } = await supabase
+                .from('bookings')
+                .select('*')
+                .eq('id', bookingId)
+                .single();
+
+            if (fetchError || !booking) {
+                alert('❌ Error fetching booking details. Please try again.');
                 return;
             }
 
-            const FORMSPREE_ID = 'mjgozran';
-            const email = document.getElementById('searchEmail').value;
-            
+            // Calculate refund based on policy
+            const refundInfo = calculateRefund(booking.booking_date, booking.booking_time, booking.service_price);
+
+            // Show detailed confirmation with refund amount
+            const confirmMessage = `⚠️ Cancel Session Confirmation
+
+Session: ${booking.service_name}
+Date: ${formatDate(booking.booking_date)} at ${booking.booking_time}
+Original Price: ₹${booking.service_price}
+
+━━━━━━━━━━━━━━━━━━━━
+REFUND CALCULATION
+━━━━━━━━━━━━━━━━━━━━
+${refundInfo.message}
+
+Refund Amount: ₹${refundInfo.amount} (${refundInfo.percentage}%)
+Processing Time: 5-7 business days
+
+Do you want to proceed with cancellation?`;
+
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+
             try {
-                const response = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+                // Update booking in Supabase with cancellation details
+                const { error: updateError } = await supabase
+                    .from('bookings')
+                    .update({
+                        status: 'cancellation_requested',
+                        cancellation_requested_at: new Date().toISOString(),
+                        cancellation_reason: 'User requested cancellation',
+                        refund_amount: refundInfo.amount,
+                        refund_percentage: refundInfo.percentage,
+                        refund_status: 'pending'
+                    })
+                    .eq('id', bookingId);
+
+                if (updateError) {
+                    throw updateError;
+                }
+
+                // Send cancellation notification via Formspree
+                const FORMSPREE_ID = 'mjgozran';
+                const email = booking.email;
+
+                await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -520,34 +616,109 @@ Status: Pending admin approval
                         email: email,
                         booking_id: bookingId,
                         message: `
-❌ CANCELLATION REQUEST
+❌ CANCELLATION REQUEST SUBMITTED
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
-Customer Email: ${email}
-Requested Action: Cancel session
+Customer: ${booking.name}
+Email: ${email}
+Session: ${booking.service_name}
+Original Date: ${booking.booking_date} at ${booking.booking_time}
+Payment ID: ${booking.payment_id || 'N/A'}
+
+REFUND DETAILS:
+• Original Amount: ₹${booking.service_price}
+• Refund Percentage: ${refundInfo.percentage}%
+• Refund Amount: ₹${refundInfo.amount}
+• Policy Applied: ${refundInfo.policyApplied}
+
+Status: Pending Admin Approval
 ━━━━━━━━━━━━━━━━━━━━
-Please process refund according to policy.
                         `.trim()
                     })
                 });
 
-                if (response.ok) {
-                    alert('✅ Cancellation request submitted!\n\nRefund will be processed according to our policy within 5-7 business days.');
-                    searchBookings(); // Refresh the list
-                }
+                // Show success message with refund details
+                alert(`✅ Cancellation Request Submitted!
+
+Your cancellation request has been received.
+
+REFUND DETAILS:
+• Refund Amount: ₹${refundInfo.amount}
+• Refund Percentage: ${refundInfo.percentage}%
+• Processing Time: 5-7 business days after admin approval
+
+You will receive an email confirmation once your refund is processed.`);
+
+                searchBookings(); // Refresh the list to show updated status
+
             } catch (error) {
+                console.error('❌ Cancellation request failed:', error);
                 alert('❌ Error submitting cancellation. Please email us directly at jha.8@alumni.iitj.ac.in');
             }
+        }
+
+        // Calculate refund based on cancellation policy
+        function calculateRefund(bookingDate, bookingTime, servicePrice) {
+            // Parse booking datetime
+            const bookingDateTime = new Date(`${bookingDate}T${convertTo24Hour(bookingTime)}`);
+            const now = new Date();
+
+            // Calculate hours until session
+            const hoursUntilSession = (bookingDateTime - now) / (1000 * 60 * 60);
+
+            let percentage = 0;
+            let policyApplied = '';
+            let message = '';
+
+            if (hoursUntilSession >= 24) {
+                percentage = 100;
+                policyApplied = 'Full Refund (24+ hours notice)';
+                message = '✓ You are cancelling more than 24 hours before the session.\n  FULL REFUND applies.';
+            } else if (hoursUntilSession >= 12) {
+                percentage = 50;
+                policyApplied = 'Partial Refund (12-24 hours notice)';
+                message = '⚠ You are cancelling 12-24 hours before the session.\n  50% PARTIAL REFUND applies.';
+            } else {
+                percentage = 0;
+                policyApplied = 'No Refund (less than 12 hours notice)';
+                message = '✗ You are cancelling less than 12 hours before the session.\n  NO REFUND per our policy.';
+            }
+
+            const amount = Math.round(servicePrice * percentage / 100);
+
+            return {
+                percentage,
+                amount,
+                policyApplied,
+                message,
+                hoursUntilSession: Math.round(hoursUntilSession)
+            };
+        }
+
+        // Convert 12-hour time format to 24-hour for Date parsing
+        function convertTo24Hour(time12h) {
+            if (!time12h) return '12:00:00';
+
+            const [time, modifier] = time12h.split(' ');
+            let [hours, minutes] = time.split(':');
+
+            if (hours === '12') {
+                hours = modifier === 'AM' ? '00' : '12';
+            } else if (modifier === 'PM') {
+                hours = parseInt(hours, 10) + 12;
+            }
+
+            return `${hours.toString().padStart(2, '0')}:${minutes || '00'}:00`;
         }
 
         // Helper functions
         function formatDate(dateString) {
             const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+            return date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
             });
         }
 
@@ -558,11 +729,12 @@ Please process refund according to policy.
         }
 
         // Enter key support
-        document.getElementById('searchEmail').addEventListener('keypress', function(e) {
+        document.getElementById('searchEmail').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 searchBookings();
             }
         });
     </script>
 </body>
+
 </html>

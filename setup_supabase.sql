@@ -57,12 +57,19 @@ CREATE TABLE bookings (
   booking_date DATE NOT NULL,
   booking_time TIME NOT NULL,
   message TEXT,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled', 'completed', 'reschedule_requested')),
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled', 'completed', 'reschedule_requested', 'cancellation_requested')),
   requested_date DATE,
   requested_time TIME,
   reschedule_reason TEXT,
   meet_link TEXT,
   payment_id TEXT,
+  -- Cancellation/Refund fields
+  cancellation_requested_at TIMESTAMP WITH TIME ZONE,
+  cancellation_reason TEXT,
+  refund_amount INTEGER DEFAULT 0,
+  refund_percentage INTEGER DEFAULT 0,
+  refund_status TEXT DEFAULT 'none' CHECK (refund_status IN ('none', 'pending', 'approved', 'processed', 'rejected')),
+  refund_id TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

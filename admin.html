@@ -404,6 +404,23 @@ Brief Q&A"></textarea>
             </div>
         </div>
 
+        <!-- Cancellation Requests Section -->
+        <div class="card" style="border-left: 3px solid #ef4444;">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0;"><i class="fas fa-times-circle"
+                        style="color: #ef4444; margin-right: 8px;"></i>Cancellation Requests</h3>
+                <button onclick="loadCancellationRequests()" class="btn btn-secondary"
+                    style="padding: 8px 16px; font-size: 0.9em;">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Review cancellation requests and process refunds.
+            </p>
+            <div id="cancellationRequestsList">
+                <p style="color: var(--text-muted); text-align: center;">Loading cancellation requests...</p>
+            </div>
+        </div>
+
         <!-- Alternative Date Modal -->
         <div id="alternativeModal"
             style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 15, 0.95); z-index: 2000; justify-content: center; align-items: center;">
@@ -458,6 +475,7 @@ Brief Q&A"></textarea>
                 if (typeof loadProducts === 'function') loadProducts();
                 if (typeof loadSessions === 'function') loadSessions();
                 if (typeof loadRescheduleRequests === 'function') loadRescheduleRequests();
+                if (typeof loadCancellationRequests === 'function') loadCancellationRequests();
             } else {
                 console.log('Incorrect password');
                 alert('Incorrect password');
@@ -1260,6 +1278,216 @@ Please contact us if you need further assistance.
                 alert('❌ Error: ' + error.message);
             }
         }
+
+        // =============================================
+        // CANCELLATION REQUEST MANAGEMENT
+        // =============================================
+
+        // Load Cancellation Requests
+        async function loadCancellationRequests() {
+            const list = document.getElementById('cancellationRequestsList');
+
+            if (!window.supabaseAdminClient) {
+                list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
+                return;
+            }
+
+            try {
+                const { data, error } = await window.supabaseAdminClient
+                    .from('bookings')
+                    .select('*')
+                    .eq('status', 'cancellation_requested')
+                    .order('cancellation_requested_at', { ascending: false });
+
+                if (error) {
+                    list.innerHTML = `<p style="color: red">Error loading requests: ${error.message}</p>`;
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No pending cancellation requests.</p>';
+                    return;
+                }
+
+                list.innerHTML = data.map(booking => `
+                    <div class="reschedule-item" style="border-left: 3px solid #ef4444;">
+                        <div class="reschedule-header">
+                            <div>
+                                <strong>${booking.service_name || booking.service || 'Session'}</strong><br>
+                                <span style="color: var(--text-muted); font-size: 0.9em;">
+                                    Booking ID: ${booking.id}<br>
+                                    Customer: ${booking.name} (${booking.email})
+                                </span>
+                            </div>
+                            <span style="background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 4px 12px; border-radius: 20px; font-size: 0.85em;">
+                                Cancellation Pending
+                            </span>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0;">
+                            <div class="date-box" style="border-left: 3px solid #94a3b8;">
+                                <div class="date-label">Booked Session</div>
+                                <div class="date-value">${formatDate(booking.booking_date)}</div>
+                                <div style="color: var(--text-muted); font-size: 0.9em;">${booking.booking_time}</div>
+                                <div style="color: var(--text-muted); font-size: 0.9em; margin-top: 5px;">Price: ₹${booking.service_price}</div>
+                            </div>
+                            <div class="date-box" style="border-left: 3px solid #22c55e;">
+                                <div class="date-label">Refund Details</div>
+                                <div class="date-value" style="color: #22c55e;">₹${booking.refund_amount || 0}</div>
+                                <div style="color: var(--text-muted); font-size: 0.9em;">${booking.refund_percentage || 0}% of original</div>
+                                <div style="color: var(--text-muted); font-size: 0.9em; margin-top: 5px;">Payment ID: ${booking.payment_id || 'N/A'}</div>
+                            </div>
+                        </div>
+                        
+                        ${booking.cancellation_reason ? `<p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9em;"><strong>Reason:</strong> ${booking.cancellation_reason}</p>` : ''}
+                        
+                        <div class="reschedule-actions">
+                            <button onclick="approveRefund('${booking.id}', '${booking.email}', ${booking.refund_amount || 0}, '${booking.payment_id || ''}')" class="btn-approve" style="padding: 10px 20px; font-size: 0.9em;">
+                                💰 Approve Refund (₹${booking.refund_amount || 0})
+                            </button>
+                            <button onclick="rejectCancellation('${booking.id}', '${booking.email}')" class="btn-reject" style="padding: 10px 20px; font-size: 0.9em;">
+                                ✕ Reject
+                            </button>
+                        </div>
+                        
+                        <p style="color: var(--text-muted); font-size: 0.8em; margin-top: 10px; margin-bottom: 0;">
+                            <i class="fas fa-info-circle"></i> After approving, process refund in Razorpay Dashboard using Payment ID: <strong>${booking.payment_id || 'N/A'}</strong>
+                        </p>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading cancellation requests:', error);
+                list.innerHTML = `<p style="color: red">Error: ${error.message}</p>`;
+            }
+        }
+
+        // Approve Refund and mark as processed
+        async function approveRefund(bookingId, email, refundAmount, paymentId) {
+            const confirmMessage = `💰 Approve Refund?
+
+Refund Amount: ₹${refundAmount}
+Payment ID: ${paymentId || 'N/A'}
+
+After clicking OK:
+1. The booking will be marked as cancelled
+2. User will receive email confirmation
+3. You must manually process the refund in Razorpay Dashboard
+
+Proceed?`;
+
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+
+            try {
+                // Update booking status to cancelled and refund as processed
+                const { error: updateError } = await window.supabaseAdminClient
+                    .from('bookings')
+                    .update({
+                        status: 'cancelled',
+                        refund_status: 'processed'
+                    })
+                    .eq('id', bookingId);
+
+                if (updateError) throw updateError;
+
+                // Send refund confirmation email to user
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                    to_email: email,
+                    to_name: email.split('@')[0],
+                    subject: `Refund Processed - Booking ${bookingId}`,
+                    message: `
+💰 REFUND PROCESSED
+━━━━━━━━━━━━━━━━━━━━
+Booking ID: ${bookingId}
+
+Your cancellation request has been approved and your refund is being processed.
+
+REFUND DETAILS:
+• Refund Amount: ₹${refundAmount}
+• Processing Time: 5-7 business days
+
+The refund will be credited to your original payment method.
+
+Thank you for using QuantMentor. We hope to serve you again!
+
+If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
+━━━━━━━━━━━━━━━━━━━━
+                    `.trim()
+                });
+
+                alert(`✅ Refund Approved!
+
+📧 User has been notified.
+
+⚠️ NEXT STEP: Process refund in Razorpay Dashboard
+Payment ID: ${paymentId || 'N/A'}
+Amount: ₹${refundAmount}
+
+Go to: Razorpay Dashboard → Transactions → Search Payment ID → Issue Refund`);
+
+                await loadCancellationRequests();
+            } catch (error) {
+                console.error('Error approving refund:', error);
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        // Reject Cancellation Request
+        async function rejectCancellation(bookingId, email) {
+            const reason = prompt('Please provide a reason for rejection:');
+            if (reason === null) return; // User clicked Cancel
+
+            if (!confirm('✕ Reject this cancellation request?\n\nThe booking will remain active.')) {
+                return;
+            }
+
+            try {
+                // Revert booking to confirmed status
+                const { error: updateError } = await window.supabaseAdminClient
+                    .from('bookings')
+                    .update({
+                        status: 'confirmed',
+                        refund_status: 'rejected',
+                        cancellation_reason: null
+                    })
+                    .eq('id', bookingId);
+
+                if (updateError) throw updateError;
+
+                // Notify user via EmailJS
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                    to_email: email,
+                    to_name: email.split('@')[0],
+                    subject: `Cancellation Request Rejected - Booking ${bookingId}`,
+                    message: `
+❌ CANCELLATION REQUEST REJECTED
+━━━━━━━━━━━━━━━━━━━━
+Booking ID: ${bookingId}
+
+Your cancellation request could not be processed.
+
+${reason ? `Reason: ${reason}` : ''}
+
+Your booking remains active. Please attend the session as scheduled.
+
+If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
+━━━━━━━━━━━━━━━━━━━━
+                    `.trim()
+                });
+
+                alert('✅ Cancellation request rejected.\n\nUser has been notified. Booking remains active.');
+                await loadCancellationRequests();
+            } catch (error) {
+                console.error('Error rejecting cancellation:', error);
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        // Export cancellation functions to window
+        window.loadCancellationRequests = loadCancellationRequests;
+        window.approveRefund = approveRefund;
+        window.rejectCancellation = rejectCancellation;
 
         // Helper function to format dates
         function formatDate(dateString) {
