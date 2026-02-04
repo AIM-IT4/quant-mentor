@@ -588,7 +588,8 @@ Do you want to proceed with cancellation?`;
 
             try {
                 // Update booking in Supabase with cancellation details
-                const { error: updateError } = await supabase
+                console.log('📤 Updating booking with cancellation...', bookingId);
+                const { data: updateData, error: updateError } = await supabase
                     .from('bookings')
                     .update({
                         status: 'cancellation_requested',
@@ -598,9 +599,13 @@ Do you want to proceed with cancellation?`;
                         refund_percentage: refundInfo.percentage,
                         refund_status: 'pending'
                     })
-                    .eq('id', bookingId);
+                    .eq('id', bookingId)
+                    .select();
+
+                console.log('📤 Update result:', { updateData, updateError });
 
                 if (updateError) {
+                    console.error('❌ Update error:', updateError);
                     throw updateError;
                 }
 
