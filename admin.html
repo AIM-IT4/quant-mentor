@@ -19,6 +19,7 @@
         const EMAILJS_USER_ID = 'qDPRKM4ROa6YKvqWL';
         const EMAILJS_SERVICE_ID = 'service_t71bulx';
         const EMAILJS_TEMPLATE_ID = 'template_ddficic';
+        const EMAILJS_CANCELLATION_TEMPLATE_ID = 'template_nxmhx1c';
 
         // Initialize EmailJS
         (function () {
@@ -1402,8 +1403,8 @@ Proceed?`;
 
                 if (updateError) throw updateError;
 
-                // Send refund confirmation email to user
-                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                // Send refund confirmation email to user using cancellation template
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CANCELLATION_TEMPLATE_ID, {
                     to_email: email,
                     to_name: email.split('@')[0],
                     subject: `Refund Processed - Booking ${bookingId}`,
@@ -1466,8 +1467,8 @@ Go to: Razorpay Dashboard → Transactions → Search Payment ID → Issue Refun
 
                 if (updateError) throw updateError;
 
-                // Notify user via EmailJS
-                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                // Notify user via EmailJS using cancellation template
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CANCELLATION_TEMPLATE_ID, {
                     to_email: email,
                     to_name: email.split('@')[0],
                     subject: `Cancellation Request Rejected - Booking ${bookingId}`,
