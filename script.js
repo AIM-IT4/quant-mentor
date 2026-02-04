@@ -343,8 +343,6 @@ setTimeout(function () {
             loadProductsFromSupabase();
             // Load sessions from Supabase
             loadSessionsFromSupabase();
-            // Load Admin panel data
-            fetchAdminProducts();
         } else {
             console.error('❌ Supabase SDK not loaded');
             console.log('⚠️ Continuing without Supabase - using default links');
