@@ -802,6 +802,10 @@ async function loadSessionsFromSupabase() {
             return;
         }
 
+        // Fetch country and exchange rates first for currency conversion
+        await getUserCountry();
+        await fetchExchangeRates();
+
         const { data, error } = await window.supabaseClient
             .from('sessions')
             .select('*')
