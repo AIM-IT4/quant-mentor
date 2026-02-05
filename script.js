@@ -102,6 +102,10 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (e) { console.error('Stats Update Error:', e); }
     }
     updateStats();
+
+    // Initialize Dynamic Content
+    if (typeof loadProductsFromSupabase === 'function') loadProductsFromSupabase();
+    if (typeof loadSessionsFromSupabase === 'function') loadSessionsFromSupabase();
     // -------------------------------------
 
     // --------------------------------
@@ -1869,25 +1873,25 @@ function displayBlogs(blogs) {
 async function loadApprovedTestimonials() {
     const grid = document.getElementById('approved-testimonials-grid');
     if (!grid) return;
-    
+
     console.log('📣 Loading approved testimonials...');
     if (!window.supabaseClient) {
         console.log('⚠️ Supabase not available for testimonials');
         return;
     }
-    
+
     try {
         const { data, error } = await window.supabaseClient
             .from('testimonials')
             .select('*')
             .eq('is_published', true)
             .order('created_at', { ascending: false });
-        
+
         if (error) {
             console.error('❌ Error fetching testimonials:', error);
             return;
         }
-        
+
         console.log(`✅ Loaded ${data?.length || 0} approved testimonials`);
         displayApprovedTestimonials(data || []);
     } catch (e) {
@@ -1898,18 +1902,18 @@ async function loadApprovedTestimonials() {
 function displayApprovedTestimonials(testimonials) {
     const grid = document.getElementById('approved-testimonials-grid');
     if (!grid) return;
-    
+
     grid.innerHTML = '';
-    
+
     if (testimonials.length === 0) {
         grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:40px;">No reviews yet. Be the first to share your experience!</p>';
         return;
     }
-    
+
     testimonials.forEach(t => {
         const stars = '★'.repeat(t.rating) + '☆'.repeat(5 - t.rating);
         const date = new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-        
+
         const div = document.createElement('div');
         div.className = 'testimonial-card';
         div.innerHTML = `
@@ -1995,14 +1999,14 @@ window.pendingBooking = null;
 
 
 // --- REVIEW FORM HANDLER ---
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const reviewForm = document.getElementById('reviewForm');
     const reviewSuccess = document.getElementById('reviewSuccess');
-    
+
     if (reviewForm) {
-        reviewForm.addEventListener('submit', async function(e) {
+        reviewForm.addEventListener('submit', async function (e) {
             e.preventDefault();
-            
+
             const formData = new FormData(reviewForm);
             const data = {
                 name: formData.get('name'),
@@ -2012,12 +2016,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 product: formData.get('product') || 'Not specified',
                 created_at: new Date().toISOString()
             };
-            
+
             if (!data.name || !data.title || !data.rating || !data.review) {
                 alert('Please fill in all required fields.');
                 return;
             }
-            
+
             try {
                 if (window.supabaseClient) {
                     const { error } = await window.supabaseClient
@@ -2032,7 +2036,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             is_published: false,
                             created_at: data.created_at
                         }]);
-                    
+
                     if (error) {
                         console.error('Error submitting review:', error);
                         alert('There was an error submitting your review. Please try again.');
@@ -2044,10 +2048,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     reviews.push(data);
                     localStorage.setItem('pendingReviews', JSON.stringify(reviews));
                 }
-                
+
                 reviewForm.style.display = 'none';
                 reviewSuccess.classList.add('show');
-                
+
             } catch (error) {
                 console.error('Review submission error:', error);
                 alert('There was an error submitting your review. Please try again.');
