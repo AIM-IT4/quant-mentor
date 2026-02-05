@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog & Articles | QuantMentor</title>
     <link rel="icon" type="image/png" href="assets/images/logo.png">
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
     <nav class="navbar">
         <div class="nav-container">
@@ -19,78 +22,17 @@
 
     <main style="max-width: 800px; margin: 100px auto 60px; padding: 0 20px;">
         <h1 style="margin-bottom: 40px;">Blog & Articles</h1>
-        
+
         <p style="color: var(--text-muted); margin-bottom: 40px;">
             Insights, tutorials, and career advice from years of quantitative finance experience.
         </p>
 
-        <div style="display: flex; flex-direction: column; gap: 30px;">
-            <!-- Blog Post 1 -->
-            <article style="background: var(--surface); padding: 30px; border-radius: 12px;">
-                <div style="display: flex; gap: 15px; margin-bottom: 15px; color: var(--text-muted); font-size: 0.9em;">
-                    <span><i class="far fa-calendar"></i> Feb 2026</span>
-                    <span><i class="far fa-clock"></i> 5 min read</span>
-                </div>
-                <h2 style="margin-bottom: 15px;">Breaking into Quantitative Finance: A Complete Roadmap</h2>
-                <p style="color: var(--text-muted); margin-bottom: 20px;">
-                    Step-by-step guide on transitioning from academia or software engineering to quantitative finance roles. 
-                    Covers essential skills, resources, and networking strategies.
-                </p>
-                <a href="#" style="color: var(--primary); text-decoration: none; font-weight: 500;">
-                    Read More →
-                </a>
-            </article>
-
-            <!-- Blog Post 2 -->
-            <article style="background: var(--surface); padding: 30px; border-radius: 12px;">
-                <div style="display: flex; gap: 15px; margin-bottom: 15px; color: var(--text-muted); font-size: 0.9em;">
-                    <span><i class="far fa-calendar"></i> Jan 2026</span>
-                    <span><i class="far fa-clock"></i> 8 min read</span>
-                </div>
-                <h2 style="margin-bottom: 15px;">Understanding XVA: Credit Valuation Adjustment Explained</h2>
-                <p style="color: var(--text-muted); margin-bottom: 20px;">
-                    Deep dive into XVA (CVA, DVA, FVA, MVA) - why these adjustments matter, how they're calculated, 
-                    and their impact on derivatives pricing in modern trading.
-                </p>
-                <a href="#" style="color: var(--primary); text-decoration: none; font-weight: 500;">
-                    Read More →
-                </a>
-            </article>
-
-            <!-- Blog Post 3 -->
-            <article style="background: var(--surface); padding: 30px; border-radius: 12px;">
-                <div style="display: flex; gap: 15px; margin-bottom: 15px; color: var(--text-muted); font-size: 0.9em;">
-                    <span><i class="far fa-calendar"></i> Dec 2025</span>
-                    <span><i class="far fa-clock"></i> 6 min read</span>
-                </div>
-                <h2 style="margin-bottom: 15px;">Python vs C++ for Quants: When to Use What</h2>
-                <p style="color: var(--text-muted); margin-bottom: 20px;">
-                    Comparative analysis of Python and C++ in quantitative finance. Performance benchmarks, 
-                    use cases, and best practices for production trading systems.
-                </p>
-                <a href="#" style="color: var(--primary); text-decoration: none; font-weight: 500;">
-                    Read More →
-                </a>
-            </article>
-
-            <!-- Blog Post 4 -->
-            <article style="background: var(--surface); padding: 30px; border-radius: 12px;">
-                <div style="display: flex; gap: 15px; margin-bottom: 15px; color: var(--text-muted); font-size: 0.9em;">
-                    <span><i class="far fa-calendar"></i> Nov 2025</span>
-                    <span><i class="far fa-clock"></i> 4 min read</span>
-                </div>
-                <h2 style="margin-bottom: 15px;">Top 10 Quant Interview Questions (With Solutions)</h2>
-                <p style="color: var(--text-muted); margin-bottom: 20px;">
-                    Most frequently asked interview questions at top quant firms like Goldman Sachs, 
-                    Morgan Stanley, and Citadel. Detailed solutions and explanations included.
-                </p>
-                <a href="#" style="color: var(--primary); text-decoration: none; font-weight: 500;">
-                    Read More →
-                </a>
-            </article>
+        <div id="blog-list" style="display: flex; flex-direction: column; gap: 30px;">
+            <p style="text-align:center; color: var(--text-muted);">Loading articles...</p>
         </div>
 
-        <div style="text-align: center; margin-top: 60px; padding: 40px; background: var(--surface); border-radius: 12px;">
+        <div
+            style="text-align: center; margin-top: 60px; padding: 40px; background: var(--surface); border-radius: 12px;">
             <h3 style="margin-bottom: 15px;">Stay Updated</h3>
             <p style="color: var(--text-muted); margin-bottom: 25px;">
                 New articles published weekly. Follow me on LinkedIn for the latest updates.
@@ -101,10 +43,34 @@
         </div>
     </main>
 
+    <!-- Blog Modal (Required for reading) -->
+    <div class="modal" id="blogModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <button class="modal-close" id="blogModalClose"><i class="fas fa-times"></i></button>
+            <div class="modal-header">
+                <h3 id="blogModalTitle" style="font-size: 1.5em; margin: 0;">Article Title</h3>
+                <p id="blogModalMeta" style="color:var(--text-muted); font-size:0.9em; margin-top:5px;"></p>
+            </div>
+            <div class="modal-body">
+                <div id="blogModalCover" style="margin-bottom:20px; border-radius:8px; overflow:hidden; display:none;">
+                    <img src="" style="width:100%; height:auto; display:block;">
+                </div>
+                <div id="blogModalContent" style="line-height:1.6; color:var(--text-muted);"></div>
+            </div>
+        </div>
+    </div>
+
     <footer class="footer">
         <div class="footer-bottom" style="text-align: center; padding: 20px;">
             <p>&copy; 2026 QuantMentor. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
 </body>
+
 </html>
