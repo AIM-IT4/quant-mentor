@@ -746,7 +746,8 @@ Brief Q&A"></textarea>
 
         <!-- Testimonials Management Section -->
         <div class="card" id="testimonialsSection" style="margin-top: 30px; display: none;">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <div class="card-header"
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
                 <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
                     <i class="fas fa-star" style="color: #fbbf24;"></i> Review Approvals
                 </h2>
@@ -754,7 +755,7 @@ Brief Q&A"></textarea>
                     <i class="fas fa-sync-alt"></i> Refresh
                 </button>
             </div>
-            
+
             <div id="pendingTestimonialsList">
                 <p style="color: var(--text-muted); text-align: center;">Loading pending reviews...</p>
             </div>
@@ -836,13 +837,15 @@ Brief Q&A"></textarea>
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDEwMTI2NSwiZXhwIjoyMDg1Njc3MjY1fQ.C87qk8sAOx9NI0p7sV5ndb8n_lktUA9EmjNMFjYItAg';
 
         // Check Password Function (globally accessible)
+        // Check Password Function (globally accessible)
         function checkPassword() {
-            // ... (keep existing)
             console.log('Login button clicked');
             const pwd = document.getElementById('adminPassword').value;
             if (pwd === 'admin123') {
                 console.log('Password correct, logging in...');
                 document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('adminContainer').style.display = 'block'; // Show admin panel
+
                 if (typeof loadProducts === 'function') loadProducts();
                 if (typeof loadSessions === 'function') loadSessions();
                 if (typeof loadRescheduleRequests === 'function') loadRescheduleRequests();
@@ -2290,31 +2293,31 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
         async function loadPendingTestimonials() {
             const container = document.getElementById('pendingTestimonialsList');
             const section = document.getElementById('testimonialsSection');
-            
+
             if (!window.supabaseAdminClient) {
                 container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Supabase not connected</p>';
                 section.style.display = 'block';
                 return;
             }
-            
+
             try {
                 const { data, error } = await window.supabaseAdminClient
                     .from('testimonials')
                     .select('*')
                     .eq('is_published', false)
                     .order('created_at', { ascending: false });
-                
+
                 if (error) throw error;
-                
+
                 section.style.display = 'block';
-                
+
                 if (!data || data.length === 0) {
                     container.innerHTML = '<p style="color: var(--success); text-align: center; padding: 30px;"><i class="fas fa-check-circle"></i> No pending reviews. All caught up!</p>';
                     return;
                 }
-                
+
                 container.innerHTML = '<div style="display: grid; gap: 20px;">';
-                
+
                 data.forEach(t => {
                     const date = new Date(t.created_at).toLocaleString();
                     container.innerHTML += `
@@ -2339,9 +2342,9 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
                         </div>
                     `;
                 });
-                
+
                 container.innerHTML += '</div>';
-                
+
             } catch (e) {
                 console.error('Error loading testimonials:', e);
                 container.innerHTML = '<p style="color: var(--danger); text-align: center;">Error loading reviews: ' + e.message + '</p>';
@@ -2350,15 +2353,15 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
 
         async function approveTestimonial(id) {
             if (!confirm('Approve this review? It will be visible on the website.')) return;
-            
+
             try {
                 const { error } = await window.supabaseAdminClient
                     .from('testimonials')
                     .update({ is_published: true, is_verified: true })
                     .eq('id', id);
-                
+
                 if (error) throw error;
-                
+
                 alert('Review approved successfully!');
                 loadPendingTestimonials();
             } catch (e) {
@@ -2368,15 +2371,15 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
 
         async function rejectTestimonial(id) {
             if (!confirm('Reject and delete this review?')) return;
-            
+
             try {
                 const { error } = await window.supabaseAdminClient
                     .from('testimonials')
                     .delete()
                     .eq('id', id);
-                
+
                 if (error) throw error;
-                
+
                 alert('Review rejected and deleted.');
                 loadPendingTestimonials();
             } catch (e) {
@@ -2398,7 +2401,7 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
 
         // Auto-load testimonials section on login
         const originalCheckPassword = window.checkPassword;
-        window.checkPassword = function() {
+        window.checkPassword = function () {
             const pwd = document.getElementById('adminPassword').value;
             if (pwd === 'admin123') {
                 document.getElementById('loginOverlay').style.display = 'none';
