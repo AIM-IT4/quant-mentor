@@ -1918,3 +1918,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Clear pending booking
 window.pendingBooking = null;
+
+
+// --- REVIEW FORM HANDLER ---
+document.addEventListener('DOMContentLoaded', function() {
+    const reviewForm = document.getElementById('reviewForm');
+    const reviewSuccess = document.getElementById('reviewSuccess');
+    
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(reviewForm);
+            const data = {
+                name: formData.get('name'),
+                title: formData.get('title'),
+                rating: formData.get('rating'),
+                review: formData.get('review'),
+                product: formData.get('product') || 'Not specified',
+                created_at: new Date().toISOString()
+            };
+            
+            if (!data.name || !data.title || !data.rating || !data.review) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            try {
+                if (window.supabaseClient) {
+                    const { error } = await window.supabaseClient
+                        .from('testimonials')
+                        .insert([{
+                            name: data.name,
+                            title: data.title,
+                            rating: parseInt(data.rating),
+                            review: data.review,
+                            product: data.product,
+                            is_verified: false,
+                            is_published: false,
+                            created_at: data.created_at
+                        }]);
+                    
+                    if (error) {
+                        console.error('Error submitting review:', error);
+                        alert('There was an error submitting your review. Please try again.');
+                        return;
+                    }
+                } else {
+                    console.log('Supabase not available, storing review locally:', data);
+                    let reviews = JSON.parse(localStorage.getItem('pendingReviews') || '[]');
+                    reviews.push(data);
+                    localStorage.setItem('pendingReviews', JSON.stringify(reviews));
+                }
+                
+                reviewForm.style.display = 'none';
+                reviewSuccess.classList.add('show');
+                
+            } catch (error) {
+                console.error('Review submission error:', error);
+                alert('There was an error submitting your review. Please try again.');
+            }
+        });
+    }
+});

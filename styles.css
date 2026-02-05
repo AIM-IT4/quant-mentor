@@ -396,10 +396,9 @@ h3 {
     position: absolute;
     inset: 0;
     background-image:
-        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-    background-size: 60px 60px;
-    opacity: 0.5;
+        linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
 }
 
 .hero-container {
@@ -615,12 +614,23 @@ h3 {
 .services {
     padding: var(--section-padding);
     background: var(--bg-secondary);
+    position: relative;
+}
+
+.services::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-light), transparent);
 }
 
 .services-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    gap: 28px;
 }
 
 .service-card {
@@ -629,18 +639,18 @@ h3 {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    transition: all var(--transition-normal);
+    transition: all 0.3s ease;
 }
 
 .service-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 40px rgba(13, 148, 136, 0.12);
     border-color: var(--accent-primary);
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-glow);
 }
 
 .service-card.popular {
     border-color: var(--accent-primary);
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(245, 158, 11, 0.08));
+    background: linear-gradient(135deg, rgba(13, 148, 136, 0.08), rgba(245, 158, 11, 0.05));
 }
 
 .popular-badge {
@@ -775,7 +785,7 @@ h3 {
 .products-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    gap: 28px;
 }
 
 .product-card {
@@ -784,17 +794,18 @@ h3 {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     overflow: hidden;
-    transition: all var(--transition-normal);
+    transition: all 0.3s ease;
 }
 
 .product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 40px rgba(13, 148, 136, 0.12);
     border-color: var(--accent-primary);
-    transform: translateY(-8px);
 }
 
 .product-card.featured {
     border-color: var(--accent-secondary);
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+    background: linear-gradient(135deg, rgba(13, 148, 136, 0.08), rgba(245, 158, 11, 0.05));
 }
 
 .featured-badge {
@@ -924,23 +935,50 @@ h3 {
 .testimonials {
     padding: var(--section-padding);
     background: var(--bg-secondary);
+    position: relative;
+}
+
+.testimonials::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-light), transparent);
 }
 
 .testimonials-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    gap: 28px;
 }
 
 .testimonial-card {
-    padding: 32px;
+    padding: 28px;
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    transition: all var(--transition-normal);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.testimonial-card::before {
+    content: '"';
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    font-size: 4rem;
+    font-family: Georgia, serif;
+    color: var(--accent-primary);
+    opacity: 0.1;
+    line-height: 1;
 }
 
 .testimonial-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(13, 148, 136, 0.12);
     border-color: var(--accent-primary);
 }
 
@@ -1002,6 +1040,97 @@ h3 {
     gap: 6px;
     font-size: 0.8rem;
     color: var(--success);
+}
+
+/* --------------------------------
+   Review Form Section
+   -------------------------------- */
+.review-section {
+    padding: 60px 0;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-subtle);
+}
+
+.review-form-wrapper {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 40px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+}
+
+.review-form-wrapper h3 {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.review-form-wrapper > p {
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+}
+
+.star-rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.star-rating-input input {
+    display: none;
+}
+
+.star-rating-input label {
+    cursor: pointer;
+    font-size: 1.8rem;
+    color: var(--border-light);
+    transition: all 0.2s ease;
+}
+
+.star-rating-input label:hover,
+.star-rating-input label:hover ~ label,
+.star-rating-input input:checked ~ label {
+    color: #fbbf24;
+}
+
+.star-rating-input label:hover,
+.star-rating-input input:checked ~ label {
+    transform: scale(1.1);
+}
+
+.review-form .btn-primary {
+    width: 100%;
+    padding: 16px 28px;
+}
+
+.review-success-message {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.review-success-message.show {
+    display: block;
+}
+
+.review-success-message i {
+    font-size: 3rem;
+    color: var(--success);
+    margin-bottom: 16px;
+}
+
+.review-success-message h4 {
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.review-success-message p {
+    color: var(--text-secondary);
 }
 
 /* --------------------------------

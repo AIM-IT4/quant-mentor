@@ -13,11 +13,11 @@
             --primary: #6366f1;
             --primary-dark: #4f46e5;
             --secondary: #a855f7;
-            --background: #0a0a0f;
-            --surface: #13131f;
-            --text: #e2e8f0;
-            --text-muted: #94a3b8;
-            --border: rgba(255, 255, 255, 0.1);
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: rgba(0, 0, 0, 0.1);
         }
 
         body {
@@ -48,6 +48,7 @@
             border-radius: 12px;
             padding: 30px;
             text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
         .stat-number {
@@ -81,7 +82,7 @@
         .testimonial-card:hover {
             border-color: var(--primary);
             transform: translateY(-5px);
-            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.12);
         }
 
         .testimonial-rating {
@@ -609,24 +610,93 @@
 
         </div>
 
-        <div style="text-align: center; margin-top: 60px; padding: 40px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 12px;">
+        <!-- Review Form Section -->
+        <div style="margin-top: 60px; max-width: 600px; margin-left: auto; margin-right: auto;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2 style="margin-bottom: 10px; color: var(--text);">Share Your Experience</h2>
+                <p style="color: var(--text-muted);">Had a session? Leave a review!</p>
+            </div>
+            
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 35px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+                <form id="reviewFormPage">
+                    <div style="display: grid; gap: 20px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text);">Your Name *</label>
+                            <input type="text" name="name" required style="width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--background); color: var(--text); font-size: 1rem; box-sizing: border-box;">
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text);">Review Title *</label>
+                            <input type="text" name="title" required style="width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--background); color: var(--text); font-size: 1rem; box-sizing: border-box;">
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text);">Rating *</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="radio" id="s5" name="rating" value="5" required style="display: none;"><label for="s5" style="cursor: pointer; font-size: 1.8rem; color: #ddd; transition: all 0.2s;">★</label>
+                                <input type="radio" id="s4" name="rating" value="4" style="display: none;"><label for="s4" style="cursor: pointer; font-size: 1.8rem; color: #ddd; transition: all 0.2s;">★</label>
+                                <input type="radio" id="s3" name="rating" value="3" style="display: none;"><label for="s3" style="cursor: pointer; font-size: 1.8rem; color: #ddd; transition: all 0.2s;">★</label>
+                                <input type="radio" id="s2" name="rating" value="2" style="display: none;"><label for="s2" style="cursor: pointer; font-size: 1.8rem; color: #ddd; transition: all 0.2s;">★</label>
+                                <input type="radio" id="s1" name="rating" value="1" style="display: none;"><label for="s1" style="cursor: pointer; font-size: 1.8rem; color: #ddd; transition: all 0.2s;">★</label>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text);">Your Review *</label>
+                            <textarea name="review" rows="4" required style="width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--background); color: var(--text); font-size: 1rem; resize: vertical; box-sizing: border-box;"></textarea>
+                        </div>
+                        
+                        <button type="submit" style="width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; border-radius: 10px; color: white; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                            <i class="fas fa-paper-plane"></i> Submit Review
+                        </button>
+                    </div>
+                </form>
+                
+                <div id="reviewSuccessPage" style="display: none; text-align: center; padding: 40px 20px;">
+                    <i class="fas fa-check-circle" style="font-size: 3rem; color: #22c55e; margin-bottom: 16px;"></i>
+                    <h3 style="margin-bottom: 10px; color: var(--text);">Thank You!</h3>
+                    <p style="color: var(--text-muted);">Your review has been submitted successfully.</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 60px; padding: 40px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 12px; box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);">
             <h2 style="color: white; margin-bottom: 15px;">Ready to Join Our Success Stories?</h2>
             <p style="color: rgba(255,255,255,0.9); margin-bottom: 25px;">
                 Start your quant journey today with personalized mentorship
             </p>
-            <a href="index.html#contact" class="btn" style="background: white; color: var(--primary);">
+            <a href="index.html#contact" class="btn" style="background: white; color: var(--primary); font-weight: 600;">
                 <i class="fas fa-calendar-check"></i> Book Your Session
             </a>
         </div>
     </div>
 
-    <footer class="footer">
-        <div class="footer-bottom" style="text-align: center; padding: 30px;">
-            <p>&copy; 2026 QuantMentor. All rights reserved.</p>
+    <footer class="footer" style="background: var(--bg-secondary); border-top: 1px solid var(--border); margin-top: 40px;">
+        <div class="footer-bottom" style="text-align: center; padding: 30px; border-top: 1px solid var(--border);">
+            <p style="color: var(--text-muted);">&copy; 2026 QuantMentor. All rights reserved.</p>
         </div>
     </footer>
 
     <script>
+        // Star rating functionality
+        const starLabels = document.querySelectorAll('[for^="s"]');
+        starLabels.forEach((label, index) => {
+            label.addEventListener('click', function() {
+                const forAttr = this.getAttribute('for');
+                const radio = document.getElementById(forAttr);
+                if (radio) radio.checked = true;
+                
+                // Update visual state
+                starLabels.forEach((l, i) => {
+                    if (i <= index) {
+                        l.style.color = '#fbbf24';
+                    } else {
+                        l.style.color = '#ddd';
+                    }
+                });
+            });
+        });
+
         function filterReviews(category) {
             const cards = document.querySelectorAll('.testimonial-card');
             const buttons = document.querySelectorAll('.filter-btn');
@@ -645,6 +715,60 @@
                     card.style.display = 'block';
                 } else {
                     card.style.display = 'none';
+                }
+            });
+        }
+
+        // Review form handler for testimonials page
+        const reviewFormPage = document.getElementById('reviewFormPage');
+        const reviewSuccessPage = document.getElementById('reviewSuccessPage');
+        
+        if (reviewFormPage) {
+            reviewFormPage.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(reviewFormPage);
+                const data = {
+                    name: formData.get('name'),
+                    title: formData.get('title'),
+                    rating: formData.get('rating'),
+                    review: formData.get('review'),
+                    created_at: new Date().toISOString()
+                };
+                
+                if (!data.name || !data.title || !data.rating || !data.review) {
+                    alert('Please fill in all required fields.');
+                    return;
+                }
+                
+                try {
+                    if (typeof supabase !== 'undefined') {
+                        const { error } = await supabase
+                            .from('testimonials')
+                            .insert([{
+                                name: data.name,
+                                title: data.title,
+                                rating: parseInt(data.rating),
+                                review: data.review,
+                                is_verified: false,
+                                is_published: false,
+                                created_at: data.created_at
+                            }]);
+                        
+                        if (error) throw error;
+                    } else {
+                        console.log('Supabase not available, storing review:', data);
+                        let reviews = JSON.parse(localStorage.getItem('pendingReviews') || '[]');
+                        reviews.push(data);
+                        localStorage.setItem('pendingReviews', JSON.stringify(reviews));
+                    }
+                    
+                    reviewFormPage.style.display = 'none';
+                    reviewSuccessPage.style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('There was an error submitting your review. Please try again.');
                 }
             });
         }
