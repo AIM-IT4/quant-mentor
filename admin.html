@@ -2133,7 +2133,7 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
                 });
 
                 const labels = Object.keys(dailyData).sort();
-                const values = labels.map(l => dailyData[l]);
+                const values = labels.map(l => Math.round(dailyData[l])); // Round chart values
 
                 // Destroy old chart if exists
                 if (revenueChart) revenueChart.destroy();
