@@ -1219,11 +1219,11 @@ async function fetchProductLinks() {
     }
 }
 
-function initRazorpayCheckout(productName, amount) {
-    console.log('🚀 initRazorpayCheckout called:', { productName, amount });
+function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountForLogging = null) {
+    console.log('🚀 initRazorpayCheckout called:', { productName, amount, currency, inrAmountForLogging });
 
-    // Handle FREE products (₹0) - skip payment, go directly to download
-    if (amount === 0) {
+    // Handle FREE products (0 value) - skip payment, go directly to download
+    if (amount <= 0) {
         console.log('🆓 Free product detected');
         const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
         if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
@@ -1269,16 +1269,24 @@ function initRazorpayCheckout(productName, amount) {
         return;
     }
 
+    // Smallest currency sub-unit multiplier (100 for INR/USD/GBP, 1 for JPY)
+    const multiplier = (currency.toUpperCase() === 'JPY') ? 1 : 100;
+
     var options = {
         "key": RAZORPAY_KEY_ID,
-        "amount": amount * 100,
-        "currency": "INR",
+        "amount": Math.round(amount * multiplier), // Convert to subunits (paise/cents)
+        "currency": currency,
         "name": BUSINESS_NAME,
         "description": productName,
         "handler": async function (response) {
             console.log('Payment success:', response);
             // ✅ Payment successful!
             const paymentId = response.razorpay_payment_id;
+
+            // Determine amount to log (INR preference for database stats)
+            // If inrAmountForLogging is passed, use it. Otherwise use the amount paid (assuming INR).
+            const loggedAmount = inrAmountForLogging !== null ? inrAmountForLogging : ((currency === 'INR') ? amount : 0);
+
             const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
 
             // Get customer email from Razorpay response or prompt
@@ -1288,13 +1296,21 @@ function initRazorpayCheckout(productName, amount) {
                 // Log purchase to Supabase for statistics
                 if (window.supabaseClient) {
                     try {
-                        console.log('📊 Logging purchase to database...', { customerEmail, productName, amount, paymentId });
+                        console.log('📊 Logging purchase to database:', {
+                            customerEmail,
+                            productName,
+                            loggedAmount,
+                            currencyPaid: currency,
+                            amountPaid: amount,
+                            paymentId
+                        });
+
                         await window.supabaseClient
                             .from('purchases')
                             .insert({
                                 customer_email: customerEmail,
                                 product_name: productName,
-                                amount: parseInt(amount), // Amount is already in INR
+                                amount: Math.round(loggedAmount), // Store as Integer INR
                                 payment_id: paymentId
                             });
                         console.log('✅ Purchase logged successfully');
@@ -1461,20 +1477,53 @@ if (modalPayBtn) {
         const priceText = document.getElementById('modalPrice').textContent;
         console.log('Payment Request:', { productName, priceText });
 
-        // Always use INR price for payment processing (Razorpay handles INR)
-        // The local currency is just for display purposes
-        let price = window.currentProductInrPrice || parseInt(priceText.replace(/[^\d]/g, ''));
-        console.log('Using INR price for payment:', price);
+        // Default to INR basics
+        let payAmount = window.currentProductInrPrice || parseInt(priceText.replace(/[^\d]/g, ''));
+        let payCurrency = 'INR';
+        let logAmountInr = payAmount; // For database stats
 
-        // Apply coupon discount if available (applied to INR base price)
-        if (typeof window.currentDiscountedPrice !== 'undefined' && window.currentDiscountedPrice != null) {
-            price = window.currentDiscountedPrice;
-            console.log('Using coupon discounted INR price:', price);
+        // CHECK 1: International Currency Mode?
+        if (window.currentProductIsLocalCurrency && window.currentProductLocalPrice) {
+            payCurrency = window.currentProductLocalPrice.currency.code;
+            payAmount = window.currentProductLocalPrice.amount;
+            console.log(`🌍 International Mode: Paying in ${payCurrency}`, payAmount);
         }
 
-        console.log('Final INR Price for Razorpay:', price);
+        // CHECK 2: Coupon Applied?
+        // We use activeModalCoupon because currentDiscountedPrice is often INR-only
+        if (window.activeModalCoupon && window.activeModalCoupon.percent > 0) {
+            const discountPercent = window.activeModalCoupon.percent;
 
-        if (isNaN(price)) {
+            // Calculate discounted Pay Amount
+            const originalPayAmount = payAmount;
+            const discountValue = (originalPayAmount * discountPercent) / 100;
+            payAmount = originalPayAmount - discountValue;
+
+            // Calculate discounted Log Amount (INR)
+            const originalLogAmount = logAmountInr;
+            const logDiscountValue = (originalLogAmount * discountPercent) / 100;
+            logAmountInr = originalLogAmount - logDiscountValue;
+
+            console.log('🎟️ Coupon applied:', {
+                percent: discountPercent,
+                originalPay: originalPayAmount,
+                finalPay: payAmount,
+                currency: payCurrency
+            });
+        }
+
+        // Round amounts to 2 decimal places for payment (standard currency precision)
+        // However, Razorpay expects 'amount' argument to be in MAJOR units (e.g., Doctors Fees 500)
+        // which it then multiplies by 100 in initRazorpayCheckout.
+        // So we keep it as integer or float major units.
+
+        // Ensure we don't send crazy floats
+        payAmount = parseFloat(payAmount.toFixed(2));
+        logAmountInr = Math.round(logAmountInr); // Database stores integer INR
+
+        console.log('🚀 Final Payment Config:', { payAmount, payCurrency, logAmountInr });
+
+        if (isNaN(payAmount) || payAmount <= 0) {
             alert('Error parsing price. Please try again.');
             return;
         }
@@ -1483,7 +1532,7 @@ if (modalPayBtn) {
         document.body.style.overflow = '';
 
         console.log('Calling initRazorpayCheckout...');
-        initRazorpayCheckout(productName, price);
+        initRazorpayCheckout(productName, payAmount, payCurrency, logAmountInr);
     });
 } else {
     console.error('❌ Pay button (modalPayBtn) not found in DOM');
