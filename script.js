@@ -490,19 +490,53 @@ async function fetchExchangeRates() {
     }
     
     try {
-        // Using exchangerate-api.com (free tier, no API key required for basic usage)
-        // Alternative: https://api.exchangerate.host/latest?base=INR
-        const response = await fetch('https://api.exchangerate.host/latest?base=INR');
-        const data = await response.json();
+        // Try multiple exchange rate APIs in case one fails
+        const apis = [
+            'https://api.frankfurter.app/latest?from=INR',
+            'https://open.er-api.com/v6/latest/INR',
+            'https://api.exchangerate-api.com/v4/latest/INR'
+        ];
         
-        if (data && data.rates) {
-            exchangeRatesCache = data.rates;
-            exchangeRatesTimestamp = Date.now();
-            console.log('💱 Fetched fresh exchange rates from API');
-            return data.rates;
-        } else {
-            throw new Error('Invalid response from exchange rate API');
+        for (const apiUrl of apis) {
+            try {
+                console.log('💱 Trying exchange rate API:', apiUrl);
+                const response = await fetch(apiUrl, { timeout: 5000 });
+                
+                if (!response.ok) {
+                    console.warn('⚠️ API returned status:', response.status, apiUrl);
+                    continue;
+                }
+                
+                const data = await response.json();
+                console.log('📊 API Response:', apiUrl, data);
+                
+                // Different APIs have different response formats
+                let rates = null;
+                
+                if (data.rates) {
+                    // Standard format
+                    rates = data.rates;
+                } else if (data.rates && data.rates.rates) {
+                    // Nested format
+                    rates = data.rates.rates;
+                } else if (data.conversion_rates) {
+                    // Some APIs use this format
+                    rates = data.conversion_rates;
+                }
+                
+                if (rates && Object.keys(rates).length > 0) {
+                    exchangeRatesCache = rates;
+                    exchangeRatesTimestamp = Date.now();
+                    console.log('💱 Fetched fresh exchange rates from:', apiUrl);
+                    return rates;
+                }
+            } catch (apiError) {
+                console.warn('⚠️ API failed:', apiUrl, apiError.message);
+                continue;
+            }
         }
+        
+        throw new Error('All exchange rate APIs failed');
     } catch (error) {
         console.error('❌ Failed to fetch exchange rates:', error);
         console.log('⚠️ Falling back to hardcoded rates (may be outdated)');
