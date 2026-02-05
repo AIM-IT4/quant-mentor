@@ -689,7 +689,8 @@ Brief Q&A"></textarea>
                     const enablePPP = document.getElementById('productPPP').checked;
                     const discount = document.getElementById('productDiscount').value || 0;
                     const couponCode = document.getElementById('productCouponCode').value || null;
-                    const desc = quill ? quill.root.innerHTML : '';
+                    let desc = quill ? quill.root.innerHTML : '';
+                    if (desc === '<p><br></p>') desc = '';
                     const file = document.getElementById('productFile').files[0];
                     const coverFileInput = document.getElementById('productCover').files[0];
                     const coverFileToUpload = croppedCoverBlob || coverFileInput;
