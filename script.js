@@ -1418,11 +1418,22 @@ if (bookingForm) {
 
     // Show price when service is selected
     if (bookingService) {
-        bookingService.addEventListener('change', function () {
+        bookingService.addEventListener('change', async function () {
             const value = this.value;
             if (value) {
                 const [type, price, duration] = value.split('|');
-                priceDisplay.textContent = '₹' + price;
+                const priceValue = parseInt(price.trim());
+                
+                // Convert price to local currency
+                const localPrice = await convertPrice(priceValue, userCountryCode);
+                const isLocalCurrency = localPrice.currency.code !== 'INR';
+                
+                if (isLocalCurrency) {
+                    priceDisplay.innerHTML = `${formatPrice(localPrice)} <span style="font-size:0.8em;color:var(--text-muted);">(₹${priceValue})</span>`;
+                } else {
+                    priceDisplay.textContent = '₹' + priceValue;
+                }
+                
                 bookingPrice.style.display = 'flex';
             } else {
                 bookingPrice.style.display = 'none';
