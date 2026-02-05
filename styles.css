@@ -1664,26 +1664,54 @@ h3 {
     font-size: 0.95rem;
 }
 
-#modalDescription * {
-    max-width: 100%;
+/* Aggressively reset child elements to handle copy-pasted rich text */
+.modal-description-text * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    background-color: transparent !important;
+    /* Remove white backgrounds */
 }
 
-#modalDescription p,
+/* Force text colors to match theme, overriding inline styles */
+.modal-description-text p,
+.modal-description-text span,
+.modal-description-text div,
+.modal-description-text li,
+.modal-description-text td {
+    color: var(--text-secondary) !important;
+}
+
+.modal-description-text strong,
+.modal-description-text b,
+.modal-description-text h1,
+.modal-description-text h2,
+.modal-description-text h3,
+.modal-description-text h4 {
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+}
+
+.modal-description-text a {
+    color: var(--accent-primary) !important;
+    text-decoration: underline;
+}
+
+.modal-description-text img {
+    max-width: 100% !important;
+    height: auto !important;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+/* Spacing */
 .modal-description-text p {
     margin-bottom: 0.8em;
 }
 
-#modalDescription ul,
 .modal-description-text ul,
-#modalDescription ol,
 .modal-description-text ol {
     margin-left: 20px;
     margin-bottom: 0.8em;
-}
-
-#modalDescription strong,
-.modal-description-text strong {
-    color: var(--text-primary);
 }
 
 .modal-body {
