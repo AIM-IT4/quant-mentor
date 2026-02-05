@@ -279,7 +279,10 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 20px;
-            min-height: 300px;
+            position: relative;
+            height: 350px;
+            width: 100%;
+            overflow: hidden;
         }
 
         .chart-header {
@@ -476,13 +479,17 @@
                             <option value="90">Last 90 Days</option>
                         </select>
                     </div>
-                    <canvas id="revenueChart"></canvas>
+                    <div style="position: relative; height: calc(100% - 40px);">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
                 </div>
                 <div class="chart-container">
                     <div class="chart-header">
                         <span class="chart-title">Service Distribution</span>
                     </div>
-                    <canvas id="distributionChart"></canvas>
+                    <div style="position: relative; height: calc(100% - 40px);">
+                        <canvas id="distributionChart"></canvas>
+                    </div>
                 </div>
             </div>
         </section>
@@ -822,7 +829,6 @@ Brief Q&A"></textarea>
                 document.getElementById('loginOverlay').style.display = 'none';
                 if (typeof loadProducts === 'function') loadProducts();
                 if (typeof loadSessions === 'function') loadSessions();
-                if (typeof loadRescheduleRequests === 'function') loadRescheduleRequests();
                 if (typeof loadRescheduleRequests === 'function') loadRescheduleRequests();
                 if (typeof loadCancellationRequests === 'function') loadCancellationRequests();
                 if (typeof loadBlogs === 'function') loadBlogs();
