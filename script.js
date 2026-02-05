@@ -1669,25 +1669,30 @@ if (bookingForm) {
 
                 // 2. Fetch Availability Pattern for this day from Supabase
                 let availability = null;
+                let hasRecord = false;
 
                 if (window.supabaseClient) {
                     const { data, error } = await window.supabaseClient
                         .from('availability_patterns')
                         .select('*')
                         .eq('day_of_week', dayName)
-                        .eq('is_active', true)
                         .single();
 
-                    if (data) availability = data;
+                    if (data) {
+                        hasRecord = true;
+                        if (data.is_active) {
+                            availability = data;
+                        }
+                    }
                 }
 
-                // Fallback if no specific pattern found (default 10-6 IST)
-                if (!availability) {
+                // Fallback only if no record exists for this day at all
+                if (!availability && !hasRecord) {
                     availability = {
                         start_time: '10:00:00',
                         end_time: '18:00:00'
                     };
-                    if (dayName === 'Sunday') availability = null; // Closed Sunday by default
+                    if (dayName === 'Sunday') availability = null;
                 }
 
                 timeSelect.innerHTML = '<option value="">Select time slot</option>';
