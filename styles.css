@@ -1049,7 +1049,7 @@ h3 {
     color: var(--text-primary);
 }
 
-.review-form-wrapper > p {
+.review-form-wrapper>p {
     color: var(--text-secondary);
     margin-bottom: 28px;
 }
@@ -1074,13 +1074,13 @@ h3 {
 }
 
 .star-rating-input label:hover,
-.star-rating-input label:hover ~ label,
-.star-rating-input input:checked ~ label {
+.star-rating-input label:hover~label,
+.star-rating-input input:checked~label {
     color: #fbbf24;
 }
 
 .star-rating-input label:hover,
-.star-rating-input input:checked ~ label {
+.star-rating-input input:checked~label {
     transform: scale(1.1);
 }
 
@@ -1634,21 +1634,50 @@ h3 {
     padding: 60px 0;
     background: var(--bg-primary);
 }
+
 .admin-grid {
     align-items: start;
 }
-.admin-card h3 { margin-bottom: 8px; }
-.admin-table th, .admin-table td { padding: 8px; border-bottom: 1px solid var(--border-subtle); }
-.admin-table tbody tr:hover { background: rgba(255,255,255,0.03); }
 
+.admin-card h3 {
+    margin-bottom: 8px;
+}
 
+.admin-table th,
+.admin-table td {
+    padding: 8px;
+    border-bottom: 1px solid var(--border-subtle);
+}
 
+.admin-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
 
+/* Fix for Long Product Descriptions in Modal */
+#modalDescription {
+    white-space: normal !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
 
+#modalDescription p {
+    margin-bottom: 0.8em;
+}
 
+#modalDescription ul,
+#modalDescription ol {
+    margin-left: 20px;
+    margin-bottom: 0.8em;
+}
 
+#modalDescription strong {
+    color: var(--text-primary);
+}
 
-
-
-
-
+.modal-body {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 10px;
+}
