@@ -734,8 +734,8 @@ async function displaySupabaseProducts(products) {
             const btnText = isFree ? 'Download' : 'Buy Now';
 
             const imageSection = product.cover_image_url ?
-                `<div class="product-image" style="padding:0; aspect-ratio:16/9; overflow:hidden;">
-                    <img src="${product.cover_image_url}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease;">
+                `<div class="product-image" style="padding:0; height:240px; background:rgba(255,255,255,0.02); display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                    <img src="${product.cover_image_url}" style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; transition:transform 0.5s ease;">
                     <div class="product-badge">${isFree ? 'FREE' : 'PDF'}</div>
                  </div>` :
                 `<div class="product-image"><div class="product-placeholder pdf"><i class="fas fa-file-pdf"></i></div><div class="product-badge">${isFree ? 'FREE' : 'PDF'}</div></div>`;
