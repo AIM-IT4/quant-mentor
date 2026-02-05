@@ -12,8 +12,6 @@
         rel="stylesheet">
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- EmailJS SDK -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <!-- Cropper.js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
@@ -21,17 +19,52 @@
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
-        // EmailJS Configuration
-        const EMAILJS_USER_ID = 'qDPRKM4ROa6YKvqWL';
-        const EMAILJS_SERVICE_ID = 'service_t71bulx';
-        const EMAILJS_TEMPLATE_ID = 'template_ddficic';
-        const EMAILJS_CANCELLATION_TEMPLATE_ID = 'template_nxmhx1c';
+        // BREVO EMAIL CONFIGURATION (replaces EmailJS - 9,000 emails/month free!)
+        // Get API key from: https://app.brevo.com/settings/keys/api
+        const BREVO_API_KEY = 'xkeysib-your-api-key-here';
+        const BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in';
+        const BREVO_SENDER_NAME = 'QuantMentor';
 
-        // Initialize EmailJS
-        (function () {
-            emailjs.init(EMAILJS_USER_ID);
-            console.log('✅ EmailJS initialized in admin.html');
-        })();
+        // Send email via Brevo API
+        async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
+            if (BREVO_API_KEY === 'xkeysib-your-api-key-here') {
+                console.warn('⚠️ Brevo API key not configured. Email not sent.');
+                return { success: false, error: 'API key not configured' };
+            }
+            
+            try {
+                const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+                    method: 'POST',
+                    headers: {
+                        'accept': 'application/json',
+                        'api-key': BREVO_API_KEY,
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        sender: {
+                            email: BREVO_SENDER_EMAIL,
+                            name: BREVO_SENDER_NAME
+                        },
+                        to: [{ email: to }],
+                        subject: subject,
+                        htmlContent: htmlContent,
+                        textContent: textContent
+                    })
+                });
+                
+                if (response.ok) {
+                    console.log('✅ Email sent successfully via Brevo to:', to);
+                    return { success: true };
+                } else {
+                    const error = await response.json();
+                    console.error('❌ Brevo error:', error);
+                    return { success: false, error: error.message };
+                }
+            } catch (error) {
+                console.error('❌ Failed to send email:', error);
+                return { success: false, error: error.message };
+            }
+        }
     </script>
     <style>
         :root {
@@ -756,14 +789,11 @@ Brief Q&A"></textarea>
                 }
             } catch (e) { console.error(e); }
 
-            // EmailJS Configuration
-            const EMAILJS_USER_ID = 'qDPRKM4ROa6YKvqWL';
-            const EMAILJS_SERVICE_ID = 'service_t71bulx';
-            const EMAILJS_TEMPLATE_ID = 'template_ddficic';
-
-            // Initialize EmailJS
-            emailjs.init(EMAILJS_USER_ID);
-            console.log('✅ EmailJS initialized');
+            // BREVO EMAIL CONFIGURATION (replaces EmailJS - 9,000 emails/month free!)
+            const BREVO_API_KEY = 'xkeysib-your-api-key-here';
+            const BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in';
+            const BREVO_SENDER_NAME = 'QuantMentor';
+            console.log('✅ Brevo email configuration loaded');
 
             // Handle Form Submission
             document.getElementById('productForm').addEventListener('submit', async (e) => {
@@ -1434,13 +1464,24 @@ Brief Q&A"></textarea>
 
                 if (updateError) throw updateError;
 
-                // Notify user via EmailJS
+                // Notify user via Brevo
                 const meetLink = booking.meet_link || 'Will be shared soon';
-                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-                    to_email: email,
-                    to_name: email.split('@')[0],
-                    subject: `Reschedule Approved - Booking ${bookingId}`,
-                    message: `
+                const htmlContent = `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <h2 style="color: #10b981;">✅ Reschedule Request Approved</h2>
+                        <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                        <p><strong>Booking ID:</strong> ${bookingId}</p>
+                        <p>Your reschedule request has been approved!</p>
+                        <h3 style="color: #2563eb;">New Schedule:</h3>
+                        <p><strong>📅 Date:</strong> ${booking.requested_date}</p>
+                        <p><strong>⏰ Time:</strong> ${booking.requested_time}</p>
+                        <p><strong>🔗 Meet Link:</strong> <a href="${meetLink}">${meetLink}</a></p>
+                        <p>Your session is now confirmed for the new date/time.</p>
+                        <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                        <p style="color: #6b7280;">Best regards,<br>QuantMentor</p>
+                    </div>
+                `;
+                const textContent = `
 ✅ RESCHEDULE REQUEST APPROVED
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
@@ -1455,8 +1496,9 @@ Meet Link: ${meetLink}
 
 Your session is now confirmed for the new date/time.
 ━━━━━━━━━━━━━━━━━━━━
-                    `.trim()
-                });
+                `.trim();
+                
+                await sendEmailWithBrevo(email, `Reschedule Approved - Booking ${bookingId}`, htmlContent, textContent);
 
                 alert('✅ Reschedule request approved!\n\nUser has been notified.');
                 await loadRescheduleRequests();
@@ -1517,26 +1559,42 @@ Your session is now confirmed for the new date/time.
 
                 if (updateError) throw updateError;
 
-                // Notify user via EmailJS
-                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-                    to_email: booking.email,
-                    to_name: booking.email.split('@')[0],
-                    subject: `Alternative Date Suggested - Booking ${bookingId}`,
-                    message: `
-📅 ALTERNATIVE DATE SUGGESTED
+                // Notify user via Brevo
+                const htmlContent = `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <h2 style="color: #f59e0b;">📅 Alternative Date Offered</h2>
+                        <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                        <p><strong>Booking ID:</strong> ${bookingId}</p>
+                        <p>We couldn't accommodate your requested date, but we're offering an alternative:</p>
+                        <h3 style="color: #2563eb;">Alternative Schedule:</h3>
+                        <p><strong>📅 Date:</strong> ${altDate}</p>
+                        <p><strong>⏰ Time:</strong> ${altTime}</p>
+                        ${message ? `<p><strong>Message from Admin:</strong></p><p style="background: #f3f4f6; padding: 10px; border-radius: 5px;">${message}</p>` : ''}
+                        <p>Your session has been automatically updated to this new date/time.</p>
+                        <p>If this doesn't work for you, please contact us to reschedule.</p>
+                        <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                        <p style="color: #6b7280;">Best regards,<br>QuantMentor</p>
+                    </div>
+                `;
+                const textContent = `
+📅 ALTERNATIVE DATE OFFERED
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
 
-Your original requested date was not available. We've scheduled an alternative:
+We couldn't accommodate your requested date, but we're offering an alternative:
 
-New Schedule:
+Alternative Schedule:
 • Date: ${altDate}
 • Time: ${altTime}
 
-${message ? `Message from admin:\n${message}\n` : ''}If this doesn't work for you, please contact us to reschedule.
+${message ? 'Message from Admin:\n' + message + '\n\n' : ''}
+Your session has been automatically updated to this new date/time.
+
+If this doesn't work for you, please contact us to reschedule.
 ━━━━━━━━━━━━━━━━━━━━
-                    `.trim()
-                });
+                `.trim();
+                
+                await sendEmailWithBrevo(booking.email, `Alternative Date Offered - Booking ${bookingId}`, htmlContent, textContent);
 
                 alert('✅ Alternative date sent to user!');
                 closeAlternativeModal();
@@ -1570,12 +1628,21 @@ ${message ? `Message from admin:\n${message}\n` : ''}If this doesn't work for yo
 
                 if (updateError) throw updateError;
 
-                // Notify user via EmailJS
-                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-                    to_email: email,
-                    to_name: email.split('@')[0],
-                    subject: `Reschedule Request Rejected - Booking ${bookingId}`,
-                    message: `
+                // Notify user via Brevo
+                const htmlContent = `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <h2 style="color: #ef4444;">❌ Reschedule Request Rejected</h2>
+                        <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                        <p><strong>Booking ID:</strong> ${bookingId}</p>
+                        <p>Your reschedule request could not be accommodated.</p>
+                        <p>Your booking remains scheduled for the original date/time.</p>
+                        ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
+                        <p>Please contact us if you need further assistance.</p>
+                        <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                        <p style="color: #6b7280;">Best regards,<br>QuantMentor</p>
+                    </div>
+                `;
+                const textContent = `
 ❌ RESCHEDULE REQUEST REJECTED
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
@@ -1587,8 +1654,9 @@ ${reason ? `\nReason: ${reason}` : ''}
 
 Please contact us if you need further assistance.
 ━━━━━━━━━━━━━━━━━━━━
-                    `.trim()
-                });
+                `.trim();
+                
+                await sendEmailWithBrevo(email, `Reschedule Request Rejected - Booking ${bookingId}`, htmlContent, textContent);
 
                 alert('✅ Reschedule request rejected.\n\nUser has been notified.');
                 await loadRescheduleRequests();
@@ -1716,12 +1784,24 @@ Proceed?`;
 
                 if (updateError) throw updateError;
 
-                // Send refund confirmation email to user using cancellation template
-                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CANCELLATION_TEMPLATE_ID, {
-                    to_email: email,
-                    to_name: email.split('@')[0],
-                    subject: `Refund Processed - Booking ${bookingId}`,
-                    message: `
+                // Send refund confirmation email to user via Brevo
+                const htmlContent = `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <h2 style="color: #10b981;">💰 Refund Processed</h2>
+                        <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                        <p><strong>Booking ID:</strong> ${bookingId}</p>
+                        <p>Your cancellation request has been approved and your refund is being processed.</p>
+                        <h3 style="color: #2563eb;">Refund Details:</h3>
+                        <p><strong>💵 Refund Amount:</strong> ₹${refundAmount}</p>
+                        <p><strong>⏰ Processing Time:</strong> 5-7 business days</p>
+                        <p>The refund will be credited to your original payment method.</p>
+                        <p>Thank you for using QuantMentor. We hope to serve you again!</p>
+                        <p>If you have any questions, please contact us at <a href="mailto:jha.8@alumni.iitj.ac.in">jha.8@alumni.iitj.ac.in</a></p>
+                        <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                        <p style="color: #6b7280;">Best regards,<br>QuantMentor</p>
+                    </div>
+                `;
+                const textContent = `
 💰 REFUND PROCESSED
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
@@ -1738,8 +1818,9 @@ Thank you for using QuantMentor. We hope to serve you again!
 
 If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
 ━━━━━━━━━━━━━━━━━━━━
-                    `.trim()
-                });
+                `.trim();
+                
+                await sendEmailWithBrevo(email, `Refund Processed - Booking ${bookingId}`, htmlContent, textContent);
 
                 alert(`✅ Refund Approved!
 
@@ -1780,12 +1861,21 @@ Go to: Razorpay Dashboard → Transactions → Search Payment ID → Issue Refun
 
                 if (updateError) throw updateError;
 
-                // Notify user via EmailJS using cancellation template
-                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CANCELLATION_TEMPLATE_ID, {
-                    to_email: email,
-                    to_name: email.split('@')[0],
-                    subject: `Cancellation Request Rejected - Booking ${bookingId}`,
-                    message: `
+                // Notify user via Brevo
+                const htmlContent = `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <h2 style="color: #ef4444;">❌ Cancellation Request Rejected</h2>
+                        <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                        <p><strong>Booking ID:</strong> ${bookingId}</p>
+                        <p>Your cancellation request could not be processed.</p>
+                        ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
+                        <p>Your booking remains active. Please attend the session as scheduled.</p>
+                        <p>If you have any questions, please contact us at <a href="mailto:jha.8@alumni.iitj.ac.in">jha.8@alumni.iitj.ac.in</a></p>
+                        <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                        <p style="color: #6b7280;">Best regards,<br>QuantMentor</p>
+                    </div>
+                `;
+                const textContent = `
 ❌ CANCELLATION REQUEST REJECTED
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
@@ -1798,8 +1888,9 @@ Your booking remains active. Please attend the session as scheduled.
 
 If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
 ━━━━━━━━━━━━━━━━━━━━
-                    `.trim()
-                });
+                `.trim();
+                
+                await sendEmailWithBrevo(email, `Cancellation Request Rejected - Booking ${bookingId}`, htmlContent, textContent);
 
                 alert('✅ Cancellation request rejected.\n\nUser has been notified. Booking remains active.');
                 await loadCancellationRequests();

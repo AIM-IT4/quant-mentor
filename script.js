@@ -18,6 +18,49 @@ document.addEventListener('DOMContentLoaded', function () {
         window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     }
 
+    // Brevo Email Configuration
+    // Get your API key from: https://app.brevo.com/settings/keys/api
+    // Replace with your actual API key after signing up
+    const BREVO_API_KEY = 'xkeysib-your-api-key-here';
+    const BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in';
+    const BREVO_SENDER_NAME = 'QuantMentor';
+
+    // Send email via Brevo API
+    async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
+        try {
+            const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+                method: 'POST',
+                headers: {
+                    'accept': 'application/json',
+                    'api-key': BREVO_API_KEY,
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sender: {
+                        email: BREVO_SENDER_EMAIL,
+                        name: BREVO_SENDER_NAME
+                    },
+                    to: [{ email: to }],
+                    subject: subject,
+                    htmlContent: htmlContent,
+                    textContent: textContent
+                })
+            });
+            
+            if (response.ok) {
+                console.log('✅ Email sent successfully via Brevo');
+                return { success: true };
+            } else {
+                const error = await response.json();
+                console.error('❌ Brevo error:', error);
+                return { success: false, error: error.message };
+            }
+        } catch (error) {
+            console.error('❌ Failed to send email:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
     async function updateStats() {
         // Experience
         const elExp = document.getElementById(STATS_CONFIG.experience.id);
@@ -351,19 +394,58 @@ const RAZORPAY_KEY_ID = 'rzp_live_SBbq38M84PSrrG';
 const BUSINESS_NAME = 'QuantMentor';
 
 // ================================
-// EMAILJS CONFIGURATION (for customer emails)
+// BREVO EMAIL CONFIGURATION (replaces EmailJS - 9,000 emails/month free!)
 // ================================
-// ⚠️ Get these from emailjs.com (free: 200 emails/month)
-// 1. Sign up at emailjs.com
-// 2. Add email service (Gmail recommended)
-// 3. Create template with variables: to_email, to_name, subject, message
-// 4. Copy your IDs below
+// ⚠️ Get these from brevo.com (free: 300 emails/day = 9,000/month)
+// 1. Sign up at brevo.com
+// 2. Go to Settings → SMTP & API → API Keys
+// 3. Create API key and copy it below
+// 4. Verify sender email in Settings → Senders & IP
 
-const EMAILJS_USER_ID = 'qDPRKM4ROa6YKvqWL';         // ✅ Your public key
-const EMAILJS_SERVICE_ID = 'service_t71bulx';          // ✅ Your service ID
-const EMAILJS_TEMPLATE_ID = 'template_ddficic';        // ✅ Your template ID
+const BREVO_API_KEY = 'xkeysib-your-api-key-here';    // ⚠️ Replace with your actual API key
+const BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in'; // ✅ Your verified sender email
+const BREVO_SENDER_NAME = 'QuantMentor';
 
-// EmailJS is initialized inline in index.html to ensure it's ready before this script runs
+// Send email via Brevo API (much higher limits than EmailJS)
+async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
+    if (BREVO_API_KEY === 'xkeysib-your-api-key-here') {
+        console.warn('⚠️ Brevo API key not configured. Email not sent.');
+        return { success: false, error: 'API key not configured' };
+    }
+    
+    try {
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': BREVO_API_KEY,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: {
+                    email: BREVO_SENDER_EMAIL,
+                    name: BREVO_SENDER_NAME
+                },
+                to: [{ email: to }],
+                subject: subject,
+                htmlContent: htmlContent,
+                textContent: textContent
+            })
+        });
+        
+        if (response.ok) {
+            console.log('✅ Email sent successfully via Brevo to:', to);
+            return { success: true };
+        } else {
+            const error = await response.json();
+            console.error('❌ Brevo error:', error);
+            return { success: false, error: error.message };
+        }
+    } catch (error) {
+        console.error('❌ Failed to send email:', error);
+        return { success: false, error: error.message };
+    }
+}
 
 // ================================
 // SUPABASE INTEGRATION (for dynamic file links)
@@ -1266,48 +1348,62 @@ function initRazorpayCheckout(productName, amount) {
 }
 
 /**
- * Send product purchase email to customer via EmailJS
+ * Send product purchase email to customer via Brevo (replaces EmailJS)
+ * Free tier: 300 emails/day = 9,000/month
  */
 async function sendProductEmail(customerEmail, productName, paymentId, downloadLink) {
     const FORMSPREE_ID = 'mjgozran';
 
     console.log('📧 sendProductEmail called with:', customerEmail);
-    console.log('📧 EmailJS User ID:', EMAILJS_USER_ID);
-    console.log('📧 EmailJS available:', typeof emailjs !== 'undefined');
 
-    // Send to CUSTOMER via EmailJS (if configured)
-    if (EMAILJS_USER_ID !== 'YOUR_EMAILJS_USER_ID' && typeof emailjs !== 'undefined') {
-        console.log('📧 Attempting to send via EmailJS...');
-        try {
-            const templateParams = {
-                to_email: customerEmail,
-                to_name: customerEmail.split('@')[0],
-                subject: `Your Purchase: ${productName} `,
-                message: `🎉 Thank you for your purchase!
+    // Send to CUSTOMER via Brevo
+    if (BREVO_API_KEY !== 'xkeysib-your-api-key-here') {
+        console.log('📧 Attempting to send via Brevo...');
+        
+        const htmlContent = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #2563eb;">🎉 Thank you for your purchase!</h2>
+                <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                <p><strong>📦 Product:</strong> ${productName}</p>
+                <p><strong>🆔 Payment ID:</strong> ${paymentId}</p>
+                <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                <p><strong>📥 Download your product:</strong></p>
+                <a href="${downloadLink}" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0;">Download Now</a>
+                <p style="margin-top: 20px; color: #6b7280;">If you have any questions, simply reply to this email.</p>
+                <p style="color: #6b7280;">Best regards,<br>${BUSINESS_NAME}</p>
+            </div>
+        `;
+        
+        const textContent = `🎉 Thank you for your purchase!
 
-━━━━━━━━━━━━━━━━━━━━
-📦 Product: ${productName}
-🆔 Payment ID: ${paymentId}
-━━━━━━━━━━━━━━━━━━━━
+Product: ${productName}
+Payment ID: ${paymentId}
 
-📥 Download your product here:
-${downloadLink}
+Download your product here: ${downloadLink}
 
 If you have any questions, simply reply to this email.
 
 Best regards,
-    ${BUSINESS_NAME} `
-            };
-            console.log('📧 Template params:', templateParams);
-
-            const result = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-            console.log('✅ EmailJS SUCCESS:', result);
+${BUSINESS_NAME}`;
+        
+        try {
+            const result = await sendEmailWithBrevo(
+                customerEmail,
+                `Your Purchase: ${productName}`,
+                htmlContent,
+                textContent
+            );
+            
+            if (result.success) {
+                console.log('✅ Brevo SUCCESS: Email sent to', customerEmail);
+            } else {
+                console.error('❌ Brevo FAILED:', result.error);
+            }
         } catch (error) {
-            console.error('❌ EmailJS FAILED:', error);
-            alert('Email sending failed: ' + error.text);
+            console.error('❌ Brevo email failed:', error);
         }
     } else {
-        console.log('⚠️ EmailJS not configured or not available');
+        console.log('⚠️ Brevo API key not configured. Skipping customer email.');
     }
 
     // Also send notification to ADMIN via Formspree
@@ -1669,50 +1765,67 @@ New Booking Details:
         console.error('Admin email notification failed:', error);
     }
 
-    // Send confirmation email to CUSTOMER with Meet link via EmailJS
+    // Send confirmation email to CUSTOMER with Meet link via Brevo
     console.log('📧 Sending session confirmation to customer:', booking.email);
 
-    if (EMAILJS_USER_ID !== 'YOUR_EMAILJS_USER_ID' && typeof emailjs !== 'undefined') {
-        console.log('📧 EmailJS is available, sending...');
-        try {
-            const sessionParams = {
-                to_email: booking.email,
-                to_name: booking.name,
-                subject: `Booking Confirmed: ${booking.sessionType}`,
-                message: `🎉 Your session has been booked!
+    if (BREVO_API_KEY !== 'xkeysib-your-api-key-here') {
+        console.log('📧 Brevo is available, sending...');
+        
+        const htmlContent = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #2563eb;">🎉 Your session has been booked!</h2>
+                <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                <p><strong>📋 Session:</strong> ${booking.sessionType} (${booking.duration} mins)</p>
+                <p><strong>📅 Date:</strong> ${booking.date}</p>
+                <p><strong>⏰ Time:</strong> ${booking.time}</p>
+                <p><strong>💰 Amount Paid:</strong> ₹${booking.price}</p>
+                <p><strong>🆔 Payment ID:</strong> ${paymentId}</p>
+                <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                <p><strong>🔗 JOIN YOUR SESSION HERE:</strong></p>
+                <a href="${GOOGLE_MEET_LINK}" style="display: inline-block; background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0;">Join Google Meet</a>
+                <p style="margin-top: 20px;"><strong>🔄 Need to Reschedule?</strong></p>
+                <p>Visit: <a href="${window.location.origin}/my-bookings.html">My Bookings</a></p>
+                <p>Enter your email (${booking.email}) to view and reschedule your session.</p>
+                <p style="margin-top: 20px; color: #6b7280;">Best regards,<br>${BUSINESS_NAME}</p>
+            </div>
+        `;
+        
+        const textContent = `🎉 Your session has been booked!
 
-━━━━━━━━━━━━━━━━━━━━
-📋 Session: ${booking.sessionType} (${booking.duration} mins)
-📅 Date: ${booking.date}
-⏰ Time: ${booking.time}
-💰 Amount Paid: ₹${booking.price}
-🆔 Payment ID: ${paymentId}
-━━━━━━━━━━━━━━━━━━━━
+Session: ${booking.sessionType} (${booking.duration} mins)
+Date: ${booking.date}
+Time: ${booking.time}
+Amount Paid: ₹${booking.price}
+Payment ID: ${paymentId}
 
-🔗 JOIN YOUR SESSION HERE:
+JOIN YOUR SESSION HERE:
 ${GOOGLE_MEET_LINK}
 
-Please save this link and join on time.
-
-🔄 NEED TO RESCHEDULE?
+Need to Reschedule?
 Visit: ${window.location.origin}/my-bookings.html
-Enter your email (${booking.email}) to view and reschedule your session.
-
-Or reply to this email with your request.
+Enter your email (${booking.email}) to view and reschedule.
 
 Best regards,
-${BUSINESS_NAME}`
-            };
-            console.log('📧 Session email params:', sessionParams);
-
-            const result = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, sessionParams);
-            console.log('✅ Session confirmation SUCCESS:', result);
+${BUSINESS_NAME}`;
+        
+        try {
+            const result = await sendEmailWithBrevo(
+                booking.email,
+                `Booking Confirmed: ${booking.sessionType}`,
+                htmlContent,
+                textContent
+            );
+            
+            if (result.success) {
+                console.log('✅ Session confirmation SUCCESS via Brevo');
+            } else {
+                console.error('❌ Brevo session email FAILED:', result.error);
+            }
         } catch (error) {
-            console.error('❌ Session EmailJS FAILED:', error);
-            alert('Session email failed: ' + (error.text || error.message || error));
+            console.error('❌ Session email failed:', error);
         }
     } else {
-        console.log('⚠️ EmailJS not configured - customer confirmation email not sent');
+        console.log('⚠️ Brevo API key not configured - customer confirmation email not sent');
     }
 
     // Show success message to customer
