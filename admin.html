@@ -858,6 +858,7 @@ Brief Q&A"></textarea>
                     try { if (typeof loadRescheduleRequests === 'function') loadRescheduleRequests(); } catch (e) { console.error('Reschedule load error', e); }
                     try { if (typeof loadCancellationRequests === 'function') loadCancellationRequests(); } catch (e) { console.error('Cancellation load error', e); }
                     try { if (typeof loadBlogs === 'function') loadBlogs(); } catch (e) { console.error('Blogs load error', e); }
+                    try { if (typeof loadPendingTestimonials === 'function') loadPendingTestimonials(); } catch (e) { console.error('Testimonials load error', e); }
                     try { if (typeof initDashboard === 'function') initDashboard(); } catch (e) { console.error('Dashboard init error', e); }
                 } else {
                     alert('Incorrect password');
@@ -2410,20 +2411,7 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
         window.approveTestimonial = approveTestimonial;
         window.rejectTestimonial = rejectTestimonial;
 
-        // Auto-load testimonials section on login
-        const originalCheckPassword = window.checkPassword;
-        window.checkPassword = function () {
-            const pwd = document.getElementById('adminPassword').value;
-            if (pwd === 'admin123') {
-                document.getElementById('loginOverlay').style.display = 'none';
-                if (typeof loadProducts === 'function') loadProducts();
-                if (typeof loadSessions === 'function') loadSessions();
-                if (typeof loadBlogs === 'function') loadBlogs();
-                loadPendingTestimonials();
-            } else {
-                alert('Incorrect password');
-            }
-        };
+
 
     </script>
 </body>
