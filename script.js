@@ -1642,6 +1642,103 @@ if (bookingForm) {
         });
     }
 
+    // Dynamic Time Slot Logic (Time Zone Conversion)
+    if (bookingDate) {
+        bookingDate.addEventListener('change', async function () {
+            const dateValue = this.value;
+            const timeSelect = document.getElementById('bookingTime');
+            if (!dateValue || !timeSelect) return;
+
+            timeSelect.innerHTML = '<option value="">Loading available slots...</option>';
+            timeSelect.disabled = true;
+
+            try {
+                // 1. Detect User Timezone
+                const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const dateObj = new Date(dateValue);
+                const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+
+                // 2. Fetch Availability Pattern for this day from Supabase
+                let availability = null;
+
+                if (window.supabaseClient) {
+                    const { data, error } = await window.supabaseClient
+                        .from('availability_patterns')
+                        .select('*')
+                        .eq('day_of_week', dayName)
+                        .eq('is_active', true)
+                        .single();
+
+                    if (data) availability = data;
+                }
+
+                // Fallback if no specific pattern found (default 10-6 IST)
+                if (!availability) {
+                    availability = {
+                        start_time: '10:00:00',
+                        end_time: '18:00:00'
+                    };
+                    if (dayName === 'Sunday') availability = null; // Closed Sunday by default
+                }
+
+                timeSelect.innerHTML = '<option value="">Select time slot</option>';
+
+                if (!availability) {
+                    timeSelect.innerHTML = '<option value="" disabled>No slots available today</option>';
+                    return;
+                }
+
+                // 3. Generate Slots (Hourly)
+                const startHour = parseInt(availability.start_time.split(':')[0]);
+                const endHour = parseInt(availability.end_time.split(':')[0]);
+
+                // Helper to format time
+                const formatTime = (date) => {
+                    return date.toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                };
+
+                for (let h = startHour; h < endHour; h++) {
+                    // Create Date object in IST (Mentor time)
+                    // We assume input date is consistent
+                    const slotDateIST = new Date(dateValue + `T${h.toString().padStart(2, '0')}:00:00+05:30`);
+
+                    // Convert to User Timezone for display
+                    const displayTime = slotDateIST.toLocaleTimeString('en-US', {
+                        timeZone: userTimeZone,
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+
+                    // Format timezone name (e.g., IST, GMT, EST)
+                    const tzName = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short', timeZone: userTimeZone }).formatToParts(slotDateIST).find(p => p.type === 'timeZoneName')?.value || '';
+
+                    // Create option value (keep generic or strict? Let's keep strict "10:00 AM" format for backend compatibility, but show converted)
+                    // Wait, existing backend expects simple string. Let's send the "IST Time" as value to keep it simple for now, 
+                    // or send full string. The Admin Notification needs to know the time.
+                    // Let's stick to sending the IST time string as value "10:00 AM", but display "10:00 AM IST (4:30 AM Your Time)"
+
+                    const istTimeLabel = formatTime(slotDateIST); // e.g. "10:00 AM"
+
+                    const optionIndex = document.createElement('option');
+                    optionIndex.value = istTimeLabel;
+                    optionIndex.textContent = `${istTimeLabel} IST (${displayTime} ${tzName})`;
+                    timeSelect.appendChild(optionIndex);
+                }
+
+            } catch (err) {
+                console.error('Error generating slots:', err);
+                timeSelect.innerHTML = '<option value="">Error loading slots</option>';
+            } finally {
+                timeSelect.disabled = false;
+            }
+        });
+    }
+
     // Handle form submission
     bookingForm.addEventListener('submit', async function (e) {
         e.preventDefault();
