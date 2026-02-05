@@ -1,6 +1,55 @@
-/* ================================
-   QuantMentor - Interactive JavaScript
-   ================================ */
+// --- Brevo Email Configuration (Global) ---
+let BREVO_API_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_API_KEY) ? window.CONFIG.BREVO_API_KEY : 'xkeysib-your-api-key-here';
+let BREVO_SENDER_EMAIL = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_SENDER_EMAIL) ? window.CONFIG.BREVO_SENDER_EMAIL : 'jha.8@alumni.iitj.ac.in';
+let BREVO_SENDER_NAME = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_SENDER_NAME) ? window.CONFIG.BREVO_SENDER_NAME : 'QuantMentor';
+
+// Update config when window.CONFIG is loaded (fallback for dynamic loading)
+window.addEventListener('load', function () {
+    if (typeof window.CONFIG !== 'undefined') {
+        BREVO_API_KEY = window.CONFIG.BREVO_API_KEY || BREVO_API_KEY;
+        BREVO_SENDER_EMAIL = window.CONFIG.BREVO_SENDER_EMAIL || BREVO_SENDER_EMAIL;
+        BREVO_SENDER_NAME = window.CONFIG.BREVO_SENDER_NAME || BREVO_SENDER_NAME;
+        console.log('✅ Configuration updated from window.CONFIG');
+    }
+});
+
+// Send email via Brevo API
+async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
+    if (!BREVO_API_KEY || BREVO_API_KEY === 'xkeysib-your-api-key-here') {
+        console.warn('⚠️ Brevo API key not configured. Email not sent.');
+        return { success: false, error: 'API key not configured' };
+    }
+
+    try {
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': BREVO_API_KEY,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: { email: BREVO_SENDER_EMAIL, name: BREVO_SENDER_NAME },
+                to: [{ email: to }],
+                subject: subject,
+                htmlContent: htmlContent,
+                textContent: textContent
+            })
+        });
+
+        if (response.ok) {
+            console.log('✅ Email sent successfully via Brevo to:', to);
+            return { success: true };
+        } else {
+            const error = await response.json();
+            console.error('❌ Brevo error:', error);
+            return { success: false, error: error.message };
+        }
+    } catch (error) {
+        console.error('❌ Failed to send email:', error);
+        return { success: false, error: error.message };
+    }
+}
 
 document.addEventListener('DOMContentLoaded', function () {
     console.log('🚀 DOM loaded, initializing all components...');
@@ -16,49 +65,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
         window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    }
-
-    // Brevo Email Configuration
-    // Get your API key from: https://app.brevo.com/settings/keys/api
-    // Add your key to config.js (not tracked by git)
-    const BREVO_API_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_API_KEY) ? window.CONFIG.BREVO_API_KEY : 'xkeysib-your-api-key-here';
-    const BREVO_SENDER_EMAIL = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_SENDER_EMAIL) ? window.CONFIG.BREVO_SENDER_EMAIL : 'jha.8@alumni.iitj.ac.in';
-    const BREVO_SENDER_NAME = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_SENDER_NAME) ? window.CONFIG.BREVO_SENDER_NAME : 'QuantMentor';
-
-    // Send email via Brevo API
-    async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
-        try {
-            const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-                method: 'POST',
-                headers: {
-                    'accept': 'application/json',
-                    'api-key': BREVO_API_KEY,
-                    'content-type': 'application/json'
-                },
-                body: JSON.stringify({
-                    sender: {
-                        email: BREVO_SENDER_EMAIL,
-                        name: BREVO_SENDER_NAME
-                    },
-                    to: [{ email: to }],
-                    subject: subject,
-                    htmlContent: htmlContent,
-                    textContent: textContent
-                })
-            });
-            
-            if (response.ok) {
-                console.log('✅ Email sent successfully via Brevo');
-                return { success: true };
-            } else {
-                const error = await response.json();
-                console.error('❌ Brevo error:', error);
-                return { success: false, error: error.message };
-            }
-        } catch (error) {
-            console.error('❌ Failed to send email:', error);
-            return { success: false, error: error.message };
-        }
     }
 
     async function updateStats() {
@@ -397,55 +403,6 @@ const BUSINESS_NAME = 'QuantMentor';
 // BREVO EMAIL CONFIGURATION (replaces EmailJS - 9,000 emails/month free!)
 // ================================
 // ⚠️ Get these from brevo.com (free: 300 emails/day = 9,000/month)
-// 1. Sign up at brevo.com
-// 2. Go to Settings → SMTP & API → API Keys
-// 3. Create API key and copy it below
-// 4. Verify sender email in Settings → Senders & IP
-
-const BREVO_API_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_API_KEY) ? window.CONFIG.BREVO_API_KEY : 'xkeysib-your-api-key-here';
-const BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in'; // ✅ Your verified sender email
-const BREVO_SENDER_NAME = 'QuantMentor';
-
-// Send email via Brevo API (much higher limits than EmailJS)
-async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
-            if (!BREVO_API_KEY || BREVO_API_KEY === 'xkeysib-your-api-key-here') {
-        console.warn('⚠️ Brevo API key not configured. Email not sent.');
-        return { success: false, error: 'API key not configured' };
-    }
-    
-    try {
-        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-            method: 'POST',
-            headers: {
-                'accept': 'application/json',
-                'api-key': BREVO_API_KEY,
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify({
-                sender: {
-                    email: BREVO_SENDER_EMAIL,
-                    name: BREVO_SENDER_NAME
-                },
-                to: [{ email: to }],
-                subject: subject,
-                htmlContent: htmlContent,
-                textContent: textContent
-            })
-        });
-        
-        if (response.ok) {
-            console.log('✅ Email sent successfully via Brevo to:', to);
-            return { success: true };
-        } else {
-            const error = await response.json();
-            console.error('❌ Brevo error:', error);
-            return { success: false, error: error.message };
-        }
-    } catch (error) {
-        console.error('❌ Failed to send email:', error);
-        return { success: false, error: error.message };
-    }
-}
 
 // ================================
 // SUPABASE INTEGRATION (for dynamic file links)
@@ -570,7 +527,7 @@ async function fetchExchangeRates() {
             return exchangeRatesCache;
         }
     }
-    
+
     try {
         // Try multiple exchange rate APIs in case one fails
         const apis = [
@@ -578,23 +535,23 @@ async function fetchExchangeRates() {
             'https://open.er-api.com/v6/latest/INR',
             'https://api.exchangerate-api.com/v4/latest/INR'
         ];
-        
+
         for (const apiUrl of apis) {
             try {
                 console.log('💱 Trying exchange rate API:', apiUrl);
                 const response = await fetch(apiUrl, { timeout: 5000 });
-                
+
                 if (!response.ok) {
                     console.warn('⚠️ API returned status:', response.status, apiUrl);
                     continue;
                 }
-                
+
                 const data = await response.json();
                 console.log('📊 API Response:', apiUrl, data);
-                
+
                 // Different APIs have different response formats
                 let rates = null;
-                
+
                 if (data.rates) {
                     // Standard format
                     rates = data.rates;
@@ -605,7 +562,7 @@ async function fetchExchangeRates() {
                     // Some APIs use this format
                     rates = data.conversion_rates;
                 }
-                
+
                 if (rates && Object.keys(rates).length > 0) {
                     exchangeRatesCache = rates;
                     exchangeRatesTimestamp = Date.now();
@@ -617,7 +574,7 @@ async function fetchExchangeRates() {
                 continue;
             }
         }
-        
+
         throw new Error('All exchange rate APIs failed');
     } catch (error) {
         console.error('❌ Failed to fetch exchange rates:', error);
@@ -678,12 +635,12 @@ function getCurrencyForCountry(countryCode) {
 // Convert INR price to local currency using live rates
 async function convertPrice(inrPrice, countryCode) {
     if (!inrPrice || inrPrice <= 0) return { amount: 0, currency: CURRENCY_MAP['IN'] };
-    
+
     const currency = getCurrencyForCountry(countryCode);
     const rates = await fetchExchangeRates();
     const rate = rates[currency.code] || 1;
     const convertedAmount = Math.round(inrPrice * rate);
-    
+
     return {
         amount: convertedAmount,
         currency: currency,
@@ -765,7 +722,7 @@ async function displaySupabaseProducts(products) {
             // Convert price to local currency (async)
             const localPrice = await convertPrice(product.price, userCountryCode);
             const isLocalCurrency = localPrice.currency.code !== 'INR';
-            
+
             const priceDisplay = isFree
                 ? `<div class="product-price" style="color:#22c55e">Free</div>`
                 : isLocalCurrency
@@ -790,8 +747,8 @@ async function displaySupabaseProducts(products) {
             productCard.dataset.inrPrice = product.price;
 
             // Currency badge for non-INR countries
-            const currencyBadge = (!isFree && isLocalCurrency) 
-                ? `<span style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; font-weight: 600; margin-left: 8px;">${localPrice.currency.code}</span>` 
+            const currencyBadge = (!isFree && isLocalCurrency)
+                ? `<span style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; font-weight: 600; margin-left: 8px;">${localPrice.currency.code}</span>`
                 : '';
 
             productCard.innerHTML = `
@@ -827,7 +784,7 @@ window.openProductModal = async function (id) {
         // Convert price to local currency
         const localPrice = await convertPrice(product.price, userCountryCode);
         const isLocalCurrency = localPrice.currency.code !== 'INR';
-        
+
         // Store price info for calculations
         window.currentProductInrPrice = product.price;
         window.currentProductLocalPrice = localPrice;
@@ -835,12 +792,12 @@ window.openProductModal = async function (id) {
 
         document.getElementById('modalTitle').textContent = product.name;
         document.getElementById('modalDescription').innerHTML = product.description || 'Premium digital product.';
-        
+
         // Display price with local currency
         const priceElement = document.getElementById('modalPrice');
         const pppInfoElement = document.getElementById('pppInfo');
         const pppTextElement = document.getElementById('pppText');
-        
+
         if (product.price === 0 || !product.price) {
             priceElement.textContent = 'FREE';
             if (pppInfoElement) pppInfoElement.style.display = 'none';
@@ -927,8 +884,8 @@ async function updateServicesSection(sessions) {
         // Convert price to local currency
         const localPrice = await convertPrice(session.price, userCountryCode);
         const isLocalCurrency = localPrice.currency.code !== 'INR';
-        
-        const priceDisplay = session.price === 0 
+
+        const priceDisplay = session.price === 0
             ? '<span class="price-free">FREE</span>'
             : isLocalCurrency
                 ? `<span style="font-weight:700;">${formatPrice(localPrice)}</span>`
@@ -1000,11 +957,11 @@ async function updateBookingForm(sessions) {
     for (const session of sessions) {
         const option = document.createElement('option');
         const valueType = session.name.toLowerCase().replace(/\s+/g, '_');
-        
+
         // Convert price to local currency for display
         const localPrice = await convertPrice(session.price, userCountryCode);
         const isLocalCurrency = localPrice.currency.code !== 'INR';
-        
+
         option.value = `${valueType}| ${session.price}| ${session.duration} `;
         if (session.price === 0) {
             option.innerHTML = `🆓 ${session.name} (${session.duration} min) - FREE`;
@@ -1359,7 +1316,7 @@ async function sendProductEmail(customerEmail, productName, paymentId, downloadL
     // Send to CUSTOMER via Brevo
     if (BREVO_API_KEY && BREVO_API_KEY !== 'xkeysib-your-api-key-here') {
         console.log('📧 Attempting to send via Brevo...');
-        
+
         const htmlContent = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <h2 style="color: #2563eb;">🎉 Thank you for your purchase!</h2>
@@ -1373,7 +1330,7 @@ async function sendProductEmail(customerEmail, productName, paymentId, downloadL
                 <p style="color: #6b7280;">Best regards,<br>${BUSINESS_NAME}</p>
             </div>
         `;
-        
+
         const textContent = `🎉 Thank you for your purchase!
 
 Product: ${productName}
@@ -1385,7 +1342,7 @@ If you have any questions, simply reply to this email.
 
 Best regards,
 ${BUSINESS_NAME}`;
-        
+
         try {
             const result = await sendEmailWithBrevo(
                 customerEmail,
@@ -1393,7 +1350,7 @@ ${BUSINESS_NAME}`;
                 htmlContent,
                 textContent
             );
-            
+
             if (result.success) {
                 console.log('✅ Brevo SUCCESS: Email sent to', customerEmail);
             } else {
@@ -1447,13 +1404,13 @@ if (modalPayBtn) {
         // The local currency is just for display purposes
         let price = window.currentProductInrPrice || parseInt(priceText.replace(/[^\d]/g, ''));
         console.log('Using INR price for payment:', price);
-        
+
         // Apply coupon discount if available (applied to INR base price)
         if (typeof window.currentDiscountedPrice !== 'undefined' && window.currentDiscountedPrice != null) {
             price = window.currentDiscountedPrice;
             console.log('Using coupon discounted INR price:', price);
         }
-        
+
         console.log('Final INR Price for Razorpay:', price);
 
         if (isNaN(price)) {
@@ -1511,17 +1468,17 @@ if (bookingForm) {
             if (value) {
                 const [type, price, duration] = value.split('|');
                 const priceValue = parseInt(price.trim());
-                
+
                 // Convert price to local currency
                 const localPrice = await convertPrice(priceValue, userCountryCode);
                 const isLocalCurrency = localPrice.currency.code !== 'INR';
-                
+
                 if (isLocalCurrency) {
                     priceDisplay.textContent = formatPrice(localPrice);
                 } else {
                     priceDisplay.textContent = '₹' + priceValue;
                 }
-                
+
                 bookingPrice.style.display = 'flex';
             } else {
                 bookingPrice.style.display = 'none';
@@ -1770,7 +1727,7 @@ New Booking Details:
 
     if (BREVO_API_KEY && BREVO_API_KEY !== 'xkeysib-your-api-key-here') {
         console.log('📧 Brevo is available, sending...');
-        
+
         const htmlContent = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <h2 style="color: #2563eb;">🎉 Your session has been booked!</h2>
@@ -1789,7 +1746,7 @@ New Booking Details:
                 <p style="margin-top: 20px; color: #6b7280;">Best regards,<br>${BUSINESS_NAME}</p>
             </div>
         `;
-        
+
         const textContent = `🎉 Your session has been booked!
 
 Session: ${booking.sessionType} (${booking.duration} mins)
@@ -1807,7 +1764,7 @@ Enter your email (${booking.email}) to view and reschedule.
 
 Best regards,
 ${BUSINESS_NAME}`;
-        
+
         try {
             const result = await sendEmailWithBrevo(
                 booking.email,
@@ -1815,7 +1772,7 @@ ${BUSINESS_NAME}`;
                 htmlContent,
                 textContent
             );
-            
+
             if (result.success) {
                 console.log('✅ Session confirmation SUCCESS via Brevo');
             } else {
@@ -1849,10 +1806,10 @@ Thank you for booking!`);
     document.getElementById('bookingForm').reset();
     document.getElementById('bookingPrice').style.display = 'none';
 
-    // Refresh calendar
-    const month = currentDate.getMonth();
-    const year = currentDate.getFullYear();
-    renderCalendar(month, year);
+    // Calendar refresh removed (no longer used)
+    // const month = currentDate.getMonth();
+    // const year = currentDate.getFullYear();
+    // renderCalendar(month, year);
 }
 
 // --- BLOG & RESOURCES LOGIC ---
