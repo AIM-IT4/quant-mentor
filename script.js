@@ -422,6 +422,56 @@ async function getUserCountry() {
     }
 }
 
+// PPP (Purchasing Power Parity) Configuration
+// Discounts are applied to the base price for lower-income countries
+const PPP_TIERS = {
+    // Tier 1: High-income countries (0% discount - full price)
+    tier1: {
+        discount: 0,
+        countries: ['US', 'CA', 'GB', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'AT', 'CH', 'SE', 'NO', 'DK', 'FI', 'AU', 'NZ', 'JP', 'KR', 'SG', 'HK', 'MO', 'QA', 'AE', 'SA', 'BH', 'KW', 'OM', 'IS', 'IE', 'LU', 'LI', 'MC', 'AD', 'SM', 'VA']
+    },
+    // Tier 2: Upper-middle income (20% discount)
+    tier2: {
+        discount: 20,
+        countries: ['CN', 'RU', 'BR', 'MX', 'TR', 'AR', 'CL', 'CO', 'PE', 'ZA', 'MY', 'TH', 'ID', 'PH', 'VN', 'BD', 'EG', 'NG', 'KE', 'GH', 'UG', 'TZ', 'ZW', 'ZM', 'MW', 'MZ', 'MG', 'MU', 'SC', 'KM', 'GW', 'GQ', 'GA', 'CG', 'CD', 'CM', 'CF', 'TD', 'NE', 'BJ', 'TG', 'SL', 'LR', 'GN', 'GM', 'CV', 'ST', 'BW', 'SZ', 'LS', 'NA', 'AO', 'DZ', 'TN', 'MA', 'LY', 'SD', 'SS', 'ET', 'ER', 'DJ', 'SO', 'RW', 'BI', 'SS']
+    },
+    // Tier 3: Lower-middle income (40% discount)
+    tier3: {
+        discount: 40,
+        countries: ['IN', 'PK', 'LK', 'NP', 'MM', 'KH', 'LA', 'BT', 'MN', 'KZ', 'UZ', 'AZ', 'AM', 'GE', 'MD', 'UA', 'BY', 'AL', 'BA', 'RS', 'ME', 'MK', 'BG', 'RO', 'HR', 'SI', 'SK', 'CZ', 'PL', 'HU', 'LT', 'LV', 'EE', 'PT', 'GR', 'CY', 'MT', 'UY', 'PY', 'BO', 'EC', 'VE', 'GY', 'SR', 'GF', 'JM', 'HT', 'DO', 'CU', 'PR', 'CR', 'PA', 'GT', 'HN', 'SV', 'NI', 'BZ', 'BS', 'BB', 'TT', 'GD', 'LC', 'VC', 'AG', 'DM', 'KN', 'AI', 'VG', 'KY', 'BM', 'TC', 'MS', 'GL', 'FO', 'AX', 'SJ', 'GF', 'RE', 'YT', 'GP', 'MQ', 'BL', 'MF', 'SX', 'AW', 'CW', 'BQ', 'SX']
+    },
+    // Tier 4: Low-income countries (60% discount)
+    tier4: {
+        discount: 60,
+        countries: ['AF', 'IQ', 'SY', 'YE', 'PS', 'LB', 'JO', 'IR', 'PK', 'MV', 'BT', 'NP', 'BD', 'MM', 'LA', 'KH', 'VN', 'PH', 'ID', 'LK', 'AF', 'SO', 'ER', 'DJ', 'TD', 'NE', 'ML', 'BF', 'GM', 'GW', 'SL', 'LR', 'GN', 'BI', 'MZ', 'MW', 'ZM', 'ZW', 'MG', 'KM', 'SC', 'MR', 'ML', 'BF', 'NE', 'TD', 'CF', 'CD', 'CG', 'GQ', 'GA', 'ST', 'CV', 'GM', 'GW', 'SL', 'LR', 'GN', 'BJ', 'TG', 'GH', 'CI', 'NG', 'CM', 'CF', 'GQ', 'GA', 'CG', 'CD', 'AO', 'ET', 'ER', 'DJ', 'SO', 'KE', 'UG', 'TZ', 'RW', 'BI', 'SS', 'SD', 'SS', 'ET', 'ER', 'DJ', 'SO', 'YE', 'IQ', 'SY', 'LB', 'PS', 'JO', 'IR', 'AF', 'PK', 'IN', 'NP', 'BD', 'LK', 'MV', 'BT', 'MM', 'KH', 'LA', 'VN', 'PH', 'ID', 'PG', 'SB', 'VU', 'FJ', 'KI', 'TV', 'NR', 'PW', 'MH', 'FM', 'WS', 'TO', 'CK', 'NU', 'AS', 'KI', 'NR', 'TV', 'TK', 'WF', 'PF', 'NC', 'AS', 'GU', 'MP', 'VI', 'PR', 'AI', 'MS', 'VG', 'TC', 'KY', 'BM', 'GL', 'FO', 'AX', 'SJ', 'GF', 'RE', 'YT', 'GP', 'MQ', 'BL', 'MF', 'SX', 'AW', 'CW', 'BQ', 'SX']
+    }
+};
+
+// Calculate PPP discount percentage based on country code
+function getPPPDiscount(countryCode) {
+    if (!countryCode) return 0;
+    const code = countryCode.toUpperCase();
+    
+    for (const tier of Object.values(PPP_TIERS)) {
+        if (tier.countries.includes(code)) {
+            return tier.discount;
+        }
+    }
+    // Default to tier 3 (40% discount) if country not found
+    return 40;
+}
+
+// Calculate PPP-adjusted price
+function calculatePPPPrice(basePrice, countryCode, enablePPP = true) {
+    if (!enablePPP || !basePrice || basePrice <= 0) return basePrice;
+    
+    const discount = getPPPDiscount(countryCode);
+    if (discount === 0) return basePrice;
+    
+    const discountedPrice = Math.round(basePrice * (100 - discount) / 100);
+    return Math.max(discountedPrice, 1); // Minimum price of 1
+}
+
 // Load and display products from Supabase
 async function loadProductsFromSupabase() {
     try {
@@ -485,9 +535,16 @@ function displaySupabaseProducts(products) {
             productCard.className = 'product-card';
             productCard.dataset.category = 'notes';
 
+            // Calculate PPP price if enabled
+            const pppPrice = calculatePPPPrice(product.price, userCountryCode, product.enable_ppp);
+            const pppDiscount = product.enable_ppp ? getPPPDiscount(userCountryCode) : 0;
+            const hasPPPDiscount = pppDiscount > 0 && pppPrice < product.price;
+            
             const priceDisplay = isFree
                 ? `<div class="product-price" style="color:#22c55e">Free</div>`
-                : `<div class="product-price">₹${product.price}</div>`;
+                : hasPPPDiscount 
+                    ? `<div style="display:flex;gap:8px;align-items:baseline;"><span style="text-decoration:line-through;color:var(--text-muted);font-size:0.9em">₹${product.price}</span><div class="product-price" style="color:#22c55e">₹${pppPrice}</div></div>`
+                    : `<div class="product-price">₹${product.price}</div>`;
 
             const btnText = isFree ? 'Download' : 'Buy Now';
 
@@ -502,10 +559,20 @@ function displaySupabaseProducts(products) {
             const rawDesc = product.description || '';
             const displayDesc = (rawDesc === '<p><br></p>') ? '' : rawDesc;
 
+            // Store PPP info on the card for modal use
+            productCard.dataset.pppPrice = pppPrice;
+            productCard.dataset.basePrice = product.price;
+            productCard.dataset.pppDiscount = pppDiscount;
+
+            // PPP discount badge for eligible countries
+            const pppBadge = (!isFree && hasPPPDiscount) 
+                ? `<span style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; font-weight: 600; margin-left: 8px;">${pppDiscount}% OFF</span>` 
+                : '';
+
             productCard.innerHTML = `
                 ${imageSection}
                 <div class="product-content">
-                    <h3 class="product-title">${product.name}</h3>
+                    <h3 class="product-title">${product.name}${pppBadge}</h3>
                     <div class="product-description">${displayDesc || (isFree ? 'Free resource for quants.' : 'Premium content.')}</div>
                     <div class="product-meta">
                         <span><i class="fas fa-file-alt"></i> ${isFree ? 'Resource' : 'Premium Note'}</span>
@@ -513,7 +580,7 @@ function displaySupabaseProducts(products) {
                     </div>
                     <div class="product-footer">
                         ${isFree ? priceDisplay : (product.original_price > product.price ? `<div style="display:flex;gap:8px;align-items:baseline;"><span style="text-decoration:line-through;color:var(--text-muted);font-size:0.9em">₹${product.original_price}</span>${priceDisplay}</div>` : priceDisplay)}
-                        <button class="btn btn-product" onclick="openProductModal('${product.id}')" data-price="${product.price}">${btnText}</button>
+                        <button class="btn btn-product" onclick="openProductModal('${product.id}')" data-price="${product.price}" data-ppp-price="${pppPrice}">${btnText}</button>
                     </div>
                 </div>
             `;
@@ -532,9 +599,48 @@ window.openProductModal = async function (id) {
         const modal = document.getElementById('productModal');
         if (!modal) return;
 
+        // Calculate PPP price if enabled
+        const pppPrice = calculatePPPPrice(product.price, userCountryCode, product.enable_ppp);
+        const pppDiscount = product.enable_ppp ? getPPPDiscount(userCountryCode) : 0;
+        const hasPPPDiscount = pppDiscount > 0 && pppPrice < product.price;
+        
+        // Store base price and PPP info for calculations
+        window.currentProductBasePrice = product.price;
+        window.currentProductPPPPrice = pppPrice;
+        window.currentProductPPPDiscount = pppDiscount;
+        window.currentProductHasPPP = hasPPPDiscount;
+
         document.getElementById('modalTitle').textContent = product.name;
         document.getElementById('modalDescription').innerHTML = product.description || 'Premium digital product.';
-        document.getElementById('modalPrice').textContent = (product.price === 0 || !product.price) ? 'FREE' : '₹' + product.price;
+        
+        // Display price with PPP discount if applicable
+        const priceElement = document.getElementById('modalPrice');
+        const pppInfoElement = document.getElementById('pppInfo');
+        const pppTextElement = document.getElementById('pppText');
+        
+        if (product.price === 0 || !product.price) {
+            priceElement.textContent = 'FREE';
+            if (pppInfoElement) pppInfoElement.style.display = 'none';
+        } else if (hasPPPDiscount) {
+            priceElement.innerHTML = `<span style="text-decoration:line-through;color:var(--text-muted);font-size:0.8em;margin-right:10px;">₹${product.price}</span><span style="color:#22c55e;">₹${pppPrice}</span>`;
+            if (pppInfoElement && pppTextElement) {
+                pppInfoElement.style.display = 'block';
+                pppTextElement.textContent = `PPP discount applied: ${pppDiscount}% off for ${userCountryCode || 'your region'}`;
+            }
+        } else {
+            priceElement.textContent = '₹' + product.price;
+            if (pppInfoElement) {
+                // Show PPP info even without discount, for transparency
+                pppInfoElement.style.display = 'block';
+                if (pppTextElement) {
+                    if (product.enable_ppp) {
+                        pppTextElement.textContent = `Pricing for ${userCountryCode || 'your region'} (no PPP discount applicable)`;
+                    } else {
+                        pppTextElement.textContent = `Pricing in INR`;
+                    }
+                }
+            }
+        }
 
         window.currentDiscountedPrice = undefined;
         window.activeModalCoupon = {
@@ -1087,12 +1193,25 @@ if (modalPayBtn) {
         const priceText = document.getElementById('modalPrice').textContent;
         console.log('Payment Request:', { productName, priceText });
 
-        // Use discounted price if coupon applied
-        let price = parseInt(priceText.replace(/[^\d]/g, ''));
+        // Determine final price: PPP price takes priority, then coupon discount, then base price
+        let price;
+        
+        // Check if PPP discount is active
+        if (window.currentProductHasPPP && window.currentProductPPPPrice) {
+            price = window.currentProductPPPPrice;
+            console.log('Using PPP price:', price);
+        } else {
+            // Parse from displayed price
+            price = parseInt(priceText.replace(/[^\d]/g, ''));
+        }
+        
+        // Apply coupon discount if available (applied to PPP price if PPP is active)
         if (typeof window.currentDiscountedPrice !== 'undefined' && window.currentDiscountedPrice != null) {
             price = window.currentDiscountedPrice;
+            console.log('Using coupon discounted price:', price);
         }
-        console.log('Parsed Price:', price);
+        
+        console.log('Final Price:', price);
 
         if (isNaN(price)) {
             alert('Error parsing price. Please try again.');
