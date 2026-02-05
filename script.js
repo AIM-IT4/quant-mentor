@@ -19,8 +19,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Brevo Email Configuration
-    // Get your API key from .env file
-    const BREVO_API_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_API_KEY) ? window.CONFIG.BREVO_API_KEY : process.env.BREVO_API_KEY;
+    // Get your API key from: https://app.brevo.com/settings/keys/api
+    // Add your key to config.js (not tracked by git)
+    const BREVO_API_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_API_KEY) ? window.CONFIG.BREVO_API_KEY : 'xkeysib-your-api-key-here';
     const BREVO_SENDER_EMAIL = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_SENDER_EMAIL) ? window.CONFIG.BREVO_SENDER_EMAIL : 'jha.8@alumni.iitj.ac.in';
     const BREVO_SENDER_NAME = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_SENDER_NAME) ? window.CONFIG.BREVO_SENDER_NAME : 'QuantMentor';
 
