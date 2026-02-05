@@ -457,17 +457,37 @@ let userCountryCode = null;
 // Try to get user country (simple caching)
 async function getUserCountry() {
     if (userCountryCode) return userCountryCode;
+
+    // Helper to fetch with timeout
+    const fetchWithTimeout = async (url, timeout = 3000) => {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeout);
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(id);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+    };
+
     try {
-        // Using a free IP API (limit usage if possible, or handle errors gracefully)
-        const response = await fetch('https://ipapi.co/json/');
-        const data = await response.json();
+        // Primary: ipapi.co
+        const data = await fetchWithTimeout('https://ipapi.co/json/');
         userCountryCode = data.country_code;
-        console.log('🌍 User country detected:', userCountryCode);
-        return userCountryCode;
     } catch (e) {
-        console.warn('📍 Could not detect country:', e);
-        return 'IN'; // Default to IN if failed
+        console.warn('⚠️ Primary IP service (ipapi.co) failed:', e);
+        try {
+            // Fallback: ipwho.is (No API key required, good CORS)
+            console.log('🔄 Trying fallback IP service (ipwho.is)...');
+            const data = await fetchWithTimeout('https://ipwho.is/');
+            if (data.success === false) throw new Error(data.message);
+            userCountryCode = data.country_code;
+        } catch (e2) {
+            console.warn('❌ All IP services failed, defaulting to India (IN):', e2);
+            userCountryCode = 'IN';
+        }
     }
+
+    console.log('🌍 User country detected:', userCountryCode);
+    return userCountryCode;
 }
 
 // Currency Configuration - Maps country codes to currency info (rates fetched dynamically)
@@ -1609,6 +1629,51 @@ if (bookingForm) {
     bookingForm.addEventListener('submit', async function (e) {
         e.preventDefault();
         console.log('🚀 Booking form submitted!'); // Debug log
+
+        const name = document.getElementById('bookingName').value;
+        const email = document.getElementById('bookingEmail').value;
+        const phone = document.getElementById('bookingPhone').value || 'Not provided';
+        const serviceValue = document.getElementById('bookingService').value;
+        const date = document.getElementById('bookingDate').value;
+        const time = document.getElementById('bookingTime').value;
+        const message = document.getElementById('bookingMessage').value || 'No specific message';
+
+        if (!serviceValue || !date || !time) {
+            alert('Please fill in all required fields');
+            return;
+        }
+
+        const [sessionType, price, duration] = serviceValue.split('|');
+
+        // Try to find session info from multiple sources
+        let sessionInfo = SESSION_TYPES[sessionType];
+
+        // If not found in hardcoded types, try to find by matching session name in dynamic sessions
+        if (!sessionInfo && window.dynamicSessions) {
+            sessionInfo = window.dynamicSessions.find(s =>
+                s.name.toLowerCase().replace(/\s+/g, '_') === sessionType ||
+                s.name.toLowerCase() === sessionType.replace(/_/g, ' ')
+            );
+        }
+
+        // If still not found, create session info from the dropdown text
+        if (!sessionInfo) {
+            const selectedOption = bookingService.options[bookingService.selectedIndex];
+            if (selectedOption && selectedOption.text) {
+                const match = selectedOption.text.match(/[🆓\s]*([^\(]+)/);
+                const sessionName = match ? match[1].trim() : 'Session';
+                sessionInfo = {
+                    name: sessionName,
+                    price: parseInt(price) || 0,
+                    duration: parseInt(duration) || 60
+                };
+            }
+        }
+
+        if (!sessionInfo) {
+            alert('Error: Invalid session type. Please refresh and try again.');
+            return;
+        }
 
         // Format date for display
         const dateObj = new Date(date);
