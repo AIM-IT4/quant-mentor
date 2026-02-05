@@ -99,11 +99,11 @@
             --primary: #6366f1;
             --primary-dark: #4f46e5;
             --secondary: #a855f7;
-            --background: #f8fafc;
-            --surface: #ffffff;
-            --text: #1e293b;
-            --text-muted: #64748b;
-            --border: rgba(0, 0, 0, 0.1);
+            --background: #0a0a0f;
+            --surface: #13131f;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
@@ -741,6 +741,22 @@ Brief Q&A"></textarea>
                 <div id="blogsList">
                     <p style="color: var(--text-muted); text-align: center;">Loading articles...</p>
                 </div>
+            </div>
+        </div>
+
+        <!-- Testimonials Management Section -->
+        <div class="card" id="testimonialsSection" style="margin-top: 30px; display: none;">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-star" style="color: #fbbf24;"></i> Review Approvals
+                </h2>
+                <button onclick="loadPendingTestimonials()" class="btn btn-secondary" style="padding: 8px 16px;">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+            
+            <div id="pendingTestimonialsList">
+                <p style="color: var(--text-muted); text-align: center;">Loading pending reviews...</p>
             </div>
         </div>
 
@@ -2269,6 +2285,131 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
 
         const blogF = document.getElementById('blogForm');
         if (blogF) blogF.addEventListener('submit', saveBlog);
+
+        // --- TESTIMONIALS MANAGEMENT ---
+        async function loadPendingTestimonials() {
+            const container = document.getElementById('pendingTestimonialsList');
+            const section = document.getElementById('testimonialsSection');
+            
+            if (!window.supabaseAdminClient) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Supabase not connected</p>';
+                section.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const { data, error } = await window.supabaseAdminClient
+                    .from('testimonials')
+                    .select('*')
+                    .eq('is_published', false)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                section.style.display = 'block';
+                
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="color: var(--success); text-align: center; padding: 30px;"><i class="fas fa-check-circle"></i> No pending reviews. All caught up!</p>';
+                    return;
+                }
+                
+                container.innerHTML = '<div style="display: grid; gap: 20px;">';
+                
+                data.forEach(t => {
+                    const date = new Date(t.created_at).toLocaleString();
+                    container.innerHTML += `
+                        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                                <div>
+                                    <strong style="font-size: 1.1rem;">${escapeHtml(t.name)}</strong>
+                                    <span style="color: var(--text-muted); margin-left: 10px;">${'★'.repeat(t.rating)}</span>
+                                </div>
+                                <span style="font-size: 0.85rem; color: var(--text-muted);">${date}</span>
+                            </div>
+                            <h4 style="margin: 0 0 10px 0; color: var(--accent);">${escapeHtml(t.title)}</h4>
+                            <p style="margin: 0 0 15px 0; color: var(--text-secondary); line-height: 1.6;">"${escapeHtml(t.review)}"</p>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button onclick="approveTestimonial(${t.id})" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                                <button onclick="rejectTestimonial(${t.id})" class="btn" style="padding: 8px 20px; font-size: 0.9rem; background: transparent; border: 1px solid var(--danger); color: var(--danger);">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML += '</div>';
+                
+            } catch (e) {
+                console.error('Error loading testimonials:', e);
+                container.innerHTML = '<p style="color: var(--danger); text-align: center;">Error loading reviews: ' + e.message + '</p>';
+            }
+        }
+
+        async function approveTestimonial(id) {
+            if (!confirm('Approve this review? It will be visible on the website.')) return;
+            
+            try {
+                const { error } = await window.supabaseAdminClient
+                    .from('testimonials')
+                    .update({ is_published: true, is_verified: true })
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                alert('Review approved successfully!');
+                loadPendingTestimonials();
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        async function rejectTestimonial(id) {
+            if (!confirm('Reject and delete this review?')) return;
+            
+            try {
+                const { error } = await window.supabaseAdminClient
+                    .from('testimonials')
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                alert('Review rejected and deleted.');
+                loadPendingTestimonials();
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Export testimonial functions
+        window.loadPendingTestimonials = loadPendingTestimonials;
+        window.approveTestimonial = approveTestimonial;
+        window.rejectTestimonial = rejectTestimonial;
+
+        // Auto-load testimonials section on login
+        const originalCheckPassword = window.checkPassword;
+        window.checkPassword = function() {
+            const pwd = document.getElementById('adminPassword').value;
+            if (pwd === 'admin123') {
+                document.getElementById('loginOverlay').style.display = 'none';
+                if (typeof loadProducts === 'function') loadProducts();
+                if (typeof loadSessions === 'function') loadSessions();
+                if (typeof loadBlogs === 'function') loadBlogs();
+                loadPendingTestimonials();
+            } else {
+                alert('Incorrect password');
+            }
+        };
 
     </script>
 </body>

@@ -1,29 +1,29 @@
 /* ================================
    CSS Design System - QuantMentor
-   Premium Light Mode Theme
+   Premium Dark Mode Theme
    ================================ */
 
 /* --------------------------------
    CSS Custom Properties (Variables)
    -------------------------------- */
 :root {
-    /* Colors - Light Theme */
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8fafc;
-    --bg-tertiary: #f1f5f9;
-    --bg-card: rgba(255, 255, 255, 0.95);
-    --bg-glass: rgba(0, 0, 0, 0.03);
+    /* Colors - Dark Theme */
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --bg-card: rgba(26, 26, 37, 0.8);
+    --bg-glass: rgba(255, 255, 255, 0.05);
 
     /* Text Colors */
-    --text-primary: #1e293b;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0b0;
+    --text-muted: #6a6a7a;
 
-    /* Accent Colors - Darker for visibility on light backgrounds */
-    --accent-primary: #0d9488;
-    --accent-secondary: #0f766e;
-    --accent-tertiary: #115e59;
-    --accent-gradient: linear-gradient(135deg, #0d9488 0%, #0f766e 40%, #f59e0b 100%);
+    /* Accent Colors */
+    --accent-primary: #2dd4bf;
+    --accent-secondary: #14b8a6;
+    --accent-tertiary: #0d9488;
+    --accent-gradient: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 40%, #f59e0b 100%);
 
     /* Status Colors */
     --success: #22c55e;
@@ -31,14 +31,14 @@
     --error: #ef4444;
 
     /* Borders */
-    --border-subtle: rgba(0, 0, 0, 0.08);
-    --border-light: rgba(0, 0, 0, 0.12);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-light: rgba(255, 255, 255, 0.12);
 
     /* Shadows */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.1);
-    --shadow-glow: 0 0 40px rgba(13, 148, 136, 0.15);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 40px rgba(45, 212, 191, 0.25);
 
     /* Typography */
     --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -206,28 +206,28 @@ h3 {
 .btn-primary {
     background: var(--accent-gradient);
     color: white;
-    box-shadow: 0 4px 15px rgba(13, 148, 136, 0.3);
+    box-shadow: 0 4px 20px rgba(45, 212, 191, 0.35);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(13, 148, 136, 0.4);
+    box-shadow: 0 6px 30px rgba(45, 212, 191, 0.45);
 }
 
 .btn-secondary {
-    background: var(--bg-tertiary);
+    background: var(--bg-glass);
     color: var(--text-primary);
     border: 1px solid var(--border-light);
+    backdrop-filter: blur(10px);
 }
 
 .btn-secondary:hover {
-    background: var(--bg-secondary);
+    background: rgba(255, 255, 255, 0.1);
     border-color: var(--accent-primary);
-    color: var(--accent-primary);
 }
 
 .btn-service {
-    background: var(--bg-tertiary);
+    background: transparent;
     border: 1px solid var(--border-light);
     color: var(--text-primary);
     padding: 10px 20px;
@@ -235,9 +235,8 @@ h3 {
 }
 
 .btn-service:hover {
-    background: var(--accent-primary);
-    border-color: var(--accent-primary);
-    color: white;
+    background: var(--accent-gradient);
+    border-color: transparent;
 }
 
 .btn-product {
@@ -266,10 +265,9 @@ h3 {
     right: 0;
     z-index: 1000;
     padding: 16px 0;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(10, 10, 15, 0.8);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border-subtle);
-    box-shadow: var(--shadow-sm);
 }
 
 .nav-container {
@@ -396,9 +394,10 @@ h3 {
     position: absolute;
     inset: 0;
     background-image:
-        linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.5;
 }
 
 .hero-container {
@@ -508,11 +507,19 @@ h3 {
     border: 1px solid var(--border-light);
     border-radius: var(--radius-xl);
     text-align: center;
-    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(20px);
+    overflow: hidden;
 }
 
 .profile-glow {
-    display: none;
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 180deg, transparent, var(--accent-primary), transparent 30%);
+    animation: rotate 4s linear infinite;
+    opacity: 0.1;
 }
 
 @keyframes rotate {
@@ -614,23 +621,16 @@ h3 {
 .services {
     padding: var(--section-padding);
     background: var(--bg-secondary);
-    position: relative;
 }
 
 .services::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--border-light), transparent);
+    display: none;
 }
 
 .services-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 28px;
+    gap: 24px;
 }
 
 .service-card {
@@ -639,18 +639,18 @@ h3 {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal);
 }
 
 .service-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 40px rgba(13, 148, 136, 0.12);
     border-color: var(--accent-primary);
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-glow);
 }
 
 .service-card.popular {
     border-color: var(--accent-primary);
-    background: linear-gradient(135deg, rgba(13, 148, 136, 0.08), rgba(245, 158, 11, 0.05));
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(245, 158, 11, 0.08));
 }
 
 .popular-badge {
@@ -785,7 +785,7 @@ h3 {
 .products-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 28px;
+    gap: 24px;
 }
 
 .product-card {
@@ -794,18 +794,17 @@ h3 {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal);
 }
 
 .product-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 40px rgba(13, 148, 136, 0.12);
     border-color: var(--accent-primary);
+    transform: translateY(-8px);
 }
 
 .product-card.featured {
     border-color: var(--accent-secondary);
-    background: linear-gradient(135deg, rgba(13, 148, 136, 0.08), rgba(245, 158, 11, 0.05));
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
 }
 
 .featured-badge {
@@ -935,51 +934,34 @@ h3 {
 .testimonials {
     padding: var(--section-padding);
     background: var(--bg-secondary);
-    position: relative;
 }
 
 .testimonials::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--border-light), transparent);
+    display: none;
 }
 
 .testimonials-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 28px;
+    gap: 24px;
 }
 
 .testimonial-card {
-    padding: 28px;
+    padding: 32px;
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.testimonial-card::before {
-    content: '"';
-    position: absolute;
-    top: 10px;
-    left: 20px;
-    font-size: 4rem;
-    font-family: Georgia, serif;
-    color: var(--accent-primary);
-    opacity: 0.1;
-    line-height: 1;
+    transition: all var(--transition-normal);
 }
 
 .testimonial-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(13, 148, 136, 0.12);
     border-color: var(--accent-primary);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-glow);
+}
+
+.testimonial-card::before {
+    display: none;
 }
 
 .testimonial-rating {

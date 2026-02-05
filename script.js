@@ -434,6 +434,8 @@ setTimeout(function () {
             loadSessionsFromSupabase();
             // Load blogs from Supabase
             loadBlogs();
+            // Load approved testimonials
+            loadApprovedTestimonials();
         } else {
             console.error('❌ Supabase SDK not loaded');
             console.log('⚠️ Continuing without Supabase - using default links');
@@ -1861,6 +1863,78 @@ function displayBlogs(blogs) {
         `;
         grid.appendChild(div);
     });
+}
+
+// --- APPROVED TESTIMONIALS ---
+async function loadApprovedTestimonials() {
+    const grid = document.getElementById('approved-testimonials-grid');
+    if (!grid) return;
+    
+    console.log('📣 Loading approved testimonials...');
+    if (!window.supabaseClient) {
+        console.log('⚠️ Supabase not available for testimonials');
+        return;
+    }
+    
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('testimonials')
+            .select('*')
+            .eq('is_published', true)
+            .order('created_at', { ascending: false });
+        
+        if (error) {
+            console.error('❌ Error fetching testimonials:', error);
+            return;
+        }
+        
+        console.log(`✅ Loaded ${data?.length || 0} approved testimonials`);
+        displayApprovedTestimonials(data || []);
+    } catch (e) {
+        console.error('Testimonials load error:', e);
+    }
+}
+
+function displayApprovedTestimonials(testimonials) {
+    const grid = document.getElementById('approved-testimonials-grid');
+    if (!grid) return;
+    
+    grid.innerHTML = '';
+    
+    if (testimonials.length === 0) {
+        grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:40px;">No reviews yet. Be the first to share your experience!</p>';
+        return;
+    }
+    
+    testimonials.forEach(t => {
+        const stars = '★'.repeat(t.rating) + '☆'.repeat(5 - t.rating);
+        const date = new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        
+        const div = document.createElement('div');
+        div.className = 'testimonial-card';
+        div.innerHTML = `
+            <div class="testimonial-rating">${'★'.repeat(t.rating)}</div>
+            <p class="testimonial-text">"${escapeHtml(t.review)}"</p>
+            <div class="testimonial-author">
+                <div class="author-avatar"><i class="fas fa-user"></i></div>
+                <div class="author-info">
+                    <span class="author-name">${escapeHtml(t.name)}</span>
+                    <span class="author-role">${escapeHtml(t.title)}</span>
+                </div>
+            </div>
+            <div class="verified-badge">
+                <i class="fas fa-check-circle"></i> Verified • ${date}
+            </div>
+        `;
+        grid.appendChild(div);
+    });
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Global scope for HTML access
