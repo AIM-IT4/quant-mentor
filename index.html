@@ -844,29 +844,25 @@
         </div>
     </div>
 
-    <!-- EmailJS SDK for sending emails to customers (free) -->
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <script>
-        // Initialize EmailJS immediately after loading
-        (function () {
-            if (typeof emailjs !== 'undefined') {
-                emailjs.init('qDPRKM4ROa6YKvqWL');
-                console.log('✅ EmailJS initialized inline');
-            } else {
-                console.error('❌ EmailJS SDK not loaded');
-            }
-        })();
-    </script>
-
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- Razorpay Checkout Script (Secure - loaded from Razorpay CDN) -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    
+
     <!-- Config file (contains API keys - not tracked by git) -->
-    <script src="config.js"></script>
-    
+    <script>
+        // Load config.js if it exists, otherwise gracefully fallback
+        (function () {
+            const script = document.createElement('script');
+            script.src = 'config.js';
+            script.onerror = function () {
+                console.log('ℹ️ Local configuration file (config.js) not found. Using defaults/environment variables.');
+            };
+            document.head.appendChild(script);
+        })();
+    </script>
+
     <script src="script.js"></script>
 </body>
 

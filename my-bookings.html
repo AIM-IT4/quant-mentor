@@ -11,17 +11,15 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- EmailJS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
-        // EmailJS Configuration for Cancellation Emails
-        const EMAILJS_USER_ID = 'qDPRKM4ROa6YKvqWL';
-        const EMAILJS_SERVICE_ID = 'service_t71bulx';
-        const EMAILJS_CANCELLATION_TEMPLATE_ID = 'template_nxmhx1c';
-
-        // Initialize EmailJS
+        // Load config.js if it exists, otherwise gracefully fallback
         (function () {
-            emailjs.init(EMAILJS_USER_ID);
+            const script = document.createElement('script');
+            script.src = 'config.js';
+            script.onerror = function () {
+                console.log('ℹ️ Local configuration file (config.js) not found. Using defaults/environment variables.');
+            };
+            document.head.appendChild(script);
         })();
     </script>
     <style>
@@ -305,6 +303,50 @@
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             }
         });
+
+        // Brevo Email Configuration
+        const BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in';
+        const BREVO_SENDER_NAME = 'QuantMentor';
+
+        // Send email via Brevo API
+        async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
+            const BREVO_API_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_API_KEY) ? window.CONFIG.BREVO_API_KEY : '';
+
+            if (!BREVO_API_KEY) {
+                console.warn('⚠️ Brevo API key not configured. Email not sent.');
+                return { success: false, error: 'API key not configured' };
+            }
+
+            try {
+                const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+                    method: 'POST',
+                    headers: {
+                        'accept': 'application/json',
+                        'api-key': BREVO_API_KEY,
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        sender: { email: BREVO_SENDER_EMAIL, name: BREVO_SENDER_NAME },
+                        to: [{ email: to }],
+                        subject: subject,
+                        htmlContent: htmlContent,
+                        textContent: textContent
+                    })
+                });
+
+                if (response.ok) {
+                    console.log('✅ Email sent successfully via Brevo');
+                    return { success: true };
+                } else {
+                    const error = await response.json();
+                    console.error('❌ Brevo error:', error);
+                    return { success: false, error: error.message };
+                }
+            } catch (error) {
+                console.error('❌ Failed to send email:', error);
+                return { success: false, error: error.message };
+            }
+        }
 
         // Search bookings by email
         async function searchBookings() {
@@ -622,19 +664,29 @@ Do you want to proceed with cancellation?`;
                     throw updateError;
                 }
 
-                // Send cancellation notification via EmailJS
-                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CANCELLATION_TEMPLATE_ID, {
-                    to_email: booking.email,
-                    to_name: booking.name || booking.email.split('@')[0],
-                    subject: `Cancellation Request Received - Booking ${bookingId}`,
-                    booking_id: bookingId,
-                    service_name: booking.service_name,
-                    booking_date: formatDate(booking.booking_date),
-                    booking_time: booking.booking_time,
-                    original_price: booking.service_price,
-                    refund_percentage: refundInfo.percentage,
-                    refund_amount: refundInfo.amount,
-                    message: `
+                // Send cancellation notification via Brevo
+                const htmlContent = `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <h2 style="color: #ef4444;">❌ Cancellation Request Received</h2>
+                        <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                        <p><strong>Booking ID:</strong> ${bookingId}</p>
+                        <p><strong>Session:</strong> ${booking.service_name}</p>
+                        <p><strong>Original Date:</strong> ${formatDate(booking.booking_date)} at ${booking.booking_time}</p>
+                        <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                        <h3 style="color: #374151;">REFUND DETAILS:</h3>
+                        <p>• <strong>Original Amount:</strong> ₹${booking.service_price}</p>
+                        <p>• <strong>Refund Percentage:</strong> ${refundInfo.percentage}%</p>
+                        <p>• <strong>Refund Amount:</strong> ₹${refundInfo.amount}</p>
+                        <p>• <strong>Policy Applied:</strong> ${refundInfo.policyApplied}</p>
+                        <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                        <p style="color: #6b7280;"><strong>Status:</strong> Pending Admin Approval</p>
+                        <p style="color: #6b7280;"><strong>Processing Time:</strong> 5-7 business days after approval</p>
+                        <p style="margin-top: 20px; color: #6b7280;">You will receive another email once your refund is processed.</p>
+                        <p style="color: #6b7280;">Best regards,<br>${BREVO_SENDER_NAME}</p>
+                    </div>
+                `;
+
+                const textContent = `
 ❌ CANCELLATION REQUEST RECEIVED
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
@@ -649,11 +701,15 @@ REFUND DETAILS:
 
 Status: Pending Admin Approval
 Processing Time: 5-7 business days after approval
-
-You will receive another email once your refund is processed.
 ━━━━━━━━━━━━━━━━━━━━
-                    `.trim()
-                });
+                `;
+
+                await sendEmailWithBrevo(
+                    booking.email,
+                    `Cancellation Request Received - Booking ${bookingId}`,
+                    htmlContent,
+                    textContent
+                );
 
                 console.log('📧 Cancellation email sent successfully');
 
