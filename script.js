@@ -53,6 +53,13 @@ async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
     }
 }
 
+// Send Notification to Admin
+async function sendAdminNotification(subject, htmlContent, textContent) {
+    const ADMIN_EMAIL = 'jha.8@alumni.iitj.ac.in';
+    console.log('📧 Sending Admin Notification to:', ADMIN_EMAIL);
+    return sendEmailWithBrevo(ADMIN_EMAIL, subject, htmlContent, textContent);
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log('🚀 DOM loaded, initializing all components...');
 
@@ -1342,6 +1349,21 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
                 if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
                     // Send email to customer via Brevo
                     sendProductEmail(customerEmail, productName, paymentId, downloadLink);
+
+                    // Send Admin Notification
+                    const adminSubject = `💰 New Product Sale: ${productName}`;
+                    const adminBody = `
+                        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #22c55e; border-radius: 8px;">
+                            <h2 style="color: #16a34a;">💰 New Sale!</h2>
+                            <p><strong>Product:</strong> ${productName}</p>
+                            <p><strong>Amount:</strong> ₹${Math.round(loggedAmount)}</p>
+                            <p><strong>Customer Email:</strong> ${customerEmail}</p>
+                            <p><strong>Payment ID:</strong> ${paymentId}</p>
+                        </div>
+                    `;
+                    const adminText = `New Sale!\nProduct: ${productName}\nAmount: ₹${Math.round(loggedAmount)}\nEmail: ${customerEmail}\nID: ${paymentId}`;
+                    sendAdminNotification(adminSubject, adminBody, adminText);
+
                     alert('🎉 Payment Successful!\n\nPayment ID: ' + paymentId + '\n\nDownload link sent to: ' + customerEmail + '\n\nClick OK to also open it now.');
                     window.open(downloadLink, '_blank');
                 } else {
@@ -1876,8 +1898,25 @@ New Booking Details:
         });
         console.log('Email notification sent');
     } catch (error) {
-        console.error('Admin email notification failed:', error);
+        console.error('Formspree email failed:', error);
     }
+
+    // Send Admin Notification via Brevo (Unified System)
+    const adminHtml = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+            <h2 style="color: #4f46e5;">🆕 New Session Booking</h2>
+            <p><strong>Customer:</strong> ${booking.name}</p>
+            <p><strong>Email:</strong> ${booking.email}</p>
+            <p><strong>Phone:</strong> ${booking.phone}</p>
+            <hr>
+            <p><strong>Session:</strong> ${booking.sessionType}</p>
+            <p><strong>Price:</strong> ₹${booking.price}</p>
+            <p><strong>Date:</strong> ${booking.date} at ${booking.time}</p>
+            <p><strong>Payment ID:</strong> ${paymentId}</p>
+            <p><strong>Message:</strong> ${booking.message}</p>
+        </div>
+    `;
+    await sendAdminNotification(`New Booking: ${booking.name} - ${booking.sessionType}`, adminHtml, emailBody);
 
     // Send confirmation email to CUSTOMER with Meet link via Brevo
     console.log('📧 Sending session confirmation to customer:', booking.email);
