@@ -687,7 +687,7 @@ async function displaySupabaseProducts(products) {
             const priceDisplay = isFree
                 ? `<div class="product-price" style="color:#22c55e">Free</div>`
                 : isLocalCurrency
-                    ? `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;"><div class="product-price" style="font-size:1.2em;">${formatPrice(localPrice)}</div><span style="font-size:0.75em;color:var(--text-muted);">(₹${product.price} INR)</span></div>`
+                    ? `<div class="product-price" style="font-size:1.2em;">${formatPrice(localPrice)}</div>`
                     : `<div class="product-price">₹${product.price}</div>`;
 
             const btnText = isFree ? 'Download' : 'Buy Now';
@@ -763,21 +763,13 @@ window.openProductModal = async function (id) {
             priceElement.textContent = 'FREE';
             if (pppInfoElement) pppInfoElement.style.display = 'none';
         } else if (isLocalCurrency) {
-            // Show local currency with INR reference
+            // Show local currency only
             priceElement.innerHTML = `<span style="font-size:1.3em;font-weight:600;">${formatPrice(localPrice)}</span>`;
-            if (pppInfoElement && pppTextElement) {
-                pppInfoElement.style.display = 'block';
-                pppTextElement.innerHTML = `<i class="fas fa-globe"></i> Converted from ₹${product.price} INR • ${localPrice.currency.name}`;
-            }
+            if (pppInfoElement) pppInfoElement.style.display = 'none';
         } else {
             // Show INR for Indian users
             priceElement.textContent = '₹' + product.price;
-            if (pppInfoElement) {
-                pppInfoElement.style.display = 'block';
-                if (pppTextElement) {
-                    pppTextElement.innerHTML = '<i class="fas fa-rupee-sign"></i> Price in Indian Rupees (INR)';
-                }
-            }
+            if (pppInfoElement) pppInfoElement.style.display = 'none';
         }
 
         window.currentDiscountedPrice = undefined;
@@ -857,7 +849,7 @@ async function updateServicesSection(sessions) {
         const priceDisplay = session.price === 0 
             ? '<span class="price-free">FREE</span>'
             : isLocalCurrency
-                ? `<span style="font-weight:700;">${formatPrice(localPrice)}</span><span style="font-size:0.8em;color:var(--text-muted);margin-left:5px;">(₹${session.price})</span>`
+                ? `<span style="font-weight:700;">${formatPrice(localPrice)}</span>`
                 : `₹${session.price}`;
 
         serviceCard.innerHTML = `
@@ -935,9 +927,9 @@ async function updateBookingForm(sessions) {
         if (session.price === 0) {
             option.innerHTML = `🆓 ${session.name} (${session.duration} min) - FREE`;
         } else if (isLocalCurrency) {
-            option.innerHTML = `${session.name} (${session.duration} min) - ${formatPrice(localPrice)} (₹${session.price}) `;
+            option.innerHTML = `${session.name} (${session.duration} min) - ${formatPrice(localPrice)}`;
         } else {
-            option.innerHTML = `${session.name} (${session.duration} min) - ₹${session.price} `;
+            option.innerHTML = `${session.name} (${session.duration} min) - ₹${session.price}`;
         }
         option.style.color = session.price === 0 ? '#22c55e' : '';
 
@@ -1429,7 +1421,7 @@ if (bookingForm) {
                 const isLocalCurrency = localPrice.currency.code !== 'INR';
                 
                 if (isLocalCurrency) {
-                    priceDisplay.innerHTML = `${formatPrice(localPrice)} <span style="font-size:0.8em;color:var(--text-muted);">(₹${priceValue})</span>`;
+                    priceDisplay.textContent = formatPrice(localPrice);
                 } else {
                     priceDisplay.textContent = '₹' + priceValue;
                 }
