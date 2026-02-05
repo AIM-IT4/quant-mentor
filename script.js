@@ -387,7 +387,7 @@ function displaySupabaseProducts(products) {
 
     // Clear existing products (keep only hardcoded ones we want to keep)
     const existingCards = productsGrid.querySelectorAll('.product-card');
-    const hardcodedProducts = ['Test Product']; // Keep these hardcoded products
+    const hardcodedProducts = []; // No hardcoded products to keep
 
     existingCards.forEach(card => {
         const productName = card.querySelector('.btn-product')?.dataset.product;
@@ -613,7 +613,6 @@ const PRODUCT_DOWNLOAD_LINKS = {
     'Quant Projects Bundle': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
     'Interview Bible': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
     'Complete Quant Bundle': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
-    'Test Product': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
     'Free Sample - Quant Cheatsheet': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing'
 };
 
