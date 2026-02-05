@@ -1516,7 +1516,10 @@ Brief Q&A"></textarea>
                             </div>
                         </div>
 
-                        ${booking.meet_link ? `<div style="background: rgba(34, 197, 94, 0.1); padding: 8px 12px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9em; color: #22c55e;"><i class="fas fa-video"></i> <strong>Meet Link:</strong> <a href="${booking.meet_link}" target="_blank" style="color: inherit; text-decoration: underline;">${booking.meet_link}</a></div>` : '<div style="background: rgba(239, 68, 68, 0.1); padding: 8px 12px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9em; color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> No Meet Link found</div>'}
+                        ${(function () {
+                        const link = booking.meet_link || 'https://meet.google.com/hfp-npyq-qho';
+                        return `<div style="background: rgba(34, 197, 94, 0.1); padding: 8px 12px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9em; color: #22c55e;"><i class="fas fa-video"></i> <strong>Meet Link:</strong> <a href="${link}" target="_blank" style="color: inherit; text-decoration: underline;">${link}</a></div>`;
+                    })()}
                         
                         ${booking.reschedule_reason ? `<p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9em;"><strong>Reason:</strong> ${booking.reschedule_reason}</p>` : ''}
                         
@@ -1577,7 +1580,7 @@ Brief Q&A"></textarea>
                 if (updateError) throw updateError;
 
                 // Notify user via Brevo
-                const meetLink = booking.meet_link || 'Will be shared soon';
+                const meetLink = booking.meet_link || 'https://meet.google.com/hfp-npyq-qho';
                 const htmlContent = `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                         <h2 style="color: #10b981;">✅ Reschedule Request Approved</h2>
