@@ -683,7 +683,10 @@ Brief Q&A"></textarea>
                 status.className = 'status';
 
                 try {
-                    const productId = document.getElementById('productId').value;
+                    console.log('Admin Panel Version: Service Key Active');
+                    console.log('Key Prefix:', SUPABASE_KEY ? SUPABASE_KEY.substring(0, 15) : 'None');
+
+                    const productId = document.getElementById('productId').value.trim();
                     const name = document.getElementById('productName').value;
                     const price = document.getElementById('productPrice').value;
                     const originalPrice = document.getElementById('productOriginalPrice').value || 0;
