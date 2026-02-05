@@ -461,7 +461,7 @@ function displaySupabaseProducts(products) {
     if (productsGrid) productsGrid.innerHTML = '';
     if (resourcesGrid) resourcesGrid.innerHTML = '';
 
-    const paidProducts = products.filter(p => !p.price || p.price > 0);
+    const paidProducts = products.filter(p => p.price > 0);
     const freeProducts = products.filter(p => p.price === 0);
 
     const renderList = [
