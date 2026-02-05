@@ -839,21 +839,32 @@ Brief Q&A"></textarea>
         // Check Password Function (globally accessible)
         // Check Password Function (globally accessible)
         function checkPassword() {
-            console.log('Login button clicked');
-            const pwd = document.getElementById('adminPassword').value;
-            if (pwd === 'admin123') {
-                console.log('Password correct, logging in...');
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('adminContainer').style.display = 'block'; // Show admin panel
+            try {
+                console.log('Login button clicked');
+                const pwd = document.getElementById('adminPassword').value;
+                if (pwd === 'admin123') {
+                    console.log('Password correct, logging in...');
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('adminContainer').style.display = 'block';
 
-                if (typeof loadProducts === 'function') loadProducts();
-                if (typeof loadSessions === 'function') loadSessions();
-                if (typeof loadRescheduleRequests === 'function') loadRescheduleRequests();
-                if (typeof loadCancellationRequests === 'function') loadCancellationRequests();
-                if (typeof loadBlogs === 'function') loadBlogs();
-                if (typeof initDashboard === 'function') initDashboard();
-            } else {
-                alert('Incorrect password');
+                    // Force redraw and scroll to top
+                    setTimeout(() => {
+                        window.scrollTo(0, 0);
+                    }, 100);
+
+                    // Execute load functions safely
+                    try { if (typeof loadProducts === 'function') loadProducts(); } catch (e) { console.error('Products load error', e); }
+                    try { if (typeof loadSessions === 'function') loadSessions(); } catch (e) { console.error('Sessions load error', e); }
+                    try { if (typeof loadRescheduleRequests === 'function') loadRescheduleRequests(); } catch (e) { console.error('Reschedule load error', e); }
+                    try { if (typeof loadCancellationRequests === 'function') loadCancellationRequests(); } catch (e) { console.error('Cancellation load error', e); }
+                    try { if (typeof loadBlogs === 'function') loadBlogs(); } catch (e) { console.error('Blogs load error', e); }
+                    try { if (typeof initDashboard === 'function') initDashboard(); } catch (e) { console.error('Dashboard init error', e); }
+                } else {
+                    alert('Incorrect password');
+                }
+            } catch (err) {
+                alert('Login Critical Error: ' + err.message);
+                console.error(err);
             }
         }
 
