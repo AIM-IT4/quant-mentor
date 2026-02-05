@@ -1914,6 +1914,8 @@ New Booking Details:
             <p><strong>Date:</strong> ${booking.date} at ${booking.time}</p>
             <p><strong>Payment ID:</strong> ${paymentId}</p>
             <p><strong>Message:</strong> ${booking.message}</p>
+            <hr>
+            <p><strong>🔗 Meeting Link:</strong> <a href="${GOOGLE_MEET_LINK}">${GOOGLE_MEET_LINK}</a></p>
         </div>
     `;
     await sendAdminNotification(`New Booking: ${booking.name} - ${booking.sessionType}`, adminHtml, emailBody);
