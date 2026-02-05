@@ -848,7 +848,7 @@ async function displaySupabaseProducts(products) {
                 ${imageSection}
                 <div class="product-content">
                     <h3 class="product-title">${product.name}${currencyBadge}</h3>
-                    <div class="product-description">${displayDesc || (isFree ? 'Free resource for quants.' : 'Premium content.')}</div>
+                    <div class="product-description">${displayDesc.replace(/<[^>]*>?/gm, '').substring(0, 150) + '...'}</div>
                     <div class="product-meta">
                         <span><i class="fas fa-file-alt"></i> ${isFree ? 'Resource' : 'Premium Note'}</span>
                         <span><i class="fas fa-download"></i> Instant Access</span>

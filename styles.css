@@ -891,6 +891,14 @@ h3 {
     font-size: 0.9rem;
     margin-bottom: 16px;
     line-height: 1.5;
+    /* Line clamping for cleaner cards */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 4.5em;
+    /* 1.5 line-height * 3 lines */
 }
 
 .product-meta {
