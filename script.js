@@ -422,75 +422,157 @@ async function getUserCountry() {
     }
 }
 
-// Currency Configuration - Exchange rates from INR (base currency)
-const CURRENCY_CONFIG = {
-    'IN': { code: 'INR', symbol: '₹', rate: 1, name: 'Indian Rupee' },
-    'US': { code: 'USD', symbol: '$', rate: 0.012, name: 'US Dollar' },
-    'GB': { code: 'GBP', symbol: '£', rate: 0.0095, name: 'British Pound' },
-    'EU': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
-    'DE': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
-    'FR': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
-    'IT': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
-    'ES': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
-    'NL': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
-    'BE': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
-    'AT': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
-    'PT': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
-    'GR': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
-    'IE': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
-    'FI': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
-    'JP': { code: 'JPY', symbol: '¥', rate: 1.8, name: 'Japanese Yen' },
-    'KR': { code: 'KRW', symbol: '₩', rate: 16.5, name: 'Korean Won' },
-    'CN': { code: 'CNY', symbol: '¥', rate: 0.087, name: 'Chinese Yuan' },
-    'AU': { code: 'AUD', symbol: 'A$', rate: 0.018, name: 'Australian Dollar' },
-    'CA': { code: 'CAD', symbol: 'C$', rate: 0.016, name: 'Canadian Dollar' },
-    'CH': { code: 'CHF', symbol: 'CHF', rate: 0.010, name: 'Swiss Franc' },
-    'SE': { code: 'SEK', symbol: 'kr', rate: 0.13, name: 'Swedish Krona' },
-    'NO': { code: 'NOK', symbol: 'kr', rate: 0.13, name: 'Norwegian Krone' },
-    'DK': { code: 'DKK', symbol: 'kr', rate: 0.084, name: 'Danish Krone' },
-    'SG': { code: 'SGD', symbol: 'S$', rate: 0.016, name: 'Singapore Dollar' },
-    'HK': { code: 'HKD', symbol: 'HK$', rate: 0.094, name: 'Hong Kong Dollar' },
-    'NZ': { code: 'NZD', symbol: 'NZ$', rate: 0.020, name: 'New Zealand Dollar' },
-    'BR': { code: 'BRL', symbol: 'R$', rate: 0.067, name: 'Brazilian Real' },
-    'MX': { code: 'MXN', symbol: 'Mex$', rate: 0.24, name: 'Mexican Peso' },
-    'ZA': { code: 'ZAR', symbol: 'R', rate: 0.22, name: 'South African Rand' },
-    'RU': { code: 'RUB', symbol: '₽', rate: 1.1, name: 'Russian Ruble' },
-    'TR': { code: 'TRY', symbol: '₺', rate: 0.42, name: 'Turkish Lira' },
-    'AE': { code: 'AED', symbol: 'د.إ', rate: 0.044, name: 'UAE Dirham' },
-    'SA': { code: 'SAR', symbol: '﷼', rate: 0.045, name: 'Saudi Riyal' },
-    'PK': { code: 'PKR', symbol: '₨', rate: 3.3, name: 'Pakistani Rupee' },
-    'BD': { code: 'BDT', symbol: '৳', rate: 1.4, name: 'Bangladeshi Taka' },
-    'LK': { code: 'LKR', symbol: 'Rs', rate: 3.6, name: 'Sri Lankan Rupee' },
-    'NP': { code: 'NPR', symbol: 'Rs', rate: 1.6, name: 'Nepalese Rupee' },
-    'TH': { code: 'THB', symbol: '฿', rate: 0.43, name: 'Thai Baht' },
-    'MY': { code: 'MYR', symbol: 'RM', rate: 0.056, name: 'Malaysian Ringgit' },
-    'ID': { code: 'IDR', symbol: 'Rp', rate: 190, name: 'Indonesian Rupiah' },
-    'PH': { code: 'PHP', symbol: '₱', rate: 0.70, name: 'Philippine Peso' },
-    'VN': { code: 'VND', symbol: '₫', rate: 300, name: 'Vietnamese Dong' },
-    'EG': { code: 'EGP', symbol: '£', rate: 0.60, name: 'Egyptian Pound' },
-    'NG': { code: 'NGN', symbol: '₦', rate: 18.5, name: 'Nigerian Naira' },
-    'KE': { code: 'KES', symbol: 'KSh', rate: 1.6, name: 'Kenyan Shilling' },
-    'GH': { code: 'GHS', symbol: 'GH₵', rate: 0.18, name: 'Ghanaian Cedi' }
+// Currency Configuration - Maps country codes to currency info (rates fetched dynamically)
+const CURRENCY_MAP = {
+    'IN': { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+    'US': { code: 'USD', symbol: '$', name: 'US Dollar' },
+    'GB': { code: 'GBP', symbol: '£', name: 'British Pound' },
+    'EU': { code: 'EUR', symbol: '€', name: 'Euro' },
+    'DE': { code: 'EUR', symbol: '€', name: 'Euro' },
+    'FR': { code: 'EUR', symbol: '€', name: 'Euro' },
+    'IT': { code: 'EUR', symbol: '€', name: 'Euro' },
+    'ES': { code: 'EUR', symbol: '€', name: 'Euro' },
+    'NL': { code: 'EUR', symbol: '€', name: 'Euro' },
+    'BE': { code: 'EUR', symbol: '€', name: 'Euro' },
+    'AT': { code: 'EUR', symbol: '€', name: 'Euro' },
+    'PT': { code: 'EUR', symbol: '€', name: 'Euro' },
+    'GR': { code: 'EUR', symbol: '€', name: 'Euro' },
+    'IE': { code: 'EUR', symbol: '€', name: 'Euro' },
+    'FI': { code: 'EUR', symbol: '€', name: 'Euro' },
+    'JP': { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+    'KR': { code: 'KRW', symbol: '₩', name: 'Korean Won' },
+    'CN': { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
+    'AU': { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+    'CA': { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+    'CH': { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
+    'SE': { code: 'SEK', symbol: 'kr', name: 'Swedish Krona' },
+    'NO': { code: 'NOK', symbol: 'kr', name: 'Norwegian Krone' },
+    'DK': { code: 'DKK', symbol: 'kr', name: 'Danish Krone' },
+    'SG': { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar' },
+    'HK': { code: 'HKD', symbol: 'HK$', name: 'Hong Kong Dollar' },
+    'NZ': { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar' },
+    'BR': { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
+    'MX': { code: 'MXN', symbol: 'Mex$', name: 'Mexican Peso' },
+    'ZA': { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
+    'RU': { code: 'RUB', symbol: '₽', name: 'Russian Ruble' },
+    'TR': { code: 'TRY', symbol: '₺', name: 'Turkish Lira' },
+    'AE': { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham' },
+    'SA': { code: 'SAR', symbol: '﷼', name: 'Saudi Riyal' },
+    'PK': { code: 'PKR', symbol: '₨', name: 'Pakistani Rupee' },
+    'BD': { code: 'BDT', symbol: '৳', name: 'Bangladeshi Taka' },
+    'LK': { code: 'LKR', symbol: 'Rs', name: 'Sri Lankan Rupee' },
+    'NP': { code: 'NPR', symbol: 'Rs', name: 'Nepalese Rupee' },
+    'TH': { code: 'THB', symbol: '฿', name: 'Thai Baht' },
+    'MY': { code: 'MYR', symbol: 'RM', name: 'Malaysian Ringgit' },
+    'ID': { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah' },
+    'PH': { code: 'PHP', symbol: '₱', name: 'Philippine Peso' },
+    'VN': { code: 'VND', symbol: '₫', name: 'Vietnamese Dong' },
+    'EG': { code: 'EGP', symbol: '£', name: 'Egyptian Pound' },
+    'NG': { code: 'NGN', symbol: '₦', name: 'Nigerian Naira' },
+    'KE': { code: 'KES', symbol: 'KSh', name: 'Kenyan Shilling' },
+    'GH': { code: 'GHS', symbol: 'GH₵', name: 'Ghanaian Cedi' }
 };
+
+// Cache for exchange rates
+let exchangeRatesCache = null;
+let exchangeRatesTimestamp = null;
+const RATES_CACHE_DURATION = 3600000; // 1 hour in milliseconds
+
+// Fetch real-time exchange rates from API
+async function fetchExchangeRates() {
+    // Check if we have cached rates that are still valid
+    if (exchangeRatesCache && exchangeRatesTimestamp) {
+        const age = Date.now() - exchangeRatesTimestamp;
+        if (age < RATES_CACHE_DURATION) {
+            console.log('💱 Using cached exchange rates (age:', Math.round(age / 60000), 'minutes)');
+            return exchangeRatesCache;
+        }
+    }
+    
+    try {
+        // Using exchangerate-api.com (free tier, no API key required for basic usage)
+        // Alternative: https://api.exchangerate.host/latest?base=INR
+        const response = await fetch('https://api.exchangerate.host/latest?base=INR');
+        const data = await response.json();
+        
+        if (data && data.rates) {
+            exchangeRatesCache = data.rates;
+            exchangeRatesTimestamp = Date.now();
+            console.log('💱 Fetched fresh exchange rates from API');
+            return data.rates;
+        } else {
+            throw new Error('Invalid response from exchange rate API');
+        }
+    } catch (error) {
+        console.error('❌ Failed to fetch exchange rates:', error);
+        console.log('⚠️ Falling back to hardcoded rates (may be outdated)');
+        return getFallbackRates();
+    }
+}
+
+// Fallback rates in case API fails
+function getFallbackRates() {
+    return {
+        'INR': 1,
+        'USD': 0.012,
+        'GBP': 0.0095,
+        'EUR': 0.011,
+        'JPY': 1.8,
+        'KRW': 16.5,
+        'CNY': 0.087,
+        'AUD': 0.018,
+        'CAD': 0.016,
+        'CHF': 0.010,
+        'SEK': 0.13,
+        'NOK': 0.13,
+        'DKK': 0.084,
+        'SGD': 0.016,
+        'HKD': 0.094,
+        'NZD': 0.020,
+        'BRL': 0.067,
+        'MXN': 0.24,
+        'ZAR': 0.22,
+        'RUB': 1.1,
+        'TRY': 0.42,
+        'AED': 0.044,
+        'SAR': 0.045,
+        'PKR': 3.3,
+        'BDT': 1.4,
+        'LKR': 3.6,
+        'NPR': 1.6,
+        'THB': 0.43,
+        'MYR': 0.056,
+        'IDR': 190,
+        'PHP': 0.70,
+        'VND': 300,
+        'EGP': 0.60,
+        'NGN': 18.5,
+        'KES': 1.6,
+        'GHS': 0.18
+    };
+}
 
 // Get currency info for a country code
 function getCurrencyForCountry(countryCode) {
-    if (!countryCode) return CURRENCY_CONFIG['IN']; // Default to INR
+    if (!countryCode) return CURRENCY_MAP['IN']; // Default to INR
     const code = countryCode.toUpperCase();
-    return CURRENCY_CONFIG[code] || CURRENCY_CONFIG['IN']; // Default to INR if not found
+    return CURRENCY_MAP[code] || CURRENCY_MAP['IN']; // Default to INR if not found
 }
 
-// Convert INR price to local currency
-function convertPrice(inrPrice, countryCode) {
-    if (!inrPrice || inrPrice <= 0) return { amount: 0, currency: CURRENCY_CONFIG['IN'] };
+// Convert INR price to local currency using live rates
+async function convertPrice(inrPrice, countryCode) {
+    if (!inrPrice || inrPrice <= 0) return { amount: 0, currency: CURRENCY_MAP['IN'] };
     
     const currency = getCurrencyForCountry(countryCode);
-    const convertedAmount = Math.round(inrPrice * currency.rate);
+    const rates = await fetchExchangeRates();
+    const rate = rates[currency.code] || 1;
+    const convertedAmount = Math.round(inrPrice * rate);
     
     return {
         amount: convertedAmount,
         currency: currency,
-        originalInr: inrPrice
+        originalInr: inrPrice,
+        rate: rate
     };
 }
 
@@ -508,8 +590,9 @@ async function loadProductsFromSupabase() {
             return;
         }
 
-        // Fetch country first for PPP
+        // Fetch country and exchange rates first
         await getUserCountry();
+        await fetchExchangeRates(); // Pre-fetch rates for currency conversion
 
         const { data, error } = await window.supabaseClient
             .from('products')
@@ -523,7 +606,7 @@ async function loadProductsFromSupabase() {
 
         if (data && data.length > 0) {
             console.log('📦 Loading ' + data.length + ' products from Supabase');
-            displaySupabaseProducts(data);
+            await displaySupabaseProducts(data);
         }
     } catch (err) {
         console.error('Failed to load products:', err);
@@ -532,7 +615,7 @@ async function loadProductsFromSupabase() {
 
 // Display products from Supabase in the products grid
 // Display products separated by Paid and Free
-function displaySupabaseProducts(products) {
+async function displaySupabaseProducts(products) {
     const productsGrid = document.querySelector('#products .products-grid') || document.querySelector('.products-grid');
     const resourcesGrid = document.getElementById('resources-grid');
 
@@ -547,24 +630,24 @@ function displaySupabaseProducts(products) {
         { items: freeProducts, container: resourcesGrid, isFree: true }
     ];
 
-    renderList.forEach(({ items, container, isFree }) => {
-        if (!container) return;
+    for (const { items, container, isFree } of renderList) {
+        if (!container) continue;
         if (items.length === 0 && isFree) {
             const section = document.getElementById('resources');
             if (section) section.style.display = 'none';
-            return;
+            continue;
         } else if (items.length > 0 && isFree) {
             const section = document.getElementById('resources');
             if (section) section.style.display = 'block';
         }
 
-        items.forEach(product => {
+        for (const product of items) {
             const productCard = document.createElement('div');
             productCard.className = 'product-card';
             productCard.dataset.category = 'notes';
 
-            // Convert price to local currency
-            const localPrice = convertPrice(product.price, userCountryCode);
+            // Convert price to local currency (async)
+            const localPrice = await convertPrice(product.price, userCountryCode);
             const isLocalCurrency = localPrice.currency.code !== 'INR';
             
             const priceDisplay = isFree
@@ -611,8 +694,8 @@ function displaySupabaseProducts(products) {
                 </div>
             `;
             container.appendChild(productCard);
-        });
-    });
+        }
+    }
 }
 
 // Global scope for product modal
@@ -626,7 +709,7 @@ window.openProductModal = async function (id) {
         if (!modal) return;
 
         // Convert price to local currency
-        const localPrice = convertPrice(product.price, userCountryCode);
+        const localPrice = await convertPrice(product.price, userCountryCode);
         const isLocalCurrency = localPrice.currency.code !== 'INR';
         
         // Store price info for calculations
