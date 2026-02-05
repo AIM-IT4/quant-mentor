@@ -1654,25 +1654,35 @@ h3 {
 }
 
 /* Fix for Long Product Descriptions in Modal */
-#modalDescription {
+#modalDescription,
+.modal-description-text {
     white-space: normal !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
     line-height: 1.6;
     color: var(--text-secondary);
+    font-size: 0.95rem;
 }
 
-#modalDescription p {
+#modalDescription * {
+    max-width: 100%;
+}
+
+#modalDescription p,
+.modal-description-text p {
     margin-bottom: 0.8em;
 }
 
 #modalDescription ul,
-#modalDescription ol {
+.modal-description-text ul,
+#modalDescription ol,
+.modal-description-text ol {
     margin-left: 20px;
     margin-bottom: 0.8em;
 }
 
-#modalDescription strong {
+#modalDescription strong,
+.modal-description-text strong {
     color: var(--text-primary);
 }
 
@@ -1680,4 +1690,7 @@ h3 {
     max-height: 60vh;
     overflow-y: auto;
     padding-right: 10px;
+    scrollbar-width: thin;
+    /* Firefox */
+    scrollbar-color: var(--border-light) transparent;
 }
