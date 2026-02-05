@@ -1238,7 +1238,7 @@ function initRazorpayCheckout(productName, amount) {
         "currency": "INR",
         "name": BUSINESS_NAME,
         "description": productName,
-        "handler": function (response) {
+        "handler": async function (response) {
             console.log('Payment success:', response);
             // ✅ Payment successful!
             const paymentId = response.razorpay_payment_id;
@@ -1247,17 +1247,38 @@ function initRazorpayCheckout(productName, amount) {
             // Get customer email from Razorpay response or prompt
             const customerEmail = prompt('Enter your email to receive the download link:');
 
-            if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
-                // Send email to customer
-                if (customerEmail && customerEmail.includes('@')) {
+            if (customerEmail && customerEmail.includes('@')) {
+                // Log purchase to Supabase for statistics
+                if (window.supabaseClient) {
+                    try {
+                        console.log('📊 Logging purchase to database...', { customerEmail, productName, amount, paymentId });
+                        await window.supabaseClient
+                            .from('purchases')
+                            .insert({
+                                customer_email: customerEmail,
+                                product_name: productName,
+                                amount: parseInt(amount) / 100, // Convert paise to INR
+                                payment_id: paymentId
+                            });
+                        console.log('✅ Purchase logged successfully');
+                    } catch (err) {
+                        console.error('❌ Failed to log purchase:', err);
+                    }
+                }
+
+                if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
+                    // Send email to customer via Brevo
                     sendProductEmail(customerEmail, productName, paymentId, downloadLink);
                     alert('🎉 Payment Successful!\n\nPayment ID: ' + paymentId + '\n\nDownload link sent to: ' + customerEmail + '\n\nClick OK to also open it now.');
+                    window.open(downloadLink, '_blank');
                 } else {
-                    alert('🎉 Payment Successful!\n\nPayment ID: ' + paymentId + '\n\nClick OK to download your product.');
+                    alert('🎉 Payment Successful!\n\nPayment ID: ' + paymentId + '\n\n⚠️ Download link not configured (but your purchase is recorded). Please contact support.');
                 }
-                window.open(downloadLink, '_blank');
             } else {
-                alert('🎉 Payment Successful!\n\nPayment ID: ' + paymentId + '\n\n⚠️ Download link not configured. Please contact support with your Payment ID.');
+                alert('🎉 Payment Successful!\n\nPayment ID: ' + paymentId + '\n\n⚠️ No valid email provided. Please contact support to receive your download.');
+                if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
+                    window.open(downloadLink, '_blank');
+                }
             }
         },
         "theme": {
