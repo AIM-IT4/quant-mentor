@@ -391,6 +391,8 @@ setTimeout(function () {
             loadProductsFromSupabase();
             // Load sessions from Supabase
             loadSessionsFromSupabase();
+            // Load blogs from Supabase
+            loadBlogs();
         } else {
             console.error('❌ Supabase SDK not loaded');
             console.log('⚠️ Continuing without Supabase - using default links');
@@ -1548,7 +1550,7 @@ window.openBlogModal = async function (id) {
 
 // Initialize Listeners
 document.addEventListener('DOMContentLoaded', () => {
-    loadBlogs();
+    // Blogs now loaded in main init sequence above
 
     const blogClose = document.getElementById('blogModalClose');
     if (blogClose) {
