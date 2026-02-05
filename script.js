@@ -1203,33 +1203,6 @@ function initRazorpayCheckout(productName, amount) {
         };
         document.head.appendChild(script);
         return;
-    } else {
-        alert('⚠️ Download link not configured. Please contact support.');
-        return;
-    }
-
-    // Validate key for paid products
-    if (RAZORPAY_KEY_ID === 'YOUR_RAZORPAY_KEY_ID_HERE') {
-        alert('⚠️ Razorpay not configured!\n\nAdd your Key ID in script.js line 253');
-        return;
-    }
-
-    // Check if Razorpay SDK is loaded
-    if (typeof Razorpay === 'undefined') {
-        alert('❌ Payment System Loading...\nPlease wait a moment and try again.\nIf the issue persists, refresh the page.');
-        console.error('Razorpay SDK not found!');
-
-        // Try to load Razorpay SDK dynamically
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.onload = function () {
-            alert('✅ Payment system loaded!\nPlease click "Buy Now" again.');
-        };
-        script.onerror = function () {
-            alert('❌ Unable to load payment system.\nPlease check your internet connection.');
-        };
-        document.head.appendChild(script);
-        return;
     }
 
     var options = {
