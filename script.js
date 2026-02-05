@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // ================================
 
 // ⚠️ ADD YOUR RAZORPAY KEY ID BELOW
-const RAZORPAY_KEY_ID = 'rzp_test_1DWpRLqKKMWMgY';
+const RAZORPAY_KEY_ID = 'rzp_live_SBbq38M84PSrrG';
 
 // Your business name
 const BUSINESS_NAME = 'QuantMentor';
