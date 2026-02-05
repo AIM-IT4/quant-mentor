@@ -1568,13 +1568,8 @@ const ADMIN_EMAIL = 'jha.8@alumni.iitj.ac.in';
 // Google Meet link for sessions (you can also generate unique links per booking)
 const GOOGLE_MEET_LINK = "https://meet.google.com/hfp-npyq-qho";
 
-// Session types with details
-const SESSION_TYPES = {
-    'free': { name: 'Free Test Session', price: 0, duration: 15 },
-    'quick': { name: 'Quick Consultation', price: 499, duration: 30 },
-    'deep': { name: 'Deep Dive Session', price: 999, duration: 60 },
-    'interview': { name: 'Interview Prep', price: 1499, duration: 90 }
-};
+// Session types (loaded dynamically from Supabase)
+let SESSION_TYPES = {};
 
 // Initialize booking form
 const bookingForm = document.getElementById('bookingForm');
@@ -1643,13 +1638,10 @@ if (bookingForm) {
             return;
         }
 
-        const [sessionType, price, duration] = serviceValue.split('|');
+        // Try to find session info from dynamic sessions
+        let sessionInfo = null;
 
-        // Try to find session info from multiple sources
-        let sessionInfo = SESSION_TYPES[sessionType];
-
-        // If not found in hardcoded types, try to find by matching session name in dynamic sessions
-        if (!sessionInfo && window.dynamicSessions) {
+        if (window.dynamicSessions) {
             sessionInfo = window.dynamicSessions.find(s =>
                 s.name.toLowerCase().replace(/\s+/g, '_') === sessionType ||
                 s.name.toLowerCase() === sessionType.replace(/_/g, ' ')
