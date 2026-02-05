@@ -1638,6 +1638,8 @@ if (bookingForm) {
             return;
         }
 
+        const [sessionType, price, duration] = serviceValue.split('|');
+
         // Try to find session info from dynamic sessions
         let sessionInfo = null;
 
