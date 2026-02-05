@@ -17,6 +17,9 @@
     <!-- Cropper.js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <!-- Quill.js (Rich Text Editor) -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
         // EmailJS Configuration
         const EMAILJS_USER_ID = 'qDPRKM4ROa6YKvqWL';
@@ -345,7 +348,9 @@
 
                 <div class="form-group">
                     <label>Description</label>
-                    <textarea id="productDesc" rows="3" placeholder="Brief description..."></textarea>
+                    <div style="background: white; border-radius: 4px; overflow: hidden;">
+                        <div id="productDescEditor" style="height: 250px; color: black;"></div>
+                    </div>
                 </div>
 
                 <div class="form-group" id="fileUploadGroup">
@@ -513,6 +518,7 @@ Brief Q&A"></textarea>
         let supabaseAdminClient = null;
         let cropper = null;
         let croppedCoverBlob = null;
+        let quill = null;
 
         // Check Password Function (globally accessible)
         function checkPassword() {
@@ -572,6 +578,29 @@ Brief Q&A"></textarea>
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', async function () {
             console.log('Admin page DOM loaded');
+
+            // Initialize Quill
+            try {
+                quill = new Quill('#productDescEditor', {
+                    theme: 'snow',
+                    placeholder: 'Detailed product description...',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline', 'strike'],
+                            ['blockquote', 'code-block'],
+                            [{ 'header': 1 }, { 'header': 2 }],
+                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                            [{ 'script': 'sub' }, { 'script': 'super' }],
+                            [{ 'indent': '-1' }, { 'indent': '+1' }],
+                            [{ 'size': ['small', false, 'large', 'huge'] }],
+                            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                            [{ 'color': [] }, { 'background': [] }],
+                            [{ 'align': [] }],
+                            ['clean']
+                        ]
+                    }
+                });
+            } catch (e) { console.error('Quill init error:', e); }
 
             // Cropper Event Listener
             const productCoverInput = document.getElementById('productCover');
@@ -660,7 +689,7 @@ Brief Q&A"></textarea>
                     const enablePPP = document.getElementById('productPPP').checked;
                     const discount = document.getElementById('productDiscount').value || 0;
                     const couponCode = document.getElementById('productCouponCode').value || null;
-                    const desc = document.getElementById('productDesc').value;
+                    const desc = quill ? quill.root.innerHTML : '';
                     const file = document.getElementById('productFile').files[0];
                     const coverFileInput = document.getElementById('productCover').files[0];
                     const coverFileToUpload = croppedCoverBlob || coverFileInput;
@@ -745,6 +774,7 @@ Brief Q&A"></textarea>
                     status.textContent = productId ? '✅ Product updated successfully!' : '✅ Product added successfully!';
                     status.classList.add('success');
                     document.getElementById('productForm').reset();
+                    if (quill) quill.setText('');
 
                     // Reset Cropper State
                     croppedCoverBlob = null;
@@ -847,7 +877,8 @@ Brief Q&A"></textarea>
                 document.getElementById('productPPP').checked = data.enable_ppp || false;
                 document.getElementById('productDiscount').value = data.discount_percentage || 0;
                 document.getElementById('productCouponCode').value = data.coupon_code || '';
-                document.getElementById('productDesc').value = data.description || '';
+                document.getElementById('productCouponCode').value = data.coupon_code || '';
+                if (quill) quill.root.innerHTML = data.description || '';
                 document.getElementById('productSubmitBtn').textContent = 'Update Product';
                 document.getElementById('cancelEditBtn').style.display = 'inline-block';
 
@@ -873,7 +904,8 @@ Brief Q&A"></textarea>
                 document.getElementById('productPPP').checked = false;
                 document.getElementById('productDiscount').value = '';
                 document.getElementById('productCouponCode').value = '';
-                document.getElementById('productDesc').value = '';
+                document.getElementById('productCouponCode').value = '';
+                if (quill) quill.setText('');
                 document.getElementById('productSubmitBtn').textContent = 'Upload & Save Product';
                 document.getElementById('cancelEditBtn').style.display = 'none';
                 document.getElementById('fileUploadGroup').style.display = 'block';

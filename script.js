@@ -465,7 +465,7 @@ function displaySupabaseProducts(products) {
                 ${imageSection}
                 <div class="product-content">
                     <h3 class="product-title">${product.name}</h3>
-                    <p class="product-description">${product.description || 'Premium digital product for quant professionals.'}</p>
+                    <div class="product-description">${product.description || 'Premium digital product for quant professionals.'}</div>
                     ${product.coupon_code && discountPercent > 0 ? `<div class="product-coupon" style="font-size: .8rem; color: #f59e0b; margin-top: 5px;">Coupon ${product.coupon_code}: ${discountPercent}% off</div>` : ''}
                     <div class="product-meta">
                         <span><i class="fas fa-file-pdf"></i> ${product.file_url.includes('.pdf') ? 'PDF Document' : 'Digital File'}</span>
