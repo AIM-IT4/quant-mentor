@@ -817,8 +817,8 @@ async function loadSessionsFromSupabase() {
             console.log('🎯 Loading ' + data.length + ' sessions from Supabase');
             // Store sessions globally for booking form reference
             window.dynamicSessions = data;
-            updateServicesSection(data);
-            updateBookingForm(data);
+            await updateServicesSection(data);
+            await updateBookingForm(data);
         }
     } catch (err) {
         console.error('Failed to load sessions:', err);
@@ -826,7 +826,7 @@ async function loadSessionsFromSupabase() {
 }
 
 // Update Services Section with Dynamic Sessions
-function updateServicesSection(sessions) {
+async function updateServicesSection(sessions) {
     const servicesContainer = document.querySelector('.services-grid');
     if (!servicesContainer) {
         console.error('Services container not found');
@@ -836,7 +836,8 @@ function updateServicesSection(sessions) {
     // Clear existing services (except hardcoded structure, we'll replace content)
     servicesContainer.innerHTML = '';
 
-    sessions.forEach((session, index) => {
+    for (let index = 0; index < sessions.length; index++) {
+        const session = sessions[index];
         const serviceCard = document.createElement('div');
         serviceCard.className = session.is_popular ? 'service-card popular' : 'service-card';
 
@@ -844,6 +845,16 @@ function updateServicesSection(sessions) {
         const featuresHtml = session.features ? session.features.map(feature =>
             `<li><i class="fas fa-check" style="color: #22c55e; margin-right: 8px;"></i>${feature}</li>`
         ).join('') : '';
+
+        // Convert price to local currency
+        const localPrice = await convertPrice(session.price, userCountryCode);
+        const isLocalCurrency = localPrice.currency.code !== 'INR';
+        
+        const priceDisplay = session.price === 0 
+            ? '<span class="price-free">FREE</span>'
+            : isLocalCurrency
+                ? `<span style="font-weight:700;">${formatPrice(localPrice)}</span><span style="font-size:0.8em;color:var(--text-muted);margin-left:5px;">(₹${session.price})</span>`
+                : `₹${session.price}`;
 
         serviceCard.innerHTML = `
             <div class="service-header">
@@ -855,7 +866,7 @@ function updateServicesSection(sessions) {
             </div>
             <div class="service-content">
                 <div class="service-price">
-                    ${session.price === 0 ? '<span class="price-free">FREE</span>' : `₹${session.price}`}
+                    ${priceDisplay}
                     <span class="price-duration">/${session.duration} min</span>
                 </div>
                 <p class="service-description">${session.description || 'Personalized mentorship session.'}</p>
@@ -896,7 +907,7 @@ function updateServicesSection(sessions) {
 }
 
 // Update Booking Form with Dynamic Sessions
-function updateBookingForm(sessions) {
+async function updateBookingForm(sessions) {
     const bookingSelect = document.getElementById('bookingService');
     if (!bookingSelect) {
         console.error('Booking select not found');
@@ -908,17 +919,26 @@ function updateBookingForm(sessions) {
     bookingSelect.innerHTML = '';
     bookingSelect.appendChild(placeholder);
 
-    sessions.forEach(session => {
+    for (const session of sessions) {
         const option = document.createElement('option');
         const valueType = session.name.toLowerCase().replace(/\s+/g, '_');
+        
+        // Convert price to local currency for display
+        const localPrice = await convertPrice(session.price, userCountryCode);
+        const isLocalCurrency = localPrice.currency.code !== 'INR';
+        
         option.value = `${valueType}| ${session.price}| ${session.duration} `;
-        option.innerHTML = session.price === 0
-            ? `🆓 ${session.name} (${session.duration} min) - FREE`
-            : `${session.name} (${session.duration} min) - ₹${session.price} `;
+        if (session.price === 0) {
+            option.innerHTML = `🆓 ${session.name} (${session.duration} min) - FREE`;
+        } else if (isLocalCurrency) {
+            option.innerHTML = `${session.name} (${session.duration} min) - ${formatPrice(localPrice)} (₹${session.price}) `;
+        } else {
+            option.innerHTML = `${session.name} (${session.duration} min) - ₹${session.price} `;
+        }
         option.style.color = session.price === 0 ? '#22c55e' : '';
 
         bookingSelect.appendChild(option);
-    });
+    }
 
     console.log('✅ Booking form updated with ' + sessions.length + ' sessions');
 }
