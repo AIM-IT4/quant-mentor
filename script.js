@@ -856,7 +856,12 @@ async function displaySupabaseProducts(products) {
             productCard.innerHTML = `
                 ${imageSection}
                 <div class="product-content">
-                    <h3 class="product-title">${product.name}${currencyBadge}</h3>
+                    <h3 class="product-title">
+                        ${product.name}${currencyBadge}
+                        <button class="share-btn" onclick="copyProductLink('${product.id}')" title="Copy share link" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.8em; margin-left:10px; transition:color 0.3s ease;">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </h3>
                     <div class="product-description">${displayDesc.replace(/<[^>]*>?/gm, '').substring(0, 150) + '...'}</div>
                     <div class="product-meta">
                         <span><i class="fas fa-file-alt"></i> ${isFree ? 'Resource' : 'Premium Note'}</span>
@@ -2365,3 +2370,21 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+// Helper to copy product link for social sharing
+window.copyProductLink = function (id) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('id', id);
+    const shareUrl = url.toString();
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            alert('✅ Shareable link copied to clipboard!');
+        }).catch(err => {
+            console.error('Clipboard copy failed:', err);
+            prompt('Copy this link to share:', shareUrl);
+        });
+    } else {
+        prompt('Copy this link to share:', shareUrl);
+    }
+};
