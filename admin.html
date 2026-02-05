@@ -899,6 +899,7 @@ Brief Q&A"></textarea>
                     try { if (typeof loadPendingTestimonials === 'function') loadPendingTestimonials(); } catch (e) { console.error('Testimonials load error', e); }
                     try { if (typeof loadAvailability === 'function') loadAvailability(); } catch (e) { console.error('Availability load error', e); }
                     try { if (typeof initDashboard === 'function') initDashboard(); } catch (e) { console.error('Dashboard init error', e); }
+                    try { if (typeof initDashboard === 'function') initDashboard(); } catch (e) { console.error('Dashboard init error', e); }
                 } else {
                     alert('Incorrect password');
                 }
@@ -1223,6 +1224,9 @@ Brief Q&A"></textarea>
                         </div>
                     </div>
                     <div style="display: flex; gap: 10px; align-items: center;">
+                        <button onclick="copyProductLink('${p.id}')" style="background: rgba(99, 102, 241, 0.1); color: var(--primary); border: 1px solid var(--primary); padding: 8px 12px; font-size: 0.9em;" title="Copy shareable link for LinkedIn/Socials">
+                            <i class="fas fa-link"></i> Link
+                        </button>
                         <a href="${p.file_url}" target="_blank" style="color: var(--primary); text-decoration: none; padding: 8px 16px; border: 1px solid var(--primary); border-radius: 6px;">Download</a>
                         <button onclick="editProduct('${p.id}')" style="padding: 8px 16px; font-size: 0.9em;">Edit</button>
                         <button onclick="deleteProduct('${p.id}')" style="padding: 8px 16px; font-size: 0.9em; background: transparent; border: 1px solid #ef4444; color: #ef4444;">Delete</button>
@@ -1230,6 +1234,19 @@ Brief Q&A"></textarea>
                 </div>
             `}).join('');
             }
+
+            // Helper to copy product link
+            window.copyProductLink = (id) => {
+                const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
+                const shareUrl = `${baseUrl}?id=${id}`;
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    alert('✅ Shareable link copied to clipboard!\n' + shareUrl);
+                }).catch(err => {
+                    console.error('Copy failed:', err);
+                    alert('❌ Copy failed. Link: ' + shareUrl);
+                });
+            };
+
 
             // Edit Product
             async function editProduct(id) {
@@ -2466,7 +2483,114 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
             return div.innerHTML;
         }
 
-        // Export testimonial functions
+        // ================================
+        // Availability Management (Global)
+        // ================================
+        async function loadAvailability() {
+            const tbody = document.getElementById('availabilityTableBody');
+            if (!window.supabaseAdminClient) {
+                console.warn('Supabase client not ready for availability');
+                return;
+            }
+
+            try {
+                // Get existing patterns
+                let { data: patterns, error } = await window.supabaseAdminClient
+                    .from('availability_patterns')
+                    .select('*')
+                    .order('id', { ascending: true });
+
+                if (error) {
+                    if (error.code === '42P01') {
+                        throw new Error('Table "availability_patterns" does not exist. Please run the SQL script.');
+                    }
+                    throw error;
+                }
+
+                // Define default text days if DB is empty or partial
+                const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+                // Map or Create defaults
+                const displayPatterns = DAYS.map(day => {
+                    const existing = patterns?.find(p => p.day_of_week === day);
+                    return existing || {
+                        day_of_week: day,
+                        is_active: (day !== 'Sunday'),
+                        start_time: '10:00:00',
+                        end_time: '18:00:00'
+                    };
+                });
+
+                tbody.innerHTML = displayPatterns.map(p => `
+                    <tr data-day="${p.day_of_week}">
+                        <td style="font-weight: 500;">${p.day_of_week}</td>
+                        <td style="text-align: center;">
+                            <input type="checkbox" class="avail-active" ${p.is_active ? 'checked' : ''} style="transform: scale(1.2); cursor: pointer;">
+                        </td>
+                        <td>
+                            <input type="time" class="avail-start" value="${p.start_time.substring(0, 5)}" style="padding: 6px; background: #333; color: white; border: 1px solid #555; border-radius: 4px;">
+                        </td>
+                        <td>
+                            <input type="time" class="avail-end" value="${p.end_time.substring(0, 5)}" style="padding: 6px; background: #333; color: white; border: 1px solid #555; border-radius: 4px;">
+                        </td>
+                    </tr>
+                `).join('');
+
+            } catch (err) {
+                console.error('Error loading availability:', err);
+                tbody.innerHTML = `<tr><td colspan="4" style="color:var(--danger); text-align:center;">Error: ${err.message}</td></tr>`;
+            }
+        }
+
+        async function saveAvailability() {
+            if (!window.supabaseAdminClient) {
+                alert('Supabase not initialized');
+                return;
+            }
+
+            const btn = document.querySelector('button[onclick="saveAvailability()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            btn.disabled = true;
+
+            const rows = document.querySelectorAll('#availabilityTableBody tr');
+            const updates = [];
+
+            rows.forEach(row => {
+                const day = row.dataset.day;
+                if (!day) return;
+
+                const isActive = row.querySelector('.avail-active').checked;
+                const start = row.querySelector('.avail-start').value;
+                const end = row.querySelector('.avail-end').value;
+
+                updates.push({
+                    day_of_week: day,
+                    is_active: isActive,
+                    start_time: start,
+                    end_time: end
+                });
+            });
+
+            try {
+                const { error } = await window.supabaseAdminClient
+                    .from('availability_patterns')
+                    .upsert(updates, { onConflict: 'day_of_week' });
+
+                if (error) throw error;
+                alert('✅ Availability schedule saved!');
+            } catch (err) {
+                console.error('Error saving schedule:', err);
+                alert('❌ Failed to save: ' + err.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Export functions globally
+        window.loadAvailability = loadAvailability;
+        window.saveAvailability = saveAvailability;
         window.loadPendingTestimonials = loadPendingTestimonials;
         window.approveTestimonial = approveTestimonial;
         window.rejectTestimonial = rejectTestimonial;

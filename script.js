@@ -448,6 +448,15 @@ setTimeout(function () {
             loadBlogs();
             // Load approved testimonials
             loadApprovedTestimonials();
+
+            // Check for direct product link in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id') || urlParams.get('product');
+            if (productId) {
+                console.log('🔗 Direct link detected for product:', productId);
+                // small delay to let products load
+                setTimeout(() => window.openProductModal(productId), 1500);
+            }
         } else {
             console.error('❌ Supabase SDK not loaded');
             console.log('⚠️ Continuing without Supabase - using default links');
