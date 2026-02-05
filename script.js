@@ -1583,6 +1583,14 @@ if (bookingForm) {
                 const localPrice = await convertPrice(priceValue, userCountryCode);
                 const isLocalCurrency = localPrice.currency.code !== 'INR';
 
+                // Store for submit handler to avoid re-fetching
+                window.selectedSessionLocalPrice = {
+                    amount: isLocalCurrency ? localPrice.amount : priceValue,
+                    currency: isLocalCurrency ? localPrice.currency.code : 'INR',
+                    originalInr: priceValue,
+                    isLocal: isLocalCurrency
+                };
+
                 if (isLocalCurrency) {
                     priceDisplay.textContent = formatPrice(localPrice);
                 } else {
@@ -1592,6 +1600,7 @@ if (bookingForm) {
                 bookingPrice.style.display = 'flex';
             } else {
                 bookingPrice.style.display = 'none';
+                window.selectedSessionLocalPrice = null; // Clear on deselect
             }
         });
     }
