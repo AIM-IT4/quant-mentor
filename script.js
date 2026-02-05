@@ -441,13 +441,7 @@ function displaySupabaseProducts(products) {
                     </div>`;
         }
 
-        // PPP Badge Logic
-        let pppBadge = '';
-        if (product.enable_ppp && userCountryCode) {
-            pppBadge = `<div class="ppp-badge" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-top: 8px;">
-                    <i class="fas fa-globe-asia"></i> Purchasing Power Parity Active
-                </div>`;
-        }
+
 
         // Cover Image
         let imageSection;
@@ -472,7 +466,6 @@ function displaySupabaseProducts(products) {
                 <div class="product-content">
                     <h3 class="product-title">${product.name}</h3>
                     <p class="product-description">${product.description || 'Premium digital product for quant professionals.'}</p>
-                    ${pppBadge}
                     ${product.coupon_code && discountPercent > 0 ? `<div class="product-coupon" style="font-size: .8rem; color: #f59e0b; margin-top: 5px;">Coupon ${product.coupon_code}: ${discountPercent}% off</div>` : ''}
                     <div class="product-meta">
                         <span><i class="fas fa-file-pdf"></i> ${product.file_url.includes('.pdf') ? 'PDF Document' : 'Digital File'}</span>
