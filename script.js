@@ -1,21 +1,23 @@
 // --- Brevo Email Configuration (Global) ---
-let BREVO_API_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_API_KEY) ? window.CONFIG.BREVO_API_KEY : 'xkeysib-your-api-key-here';
-let BREVO_SENDER_EMAIL = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_SENDER_EMAIL) ? window.CONFIG.BREVO_SENDER_EMAIL : 'jha.8@alumni.iitj.ac.in';
-let BREVO_SENDER_NAME = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_SENDER_NAME) ? window.CONFIG.BREVO_SENDER_NAME : 'QuantMentor';
+// These are fallback values. Priority is given to window.CONFIG from config.js
+let BREVO_API_KEY = 'xkeysib-your-api-key-here';
+let BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in';
+let BREVO_SENDER_NAME = 'QuantMentor';
 
-// Update config when window.CONFIG is loaded (fallback for dynamic loading)
-window.addEventListener('load', function () {
-    if (typeof window.CONFIG !== 'undefined') {
-        BREVO_API_KEY = window.CONFIG.BREVO_API_KEY || BREVO_API_KEY;
-        BREVO_SENDER_EMAIL = window.CONFIG.BREVO_SENDER_EMAIL || BREVO_SENDER_EMAIL;
-        BREVO_SENDER_NAME = window.CONFIG.BREVO_SENDER_NAME || BREVO_SENDER_NAME;
-        console.log('✅ Configuration updated from window.CONFIG');
-    }
-});
+// Helper to get latest config
+function getBrevoConfig() {
+    return {
+        apiKey: (window.CONFIG && window.CONFIG.BREVO_API_KEY) || BREVO_API_KEY,
+        senderEmail: (window.CONFIG && window.CONFIG.BREVO_SENDER_EMAIL) || BREVO_SENDER_EMAIL,
+        senderName: (window.CONFIG && window.CONFIG.BREVO_SENDER_NAME) || BREVO_SENDER_NAME
+    };
+}
 
 // Send email via Brevo API
 async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
-    if (!BREVO_API_KEY || BREVO_API_KEY === 'xkeysib-your-api-key-here') {
+    const config = getBrevoConfig();
+
+    if (!config.apiKey || config.apiKey === 'xkeysib-your-api-key-here') {
         console.warn('⚠️ Brevo API key not configured. Email not sent.');
         return { success: false, error: 'API key not configured' };
     }
@@ -25,11 +27,11 @@ async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
             method: 'POST',
             headers: {
                 'accept': 'application/json',
-                'api-key': BREVO_API_KEY,
+                'api-key': config.apiKey,
                 'content-type': 'application/json'
             },
             body: JSON.stringify({
-                sender: { email: BREVO_SENDER_EMAIL, name: BREVO_SENDER_NAME },
+                sender: { email: config.senderEmail, name: config.senderName },
                 to: [{ email: to }],
                 subject: subject,
                 htmlContent: htmlContent,
@@ -1314,7 +1316,8 @@ async function sendProductEmail(customerEmail, productName, paymentId, downloadL
     console.log('📧 sendProductEmail called with:', customerEmail);
 
     // Send to CUSTOMER via Brevo
-    if (BREVO_API_KEY && BREVO_API_KEY !== 'xkeysib-your-api-key-here') {
+    const config = getBrevoConfig();
+    if (config.apiKey && config.apiKey !== 'xkeysib-your-api-key-here') {
         console.log('📧 Attempting to send via Brevo...');
 
         const htmlContent = `
@@ -1725,7 +1728,8 @@ New Booking Details:
     // Send confirmation email to CUSTOMER with Meet link via Brevo
     console.log('📧 Sending session confirmation to customer:', booking.email);
 
-    if (BREVO_API_KEY && BREVO_API_KEY !== 'xkeysib-your-api-key-here') {
+    const config = getBrevoConfig();
+    if (config.apiKey && config.apiKey !== 'xkeysib-your-api-key-here') {
         console.log('📧 Brevo is available, sending...');
 
         const htmlContent = `
