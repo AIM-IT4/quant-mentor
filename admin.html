@@ -1297,94 +1297,7 @@ Brief Q&A"></textarea>
                 }
             }
 
-            // Session Management Functions
-            async function loadSessions() {
-                const list = document.getElementById('sessionsList');
 
-                if (!window.supabaseAdminClient) {
-                    list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
-                    return;
-                }
-
-                const { data, error } = await window.supabaseAdminClient
-                    .from('sessions')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) {
-                    list.innerHTML = `<p style="color: red">Error loading sessions: ${error.message}</p>`;
-                    return;
-                }
-
-                if (!data || data.length === 0) {
-                    list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No sessions found.</p>';
-                    return;
-                }
-
-                list.innerHTML = data.map(session => `
-                <div class="session-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); ${!session.is_active ? 'opacity: 0.6;' : ''}">
-                    <div>
-                        <strong>${session.name}</strong>
-                        ${session.is_popular ? '<span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; margin-left: 8px;">POPULAR</span>' : ''}
-                        ${!session.is_active ? '<span style="background: #666; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; margin-left: 8px;">INACTIVE</span>' : ''}
-                        <br>
-                        <span style="color: var(--text-muted);">
-                            ${session.duration} min • ₹${session.price}
-                        </span>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button onclick="editSession('${session.id}')" style="padding: 8px 16px; font-size: 0.9em; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
-                        <button onclick="deleteSession('${session.id}')" style="padding: 8px 16px; font-size: 0.9em; background: transparent; border: 1px solid #ef4444; color: #ef4444;">Delete</button>
-                    </div>
-                </div>
-            `).join('');
-            }
-
-            // Edit Session
-            async function editSession(id) {
-                const { data, error } = await window.supabaseAdminClient
-                    .from('sessions')
-                    .select('*')
-                    .eq('id', id)
-                    .single();
-
-                if (error) {
-                    alert('❌ Error loading session: ' + error.message);
-                    return;
-                }
-
-                document.getElementById('sessionId').value = data.id;
-                document.getElementById('sessionName').value = data.name;
-                document.getElementById('sessionDuration').value = data.duration;
-                document.getElementById('sessionPrice').value = data.price;
-                document.getElementById('sessionDesc').value = data.description || '';
-                document.getElementById('sessionFeatures').value = data.features ? data.features.join('\n') : '';
-                document.getElementById('sessionPopular').checked = data.is_popular;
-                document.getElementById('sessionActive').checked = data.is_active;
-                document.getElementById('sessionSubmitBtn').textContent = 'Update Session';
-
-                // Scroll to form
-                document.getElementById('sessionForm').scrollIntoView({ behavior: 'smooth' });
-            }
-
-            // Delete Session
-            async function deleteSession(id) {
-                if (!confirm('⚠️ Are you sure you want to delete this session?')) return;
-
-                try {
-                    const { error } = await window.supabaseAdminClient
-                        .from('sessions')
-                        .delete()
-                        .eq('id', id);
-
-                    if (error) throw error;
-
-                    alert('✅ Session deleted successfully!');
-                    await loadSessions();
-                } catch (error) {
-                    alert('❌ Error deleting session: ' + error.message);
-                }
-            }
 
             // Handle Session Form Submission
             document.getElementById('sessionForm').addEventListener('submit', async (e) => {
@@ -2310,13 +2223,96 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
         window.cancelBlogEdit = cancelBlogEdit;
 
         // Export Session Functions
-        window.loadSessions = loadSessions;
-        window.editSession = editSession;
-        window.deleteSession = deleteSession;
-        window.loadProducts = loadProducts;
-        window.deleteProduct = deleteProduct;
-        window.loadRescheduleRequests = loadRescheduleRequests;
-        window.loadCancellationRequests = loadCancellationRequests;
+        // Session Management Functions - GLOBAL SCOPE
+        async function loadSessions() {
+            const list = document.getElementById('sessionsList');
+
+            if (!window.supabaseAdminClient) {
+                if (list) list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
+                return;
+            }
+
+            const { data, error } = await window.supabaseAdminClient
+                .from('sessions')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                if (list) list.innerHTML = `<p style="color: red">Error loading sessions: ${error.message}</p>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                if (list) list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No sessions found.</p>';
+                return;
+            }
+
+            if (list) {
+                list.innerHTML = data.map(session => `
+                    <div class="session-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); ${!session.is_active ? 'opacity: 0.6;' : ''}">
+                        <div>
+                            <strong>${session.name}</strong>
+                            ${session.is_popular ? '<span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; margin-left: 8px;">POPULAR</span>' : ''}
+                            ${!session.is_active ? '<span style="background: #666; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; margin-left: 8px;">INACTIVE</span>' : ''}
+                            <br>
+                            <span style="color: var(--text-muted);">
+                                ${session.duration} min • ₹${session.price}
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="editSession('${session.id}')" style="padding: 8px 16px; font-size: 0.9em; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
+                            <button onclick="deleteSession('${session.id}')" style="padding: 8px 16px; font-size: 0.9em; background: transparent; border: 1px solid #ef4444; color: #ef4444;">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Edit Session
+        async function editSession(id) {
+            const { data, error } = await window.supabaseAdminClient
+                .from('sessions')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error) {
+                alert('❌ Error loading session: ' + error.message);
+                return;
+            }
+
+            document.getElementById('sessionId').value = data.id;
+            document.getElementById('sessionName').value = data.name;
+            document.getElementById('sessionDuration').value = data.duration;
+            document.getElementById('sessionPrice').value = data.price;
+            document.getElementById('sessionDesc').value = data.description || '';
+            document.getElementById('sessionFeatures').value = data.features ? data.features.join('\n') : '';
+            document.getElementById('sessionPopular').checked = data.is_popular;
+            document.getElementById('sessionActive').checked = data.is_active;
+            document.getElementById('sessionSubmitBtn').textContent = 'Update Session';
+
+            // Scroll to form
+            document.getElementById('sessionForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Delete Session
+        async function deleteSession(id) {
+            if (!confirm('⚠️ Are you sure you want to delete this session?')) return;
+
+            try {
+                const { error } = await window.supabaseAdminClient
+                    .from('sessions')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                alert('✅ Session deleted successfully!');
+                await loadSessions();
+            } catch (error) {
+                alert('❌ Error deleting session: ' + error.message);
+            }
+        }
 
         // Init Blog Components
         const blogEditorEl = document.getElementById('blogContentEditor');
