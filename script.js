@@ -1230,7 +1230,7 @@ function initRazorpayCheckout(productName, amount) {
                             .insert({
                                 customer_email: customerEmail,
                                 product_name: productName,
-                                amount: parseInt(amount) / 100, // Convert paise to INR
+                                amount: parseInt(amount), // Amount is already in INR
                                 payment_id: paymentId
                             });
                         console.log('✅ Purchase logged successfully');
