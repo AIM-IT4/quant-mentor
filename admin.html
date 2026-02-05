@@ -673,6 +673,7 @@ Brief Q&A"></textarea>
 
             // Handle Form Submission
             document.getElementById('productForm').addEventListener('submit', async (e) => {
+                console.log('Product Form Submit Triggered');
                 e.preventDefault();
                 const btn = document.getElementById('productSubmitBtn');
                 const status = document.getElementById('uploadStatus');
@@ -760,7 +761,12 @@ Brief Q&A"></textarea>
                         const result = await window.supabaseAdminClient
                             .from('products')
                             .update(productData)
-                            .eq('id', productId);
+                            .eq('id', productId)
+                            .select();
+
+                        if (!result.error && result.data && result.data.length === 0) {
+                            throw new Error('Update failed: ID matched no rows. Refresh and try again.');
+                        }
                         dbError = result.error;
                     } else {
                         // Insert new product
