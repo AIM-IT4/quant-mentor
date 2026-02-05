@@ -427,6 +427,20 @@
         </div>
     </section>
 
+    <!-- Free Resources Section -->
+    <section class="products" id="resources" style="background: var(--bg-card); padding: 80px 0;">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-tag">Free content</span>
+                <h2 class="section-title">Free <span class="gradient-text">Resources</span></h2>
+                <p class="section-subtitle">High-quality guides and tools to kickstart your quant journey.</p>
+            </div>
+            <div class="products-grid" id="resources-grid">
+                <p style="text-align:center; color:var(--text-muted); grid-column:1/-1;">Loading free resources...</p>
+            </div>
+        </div>
+    </section>
+
     <!-- Testimonials Section -->
     <section class="testimonials" id="testimonials">
         <div class="section-container">
@@ -586,6 +600,40 @@
             </div>
         </div>
     </section>
+
+    <!-- Blog Section -->
+    <section class="blog" id="blog" style="padding: 80px 0;">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-tag">Insights</span>
+                <h2 class="section-title">Latest <span class="gradient-text">Articles</span></h2>
+                <p class="section-subtitle">Deep dives into quantitative finance, algorithms, and market microstructure.
+                </p>
+            </div>
+            <div class="products-grid" id="blog-grid"
+                style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+                <p style="text-align:center; color:var(--text-muted); grid-column:1/-1;">Loading articles...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Modal -->
+    <div class="modal" id="blogModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <button class="modal-close" id="blogModalClose"><i class="fas fa-times"></i></button>
+            <div class="modal-header">
+                <h3 id="blogModalTitle" style="font-size: 1.5em; margin: 0;">Article Title</h3>
+                <p id="blogModalMeta" style="color:var(--text-muted); font-size:0.9em; margin-top:5px;"></p>
+            </div>
+            <div class="modal-body">
+                <div id="blogModalCover" style="margin-bottom:20px; border-radius:8px; overflow:hidden; display:none;">
+                    <img src="" style="width:100%; height:auto; display:block;">
+                </div>
+                <div id="blogModalContent" style="line-height:1.6; color:var(--text-muted);"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Contact/Booking Section -->
     <section class="contact" id="contact">

@@ -451,133 +451,102 @@ async function loadProductsFromSupabase() {
 }
 
 // Display products from Supabase in the products grid
+// Display products separated by Paid and Free
 function displaySupabaseProducts(products) {
-    const productsGrid = document.querySelector('.products-grid');
-    if (!productsGrid) return;
+    const productsGrid = document.querySelector('#products .products-grid') || document.querySelector('.products-grid');
+    const resourcesGrid = document.getElementById('resources-grid');
 
-    // Clear existing dynamic cards (keep hardcoded if needed, but usually we replace all)
-    // For this implementation, we'll keep the logic of removing non-hardcoded
-    const existingCards = productsGrid.querySelectorAll('.product-card');
-    const hardcodedProducts = [];
+    if (productsGrid) productsGrid.innerHTML = '';
+    if (resourcesGrid) resourcesGrid.innerHTML = '';
 
-    existingCards.forEach(card => {
-        const productName = card.querySelector('.btn-product')?.dataset.product;
-        if (!hardcodedProducts.includes(productName)) {
-            card.remove();
-        }
-    });
+    const paidProducts = products.filter(p => !p.price || p.price > 0);
+    const freeProducts = products.filter(p => p.price === 0);
 
-    // Add products from Supabase
-    products.forEach(product => {
-        console.log(`📦 Rendering: ${product.name} | Price: ${product.price} | Orig: ${product.original_price} | Cover: ${!!product.cover_image_url}`);
+    const renderList = [
+        { items: paidProducts, container: productsGrid, isFree: false },
+        { items: freeProducts, container: resourcesGrid, isFree: true }
+    ];
 
-        const productCard = document.createElement('div');
-        productCard.className = 'product-card';
-        productCard.dataset.category = 'notes';
-
-        const discountPercent = product.discount_percentage || 0;
-        const price = product.price;
-        const originalPrice = product.original_price || 0;
-
-        // Slash Pricing Logic
-        let priceDisplay = `<div class="product-price">₹${price}</div>`;
-        if (originalPrice > price) {
-            priceDisplay = `
-                    <div class="product-price-container" style="display: flex; align-items: baseline; gap: 8px;">
-                        <div class="original-price" style="text-decoration: line-through; color: var(--text-muted); font-size: 0.9em;">₹${originalPrice}</div>
-                        <div class="product-price">₹${price}</div>
-                    </div>`;
+    renderList.forEach(({ items, container, isFree }) => {
+        if (!container) return;
+        if (items.length === 0 && isFree) {
+            const section = document.getElementById('resources');
+            if (section) section.style.display = 'none';
+            return;
+        } else if (items.length > 0 && isFree) {
+            const section = document.getElementById('resources');
+            if (section) section.style.display = 'block';
         }
 
+        items.forEach(product => {
+            const productCard = document.createElement('div');
+            productCard.className = 'product-card';
+            productCard.dataset.category = 'notes';
 
+            const priceDisplay = isFree
+                ? `<div class="product-price" style="color:#22c55e">Free</div>`
+                : `<div class="product-price">₹${product.price}</div>`;
 
-        // Cover Image
-        let imageSection;
-        if (product.cover_image_url) {
-            imageSection = `
-                <div class="product-image" style="padding: 0; aspect-ratio: 16/9; overflow: hidden;">
-                    <img src="${product.cover_image_url}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
-                    <div class="product-badge">PDF</div>
-                </div>`;
-        } else {
-            imageSection = `
-                <div class="product-image">
-                    <div class="product-placeholder" style="background: linear-gradient(135deg, #2dd4bf, #14b8a6);">
-                        <i class="fas fa-file-pdf"></i>
-                    </div>
-                    <div class="product-badge">PDF</div>
-                </div>`;
-        }
+            const btnText = isFree ? 'Download' : 'Buy Now';
 
-        // Create clean description
-        let displayDesc = product.description;
-        if (displayDesc === '<p><br></p>') displayDesc = '';
-        displayDesc = displayDesc || 'Premium digital product for quant professionals.';
+            const imageSection = product.cover_image_url ?
+                `<div class="product-image" style="padding:0; aspect-ratio:16/9; overflow:hidden;">
+                    <img src="${product.cover_image_url}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease;">
+                    <div class="product-badge">${isFree ? 'FREE' : 'PDF'}</div>
+                 </div>` :
+                `<div class="product-image"><div class="product-placeholder pdf"><i class="fas fa-file-pdf"></i></div><div class="product-badge">${isFree ? 'FREE' : 'PDF'}</div></div>`;
 
-        productCard.innerHTML = `
+            // Handle sanitized description
+            const rawDesc = product.description || '';
+            const displayDesc = (rawDesc === '<p><br></p>') ? '' : rawDesc;
+
+            productCard.innerHTML = `
                 ${imageSection}
                 <div class="product-content">
                     <h3 class="product-title">${product.name}</h3>
-                    <div class="product-description">${displayDesc}</div>
-                    ${product.coupon_code && discountPercent > 0 ? `<div class="product-coupon" style="font-size: .8rem; color: #f59e0b; margin-top: 5px;">Coupon ${product.coupon_code}: ${discountPercent}% off</div>` : ''}
+                    <div class="product-description">${displayDesc || (isFree ? 'Free resource for quants.' : 'Premium content.')}</div>
                     <div class="product-meta">
-                        <span><i class="fas fa-file-pdf"></i> ${product.file_url.includes('.pdf') ? 'PDF Document' : 'Digital File'}</span>
-                        <span><i class="fas fa-check"></i> Instant Download</span>
+                        <span><i class="fas fa-file-alt"></i> ${isFree ? 'Resource' : 'Premium Note'}</span>
+                        <span><i class="fas fa-download"></i> Instant Access</span>
                     </div>
                     <div class="product-footer">
-                        ${priceDisplay}
-                        <button class="btn btn-product" data-product="${product.name}" data-price="${product.price}" data-original-price="${originalPrice}" data-coupon-code="${product.coupon_code || ''}" data-coupon-percent="${discountPercent}">
-                            Buy Now
-                        </button>
+                        ${isFree ? priceDisplay : (product.original_price > product.price ? `<div style="display:flex;gap:8px;align-items:baseline;"><span style="text-decoration:line-through;color:var(--text-muted);font-size:0.9em">₹${product.original_price}</span>${priceDisplay}</div>` : priceDisplay)}
+                        <button class="btn btn-product" onclick="openProductModal('${product.id}')" data-price="${product.price}">${btnText}</button>
                     </div>
                 </div>
             `;
-
-        productsGrid.appendChild(productCard);
-
-        // Add event listener for the new button
-        const buyButton = productCard.querySelector('.btn-product');
-        if (buyButton) {
-            buyButton.addEventListener('click', function () {
-                console.log('🖱️ Supabase product button clicked:', this.dataset.product);
-                const productName = this.dataset.product;
-                const price = this.dataset.price;
-                const couponCode = this.dataset.couponCode || '';
-                const couponPercent = parseInt(this.dataset.couponPercent) || 0;
-
-                const modal = document.getElementById('productModal');
-                const modalTitle = document.getElementById('modalTitle');
-                const modalDescription = document.getElementById('modalDescription');
-                const modalPrice = document.getElementById('modalPrice');
-
-                if (!modal) {
-                    console.error('❌ Modal not found in DOM');
-                    alert('Error: Product modal not found. Please refresh the page.');
-                    return;
-                }
-
-                modalTitle.textContent = productName;
-                modalDescription.textContent = product.description || 'Premium digital product for quant professionals.';
-                modalPrice.textContent = '₹' + price;
-
-                // Set the active coupon for this product
-                window.currentDiscountedPrice = undefined;
-                window.activeModalCoupon = {
-                    code: couponCode,
-                    percent: couponPercent
-                };
-
-                // Clear coupon input
-                const couponInput = document.getElementById('couponInput');
-                if (couponInput) couponInput.value = '';
-
-                modal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-                console.log('✅ Modal opened for Supabase product:', productName, 'Coupon:', window.activeModalCoupon);
-            });
-        }
+            container.appendChild(productCard);
+        });
     });
 }
+
+// Global scope for product modal
+window.openProductModal = async function (id) {
+    if (!window.supabaseClient) return;
+    try {
+        const { data: product, error } = await window.supabaseClient.from('products').select('*').eq('id', id).single();
+        if (error || !product) return;
+
+        const modal = document.getElementById('productModal');
+        if (!modal) return;
+
+        document.getElementById('modalTitle').textContent = product.name;
+        document.getElementById('modalDescription').innerHTML = product.description || 'Premium digital product.';
+        document.getElementById('modalPrice').textContent = (product.price === 0 || !product.price) ? 'FREE' : '₹' + product.price;
+
+        window.currentDiscountedPrice = undefined;
+        window.activeModalCoupon = {
+            code: product.coupon_code || '',
+            percent: product.discount_percentage || 0
+        };
+
+        const couponInput = document.getElementById('couponInput');
+        if (couponInput) couponInput.value = '';
+
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    } catch (err) { console.error(err); }
+};
 
 // Load Sessions from Supabase and Update Services Section
 async function loadSessionsFromSupabase() {
@@ -653,7 +622,7 @@ function updateServicesSection(sessions) {
                     ${session.price === 0 ? '🆓 Book Free Session' : 'Book Session'}
                 </a>
             </div>
-        `;
+`;
 
         servicesContainer.appendChild(serviceCard);
 
@@ -696,10 +665,10 @@ function updateBookingForm(sessions) {
     sessions.forEach(session => {
         const option = document.createElement('option');
         const valueType = session.name.toLowerCase().replace(/\s+/g, '_');
-        option.value = `${valueType}|${session.price}|${session.duration}`;
+        option.value = `${valueType}| ${session.price}| ${session.duration} `;
         option.innerHTML = session.price === 0
             ? `🆓 ${session.name} (${session.duration} min) - FREE`
-            : `${session.name} (${session.duration} min) - ₹${session.price}`;
+            : `${session.name} (${session.duration} min) - ₹${session.price} `;
         option.style.color = session.price === 0 ? '#22c55e' : '';
 
         bookingSelect.appendChild(option);
@@ -748,7 +717,7 @@ async function fetchProductLinks() {
             data.forEach(product => {
                 PRODUCT_DOWNLOAD_LINKS[product.name] = product.file_url;
                 // Log for debugging
-                console.log(`🔗 Link updated for: ${product.name}`);
+                console.log(`🔗 Link updated for: ${product.name} `);
             });
         } else {
             console.log('📚 No products found in Supabase, using default links');
@@ -828,7 +797,7 @@ async function fetchProductLinks() {
         products.forEach(p => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td style="padding:8px 6px;">${p.id ?? ''}</td>
+    < td style = "padding:8px 6px;" > ${p.id ?? ''}</td >
                 <td style="padding:8px 6px;">${p.name ?? ''}</td>
                 <td style="padding:8px 6px;">₹${p.price ?? 0}</td>
                 <td style="padding:8px 6px;">${p.coupon_code ?? ''} (${p.coupon_percent ?? 0}%)</td>
@@ -836,7 +805,7 @@ async function fetchProductLinks() {
                 <td style="padding:8px 6px;">
                     <button class="btn btn-secondary" data-id="${p.id}" data-name="${p.name ?? ''}" data-price="${p.price ?? 0}" data-description="${p.description ?? ''}" data-code="${p.coupon_code ?? ''}" data-percent="${p.coupon_percent ?? 0}" onclick="adminEditProduct(this)">Edit</button>
                 </td>
-            `;
+`;
             tbody.appendChild(tr);
         });
     }
@@ -1051,7 +1020,7 @@ async function sendProductEmail(customerEmail, productName, paymentId, downloadL
             const templateParams = {
                 to_email: customerEmail,
                 to_name: customerEmail.split('@')[0],
-                subject: `Your Purchase: ${productName}`,
+                subject: `Your Purchase: ${productName} `,
                 message: `🎉 Thank you for your purchase!
 
 ━━━━━━━━━━━━━━━━━━━━
@@ -1065,7 +1034,7 @@ ${downloadLink}
 If you have any questions, simply reply to this email.
 
 Best regards,
-${BUSINESS_NAME}`
+    ${BUSINESS_NAME} `
             };
             console.log('📧 Template params:', templateParams);
 
@@ -1488,6 +1457,108 @@ Thank you for booking!`);
     document.getElementById('bookingForm').reset();
     document.getElementById('bookingPrice').style.display = 'none';
 
-    // Clear pending booking
-    window.pendingBooking = null;
+    // Refresh calendar
+    const month = currentDate.getMonth();
+    const year = currentDate.getFullYear();
+    renderCalendar(month, year);
 }
+
+// --- BLOG & RESOURCES LOGIC ---
+
+async function loadBlogs() {
+    if (!window.supabaseClient) return;
+    try {
+        const { data } = await window.supabaseClient.from('blogs').select('*').eq('is_published', true).order('created_at', { ascending: false });
+        if (data) displayBlogs(data);
+    } catch (e) { console.error('Blog load error', e); }
+}
+
+function displayBlogs(blogs) {
+    const grid = document.getElementById('blog-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    if (blogs.length === 0) {
+        grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--text-muted)">Coming soon.</p>';
+        return;
+    }
+
+    blogs.forEach(blog => {
+        const div = document.createElement('div');
+        div.className = 'product-card blog-card';
+        div.style.cursor = 'pointer';
+        div.onclick = () => openBlogModal(blog.id);
+
+        div.innerHTML = `
+            <div class="product-image" style="padding:0; aspect-ratio:16/9; overflow:hidden; background:#1e293b;">
+                ${blog.cover_image_url ? `<img src="${blog.cover_image_url}" style="width:100%;height:100%;object-fit:cover;">` : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:gray;"><i class="fas fa-newspaper fa-3x"></i></div>`}
+                <div class="product-badge" style="background:#8b5cf6;">ARTICLE</div>
+            </div>
+            <div class="product-content" style="display:flex; flex-direction:column;">
+                <h3 class="product-title">${blog.title}</h3>
+                <p class="product-description" style="flex:1; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">${blog.excerpt || ''}</p>
+                <div class="product-footer" style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+                     <span style="font-size:0.85em; color:var(--text-muted);">${new Date(blog.created_at).toLocaleDateString()}</span>
+                     <span style="color:var(--accent); font-size:0.9em; font-weight:600;">Read &rarr;</span>
+                </div>
+            </div>
+        `;
+        grid.appendChild(div);
+    });
+}
+
+// Global scope for HTML access
+window.openBlogModal = async function (id) {
+    const modal = document.getElementById('blogModal');
+    if (!modal) { console.error('Blog Modal Not Found'); return; }
+
+    // Reset & Show Loading
+    document.getElementById('blogModalTitle').textContent = 'Loading...';
+    document.getElementById('blogModalContent').innerHTML = '';
+    document.getElementById('blogModalCover').style.display = 'none';
+    modal.classList.add('active');
+    modal.style.display = 'flex'; // Ensure display flex overrides any none
+
+    try {
+        const { data } = await window.supabaseClient.from('blogs').select('*').eq('id', id).single();
+        if (data) {
+            document.getElementById('blogModalTitle').textContent = data.title;
+            document.getElementById('blogModalMeta').textContent = new Date(data.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('blogModalContent').innerHTML = data.content;
+
+            const cover = document.getElementById('blogModalCover');
+            if (data.cover_image_url) {
+                cover.style.display = 'block';
+                cover.querySelector('img').src = data.cover_image_url;
+            }
+        }
+    } catch (e) {
+        document.getElementById('blogModalContent').textContent = 'Error loading article.';
+    }
+};
+
+// Initialize Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    loadBlogs();
+
+    const blogClose = document.getElementById('blogModalClose');
+    if (blogClose) {
+        blogClose.onclick = () => {
+            const m = document.getElementById('blogModal');
+            m.classList.remove('active');
+            m.style.display = 'none';
+        }
+    }
+
+    window.addEventListener('click', (e) => {
+        const m = document.getElementById('blogModal');
+        if (e.target === m || (m && e.target.classList.contains('modal-overlay'))) {
+            m.classList.remove('active');
+            m.style.display = 'none';
+        }
+    });
+});
+
+
+// Clear pending booking
+window.pendingBooking = null;

@@ -309,7 +309,14 @@
                 <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div class="form-group">
                         <label>Sale Price (₹)</label>
-                        <input type="number" id="productPrice" required placeholder="e.g. 699">
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <input type="number" id="productPrice" required placeholder="e.g. 699" style="flex:1">
+                            <label
+                                style="display:flex; align-items:center; gap:5px; font-weight:normal; font-size:0.9em; cursor:pointer; color:var(--text);">
+                                <input type="checkbox" id="productFree" onchange="togglePriceInput(this)">
+                                Free
+                            </label>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Original Price (₹) - for slash pricing</label>
@@ -458,6 +465,67 @@ Brief Q&A"></textarea>
             </div>
         </div>
 
+        <!-- Blog Management -->
+        <div class="blog-management" style="margin-top: 60px;">
+            <h2>Blog & Articles Management</h2>
+            <div class="card">
+                <h3 style="margin-top: 0;">Add/Edit Article</h3>
+                <form id="blogForm">
+                    <input type="hidden" id="blogId">
+
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="blogTitle" required placeholder="Article Title">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Slug (URL Friendly)</label>
+                        <input type="text" id="blogSlug" placeholder="auto-generated-from-title"
+                            style="color:var(--text-muted)">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Excerpt (Short Summary)</label>
+                        <textarea id="blogExcerpt" rows="2"
+                            placeholder="Brief summary to display on cards..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Content</label>
+                        <div style="background: white; border-radius: 4px; overflow: hidden;">
+                            <div id="blogContentEditor" style="height: 300px; color: black;"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cover Image URL</label>
+                        <input type="text" id="blogCover" placeholder="https://...">
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="checkbox" id="blogPublished" checked>
+                            Publish Immediately
+                        </label>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" id="blogSubmitBtn">Save Article</button>
+                        <button type="button" id="blogCancelBtn" onclick="cancelBlogEdit()"
+                            style="display:none; background:transparent; border:1px solid var(--text-muted);">Cancel
+                            Edit</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <h3>Existing Articles</h3>
+                <div id="blogsList">
+                    <p style="color: var(--text-muted); text-align: center;">Loading articles...</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Alternative Date Modal -->
         <div id="alternativeModal"
             style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 15, 0.95); z-index: 2000; justify-content: center; align-items: center;">
@@ -519,6 +587,17 @@ Brief Q&A"></textarea>
         let cropper = null;
         let croppedCoverBlob = null;
         let quill = null;
+        let blogQuill = null;
+
+        function togglePriceInput(checkbox) {
+            const input = document.getElementById('productPrice');
+            if (checkbox.checked) {
+                input.value = 0;
+                input.disabled = true;
+            } else {
+                input.disabled = false;
+            }
+        }
         const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDEwMTI2NSwiZXhwIjoyMDg1Njc3MjY1fQ.C87qk8sAOx9NI0p7sV5ndb8n_lktUA9EmjNMFjYItAg';
 
@@ -533,7 +612,9 @@ Brief Q&A"></textarea>
                 if (typeof loadProducts === 'function') loadProducts();
                 if (typeof loadSessions === 'function') loadSessions();
                 if (typeof loadRescheduleRequests === 'function') loadRescheduleRequests();
+                if (typeof loadRescheduleRequests === 'function') loadRescheduleRequests();
                 if (typeof loadCancellationRequests === 'function') loadCancellationRequests();
+                if (typeof loadBlogs === 'function') loadBlogs();
             } else {
                 alert('Incorrect password');
             }
@@ -1716,6 +1797,128 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
                 day: 'numeric'
             });
         }
+        // --- BLOG MANAGEMENT LOGIC ---
+        async function loadBlogs() {
+            const list = document.getElementById('blogsList');
+            if (!window.supabaseAdminClient) {
+                list.innerHTML = '<p style="color:red">Supabase Admin Client missing</p>';
+                return;
+            }
+            try {
+                const { data, error } = await window.supabaseAdminClient
+                    .from('blogs')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<p style="text-align:center; color:var(--text-muted)">No articles found.</p>';
+                    return;
+                }
+                list.innerHTML = data.map(b => `
+                    <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong style="font-size:1.1em; color:white;">${b.title}</strong>
+                            <div style="font-size:0.85em; color:var(--text-muted); margin-top:4px;">
+                                ${b.is_published ? '<span style="color:#22c55e">● Published</span>' : '<span style="color:#f59e0b">● Draft</span>'}
+                                <span style="margin-left:10px;">/${b.slug}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="editBlog('${b.id}')" style="padding:6px 12px; font-size:0.9em;">Edit</button>
+                            <button onclick="deleteBlog('${b.id}')" style="padding:6px 12px; font-size:0.9em; background:transparent; border:1px solid #ef4444; color:#ef4444;">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) { list.innerHTML = `<p style="color:red">Error: ${e.message}</p>`; }
+        }
+
+        async function saveBlog(e) {
+            e.preventDefault();
+            const id = document.getElementById('blogId').value;
+            const title = document.getElementById('blogTitle').value;
+            // Auto slug
+            let slug = document.getElementById('blogSlug').value;
+            if (!slug) slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now();
+
+            const excerpt = document.getElementById('blogExcerpt').value;
+            const content = blogQuill ? blogQuill.root.innerHTML : '';
+            const cover = document.getElementById('blogCover').value;
+            const published = document.getElementById('blogPublished').checked;
+
+            const payload = { title, slug, excerpt, content, cover_image_url: cover, is_published: published };
+
+            try {
+                let error;
+                if (id) {
+                    const res = await window.supabaseAdminClient.from('blogs').update(payload).eq('id', id);
+                    error = res.error;
+                } else {
+                    const res = await window.supabaseAdminClient.from('blogs').insert([payload]);
+                    error = res.error;
+                }
+                if (error) throw error;
+                alert('Article saved successfully!');
+                cancelBlogEdit();
+                loadBlogs();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        async function editBlog(id) {
+            try {
+                const { data, error } = await window.supabaseAdminClient.from('blogs').select('*').eq('id', id).single();
+                if (error) throw error;
+
+                document.getElementById('blogId').value = data.id;
+                document.getElementById('blogTitle').value = data.title;
+                document.getElementById('blogSlug').value = data.slug;
+                document.getElementById('blogExcerpt').value = data.excerpt || '';
+                document.getElementById('blogCover').value = data.cover_image_url || '';
+                document.getElementById('blogPublished').checked = data.is_published;
+                if (blogQuill) blogQuill.root.innerHTML = data.content || '';
+
+                document.getElementById('blogSubmitBtn').textContent = 'Update Article';
+                document.getElementById('blogCancelBtn').style.display = 'inline-block';
+                document.getElementById('blogForm').scrollIntoView({ behavior: 'smooth' });
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        async function deleteBlog(id) {
+            if (!confirm('Are you sure you want to delete this article?')) return;
+            const { error } = await window.supabaseAdminClient.from('blogs').delete().eq('id', id);
+            if (error) alert('Error: ' + error.message);
+            else loadBlogs();
+        }
+
+        function cancelBlogEdit() {
+            document.getElementById('blogForm').reset();
+            document.getElementById('blogId').value = '';
+            if (blogQuill) blogQuill.setText('');
+            document.getElementById('blogSubmitBtn').textContent = 'Save Article';
+            document.getElementById('blogCancelBtn').style.display = 'none';
+        }
+
+        // Export to Window
+        window.loadBlogs = loadBlogs;
+        window.editBlog = editBlog;
+        window.deleteBlog = deleteBlog;
+        window.cancelBlogEdit = cancelBlogEdit;
+
+        // Init Blog Components
+        const blogEditorEl = document.getElementById('blogContentEditor');
+        if (blogEditorEl) {
+            try {
+                blogQuill = new Quill('#blogContentEditor', {
+                    theme: 'snow',
+                    placeholder: 'Write your article...',
+                    modules: { toolbar: [['bold', 'italic', 'underline', 'strike'], ['blockquote', 'code-block'], [{ 'header': 1 }, { 'header': 2 }], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link', 'image'], ['clean']] }
+                });
+            } catch (e) { console.error('Blog Quill Init Error', e); }
+        }
+
+        const blogF = document.getElementById('blogForm');
+        if (blogF) blogF.addEventListener('submit', saveBlog);
+
     </script>
 </body>
 
