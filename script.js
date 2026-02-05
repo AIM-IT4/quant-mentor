@@ -353,6 +353,25 @@ setTimeout(function () {
     }
 }, 500);
 
+// Fetched country cache
+let userCountryCode = null;
+
+// Try to get user country (simple caching)
+async function getUserCountry() {
+    if (userCountryCode) return userCountryCode;
+    try {
+        // Using a free IP API (limit usage if possible, or handle errors gracefully)
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        userCountryCode = data.country_code;
+        console.log('🌍 User country detected:', userCountryCode);
+        return userCountryCode;
+    } catch (e) {
+        console.warn('📍 Could not detect country:', e);
+        return 'IN'; // Default to IN if failed
+    }
+}
+
 // Load and display products from Supabase
 async function loadProductsFromSupabase() {
     try {
@@ -360,6 +379,9 @@ async function loadProductsFromSupabase() {
             console.error('Supabase client not initialized');
             return;
         }
+
+        // Fetch country first for PPP
+        await getUserCountry();
 
         const { data, error } = await window.supabaseClient
             .from('products')
@@ -372,7 +394,7 @@ async function loadProductsFromSupabase() {
         }
 
         if (data && data.length > 0) {
-            console.log('📦 Loading ' + data.length + ' products from Supabase:');
+            console.log('📦 Loading ' + data.length + ' products from Supabase');
             displaySupabaseProducts(data);
         }
     } catch (err) {
@@ -385,9 +407,10 @@ function displaySupabaseProducts(products) {
     const productsGrid = document.querySelector('.products-grid');
     if (!productsGrid) return;
 
-    // Clear existing products (keep only hardcoded ones we want to keep)
+    // Clear existing dynamic cards (keep hardcoded if needed, but usually we replace all)
+    // For this implementation, we'll keep the logic of removing non-hardcoded
     const existingCards = productsGrid.querySelectorAll('.product-card');
-    const hardcodedProducts = []; // No hardcoded products to keep
+    const hardcodedProducts = [];
 
     existingCards.forEach(card => {
         const productName = card.querySelector('.btn-product')?.dataset.product;
@@ -398,37 +421,71 @@ function displaySupabaseProducts(products) {
 
     // Add products from Supabase
     products.forEach(product => {
-        console.log(`📦 Adding product: ${product.name} - ₹${product.price}`);
+        console.log(`📦 Rendering: ${product.name} | Price: ${product.price} | Orig: ${product.original_price} | Cover: ${!!product.cover_image_url}`);
 
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
-        productCard.dataset.category = 'notes'; // You can adjust this based on product type
+        productCard.dataset.category = 'notes';
 
         const discountPercent = product.discount_percentage || 0;
+        const price = product.price;
+        const originalPrice = product.original_price || 0;
+
+        // Slash Pricing Logic
+        let priceDisplay = `<div class="product-price">₹${price}</div>`;
+        if (originalPrice > price) {
+            priceDisplay = `
+                    <div class="product-price-container" style="display: flex; align-items: baseline; gap: 8px;">
+                        <div class="original-price" style="text-decoration: line-through; color: var(--text-muted); font-size: 0.9em;">₹${originalPrice}</div>
+                        <div class="product-price">₹${price}</div>
+                    </div>`;
+        }
+
+        // PPP Badge Logic
+        let pppBadge = '';
+        if (product.enable_ppp && userCountryCode) {
+            pppBadge = `<div class="ppp-badge" style="display: inline-flex; align-items: center; gap: 4px; background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-top: 8px;">
+                    <i class="fas fa-globe-asia"></i> Purchasing Power Parity Active
+                </div>`;
+        }
+
+        // Cover Image
+        let imageSection;
+        if (product.cover_image_url) {
+            imageSection = `
+                <div class="product-image" style="padding: 0; aspect-ratio: 16/9; overflow: hidden;">
+                    <img src="${product.cover_image_url}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
+                    <div class="product-badge">PDF</div>
+                </div>`;
+        } else {
+            imageSection = `
+                <div class="product-image">
+                    <div class="product-placeholder" style="background: linear-gradient(135deg, #2dd4bf, #14b8a6);">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="product-badge">PDF</div>
+                </div>`;
+        }
 
         productCard.innerHTML = `
-            <div class="product-image">
-                <div class="product-placeholder" style="background: linear-gradient(135deg, #6366f1, #a855f7);">
-                    <i class="fas fa-file-pdf"></i>
+                ${imageSection}
+                <div class="product-content">
+                    <h3 class="product-title">${product.name}</h3>
+                    <p class="product-description">${product.description || 'Premium digital product for quant professionals.'}</p>
+                    ${pppBadge}
+                    ${product.coupon_code && discountPercent > 0 ? `<div class="product-coupon" style="font-size: .8rem; color: #f59e0b; margin-top: 5px;">Coupon ${product.coupon_code}: ${discountPercent}% off</div>` : ''}
+                    <div class="product-meta">
+                        <span><i class="fas fa-file-pdf"></i> ${product.file_url.includes('.pdf') ? 'PDF Document' : 'Digital File'}</span>
+                        <span><i class="fas fa-check"></i> Instant Download</span>
+                    </div>
+                    <div class="product-footer">
+                        ${priceDisplay}
+                        <button class="btn btn-product" data-product="${product.name}" data-price="${product.price}" data-original-price="${originalPrice}" data-coupon-code="${product.coupon_code || ''}" data-coupon-percent="${discountPercent}">
+                            Buy Now
+                        </button>
+                    </div>
                 </div>
-                <div class="product-badge">PDF</div>
-            </div>
-            <div class="product-content">
-                <h3 class="product-title">${product.name}</h3>
-                <p class="product-description">${product.description || 'Premium digital product for quant professionals.'}</p>
-                ${product.coupon_code && discountPercent > 0 ? `<div class="product-coupon" style="font-size: .8rem; color: #22c55e;">Coupon ${product.coupon_code}: ${discountPercent}% off</div>` : ''}
-                <div class="product-meta">
-                    <span><i class="fas fa-file-pdf"></i> ${product.file_url.includes('.pdf') ? 'PDF Document' : 'Digital File'}</span>
-                    <span><i class="fas fa-check"></i> Instant Download</span>
-                </div>
-                <div class="product-footer">
-                    <div class="product-price">₹${product.price}</div>
-                    <button class="btn btn-product" data-product="${product.name}" data-price="${product.price}" data-coupon-code="${product.coupon_code || ''}" data-coupon-percent="${discountPercent}">
-                        Buy Now
-                    </button>
-                </div>
-            </div>
-        `;
+            `;
 
         productsGrid.appendChild(productCard);
 

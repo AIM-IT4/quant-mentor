@@ -293,8 +293,36 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Price (₹)</label>
-                    <input type="number" id="productPrice" required placeholder="e.g. 499">
+                    <label>Cover Image (Required)</label>
+                    <input type="file" id="productCover" accept="image/*">
+                    <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                        Upload a cover image for the product card (JPG, PNG, WEBP)
+                    </small>
+                </div>
+
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label>Sale Price (₹)</label>
+                        <input type="number" id="productPrice" required placeholder="e.g. 699">
+                    </div>
+                    <div class="form-group">
+                        <label>Original Price (₹) - for slash pricing</label>
+                        <input type="number" id="productOriginalPrice" placeholder="e.g. 999">
+                    </div>
+                </div>
+
+                <div class="form-group"
+                    style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+                    <label style="display: flex; align-items: start; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="productPPP" style="width: auto; margin-top: 4px;">
+                        <div>
+                            <strong style="color: white;">Enable Country-Based Pricing (PPP)</strong>
+                            <p style="margin: 4px 0 0; font-size: 0.85em; color: var(--text-muted);">
+                                Automatically adjust price based on user's country purchasing power.
+                                <br>(e.g. Lower price for developing countries)
+                            </p>
+                        </div>
+                    </label>
                 </div>
 
                 <div class="form-group">
@@ -548,22 +576,27 @@ Brief Q&A"></textarea>
                     const productId = document.getElementById('productId').value;
                     const name = document.getElementById('productName').value;
                     const price = document.getElementById('productPrice').value;
+                    const originalPrice = document.getElementById('productOriginalPrice').value || 0;
+                    const enablePPP = document.getElementById('productPPP').checked;
                     const discount = document.getElementById('productDiscount').value || 0;
                     const couponCode = document.getElementById('productCouponCode').value || null;
                     const desc = document.getElementById('productDesc').value;
                     const file = document.getElementById('productFile').files[0];
+                    const coverFile = document.getElementById('productCover').files[0];
 
                     // For new products, file is required; for edits, file is optional
-                    if (!productId && !file) throw new Error('Please select a file');
+                    if (!productId && !file) throw new Error('Please select a resource file');
+
+                    // If cover image is not provided for new product (optional but recommended)
+                    // We don't block it, but usually good to have.
 
                     let fileUrl = null;
+                    let coverUrl = null;
 
-                    // Only upload if a file is selected
+                    // 1. Upload Resource File (if selected)
                     if (file) {
-                        // 1. Upload File to Storage
-                        // Create a clean filename
                         const fileExt = file.name.split('.').pop();
-                        const fileName = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.${fileExt}`;
+                        const fileName = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_res_${Date.now()}.${fileExt}`;
 
                         const { data: uploadData, error: uploadError } = await window.supabaseAdminClient.storage
                             .from('resources')
@@ -571,7 +604,6 @@ Brief Q&A"></textarea>
 
                         if (uploadError) throw uploadError;
 
-                        // 2. Get Public URL
                         const { data: publicUrlData } = window.supabaseAdminClient.storage
                             .from('resources')
                             .getPublicUrl(fileName);
@@ -579,19 +611,38 @@ Brief Q&A"></textarea>
                         fileUrl = publicUrlData.publicUrl;
                     }
 
+                    // 2. Upload Cover Image (if selected)
+                    if (coverFile) {
+                        const fileExt = coverFile.name.split('.').pop();
+                        const fileName = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_cover_${Date.now()}.${fileExt}`;
+
+                        const { data: uploadData, error: uploadError } = await window.supabaseAdminClient.storage
+                            .from('product-covers')
+                            .upload(fileName, coverFile);
+
+                        if (uploadError) throw uploadError;
+
+                        const { data: publicUrlData } = window.supabaseAdminClient.storage
+                            .from('product-covers')
+                            .getPublicUrl(fileName);
+
+                        coverUrl = publicUrlData.publicUrl;
+                    }
+
                     // 3. Save or Update Metadata in Database
                     const productData = {
                         name: name,
                         price: parseFloat(price),
+                        original_price: parseFloat(originalPrice),
+                        enable_ppp: enablePPP,
                         discount_percentage: parseInt(discount) || 0,
                         coupon_code: couponCode,
                         description: desc
                     };
 
-                    // Only update file_url if a new file was uploaded
-                    if (fileUrl) {
-                        productData.file_url = fileUrl;
-                    }
+                    // Only update URLs if new files were uploaded
+                    if (fileUrl) productData.file_url = fileUrl;
+                    if (coverUrl) productData.cover_image_url = coverUrl;
 
                     let dbError;
                     if (productId) {
@@ -656,21 +707,31 @@ Brief Q&A"></textarea>
                 }
 
                 list.innerHTML = data.map(p => {
-                    const originalPrice = p.price;
+                    const price = p.price;
+                    const originalPrice = p.original_price || 0;
                     const discountPercent = p.discount_percentage || 0;
-                    const discountedPrice = discountPercent > 0 ? Math.round(originalPrice * (1 - discountPercent / 100)) : originalPrice;
+                    const discountedPrice = discountPercent > 0 ? Math.round(price * (1 - discountPercent / 100)) : price;
+                    const hasPPP = p.enable_ppp ? '<span style="background: rgba(99, 102, 241, 0.2); color: #6366f1; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px;">PPP Enabled</span>' : '';
+                    const coverImg = p.cover_image_url ?
+                        `<img src="${p.cover_image_url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 15px;" alt="Cover">` :
+                        `<div style="width: 50px; height: 50px; background: var(--border); border-radius: 4px; margin-right: 15px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-image" style="color: var(--text-muted);"></i></div>`;
 
                     return `
                 <div class="product-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border);">
-                    <div>
-                        <strong>${p.name}</strong><br>
-                        <span style="color: var(--text-muted); font-size: 0.9em;">
-                            ${discountPercent > 0 ?
-                            `<span style="text-decoration: line-through; color: #ef4444;">₹${originalPrice}</span> 
-                                 <span style="color: #22c55e; font-weight: bold;">₹${discountedPrice}</span>
-                                 <span style="background: #22c55e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px;">${discountPercent}% OFF</span>` :
-                            `₹${originalPrice}`}
-                        </span>
+                    <div style="display: flex; align-items: center;">
+                        ${coverImg}
+                        <div>
+                            <strong>${p.name}</strong> ${hasPPP}<br>
+                            <span style="color: var(--text-muted); font-size: 0.9em;">
+                                ${originalPrice > price ?
+                            `<span style="text-decoration: line-through; color: #ef4444; margin-right: 5px;">₹${originalPrice}</span>` : ''}
+                                ${discountPercent > 0 ?
+                            `<span style="text-decoration: line-through; color: #ef4444;">₹${price}</span> 
+                                     <span style="color: #22c55e; font-weight: bold;">₹${discountedPrice}</span>
+                                     <span style="background: #22c55e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px;">${discountPercent}% OFF</span>` :
+                            `₹${price}`}
+                            </span>
+                        </div>
                     </div>
                     <div style="display: flex; gap: 10px; align-items: center;">
                         <a href="${p.file_url}" target="_blank" style="color: var(--primary); text-decoration: none; padding: 8px 16px; border: 1px solid var(--primary); border-radius: 6px;">Download</a>
@@ -697,6 +758,8 @@ Brief Q&A"></textarea>
                 document.getElementById('productId').value = data.id;
                 document.getElementById('productName').value = data.name;
                 document.getElementById('productPrice').value = data.price;
+                document.getElementById('productOriginalPrice').value = data.original_price || '';
+                document.getElementById('productPPP').checked = data.enable_ppp || false;
                 document.getElementById('productDiscount').value = data.discount_percentage || 0;
                 document.getElementById('productCouponCode').value = data.coupon_code || '';
                 document.getElementById('productDesc').value = data.description || '';
@@ -715,6 +778,8 @@ Brief Q&A"></textarea>
                 document.getElementById('productId').value = '';
                 document.getElementById('productName').value = '';
                 document.getElementById('productPrice').value = '';
+                document.getElementById('productOriginalPrice').value = '';
+                document.getElementById('productPPP').checked = false;
                 document.getElementById('productDiscount').value = '';
                 document.getElementById('productCouponCode').value = '';
                 document.getElementById('productDesc').value = '';
