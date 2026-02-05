@@ -16,8 +16,11 @@
         (function () {
             const script = document.createElement('script');
             script.src = 'config.js';
+            script.onload = function () {
+                console.log('✅ Configuration loaded successfully');
+            };
             script.onerror = function () {
-                console.log('ℹ️ Local configuration file (config.js) not found. Using defaults/environment variables.');
+                console.log('ℹ️ Local configuration (config.js) not found or build-time injection failed. Using environment variables if available.');
             };
             document.head.appendChild(script);
         })();

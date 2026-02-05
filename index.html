@@ -850,14 +850,17 @@
     <!-- Razorpay Checkout Script (Secure - loaded from Razorpay CDN) -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-    <!-- Config file (contains API keys - not tracked by git) -->
+    <!-- Config file (contains API keys - not tracked by git, auto-generated on Vercel) -->
     <script>
         // Load config.js if it exists, otherwise gracefully fallback
         (function () {
             const script = document.createElement('script');
             script.src = 'config.js';
+            script.onload = function () {
+                console.log('✅ Configuration loaded successfully');
+            };
             script.onerror = function () {
-                console.log('ℹ️ Local configuration file (config.js) not found. Using defaults/environment variables.');
+                console.log('ℹ️ Local configuration (config.js) not found or build-time injection failed. Using environment variables if available.');
             };
             document.head.appendChild(script);
         })();
