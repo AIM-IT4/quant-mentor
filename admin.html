@@ -547,10 +547,7 @@ Brief Q&A"></textarea>
 
         function cropImage() {
             if (!cropper) return;
-            const canvas = cropper.getCroppedCanvas({
-                width: 1280, // standardized width
-                height: 720,
-            });
+            const canvas = cropper.getCroppedCanvas(); // Free size based on crop
 
             canvas.toBlob((blob) => {
                 croppedCoverBlob = blob;
@@ -596,8 +593,8 @@ Brief Q&A"></textarea>
                             // Initialize Cropper
                             if (cropper) cropper.destroy();
                             cropper = new Cropper(cropperImage, {
-                                aspectRatio: 16 / 9,
-                                viewMode: 2,
+                                aspectRatio: NaN, // Free aspect ratio
+                                viewMode: 1,
                                 autoCropArea: 1,
                             });
                         }
