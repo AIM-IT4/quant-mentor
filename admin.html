@@ -2078,7 +2078,18 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
                 const totalBookingsRevenue = (bookingsData || []).reduce((sum, b) => sum + (b.service_price || 0), 0);
                 const totalPurchasesRevenue = (purchasesData || []).reduce((sum, p) => sum + (p.amount || 0), 0);
 
-                document.getElementById('totalRevenue').textContent = `₹${(totalBookingsRevenue + totalPurchasesRevenue).toLocaleString()}`;
+                console.log('💰 Revenue Debug:', {
+                    bookingsCount: bookingsData?.length,
+                    purchasesCount: purchasesData?.length,
+                    totalBookingsRevenue,
+                    totalPurchasesRevenue,
+                    firstPurchase: purchasesData?.[0],
+                    allPurchases: purchasesData
+                });
+
+                // Round to avoid fractional paise display issues
+                const totalRevenue = Math.round(totalBookingsRevenue + totalPurchasesRevenue);
+                document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toLocaleString()}`;
                 document.getElementById('totalBookings').textContent = (bookingsData || []).length;
                 document.getElementById('totalSales').textContent = (purchasesData || []).length;
             } catch (err) {
