@@ -106,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize Dynamic Content
     if (typeof loadProductsFromSupabase === 'function') loadProductsFromSupabase();
     if (typeof loadSessionsFromSupabase === 'function') loadSessionsFromSupabase();
+    if (typeof loadBlogsFromSupabase === 'function') loadBlogsFromSupabase();
     // -------------------------------------
 
     // --------------------------------
@@ -661,6 +662,63 @@ async function convertPrice(inrPrice, countryCode) {
 function formatPrice(priceObj) {
     if (!priceObj || priceObj.amount === 0) return 'FREE';
     return `${priceObj.currency.symbol}${priceObj.amount.toLocaleString()}`;
+}
+
+// Load and display blogs from Supabase
+async function loadBlogsFromSupabase() {
+    try {
+        if (!window.supabaseClient) return;
+
+        const { data, error } = await window.supabaseClient
+            .from('blogs')
+            .select('*')
+            .eq('is_published', true)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error loading blogs:', error);
+            return;
+        }
+
+        const blogGrid = document.getElementById('blog-grid');
+        if (!blogGrid) return;
+
+        blogGrid.innerHTML = '';
+
+        if (!data || data.length === 0) {
+            blogGrid.innerHTML = '<p style="text-align:center; color:var(--text-muted); grid-column:1/-1;">No articles found. Check back soon!</p>';
+            return;
+        }
+
+        data.forEach(blog => {
+            const date = new Date(blog.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.style.cursor = 'pointer';
+            card.onclick = () => window.openBlogModal(blog.id);
+
+            const imageHtml = blog.cover_image_url
+                ? `<div class="product-image" style="height:200px; padding:0; overflow:hidden;"><img src="${blog.cover_image_url}" style="width:100%; height:100%; object-fit:cover; transition:transform 0.5s ease;"></div>`
+                : `<div class="product-image" style="height:200px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05);"><i class="fas fa-newspaper" style="font-size:3em; opacity:0.5;"></i></div>`;
+
+            card.innerHTML = `
+                ${imageHtml}
+                <div class="product-content">
+                    <div style="font-size:0.85em; color:var(--primary); margin-bottom:5px;">${date}</div>
+                    <h3 class="product-title" style="margin-bottom:10px;">${blog.title}</h3>
+                    <p class="product-description" style="margin-bottom:15px;">${blog.excerpt || ''}</p>
+                    <div style="margin-top:auto; color:var(--text-color); font-weight:600; font-size:0.9em; display:flex; align-items:center; gap:5px;">
+                        Read Article <i class="fas fa-arrow-right" style="font-size:0.8em;"></i>
+                    </div>
+                </div>
+            `;
+            blogGrid.appendChild(card);
+        });
+
+    } catch (err) {
+        console.error('Failed to load blogs:', err);
+    }
 }
 
 // Load and display products from Supabase
