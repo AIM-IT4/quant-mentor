@@ -305,14 +305,14 @@
         });
 
         // Brevo Email Configuration
-        const BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in';
-        const BREVO_SENDER_NAME = 'QuantMentor';
+        const getBrevoSenderEmail = () => (window.CONFIG && window.CONFIG.BREVO_SENDER_EMAIL) || 'jha.8@alumni.iitj.ac.in';
+        const getBrevoSenderName = () => (window.CONFIG && window.CONFIG.BREVO_SENDER_NAME) || 'QuantMentor';
 
         // Send email via Brevo API
         async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
-            const BREVO_API_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_API_KEY) ? window.CONFIG.BREVO_API_KEY : '';
+            const apiKey = (window.CONFIG && window.CONFIG.BREVO_API_KEY) || '';
 
-            if (!BREVO_API_KEY) {
+            if (!apiKey) {
                 console.warn('⚠️ Brevo API key not configured. Email not sent.');
                 return { success: false, error: 'API key not configured' };
             }
@@ -322,11 +322,11 @@
                     method: 'POST',
                     headers: {
                         'accept': 'application/json',
-                        'api-key': BREVO_API_KEY,
+                        'api-key': apiKey,
                         'content-type': 'application/json'
                     },
                     body: JSON.stringify({
-                        sender: { email: BREVO_SENDER_EMAIL, name: BREVO_SENDER_NAME },
+                        sender: { email: getBrevoSenderEmail(), name: getBrevoSenderName() },
                         to: [{ email: to }],
                         subject: subject,
                         htmlContent: htmlContent,
@@ -682,7 +682,7 @@ Do you want to proceed with cancellation?`;
                         <p style="color: #6b7280;"><strong>Status:</strong> Pending Admin Approval</p>
                         <p style="color: #6b7280;"><strong>Processing Time:</strong> 5-7 business days after approval</p>
                         <p style="margin-top: 20px; color: #6b7280;">You will receive another email once your refund is processed.</p>
-                        <p style="color: #6b7280;">Best regards,<br>${BREVO_SENDER_NAME}</p>
+                        <p style="color: #6b7280;">Best regards,<br>${getBrevoSenderName()}</p>
                     </div>
                 `;
 
