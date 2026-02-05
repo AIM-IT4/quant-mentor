@@ -1601,55 +1601,6 @@ if (bookingForm) {
         e.preventDefault();
         console.log('🚀 Booking form submitted!'); // Debug log
 
-        const name = document.getElementById('bookingName').value;
-        const email = document.getElementById('bookingEmail').value;
-        const phone = document.getElementById('bookingPhone').value || 'Not provided';
-        const serviceValue = document.getElementById('bookingService').value;
-        const date = document.getElementById('bookingDate').value;
-        const time = document.getElementById('bookingTime').value;
-        const message = document.getElementById('bookingMessage').value || 'No specific message';
-
-        if (!serviceValue || !date || !time) {
-            alert('Please fill in all required fields');
-            return;
-        }
-
-        const [sessionType, price, duration] = serviceValue.split('|');
-        console.log('Debug: serviceValue =', serviceValue, 'sessionType =', sessionType);
-
-        // Try to find session info from multiple sources
-        let sessionInfo = SESSION_TYPES[sessionType];
-
-        // If not found in hardcoded types, try to find by matching session name in dynamic sessions
-        if (!sessionInfo && window.dynamicSessions) {
-            sessionInfo = window.dynamicSessions.find(s =>
-                s.name.toLowerCase().replace(/\s+/g, '_') === sessionType ||
-                s.name.toLowerCase() === sessionType.replace(/_/g, ' ')
-            );
-        }
-
-        // If still not found, create session info from the dropdown text
-        if (!sessionInfo) {
-            const selectedOption = bookingService.options[bookingService.selectedIndex];
-            if (selectedOption && selectedOption.text) {
-                // Extract session name from option text (format: "🆓 Session Name (duration min) - Price")
-                const match = selectedOption.text.match(/[🆓\s]*([^\(]+)/);
-                const sessionName = match ? match[1].trim() : 'Session';
-                sessionInfo = {
-                    name: sessionName,
-                    price: parseInt(price) || 0,
-                    duration: parseInt(duration) || 60
-                };
-            }
-        }
-
-        // Check if session info was found
-        if (!sessionInfo) {
-            alert('Error: Invalid session type. Please refresh and try again.');
-            console.error('Session type not found:', sessionType, 'Available:', Object.keys(SESSION_TYPES), 'Service value:', serviceValue);
-            return;
-        }
-
         // Format date for display
         const dateObj = new Date(date);
         const formattedDate = dateObj.toLocaleDateString('en-IN', {
@@ -1662,6 +1613,30 @@ if (bookingForm) {
         // Create session description for Razorpay
         const sessionDescription = `${sessionInfo.name} on ${formattedDate} at ${time}`;
 
+        // Prepare Payment Details
+        let payAmount = sessionInfo.price;
+        let payCurrency = 'INR';
+        let logAmountInr = sessionInfo.price;
+
+        // Check for Local Currency
+        // We need to re-convert because we only have the INR price in sessionInfo
+        // If we already displayed local price, we should re-fetch that conversion or just convert again to be safe
+        try {
+            if (userCountryCode && userCountryCode !== 'IN') {
+                // We can re-use the convertPrice function
+                // Note: convertPrice is async, so we wrap this block or just call it
+                // But wait, the listener is async!
+                const localPrice = await convertPrice(sessionInfo.price, userCountryCode);
+                if (localPrice.currency.code !== 'INR') {
+                    payAmount = localPrice.amount;
+                    payCurrency = localPrice.currency.code;
+                    console.log(`🌍 Booking International: Paying in ${payCurrency}`, payAmount);
+                }
+            }
+        } catch (e) {
+            console.warn('Currency conversion failed for booking, defaulting to INR', e);
+        }
+
         // Store booking details for after payment
         window.pendingBooking = {
             name,
@@ -1669,25 +1644,26 @@ if (bookingForm) {
             phone,
             sessionType: sessionInfo.name,
             duration: sessionInfo.duration,
-            price: parseInt(price),
+            price: Math.round(logAmountInr), // Store INR price in DB
             date: formattedDate,
             time,
             message
         };
 
-        console.log('Opening Razorpay for session:', sessionDescription, 'Price:', price);
+        console.log('Opening Razorpay for session:', sessionDescription, 'Price:', payAmount, payCurrency);
 
         // Open Razorpay for session payment
-        initSessionPayment(sessionDescription, parseInt(price), email);
+        initSessionPayment(sessionDescription, payAmount, email, payCurrency, logAmountInr);
     });
 }
 
 /**
  * Initialize Razorpay for session booking payment
  */
-function initSessionPayment(description, amount, customerEmail) {
-    // Handle FREE sessions (₹0) - skip payment, go directly to confirmation
-    if (amount === 0) {
+// Initialize Razorpay for session booking payment
+function initSessionPayment(description, amount, customerEmail, currency = 'INR', inrAmountForLogging = null) {
+    // Handle FREE sessions (0 value)
+    if (amount <= 0) {
         handleSessionPaymentSuccess({ razorpay_payment_id: 'FREE_SESSION_' + Date.now() });
         return;
     }
@@ -1697,10 +1673,13 @@ function initSessionPayment(description, amount, customerEmail) {
         return;
     }
 
+    // Smallest currency sub-unit multiplier (100 for INR/USD/GBP, 1 for JPY)
+    const multiplier = (currency.toUpperCase() === 'JPY') ? 1 : 100;
+
     var options = {
         "key": RAZORPAY_KEY_ID,
-        "amount": amount * 100,
-        "currency": "INR",
+        "amount": Math.round(amount * multiplier),
+        "currency": currency,
         "name": BUSINESS_NAME,
         "description": description,
         "handler": function (response) {
