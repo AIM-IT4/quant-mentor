@@ -20,14 +20,14 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
         // BREVO EMAIL CONFIGURATION (replaces EmailJS - 9,000 emails/month free!)
-        // Get API key from: https://app.brevo.com/settings/keys/api
-        const BREVO_API_KEY = 'xkeysib-your-api-key-here';
+        // Get your API key from .env file
+        const BREVO_API_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_API_KEY) ? window.CONFIG.BREVO_API_KEY : process.env.BREVO_API_KEY;
         const BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in';
         const BREVO_SENDER_NAME = 'QuantMentor';
 
         // Send email via Brevo API
         async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
-            if (BREVO_API_KEY === 'xkeysib-your-api-key-here') {
+            if (!BREVO_API_KEY || BREVO_API_KEY === 'xkeysib-your-api-key-here') {
                 console.warn('⚠️ Brevo API key not configured. Email not sent.');
                 return { success: false, error: 'API key not configured' };
             }
@@ -790,7 +790,7 @@ Brief Q&A"></textarea>
             } catch (e) { console.error(e); }
 
             // BREVO EMAIL CONFIGURATION (replaces EmailJS - 9,000 emails/month free!)
-            const BREVO_API_KEY = 'xkeysib-your-api-key-here';
+            const BREVO_API_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_API_KEY) ? window.CONFIG.BREVO_API_KEY : process.env.BREVO_API_KEY;
             const BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in';
             const BREVO_SENDER_NAME = 'QuantMentor';
             console.log('✅ Brevo email configuration loaded');

@@ -6,6 +6,7 @@
 # API Keys and Secrets
 secrets.json
 config.json
+config.js
 *.key
 *.pem
 

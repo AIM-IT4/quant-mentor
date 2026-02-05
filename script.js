@@ -19,11 +19,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Brevo Email Configuration
-    // Get your API key from: https://app.brevo.com/settings/keys/api
-    // Replace with your actual API key after signing up
-    const BREVO_API_KEY = 'xkeysib-your-api-key-here';
-    const BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in';
-    const BREVO_SENDER_NAME = 'QuantMentor';
+    // Get your API key from .env file
+    const BREVO_API_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_API_KEY) ? window.CONFIG.BREVO_API_KEY : process.env.BREVO_API_KEY;
+    const BREVO_SENDER_EMAIL = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_SENDER_EMAIL) ? window.CONFIG.BREVO_SENDER_EMAIL : 'jha.8@alumni.iitj.ac.in';
+    const BREVO_SENDER_NAME = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_SENDER_NAME) ? window.CONFIG.BREVO_SENDER_NAME : 'QuantMentor';
 
     // Send email via Brevo API
     async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
@@ -402,13 +401,13 @@ const BUSINESS_NAME = 'QuantMentor';
 // 3. Create API key and copy it below
 // 4. Verify sender email in Settings → Senders & IP
 
-const BREVO_API_KEY = 'xkeysib-your-api-key-here';    // ⚠️ Replace with your actual API key
+const BREVO_API_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_API_KEY) ? window.CONFIG.BREVO_API_KEY : 'xkeysib-your-api-key-here';
 const BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in'; // ✅ Your verified sender email
 const BREVO_SENDER_NAME = 'QuantMentor';
 
 // Send email via Brevo API (much higher limits than EmailJS)
 async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
-    if (BREVO_API_KEY === 'xkeysib-your-api-key-here') {
+            if (!BREVO_API_KEY || BREVO_API_KEY === 'xkeysib-your-api-key-here') {
         console.warn('⚠️ Brevo API key not configured. Email not sent.');
         return { success: false, error: 'API key not configured' };
     }
@@ -1357,7 +1356,7 @@ async function sendProductEmail(customerEmail, productName, paymentId, downloadL
     console.log('📧 sendProductEmail called with:', customerEmail);
 
     // Send to CUSTOMER via Brevo
-    if (BREVO_API_KEY !== 'xkeysib-your-api-key-here') {
+    if (BREVO_API_KEY && BREVO_API_KEY !== 'xkeysib-your-api-key-here') {
         console.log('📧 Attempting to send via Brevo...');
         
         const htmlContent = `
@@ -1768,7 +1767,7 @@ New Booking Details:
     // Send confirmation email to CUSTOMER with Meet link via Brevo
     console.log('📧 Sending session confirmation to customer:', booking.email);
 
-    if (BREVO_API_KEY !== 'xkeysib-your-api-key-here') {
+    if (BREVO_API_KEY && BREVO_API_KEY !== 'xkeysib-your-api-key-here') {
         console.log('📧 Brevo is available, sending...');
         
         const htmlContent = `
