@@ -422,54 +422,82 @@ async function getUserCountry() {
     }
 }
 
-// PPP (Purchasing Power Parity) Configuration
-// Discounts are applied to the base price for lower-income countries
-const PPP_TIERS = {
-    // Tier 1: High-income countries (0% discount - full price)
-    tier1: {
-        discount: 0,
-        countries: ['US', 'CA', 'GB', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'AT', 'CH', 'SE', 'NO', 'DK', 'FI', 'AU', 'NZ', 'JP', 'KR', 'SG', 'HK', 'MO', 'QA', 'AE', 'SA', 'BH', 'KW', 'OM', 'IS', 'IE', 'LU', 'LI', 'MC', 'AD', 'SM', 'VA']
-    },
-    // Tier 2: Upper-middle income (20% discount)
-    tier2: {
-        discount: 20,
-        countries: ['CN', 'RU', 'BR', 'MX', 'TR', 'AR', 'CL', 'CO', 'PE', 'ZA', 'MY', 'TH', 'ID', 'PH', 'VN', 'BD', 'EG', 'NG', 'KE', 'GH', 'UG', 'TZ', 'ZW', 'ZM', 'MW', 'MZ', 'MG', 'MU', 'SC', 'KM', 'GW', 'GQ', 'GA', 'CG', 'CD', 'CM', 'CF', 'TD', 'NE', 'BJ', 'TG', 'SL', 'LR', 'GN', 'GM', 'CV', 'ST', 'BW', 'SZ', 'LS', 'NA', 'AO', 'DZ', 'TN', 'MA', 'LY', 'SD', 'SS', 'ET', 'ER', 'DJ', 'SO', 'RW', 'BI', 'SS']
-    },
-    // Tier 3: Lower-middle income (40% discount)
-    tier3: {
-        discount: 40,
-        countries: ['IN', 'PK', 'LK', 'NP', 'MM', 'KH', 'LA', 'BT', 'MN', 'KZ', 'UZ', 'AZ', 'AM', 'GE', 'MD', 'UA', 'BY', 'AL', 'BA', 'RS', 'ME', 'MK', 'BG', 'RO', 'HR', 'SI', 'SK', 'CZ', 'PL', 'HU', 'LT', 'LV', 'EE', 'PT', 'GR', 'CY', 'MT', 'UY', 'PY', 'BO', 'EC', 'VE', 'GY', 'SR', 'GF', 'JM', 'HT', 'DO', 'CU', 'PR', 'CR', 'PA', 'GT', 'HN', 'SV', 'NI', 'BZ', 'BS', 'BB', 'TT', 'GD', 'LC', 'VC', 'AG', 'DM', 'KN', 'AI', 'VG', 'KY', 'BM', 'TC', 'MS', 'GL', 'FO', 'AX', 'SJ', 'GF', 'RE', 'YT', 'GP', 'MQ', 'BL', 'MF', 'SX', 'AW', 'CW', 'BQ', 'SX']
-    },
-    // Tier 4: Low-income countries (60% discount)
-    tier4: {
-        discount: 60,
-        countries: ['AF', 'IQ', 'SY', 'YE', 'PS', 'LB', 'JO', 'IR', 'PK', 'MV', 'BT', 'NP', 'BD', 'MM', 'LA', 'KH', 'VN', 'PH', 'ID', 'LK', 'AF', 'SO', 'ER', 'DJ', 'TD', 'NE', 'ML', 'BF', 'GM', 'GW', 'SL', 'LR', 'GN', 'BI', 'MZ', 'MW', 'ZM', 'ZW', 'MG', 'KM', 'SC', 'MR', 'ML', 'BF', 'NE', 'TD', 'CF', 'CD', 'CG', 'GQ', 'GA', 'ST', 'CV', 'GM', 'GW', 'SL', 'LR', 'GN', 'BJ', 'TG', 'GH', 'CI', 'NG', 'CM', 'CF', 'GQ', 'GA', 'CG', 'CD', 'AO', 'ET', 'ER', 'DJ', 'SO', 'KE', 'UG', 'TZ', 'RW', 'BI', 'SS', 'SD', 'SS', 'ET', 'ER', 'DJ', 'SO', 'YE', 'IQ', 'SY', 'LB', 'PS', 'JO', 'IR', 'AF', 'PK', 'IN', 'NP', 'BD', 'LK', 'MV', 'BT', 'MM', 'KH', 'LA', 'VN', 'PH', 'ID', 'PG', 'SB', 'VU', 'FJ', 'KI', 'TV', 'NR', 'PW', 'MH', 'FM', 'WS', 'TO', 'CK', 'NU', 'AS', 'KI', 'NR', 'TV', 'TK', 'WF', 'PF', 'NC', 'AS', 'GU', 'MP', 'VI', 'PR', 'AI', 'MS', 'VG', 'TC', 'KY', 'BM', 'GL', 'FO', 'AX', 'SJ', 'GF', 'RE', 'YT', 'GP', 'MQ', 'BL', 'MF', 'SX', 'AW', 'CW', 'BQ', 'SX']
-    }
+// Currency Configuration - Exchange rates from INR (base currency)
+const CURRENCY_CONFIG = {
+    'IN': { code: 'INR', symbol: '₹', rate: 1, name: 'Indian Rupee' },
+    'US': { code: 'USD', symbol: '$', rate: 0.012, name: 'US Dollar' },
+    'GB': { code: 'GBP', symbol: '£', rate: 0.0095, name: 'British Pound' },
+    'EU': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
+    'DE': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
+    'FR': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
+    'IT': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
+    'ES': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
+    'NL': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
+    'BE': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
+    'AT': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
+    'PT': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
+    'GR': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
+    'IE': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
+    'FI': { code: 'EUR', symbol: '€', rate: 0.011, name: 'Euro' },
+    'JP': { code: 'JPY', symbol: '¥', rate: 1.8, name: 'Japanese Yen' },
+    'KR': { code: 'KRW', symbol: '₩', rate: 16.5, name: 'Korean Won' },
+    'CN': { code: 'CNY', symbol: '¥', rate: 0.087, name: 'Chinese Yuan' },
+    'AU': { code: 'AUD', symbol: 'A$', rate: 0.018, name: 'Australian Dollar' },
+    'CA': { code: 'CAD', symbol: 'C$', rate: 0.016, name: 'Canadian Dollar' },
+    'CH': { code: 'CHF', symbol: 'CHF', rate: 0.010, name: 'Swiss Franc' },
+    'SE': { code: 'SEK', symbol: 'kr', rate: 0.13, name: 'Swedish Krona' },
+    'NO': { code: 'NOK', symbol: 'kr', rate: 0.13, name: 'Norwegian Krone' },
+    'DK': { code: 'DKK', symbol: 'kr', rate: 0.084, name: 'Danish Krone' },
+    'SG': { code: 'SGD', symbol: 'S$', rate: 0.016, name: 'Singapore Dollar' },
+    'HK': { code: 'HKD', symbol: 'HK$', rate: 0.094, name: 'Hong Kong Dollar' },
+    'NZ': { code: 'NZD', symbol: 'NZ$', rate: 0.020, name: 'New Zealand Dollar' },
+    'BR': { code: 'BRL', symbol: 'R$', rate: 0.067, name: 'Brazilian Real' },
+    'MX': { code: 'MXN', symbol: 'Mex$', rate: 0.24, name: 'Mexican Peso' },
+    'ZA': { code: 'ZAR', symbol: 'R', rate: 0.22, name: 'South African Rand' },
+    'RU': { code: 'RUB', symbol: '₽', rate: 1.1, name: 'Russian Ruble' },
+    'TR': { code: 'TRY', symbol: '₺', rate: 0.42, name: 'Turkish Lira' },
+    'AE': { code: 'AED', symbol: 'د.إ', rate: 0.044, name: 'UAE Dirham' },
+    'SA': { code: 'SAR', symbol: '﷼', rate: 0.045, name: 'Saudi Riyal' },
+    'PK': { code: 'PKR', symbol: '₨', rate: 3.3, name: 'Pakistani Rupee' },
+    'BD': { code: 'BDT', symbol: '৳', rate: 1.4, name: 'Bangladeshi Taka' },
+    'LK': { code: 'LKR', symbol: 'Rs', rate: 3.6, name: 'Sri Lankan Rupee' },
+    'NP': { code: 'NPR', symbol: 'Rs', rate: 1.6, name: 'Nepalese Rupee' },
+    'TH': { code: 'THB', symbol: '฿', rate: 0.43, name: 'Thai Baht' },
+    'MY': { code: 'MYR', symbol: 'RM', rate: 0.056, name: 'Malaysian Ringgit' },
+    'ID': { code: 'IDR', symbol: 'Rp', rate: 190, name: 'Indonesian Rupiah' },
+    'PH': { code: 'PHP', symbol: '₱', rate: 0.70, name: 'Philippine Peso' },
+    'VN': { code: 'VND', symbol: '₫', rate: 300, name: 'Vietnamese Dong' },
+    'EG': { code: 'EGP', symbol: '£', rate: 0.60, name: 'Egyptian Pound' },
+    'NG': { code: 'NGN', symbol: '₦', rate: 18.5, name: 'Nigerian Naira' },
+    'KE': { code: 'KES', symbol: 'KSh', rate: 1.6, name: 'Kenyan Shilling' },
+    'GH': { code: 'GHS', symbol: 'GH₵', rate: 0.18, name: 'Ghanaian Cedi' }
 };
 
-// Calculate PPP discount percentage based on country code
-function getPPPDiscount(countryCode) {
-    if (!countryCode) return 0;
+// Get currency info for a country code
+function getCurrencyForCountry(countryCode) {
+    if (!countryCode) return CURRENCY_CONFIG['IN']; // Default to INR
     const code = countryCode.toUpperCase();
-    
-    for (const tier of Object.values(PPP_TIERS)) {
-        if (tier.countries.includes(code)) {
-            return tier.discount;
-        }
-    }
-    // Default to tier 3 (40% discount) if country not found
-    return 40;
+    return CURRENCY_CONFIG[code] || CURRENCY_CONFIG['IN']; // Default to INR if not found
 }
 
-// Calculate PPP-adjusted price
-function calculatePPPPrice(basePrice, countryCode, enablePPP = true) {
-    if (!enablePPP || !basePrice || basePrice <= 0) return basePrice;
+// Convert INR price to local currency
+function convertPrice(inrPrice, countryCode) {
+    if (!inrPrice || inrPrice <= 0) return { amount: 0, currency: CURRENCY_CONFIG['IN'] };
     
-    const discount = getPPPDiscount(countryCode);
-    if (discount === 0) return basePrice;
+    const currency = getCurrencyForCountry(countryCode);
+    const convertedAmount = Math.round(inrPrice * currency.rate);
     
-    const discountedPrice = Math.round(basePrice * (100 - discount) / 100);
-    return Math.max(discountedPrice, 1); // Minimum price of 1
+    return {
+        amount: convertedAmount,
+        currency: currency,
+        originalInr: inrPrice
+    };
+}
+
+// Format price with currency symbol
+function formatPrice(priceObj) {
+    if (!priceObj || priceObj.amount === 0) return 'FREE';
+    return `${priceObj.currency.symbol}${priceObj.amount.toLocaleString()}`;
 }
 
 // Load and display products from Supabase
@@ -535,15 +563,14 @@ function displaySupabaseProducts(products) {
             productCard.className = 'product-card';
             productCard.dataset.category = 'notes';
 
-            // Calculate PPP price if enabled
-            const pppPrice = calculatePPPPrice(product.price, userCountryCode, product.enable_ppp);
-            const pppDiscount = product.enable_ppp ? getPPPDiscount(userCountryCode) : 0;
-            const hasPPPDiscount = pppDiscount > 0 && pppPrice < product.price;
+            // Convert price to local currency
+            const localPrice = convertPrice(product.price, userCountryCode);
+            const isLocalCurrency = localPrice.currency.code !== 'INR';
             
             const priceDisplay = isFree
                 ? `<div class="product-price" style="color:#22c55e">Free</div>`
-                : hasPPPDiscount 
-                    ? `<div style="display:flex;gap:8px;align-items:baseline;"><span style="text-decoration:line-through;color:var(--text-muted);font-size:0.9em">₹${product.price}</span><div class="product-price" style="color:#22c55e">₹${pppPrice}</div></div>`
+                : isLocalCurrency
+                    ? `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;"><div class="product-price" style="font-size:1.2em;">${formatPrice(localPrice)}</div><span style="font-size:0.75em;color:var(--text-muted);">(₹${product.price} INR)</span></div>`
                     : `<div class="product-price">₹${product.price}</div>`;
 
             const btnText = isFree ? 'Download' : 'Buy Now';
@@ -559,20 +586,19 @@ function displaySupabaseProducts(products) {
             const rawDesc = product.description || '';
             const displayDesc = (rawDesc === '<p><br></p>') ? '' : rawDesc;
 
-            // Store PPP info on the card for modal use
-            productCard.dataset.pppPrice = pppPrice;
-            productCard.dataset.basePrice = product.price;
-            productCard.dataset.pppDiscount = pppDiscount;
+            // Store price info on the card for modal use
+            productCard.dataset.localPrice = JSON.stringify(localPrice);
+            productCard.dataset.inrPrice = product.price;
 
-            // PPP discount badge for eligible countries
-            const pppBadge = (!isFree && hasPPPDiscount) 
-                ? `<span style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; font-weight: 600; margin-left: 8px;">${pppDiscount}% OFF</span>` 
+            // Currency badge for non-INR countries
+            const currencyBadge = (!isFree && isLocalCurrency) 
+                ? `<span style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; font-weight: 600; margin-left: 8px;">${localPrice.currency.code}</span>` 
                 : '';
 
             productCard.innerHTML = `
                 ${imageSection}
                 <div class="product-content">
-                    <h3 class="product-title">${product.name}${pppBadge}</h3>
+                    <h3 class="product-title">${product.name}${currencyBadge}</h3>
                     <div class="product-description">${displayDesc || (isFree ? 'Free resource for quants.' : 'Premium content.')}</div>
                     <div class="product-meta">
                         <span><i class="fas fa-file-alt"></i> ${isFree ? 'Resource' : 'Premium Note'}</span>
@@ -580,7 +606,7 @@ function displaySupabaseProducts(products) {
                     </div>
                     <div class="product-footer">
                         ${isFree ? priceDisplay : (product.original_price > product.price ? `<div style="display:flex;gap:8px;align-items:baseline;"><span style="text-decoration:line-through;color:var(--text-muted);font-size:0.9em">₹${product.original_price}</span>${priceDisplay}</div>` : priceDisplay)}
-                        <button class="btn btn-product" onclick="openProductModal('${product.id}')" data-price="${product.price}" data-ppp-price="${pppPrice}">${btnText}</button>
+                        <button class="btn btn-product" onclick="openProductModal('${product.id}')" data-price="${product.price}">${btnText}</button>
                     </div>
                 </div>
             `;
@@ -599,21 +625,19 @@ window.openProductModal = async function (id) {
         const modal = document.getElementById('productModal');
         if (!modal) return;
 
-        // Calculate PPP price if enabled
-        const pppPrice = calculatePPPPrice(product.price, userCountryCode, product.enable_ppp);
-        const pppDiscount = product.enable_ppp ? getPPPDiscount(userCountryCode) : 0;
-        const hasPPPDiscount = pppDiscount > 0 && pppPrice < product.price;
+        // Convert price to local currency
+        const localPrice = convertPrice(product.price, userCountryCode);
+        const isLocalCurrency = localPrice.currency.code !== 'INR';
         
-        // Store base price and PPP info for calculations
-        window.currentProductBasePrice = product.price;
-        window.currentProductPPPPrice = pppPrice;
-        window.currentProductPPPDiscount = pppDiscount;
-        window.currentProductHasPPP = hasPPPDiscount;
+        // Store price info for calculations
+        window.currentProductInrPrice = product.price;
+        window.currentProductLocalPrice = localPrice;
+        window.currentProductIsLocalCurrency = isLocalCurrency;
 
         document.getElementById('modalTitle').textContent = product.name;
         document.getElementById('modalDescription').innerHTML = product.description || 'Premium digital product.';
         
-        // Display price with PPP discount if applicable
+        // Display price with local currency
         const priceElement = document.getElementById('modalPrice');
         const pppInfoElement = document.getElementById('pppInfo');
         const pppTextElement = document.getElementById('pppText');
@@ -621,23 +645,20 @@ window.openProductModal = async function (id) {
         if (product.price === 0 || !product.price) {
             priceElement.textContent = 'FREE';
             if (pppInfoElement) pppInfoElement.style.display = 'none';
-        } else if (hasPPPDiscount) {
-            priceElement.innerHTML = `<span style="text-decoration:line-through;color:var(--text-muted);font-size:0.8em;margin-right:10px;">₹${product.price}</span><span style="color:#22c55e;">₹${pppPrice}</span>`;
+        } else if (isLocalCurrency) {
+            // Show local currency with INR reference
+            priceElement.innerHTML = `<span style="font-size:1.3em;font-weight:600;">${formatPrice(localPrice)}</span>`;
             if (pppInfoElement && pppTextElement) {
                 pppInfoElement.style.display = 'block';
-                pppTextElement.textContent = `PPP discount applied: ${pppDiscount}% off for ${userCountryCode || 'your region'}`;
+                pppTextElement.innerHTML = `<i class="fas fa-globe"></i> Converted from ₹${product.price} INR • ${localPrice.currency.name}`;
             }
         } else {
+            // Show INR for Indian users
             priceElement.textContent = '₹' + product.price;
             if (pppInfoElement) {
-                // Show PPP info even without discount, for transparency
                 pppInfoElement.style.display = 'block';
                 if (pppTextElement) {
-                    if (product.enable_ppp) {
-                        pppTextElement.textContent = `Pricing for ${userCountryCode || 'your region'} (no PPP discount applicable)`;
-                    } else {
-                        pppTextElement.textContent = `Pricing in INR`;
-                    }
+                    pppTextElement.innerHTML = '<i class="fas fa-rupee-sign"></i> Price in Indian Rupees (INR)';
                 }
             }
         }
@@ -1193,25 +1214,18 @@ if (modalPayBtn) {
         const priceText = document.getElementById('modalPrice').textContent;
         console.log('Payment Request:', { productName, priceText });
 
-        // Determine final price: PPP price takes priority, then coupon discount, then base price
-        let price;
+        // Always use INR price for payment processing (Razorpay handles INR)
+        // The local currency is just for display purposes
+        let price = window.currentProductInrPrice || parseInt(priceText.replace(/[^\d]/g, ''));
+        console.log('Using INR price for payment:', price);
         
-        // Check if PPP discount is active
-        if (window.currentProductHasPPP && window.currentProductPPPPrice) {
-            price = window.currentProductPPPPrice;
-            console.log('Using PPP price:', price);
-        } else {
-            // Parse from displayed price
-            price = parseInt(priceText.replace(/[^\d]/g, ''));
-        }
-        
-        // Apply coupon discount if available (applied to PPP price if PPP is active)
+        // Apply coupon discount if available (applied to INR base price)
         if (typeof window.currentDiscountedPrice !== 'undefined' && window.currentDiscountedPrice != null) {
             price = window.currentDiscountedPrice;
-            console.log('Using coupon discounted price:', price);
+            console.log('Using coupon discounted INR price:', price);
         }
         
-        console.log('Final Price:', price);
+        console.log('Final INR Price for Razorpay:', price);
 
         if (isNaN(price)) {
             alert('Error parsing price. Please try again.');
