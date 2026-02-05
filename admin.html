@@ -291,6 +291,19 @@
 
         <div class="card">
             <h2 style="margin-top: 0;">Add/Edit Product</h2>
+
+            <!-- Tip for Free Resources -->
+            <div
+                style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                <h3 style="margin: 0 0 5px 0; color: #22c55e; font-size: 1em;"><i class="fas fa-gift"></i> Pro Tip:
+                    Managing Free Resources</h3>
+                <p style="margin: 0; font-size: 0.9em; color: var(--text-muted);">
+                    To add a <strong>Free Resource</strong> (like a cheat sheet or guide), simply fill out the product
+                    form below and check the <strong>"Free"</strong> box next to the price. It will automatically appear
+                    in the "Free Resources" section on the homepage.
+                </p>
+            </div>
+
             <form id="productForm">
                 <input type="hidden" id="productId">
                 <div class="form-group">
@@ -929,7 +942,7 @@ Brief Q&A"></textarea>
                     <div style="display: flex; align-items: center;">
                         ${coverImg}
                         <div>
-                            <strong>${p.name}</strong> ${hasPPP}<br>
+                            <strong>${p.name}</strong> ${p.price === 0 ? '<span style="background: #22c55e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px;">FREE RESOURCE</span>' : ''} ${hasPPP}<br>
                             <span style="color: var(--text-muted); font-size: 0.9em;">
                                 ${originalPrice > price ?
                             `<span style="text-decoration: line-through; color: #ef4444; margin-right: 5px;">₹${originalPrice}</span>` : ''}
@@ -970,6 +983,14 @@ Brief Q&A"></textarea>
                 document.getElementById('productPPP').checked = data.enable_ppp || false;
                 document.getElementById('productDiscount').value = data.discount_percentage || 0;
                 document.getElementById('productCouponCode').value = data.coupon_code || '';
+
+                // Handle Free Resource Checkbox
+                const freeCheck = document.getElementById('productFree');
+                if (freeCheck) {
+                    freeCheck.checked = (data.price === 0);
+                    togglePriceInput(freeCheck);
+                }
+
                 if (quill) quill.root.innerHTML = data.description || '';
                 document.getElementById('productSubmitBtn').textContent = 'Update Product';
                 document.getElementById('cancelEditBtn').style.display = 'inline-block';
@@ -996,6 +1017,13 @@ Brief Q&A"></textarea>
                 document.getElementById('productPPP').checked = false;
                 document.getElementById('productDiscount').value = '';
                 document.getElementById('productCouponCode').value = '';
+
+                const freeCheck = document.getElementById('productFree');
+                if (freeCheck) {
+                    freeCheck.checked = false;
+                    togglePriceInput(freeCheck);
+                }
+
                 if (quill) quill.setText('');
                 document.getElementById('productSubmitBtn').textContent = 'Upload & Save Product';
                 document.getElementById('cancelEditBtn').style.display = 'none';

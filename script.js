@@ -1466,9 +1466,18 @@ Thank you for booking!`);
 // --- BLOG & RESOURCES LOGIC ---
 
 async function loadBlogs() {
-    if (!window.supabaseClient) return;
+    console.log('📰 Attempting to load blogs from Supabase...');
+    if (!window.supabaseClient) {
+        console.error('❌ Supabase client not ready for blogs');
+        return;
+    }
     try {
-        const { data } = await window.supabaseClient.from('blogs').select('*').eq('is_published', true).order('created_at', { ascending: false });
+        const { data, error } = await window.supabaseClient.from('blogs').select('*').eq('is_published', true).order('created_at', { ascending: false });
+        if (error) {
+            console.error('❌ Error fetching blogs:', error);
+            return;
+        }
+        console.log(`📰 Blogs fetched: ${data?.length || 0} published articles found.`);
         if (data) displayBlogs(data);
     } catch (e) { console.error('Blog load error', e); }
 }
