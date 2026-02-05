@@ -519,6 +519,8 @@ Brief Q&A"></textarea>
         let cropper = null;
         let croppedCoverBlob = null;
         let quill = null;
+        const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDEwMTI2NSwiZXhwIjoyMDg1Njc3MjY1fQ.C87qk8sAOx9NI0p7sV5ndb8n_lktUA9EmjNMFjYItAg';
 
         // Check Password Function (globally accessible)
         function checkPassword() {
@@ -653,8 +655,6 @@ Brief Q&A"></textarea>
             // Initialize Supabase
             try {
                 // ... (keep existing)
-                const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
-                const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDEwMTI2NSwiZXhwIjoyMDg1Njc3MjY1fQ.C87qk8sAOx9NI0p7sV5ndb8n_lktUA9EmjNMFjYItAg';
                 if (typeof window.supabase !== 'undefined') {
                     if (!window.supabaseAdminClient) {
                         window.supabaseAdminClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
