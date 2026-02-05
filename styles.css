@@ -1,29 +1,29 @@
 /* ================================
    CSS Design System - QuantMentor
-   Premium Dark Mode Theme
+   Premium Light Mode Theme
    ================================ */
 
 /* --------------------------------
    CSS Custom Properties (Variables)
    -------------------------------- */
 :root {
-    /* Colors - Dark Theme */
-    --bg-primary: #0d1117;
-    --bg-secondary: #161b22;
-    --bg-tertiary: #21262d;
-    --bg-card: rgba(26, 26, 37, 0.8);
-    --bg-glass: rgba(255, 255, 255, 0.05);
+    /* Colors - Light Theme */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --bg-card: rgba(255, 255, 255, 0.95);
+    --bg-glass: rgba(0, 0, 0, 0.03);
 
     /* Text Colors */
-    --text-primary: #ffffff;
-    --text-secondary: #a0a0b0;
-    --text-muted: #6a6a7a;
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
 
-    /* Accent Colors */
-    --accent-primary: #2dd4bf;
-    --accent-secondary: #14b8a6;
-    --accent-tertiary: #0d9488;
-    --accent-gradient: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 40%, #f59e0b 100%);
+    /* Accent Colors - Darker for visibility on light backgrounds */
+    --accent-primary: #0d9488;
+    --accent-secondary: #0f766e;
+    --accent-tertiary: #115e59;
+    --accent-gradient: linear-gradient(135deg, #0d9488 0%, #0f766e 40%, #f59e0b 100%);
 
     /* Status Colors */
     --success: #22c55e;
@@ -31,14 +31,14 @@
     --error: #ef4444;
 
     /* Borders */
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-light: rgba(255, 255, 255, 0.12);
+    --border-subtle: rgba(0, 0, 0, 0.08);
+    --border-light: rgba(0, 0, 0, 0.12);
 
     /* Shadows */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
-    --shadow-glow: 0 0 40px rgba(45, 212, 191, 0.25);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.1);
+    --shadow-glow: 0 0 40px rgba(13, 148, 136, 0.15);
 
     /* Typography */
     --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -206,28 +206,28 @@ h3 {
 .btn-primary {
     background: var(--accent-gradient);
     color: white;
-    box-shadow: 0 4px 20px rgba(45, 212, 191, 0.35);
+    box-shadow: 0 4px 15px rgba(13, 148, 136, 0.3);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 30px rgba(45, 212, 191, 0.45);
+    box-shadow: 0 6px 25px rgba(13, 148, 136, 0.4);
 }
 
 .btn-secondary {
-    background: var(--bg-glass);
+    background: var(--bg-tertiary);
     color: var(--text-primary);
     border: 1px solid var(--border-light);
-    backdrop-filter: blur(10px);
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-secondary);
     border-color: var(--accent-primary);
+    color: var(--accent-primary);
 }
 
 .btn-service {
-    background: transparent;
+    background: var(--bg-tertiary);
     border: 1px solid var(--border-light);
     color: var(--text-primary);
     padding: 10px 20px;
@@ -235,8 +235,9 @@ h3 {
 }
 
 .btn-service:hover {
-    background: var(--accent-gradient);
-    border-color: transparent;
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: white;
 }
 
 .btn-product {
@@ -265,9 +266,10 @@ h3 {
     right: 0;
     z-index: 1000;
     padding: 16px 0;
-    background: rgba(10, 10, 15, 0.8);
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
 }
 
 .nav-container {
@@ -507,19 +509,11 @@ h3 {
     border: 1px solid var(--border-light);
     border-radius: var(--radius-xl);
     text-align: center;
-    backdrop-filter: blur(20px);
-    overflow: hidden;
+    box-shadow: var(--shadow-md);
 }
 
 .profile-glow {
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: conic-gradient(from 180deg, transparent, var(--accent-primary), transparent 30%);
-    animation: rotate 4s linear infinite;
-    opacity: 0.1;
+    display: none;
 }
 
 @keyframes rotate {
