@@ -901,7 +901,7 @@ async function updateServicesSection(sessions) {
                 }
             });
         }
-    });
+    }
 
     console.log('✅ Services section updated with ' + sessions.length + ' sessions');
 }
