@@ -14,6 +14,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <!-- Cropper.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
         // EmailJS Configuration
         const EMAILJS_USER_ID = 'qDPRKM4ROa6YKvqWL';
@@ -487,71 +490,151 @@ Brief Q&A"></textarea>
         </div>
     </div>
 
+    <!-- Image Cropper Modal -->
+    <div id="cropperModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 15, 0.95); z-index: 3000; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
+        <div class="card"
+            style="width: 800px; max-width: 90%; max-height: 90vh; display: flex; flex-direction: column;">
+            <h3 style="margin-top: 0;">Crop Cover Image</h3>
+            <div style="flex: 1; min-height: 300px; background: #000; overflow: hidden; position: relative;">
+                <img id="cropperImage" style="max-width: 100%; display: block;" src="">
+            </div>
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="cropImage()"
+                    style="width: auto; background: linear-gradient(135deg, #22c55e, #16a34a);">Crop & Save</button>
+                <button onclick="closeCropperModal()"
+                    style="width: auto; background: transparent; border: 1px solid var(--border);">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global variables and functions
         let supabaseAdminClient = null;
+        let cropper = null;
+        let croppedCoverBlob = null;
 
         // Check Password Function (globally accessible)
         function checkPassword() {
+            // ... (keep existing)
             console.log('Login button clicked');
             const pwd = document.getElementById('adminPassword').value;
-            console.log('Password entered:', pwd ? '***' : 'empty');
-
-            if (pwd === 'admin123') { // Simple password
+            if (pwd === 'admin123') {
                 console.log('Password correct, logging in...');
                 document.getElementById('loginOverlay').style.display = 'none';
-                // Call load functions after login
                 if (typeof loadProducts === 'function') loadProducts();
                 if (typeof loadSessions === 'function') loadSessions();
                 if (typeof loadRescheduleRequests === 'function') loadRescheduleRequests();
                 if (typeof loadCancellationRequests === 'function') loadCancellationRequests();
             } else {
-                console.log('Incorrect password');
                 alert('Incorrect password');
             }
+        }
+
+        // Global functions for Cropper
+        function closeCropperModal() {
+            const modal = document.getElementById('cropperModal');
+            modal.style.display = 'none';
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            // If validated blob doesn't exist (cancelled), clear input
+            if (!croppedCoverBlob) {
+                document.getElementById('productCover').value = '';
+            }
+        }
+
+        function cropImage() {
+            if (!cropper) return;
+            const canvas = cropper.getCroppedCanvas({
+                width: 1280, // standardized width
+                height: 720,
+            });
+
+            canvas.toBlob((blob) => {
+                croppedCoverBlob = blob;
+                console.log('✅ Cropped blob created', blob);
+
+                // Visual feedback
+                const label = document.querySelector('label[for="productCover"]');
+                if (label) {
+                    label.innerHTML = 'Cover Image <span style="color:#22c55e">(Cropped & Ready)</span>';
+                }
+
+                // Close modal manually without clearing input (since we have the blob)
+                const modal = document.getElementById('cropperModal');
+                modal.style.display = 'none';
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+            }, 'image/jpeg', 0.9);
         }
 
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', async function () {
             console.log('Admin page DOM loaded');
 
-            // Add event listener for login
+            // Cropper Event Listener
+            const productCoverInput = document.getElementById('productCover');
+            const cropperImage = document.getElementById('cropperImage');
+            const cropperModal = document.getElementById('cropperModal');
+
+            if (productCoverInput) {
+                productCoverInput.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        // Reset previous blob
+                        croppedCoverBlob = null;
+
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            cropperImage.src = e.target.result;
+                            cropperModal.style.display = 'flex';
+
+                            // Initialize Cropper
+                            if (cropper) cropper.destroy();
+                            cropper = new Cropper(cropperImage, {
+                                aspectRatio: 16 / 9,
+                                viewMode: 2,
+                                autoCropArea: 1,
+                            });
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // ... (keep existing login listeners)
             const loginBtn = document.getElementById('loginBtn');
             const passwordInput = document.getElementById('adminPassword');
+            // ... (rest of listeners)
 
             if (loginBtn) {
                 loginBtn.addEventListener('click', function (e) {
                     e.preventDefault();
                     checkPassword();
                 });
-                console.log('✅ Login button event listener added');
             }
 
             if (passwordInput) {
                 passwordInput.addEventListener('keypress', function (e) {
-                    if (e.key === 'Enter') {
-                        checkPassword();
-                    }
+                    if (e.key === 'Enter') checkPassword();
                 });
-                console.log('✅ Password input Enter key listener added');
             }
 
             // Initialize Supabase
             try {
+                // ... (keep existing)
                 const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
                 const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
-
                 if (typeof window.supabase !== 'undefined') {
                     if (!window.supabaseAdminClient) {
                         window.supabaseAdminClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                        console.log('✅ Supabase admin client initialized');
                     }
-                } else {
-                    console.error('❌ Supabase SDK not loaded');
                 }
-            } catch (e) {
-                console.error('Supabase initialization failed:', e);
-            }
+            } catch (e) { console.error(e); }
 
             // EmailJS Configuration
             const EMAILJS_USER_ID = 'qDPRKM4ROa6YKvqWL';
@@ -582,13 +665,11 @@ Brief Q&A"></textarea>
                     const couponCode = document.getElementById('productCouponCode').value || null;
                     const desc = document.getElementById('productDesc').value;
                     const file = document.getElementById('productFile').files[0];
-                    const coverFile = document.getElementById('productCover').files[0];
+                    const coverFileInput = document.getElementById('productCover').files[0];
+                    const coverFileToUpload = croppedCoverBlob || coverFileInput;
 
                     // For new products, file is required; for edits, file is optional
                     if (!productId && !file) throw new Error('Please select a resource file');
-
-                    // If cover image is not provided for new product (optional but recommended)
-                    // We don't block it, but usually good to have.
 
                     let fileUrl = null;
                     let coverUrl = null;
@@ -611,14 +692,15 @@ Brief Q&A"></textarea>
                         fileUrl = publicUrlData.publicUrl;
                     }
 
-                    // 2. Upload Cover Image (if selected)
-                    if (coverFile) {
-                        const fileExt = coverFile.name.split('.').pop();
+                    // 2. Upload Cover Image (if selected or cropped)
+                    if (coverFileToUpload) {
+                        // Blob might not have name, so default to jpg if missing
+                        const fileExt = coverFileToUpload.name ? coverFileToUpload.name.split('.').pop() : 'jpg';
                         const fileName = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_cover_${Date.now()}.${fileExt}`;
 
                         const { data: uploadData, error: uploadError } = await window.supabaseAdminClient.storage
                             .from('product-covers')
-                            .upload(fileName, coverFile);
+                            .upload(fileName, coverFileToUpload);
 
                         if (uploadError) throw uploadError;
 
@@ -666,6 +748,12 @@ Brief Q&A"></textarea>
                     status.textContent = productId ? '✅ Product updated successfully!' : '✅ Product added successfully!';
                     status.classList.add('success');
                     document.getElementById('productForm').reset();
+
+                    // Reset Cropper State
+                    croppedCoverBlob = null;
+                    const cLabel = document.querySelector('label[for="productCover"]');
+                    if (cLabel) cLabel.innerHTML = 'Cover Image (Required)';
+
                     document.getElementById('productId').value = '';
                     document.getElementById('productSubmitBtn').textContent = 'Upload & Save Product';
                     document.getElementById('cancelEditBtn').style.display = 'none';
@@ -771,6 +859,12 @@ Brief Q&A"></textarea>
 
                 // Scroll to form
                 document.getElementById('productForm').scrollIntoView({ behavior: 'smooth' });
+
+                // Reset any existing cropped blob
+                croppedCoverBlob = null;
+                const label = document.querySelector('label[for="productCover"]');
+                if (label) label.innerHTML = 'Cover Image (Required)';
+                document.getElementById('productCover').value = '';
             }
 
             // Cancel Product Edit
@@ -786,7 +880,14 @@ Brief Q&A"></textarea>
                 document.getElementById('productSubmitBtn').textContent = 'Upload & Save Product';
                 document.getElementById('cancelEditBtn').style.display = 'none';
                 document.getElementById('fileUploadGroup').style.display = 'block';
+                document.getElementById('fileUploadGroup').style.display = 'block';
                 document.getElementById('fileUploadGroup').querySelector('input').required = false;
+
+                // Reset cropped blob
+                croppedCoverBlob = null;
+                const label = document.querySelector('label[for="productCover"]');
+                if (label) label.innerHTML = 'Cover Image (Required)';
+                document.getElementById('productCover').value = '';
             }
 
             // Delete Product
