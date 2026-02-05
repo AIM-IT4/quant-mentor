@@ -19,31 +19,55 @@
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
-        // BREVO EMAIL CONFIGURATION (replaces EmailJS - 9,000 emails/month free!)
-        // Get API key from: https://app.brevo.com/settings/keys/api
-        const BREVO_API_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_API_KEY) ? window.CONFIG.BREVO_API_KEY : 'xkeysib-your-api-key-here';
-        const BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in';
-        const BREVO_SENDER_NAME = 'QuantMentor';
+        // Load config.js if it exists, otherwise gracefully fallback
+        (function () {
+            const script = document.createElement('script');
+            script.src = 'config.js';
+            script.onload = function () {
+                console.log('✅ Configuration loaded successfully');
+            };
+            script.onerror = function () {
+                console.log('ℹ️ Local configuration (config.js) not found or build-time injection failed. Using environment variables if available.');
+            };
+            document.head.appendChild(script);
+        })();
+    </script>
+    <script>
+        // BREVO EMAIL CONFIGURATION (replaces EmailJS)
+        const BREVO_API_KEY_BASE = 'xkeysib-your-api-key-here';
+        const BREVO_SENDER_EMAIL_BASE = 'jha.8@alumni.iitj.ac.in';
+        const BREVO_SENDER_NAME_BASE = 'QuantMentor';
+
+        // Helper to get latest config
+        function getBrevoConfig() {
+            return {
+                apiKey: (window.CONFIG && window.CONFIG.BREVO_API_KEY) || BREVO_API_KEY_BASE,
+                senderEmail: (window.CONFIG && window.CONFIG.BREVO_SENDER_EMAIL) || BREVO_SENDER_EMAIL_BASE,
+                senderName: (window.CONFIG && window.CONFIG.BREVO_SENDER_NAME) || BREVO_SENDER_NAME_BASE
+            };
+        }
 
         // Send email via Brevo API
         async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
-            if (!BREVO_API_KEY || BREVO_API_KEY === 'xkeysib-your-api-key-here') {
+            const config = getBrevoConfig();
+
+            if (!config.apiKey || config.apiKey === 'xkeysib-your-api-key-here') {
                 console.warn('⚠️ Brevo API key not configured. Email not sent.');
                 return { success: false, error: 'API key not configured' };
             }
-            
+
             try {
                 const response = await fetch('https://api.brevo.com/v3/smtp/email', {
                     method: 'POST',
                     headers: {
                         'accept': 'application/json',
-                        'api-key': BREVO_API_KEY,
+                        'api-key': config.apiKey,
                         'content-type': 'application/json'
                     },
                     body: JSON.stringify({
                         sender: {
-                            email: BREVO_SENDER_EMAIL,
-                            name: BREVO_SENDER_NAME
+                            email: config.senderEmail,
+                            name: config.senderName
                         },
                         to: [{ email: to }],
                         subject: subject,
@@ -51,7 +75,7 @@
                         textContent: textContent
                     })
                 });
-                
+
                 if (response.ok) {
                     console.log('✅ Email sent successfully via Brevo to:', to);
                     return { success: true };
@@ -789,11 +813,7 @@ Brief Q&A"></textarea>
                 }
             } catch (e) { console.error(e); }
 
-            // BREVO EMAIL CONFIGURATION (replaces EmailJS - 9,000 emails/month free!)
-            const BREVO_API_KEY = (typeof window.CONFIG !== 'undefined' && window.CONFIG.BREVO_API_KEY) ? window.CONFIG.BREVO_API_KEY : process.env.BREVO_API_KEY;
-            const BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in';
-            const BREVO_SENDER_NAME = 'QuantMentor';
-            console.log('✅ Brevo email configuration loaded');
+            console.log('✅ Brevo email configuration loaded from global scope');
 
             // Handle Form Submission
             document.getElementById('productForm').addEventListener('submit', async (e) => {
@@ -1497,7 +1517,7 @@ Meet Link: ${meetLink}
 Your session is now confirmed for the new date/time.
 ━━━━━━━━━━━━━━━━━━━━
                 `.trim();
-                
+
                 await sendEmailWithBrevo(email, `Reschedule Approved - Booking ${bookingId}`, htmlContent, textContent);
 
                 alert('✅ Reschedule request approved!\n\nUser has been notified.');
@@ -1593,7 +1613,7 @@ Your session has been automatically updated to this new date/time.
 If this doesn't work for you, please contact us to reschedule.
 ━━━━━━━━━━━━━━━━━━━━
                 `.trim();
-                
+
                 await sendEmailWithBrevo(booking.email, `Alternative Date Offered - Booking ${bookingId}`, htmlContent, textContent);
 
                 alert('✅ Alternative date sent to user!');
@@ -1655,7 +1675,7 @@ ${reason ? `\nReason: ${reason}` : ''}
 Please contact us if you need further assistance.
 ━━━━━━━━━━━━━━━━━━━━
                 `.trim();
-                
+
                 await sendEmailWithBrevo(email, `Reschedule Request Rejected - Booking ${bookingId}`, htmlContent, textContent);
 
                 alert('✅ Reschedule request rejected.\n\nUser has been notified.');
@@ -1819,7 +1839,7 @@ Thank you for using QuantMentor. We hope to serve you again!
 If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
 ━━━━━━━━━━━━━━━━━━━━
                 `.trim();
-                
+
                 await sendEmailWithBrevo(email, `Refund Processed - Booking ${bookingId}`, htmlContent, textContent);
 
                 alert(`✅ Refund Approved!
@@ -1889,7 +1909,7 @@ Your booking remains active. Please attend the session as scheduled.
 If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
 ━━━━━━━━━━━━━━━━━━━━
                 `.trim();
-                
+
                 await sendEmailWithBrevo(email, `Cancellation Request Rejected - Booking ${bookingId}`, htmlContent, textContent);
 
                 alert('✅ Cancellation request rejected.\n\nUser has been notified. Booking remains active.');
