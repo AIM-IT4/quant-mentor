@@ -691,6 +691,7 @@ Brief Q&A"></textarea>
                     const couponCode = document.getElementById('productCouponCode').value || null;
                     let desc = quill ? quill.root.innerHTML : '';
                     if (desc === '<p><br></p>') desc = '';
+                    console.log('Update Payload:', { name, price, desc, id: productId }); // Debug Log
                     const file = document.getElementById('productFile').files[0];
                     const coverFileInput = document.getElementById('productCover').files[0];
                     const coverFileToUpload = croppedCoverBlob || coverFileInput;
@@ -790,6 +791,7 @@ Brief Q&A"></textarea>
 
                 } catch (error) {
                     console.error('Error:', error);
+                    alert('Error: ' + error.message); // Expose error to user
                     status.textContent = '❌ Error: ' + error.message;
                     status.classList.add('error');
                 } finally {
@@ -878,7 +880,6 @@ Brief Q&A"></textarea>
                 document.getElementById('productPPP').checked = data.enable_ppp || false;
                 document.getElementById('productDiscount').value = data.discount_percentage || 0;
                 document.getElementById('productCouponCode').value = data.coupon_code || '';
-                document.getElementById('productCouponCode').value = data.coupon_code || '';
                 if (quill) quill.root.innerHTML = data.description || '';
                 document.getElementById('productSubmitBtn').textContent = 'Update Product';
                 document.getElementById('cancelEditBtn').style.display = 'inline-block';
@@ -905,11 +906,9 @@ Brief Q&A"></textarea>
                 document.getElementById('productPPP').checked = false;
                 document.getElementById('productDiscount').value = '';
                 document.getElementById('productCouponCode').value = '';
-                document.getElementById('productCouponCode').value = '';
                 if (quill) quill.setText('');
                 document.getElementById('productSubmitBtn').textContent = 'Upload & Save Product';
                 document.getElementById('cancelEditBtn').style.display = 'none';
-                document.getElementById('fileUploadGroup').style.display = 'block';
                 document.getElementById('fileUploadGroup').style.display = 'block';
                 document.getElementById('fileUploadGroup').querySelector('input').required = false;
 
