@@ -286,7 +286,7 @@ h3 {
 .logo {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 6px;
     /* Balanced gap */
     font-weight: 700;
     font-size: 1.4rem;
