@@ -1564,7 +1564,16 @@ if (modalPayBtn) {
         console.log('Payment Request:', { productName, priceText });
 
         // Default to INR basics
-        let payAmount = window.currentProductInrPrice || parseInt(priceText.replace(/[^\d]/g, ''));
+        // FIX: Check for undefined/null explicitly because 0 is falsy but valid
+        let payAmount = (window.currentProductInrPrice !== undefined && window.currentProductInrPrice !== null)
+            ? window.currentProductInrPrice
+            : parseInt(priceText.replace(/[^\d]/g, ''));
+
+        // If price text is "FREE", parseInt might be NaN, so force 0 if we know it's free
+        if (priceText.trim().toUpperCase() === 'FREE') {
+            payAmount = 0;
+        }
+
         let payCurrency = 'INR';
         let logAmountInr = payAmount; // For database stats
 
