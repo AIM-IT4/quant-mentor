@@ -440,8 +440,8 @@
                                 <input type="email" id="ud-email" required placeholder="john@example.com" style="width:100%; padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
                             </div>
                             <div>
-                                <label style="display:block; color:var(--text-secondary); margin-bottom:8px; font-size:0.9rem;">Phone Number *</label>
-                                <input type="tel" id="ud-phone" required placeholder="+91 9876543210" style="width:100%; padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
+                                <label style="display:block; color:var(--text-secondary); margin-bottom:8px; font-size:0.9rem;">Phone Number (Optional)</label>
+                                <input type="tel" id="ud-phone" placeholder="+91 9876543210" style="width:100%; padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
                             </div>
                             
                             <button type="submit" class="btn btn-primary" style="width:100%; padding:14px; margin-top:10px; font-size:1.1rem;">
@@ -472,7 +472,7 @@
                     const email = document.getElementById('ud-email').value.trim();
                     const phone = document.getElementById('ud-phone').value.trim();
 
-                    if (name && email && phone) {
+                    if (name && email) {
                         if (typeof window.initRazorpayCheckout === 'function') {
                             modalOverlay.style.display = 'none';
 
@@ -492,7 +492,7 @@
                             window.initRazorpayCheckout(product.name, checkoutPrice, checkoutCurrency, loggingPrice, {
                                 name: name,
                                 email: email,
-                                phone: phone
+                                phone: phone // Optional, can be empty
                             });
                         } else {
                             alert('Payment system loading... please try again.');

@@ -670,6 +670,8 @@
                     <input id="couponInput" placeholder="Coupon code" style="flex:1; padding:8px;" />
                     <button id="applyCouponBtn" class="btn btn-secondary" type="button">Apply Coupon</button>
                 </div>
+                <!-- Inline Feedback Area -->
+                <div id="modalCouponFeedback" style="margin-top:5px; font-size:0.9em; min-height:1.2em;"></div>
             </div>
             <div class="modal-footer">
                 <p class="modal-note">
@@ -709,8 +711,8 @@
                 </div>
                 <div>
                     <label style="display:block; color:var(--text-muted); margin-bottom:8px; font-size:0.9rem;">Phone
-                        Number *</label>
-                    <input type="tel" id="main-ud-phone" required placeholder="+91 9876543210"
+                        Number (Optional)</label>
+                    <input type="tel" id="main-ud-phone" placeholder="+91 9876543210"
                         style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
                 </div>
 
