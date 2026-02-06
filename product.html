@@ -115,18 +115,60 @@
         }
 
         @media (max-width: 768px) {
+            .product-page-container {
+                padding: 100px 15px 40px;
+                overflow-x: hidden;
+            }
+
             .product-detail-card {
                 grid-template-columns: 1fr;
-                gap: 40px;
-                padding: 24px;
+                gap: 30px;
+                padding: 20px;
+                border-radius: var(--radius-lg);
             }
 
             .product-detail-image {
-                height: 300px;
+                height: 250px;
+            }
+
+            .product-info {
+                position: static;
+                text-align: left;
             }
 
             .product-info h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
+                word-break: break-word;
+                /* Wrap long titles */
+                overflow-wrap: anywhere;
+            }
+
+            .product-price-tag {
+                font-size: 1.5rem;
+                justify-content: flex-start;
+            }
+
+            .product-description-full {
+                font-size: 1rem;
+                margin-bottom: 30px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .action-buttons .btn {
+                width: 100%;
+            }
+
+            .coupon-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .coupon-row input {
+                width: 100%;
             }
         }
     </style>
