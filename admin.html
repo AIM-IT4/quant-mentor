@@ -2686,18 +2686,10 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
                     .order('booking_date', { ascending: false })
                     .order('booking_time', { ascending: false });
 
-                if (filter === 'upcoming') {
-                    // Filter: status confirmed/pending
-                    query = query.in('status', ['confirmed', 'pending']);
-                } else if (filter === 'completed') {
-                    query = query.eq('status', 'completed');
-                } else if (filter === 'cancelled') {
-                    query = query.eq('status', 'cancelled');
-                }
-
+                // Execute Query
                 const { data, error } = await query;
 
-                console.log(`📚 loadBookings('${filter}') result:`, { data, error });
+                console.log('📚 Raw bookings data:', { data, error });
 
                 if (error) {
                     console.error('Supabase Error:', error);
@@ -2706,11 +2698,36 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
                 }
 
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No bookings found for filter: <strong>${filter}</strong>.<br><small>(Check console for details)</small></td></tr>`;
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No bookings found.</td></tr>';
                     return;
                 }
 
-                tbody.innerHTML = data.map(b => {
+                // Filter Logic using JavaScript
+                let filteredData = data;
+                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+                if (filter === 'upcoming') {
+                    // Filter: status != completed AND != cancelled AND date >= today
+                    // Note: 'pending' or 'confirmed' are valid statuses for upcoming
+                    // We also include today's bookings.
+                    filteredData = data.filter(b => {
+                        return (b.status !== 'completed' && b.status !== 'cancelled') &&
+                            (b.booking_date >= today);
+                    });
+                } else if (filter === 'completed') {
+                    filteredData = data.filter(b => b.status === 'completed');
+                } else if (filter === 'cancelled') {
+                    filteredData = data.filter(b => b.status === 'cancelled');
+                }
+
+                console.log(`📚 Filtered data for '${filter}':`, filteredData);
+
+                if (filteredData.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No <strong>${filter}</strong> bookings found.<br><small>(Raw: ${data.length}, Filtered: 0)</small></td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = filteredData.map(b => {
                     // Format Date
                     const dateObj = new Date(b.booking_date);
                     const formattedDate = dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
