@@ -1242,6 +1242,7 @@ async function fetchProductLinks() {
                 <td style="padding:8px 6px;">${p.description ?? ''}</td>
                 <td style="padding:8px 6px;">
                     <button class="btn btn-secondary" data-id="${p.id}" data-name="${p.name ?? ''}" data-price="${p.price ?? 0}" data-description="${p.description ?? ''}" data-code="${p.coupon_code ?? ''}" data-percent="${p.coupon_percent ?? 0}" onclick="adminEditProduct(this)">Edit</button>
+                    <button class="btn btn-secondary" onclick="copyProductLink('${p.id}')" title="Copy Link" style="margin-left:5px;"><i class="fas fa-link"></i></button>
                 </td>
 `;
             tbody.appendChild(tr);
@@ -2470,9 +2471,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Helper to copy product link for social sharing
 window.copyProductLink = function (id) {
-    const url = new URL(window.location.href);
-    url.searchParams.set('id', id);
-    const shareUrl = url.toString();
+    const shareUrl = `${window.location.origin}/product.html?id=${id}`;
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(shareUrl).then(() => {
