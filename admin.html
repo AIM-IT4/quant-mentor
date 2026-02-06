@@ -656,6 +656,60 @@ Brief Q&A"></textarea>
             </div>
         </div>
 
+        <!-- All Bookings Management -->
+        <div class="bookings-management" style="margin-top: 60px;">
+            <h2>All Bookings</h2>
+            <div class="card">
+                <div class="card-header"
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                    <div class="filter-tabs" style="display: flex; gap: 10px;">
+                        <button onclick="loadBookings('all')" class="btn btn-sm active" id="btn-filter-all"
+                            style="background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; font-size: 0.9em; cursor:pointer;">All</button>
+                        <button onclick="loadBookings('upcoming')" class="btn btn-sm" id="btn-filter-upcoming"
+                            style="background: transparent; border: 1px solid var(--border); padding: 6px 12px; font-size: 0.9em; cursor:pointer;">Upcoming</button>
+                        <button onclick="loadBookings('completed')" class="btn btn-sm" id="btn-filter-completed"
+                            style="background: transparent; border: 1px solid var(--border); padding: 6px 12px; font-size: 0.9em; cursor:pointer;">Completed</button>
+                        <button onclick="loadBookings('cancelled')" class="btn btn-sm" id="btn-filter-cancelled"
+                            style="background: transparent; border: 1px solid var(--border); padding: 6px 12px; font-size: 0.9em; cursor:pointer;">Cancelled</button>
+                    </div>
+                    <button onclick="loadBookings(currentBookingFilter)" class="btn btn-secondary"
+                        style="padding: 8px 16px; font-size: 0.9em;">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="table-container" style="overflow-x: auto;">
+                    <table class="admin-table" style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <th
+                                    style="text-align: left; padding: 12px; color: var(--text-muted); font-weight: 500;">
+                                    Date & Time</th>
+                                <th
+                                    style="text-align: left; padding: 12px; color: var(--text-muted); font-weight: 500;">
+                                    Customer</th>
+                                <th
+                                    style="text-align: left; padding: 12px; color: var(--text-muted); font-weight: 500;">
+                                    Service</th>
+                                <th
+                                    style="text-align: left; padding: 12px; color: var(--text-muted); font-weight: 500;">
+                                    Status</th>
+                                <th
+                                    style="text-align: right; padding: 12px; color: var(--text-muted); font-weight: 500;">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allBookingsList">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                                    Loading bookings...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div class="reschedule-management" style="margin-top: 60px;">
             <h2>Reschedule Requests</h2>
             <div class="card">
@@ -898,6 +952,7 @@ Brief Q&A"></textarea>
                     try { if (typeof loadBlogs === 'function') loadBlogs(); } catch (e) { console.error('Blogs load error', e); }
                     try { if (typeof loadPendingTestimonials === 'function') loadPendingTestimonials(); } catch (e) { console.error('Testimonials load error', e); }
                     try { if (typeof loadAvailability === 'function') loadAvailability(); } catch (e) { console.error('Availability load error', e); }
+                    try { if (typeof loadBookings === 'function') loadBookings(); } catch (e) { console.error('Bookings load error', e); }
                     try { if (typeof initDashboard === 'function') initDashboard(); } catch (e) { console.error('Dashboard init error', e); }
                     try { if (typeof initDashboard === 'function') initDashboard(); } catch (e) { console.error('Dashboard init error', e); }
                 } else {
@@ -2594,6 +2649,150 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
         window.loadPendingTestimonials = loadPendingTestimonials;
         window.approveTestimonial = approveTestimonial;
         window.rejectTestimonial = rejectTestimonial;
+
+        // ================================
+        // All Bookings Management
+        // ================================
+        let currentBookingFilter = 'all';
+
+        async function loadBookings(filter = 'all') {
+            currentBookingFilter = filter;
+
+            // Update UI buttons
+            document.querySelectorAll('.filter-tabs button').forEach(btn => {
+                btn.style.background = 'transparent';
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.getElementById(`btn-filter-${filter}`);
+            if (activeBtn) {
+                activeBtn.style.background = 'var(--surface)';
+                activeBtn.classList.add('active');
+            }
+
+            const tbody = document.getElementById('allBookingsList');
+            if (!tbody) return;
+
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Loading...</td></tr>';
+
+            if (!window.supabaseAdminClient) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Supabase Admin Client not ready</td></tr>';
+                return;
+            }
+
+            try {
+                let query = window.supabaseAdminClient
+                    .from('bookings')
+                    .select('*')
+                    .order('booking_date', { ascending: false })
+                    .order('booking_time', { ascending: false });
+
+                if (filter === 'upcoming') {
+                    // Filter: status confirmed/pending AND date >= today
+                    // Simple approach: status != completed/cancelled
+                    query = query.in('status', ['confirmed', 'pending']);
+                    // Ideally check date too, but status is usually key
+                } else if (filter === 'completed') {
+                    query = query.eq('status', 'completed');
+                } else if (filter === 'cancelled') {
+                    query = query.eq('status', 'cancelled');
+                }
+
+                const { data, error } = await query;
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No bookings found.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.map(b => {
+                    // Format Date
+                    const dateObj = new Date(b.booking_date);
+                    const formattedDate = dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+
+                    // Format Booking Time (e.g. 14:00:00 -> 02:00 PM)
+                    let formattedTime = b.booking_time;
+                    if (b.booking_time && b.booking_time.includes(':')) {
+                        const [h, m] = b.booking_time.split(':');
+                        const d = new Date();
+                        d.setHours(h, m);
+                        formattedTime = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                    }
+
+                    // Status Color
+                    let statusColor = '#94a3b8'; // gray
+                    if (b.status === 'confirmed') statusColor = '#22c55e'; // green
+                    if (b.status === 'pending') statusColor = '#f59e0b'; // orange
+                    if (b.status === 'cancelled') statusColor = '#ef4444'; // red
+                    if (b.status === 'completed') statusColor = '#3b82f6'; // blue
+
+                    const isActionable = b.status === 'confirmed' || b.status === 'pending';
+                    const meetLink = b.meet_link || '#';
+
+                    return `
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 12px;">
+                                <div style="font-weight: 500;">${formattedDate}</div>
+                                <div style="font-size: 0.85em; color: var(--text-muted);">${formattedTime} IST</div>
+                            </td>
+                            <td style="padding: 12px;">
+                                <div style="font-weight: 500;">${escapeHtml(b.name)}</div>
+                                <div style="font-size: 0.85em; color: var(--text-muted);">${escapeHtml(b.email)}</div>
+                            </td>
+                            <td style="padding: 12px;">
+                                <div>${escapeHtml(b.service_name)}</div>
+                                <div style="font-size: 0.85em; color: var(--text-muted);">₹${b.service_price}</div>
+                            </td>
+                            <td style="padding: 12px;">
+                                <span style="background: ${statusColor}20; color: ${statusColor}; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; text-transform: capitalize;">
+                                    ${b.status}
+                                </span>
+                            </td>
+                            <td style="padding: 12px; text-align: right;">
+                                <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                    ${meetLink !== '#' ? `<a href="${meetLink}" target="_blank" title="Join Meeting" style="color:white; padding:6px; background:#6366f1; border-radius:4px;"><i class="fas fa-video"></i></a>` : ''}
+                                    ${isActionable ?
+                            `<button onclick="updateBookingStatus('${b.id}', 'completed')" title="Mark Completed" style="padding:6px 10px; background:rgba(34, 197, 94, 0.2); color:#22c55e; border:none; border-radius:4px; cursor:pointer;"><i class="fas fa-check"></i></button>
+                                         <button onclick="updateBookingStatus('${b.id}', 'cancelled')" title="Cancel" style="padding:6px 10px; background:rgba(239, 68, 68, 0.2); color:#ef4444; border:none; border-radius:4px; cursor:pointer;"><i class="fas fa-times"></i></button>`
+                            :
+                            `<button disabled style="opacity:0.3; background:transparent; border:none; color:white;"><i class="fas fa-ban"></i></button>`
+                        }
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.error('Error loading bookings:', err);
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Error: ${err.message}</td></tr>`;
+            }
+        }
+
+        async function updateBookingStatus(id, newStatus) {
+            if (!confirm(`Are you sure you want to mark this booking as ${newStatus}?`)) return;
+
+            try {
+                const { error } = await window.supabaseAdminClient
+                    .from('bookings')
+                    .update({ status: newStatus })
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                alert(`Booking marked as ${newStatus}`);
+                loadBookings(currentBookingFilter);
+                // Also update stats
+                updateDashboardStats();
+            } catch (err) {
+                alert('Error updating status: ' + err.message);
+            }
+        }
+
+        // Export
+        window.loadBookings = loadBookings;
+        window.updateBookingStatus = updateBookingStatus;
+
 
 
 
