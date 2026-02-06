@@ -1302,7 +1302,7 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
             const customerEmail = prompt('Enter your email to receive the free download:');
             if (customerEmail && customerEmail.includes('@')) {
                 sendProductEmail(customerEmail, productName, 'FREE', downloadLink);
-                alert('🎉 Free Download!\n\nCheck your email for the download link.\n\nClick OK to also open it now.');
+                alert('🎉 Free Download!\n\nCheck your email for the download link.\n\n📩 IMPORTANT: Please check your Spam/Junk folder if you don\'t see the email in your Inbox.\n\nClick OK to also open it now.');
                 window.open(downloadLink, '_blank');
             } else {
                 alert('🎉 Free Download!\n\nClick OK to download.');
@@ -1408,7 +1408,7 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
                     const adminText = `New Sale!\nProduct: ${productName}\nAmount: ₹${Math.round(loggedAmount)}\nEmail: ${customerEmail}\nID: ${paymentId}`;
                     sendAdminNotification(adminSubject, adminBody, adminText);
 
-                    alert('🎉 Payment Successful!\n\nPayment ID: ' + paymentId + '\n\nDownload link sent to: ' + customerEmail + '\n\nClick OK to also open it now.');
+                    alert('🎉 Payment Successful!\n\nPayment ID: ' + paymentId + '\n\nDownload link sent to: ' + customerEmail + '\n\n📩 IMPORTANT: Please check your Spam/Junk folder if you don\'t see the email in your Inbox.\n\nClick OK to also open it now.');
                     window.open(downloadLink, '_blank');
                 } else {
                     alert('🎉 Payment Successful!\n\nPayment ID: ' + paymentId + '\n\n⚠️ Download link not configured (but your purchase is recorded). Please contact support.');
@@ -2193,6 +2193,8 @@ Payment ID: ${paymentId}
 ⏰ ${booking.time}
 
 ✅ Confirmation email with Google Meet link has been sent to ${booking.email}
+
+📩 IMPORTANT: Please check your Spam/Junk folder if you don't see the email in your Inbox.
 
 🔄 Need to Reschedule?
 Visit: ${window.location.origin}/my-bookings.html
