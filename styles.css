@@ -1900,16 +1900,56 @@ body.light-mode .theme-toggle .fa-moon {
     display: none;
 }
 
-/* Adjust navbar to accommodate toggle */
-.nav-links {
-    display: flex;
-    align-items: center;
-}
-
 /* Responsive adjustment */
 @media (max-width: 768px) {
+    .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
     .theme-toggle {
         margin-left: 0;
-        margin-right: 16px;
+        margin-right: 0;
+    }
+
+    .nav-links {
+        display: none;
+        position: fixed;
+        top: 80px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--bg-primary);
+        flex-direction: column;
+        padding: 40px 24px;
+        gap: 24px;
+        z-index: 999;
+        overflow-y: auto;
+    }
+
+    .nav-links.mobile-active {
+        display: flex;
+    }
+
+    .nav-links li {
+        width: 100%;
+    }
+
+    .nav-links a {
+        font-size: 1.2rem;
+        width: 100%;
+        display: block;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .nav-cta {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .logo-text {
+        font-size: 1.2rem;
     }
 }
