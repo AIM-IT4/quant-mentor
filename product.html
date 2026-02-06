@@ -303,8 +303,9 @@
                             </button>
                         </div>
                     `;
-                    // Insert after price
-                    priceEl.parentNode.insertBefore(couponContainer, priceEl.nextSibling);
+                    // Insert coupon before action buttons
+                    const actionButtons = document.querySelector('.action-buttons');
+                    priceEl.parentNode.insertBefore(couponContainer, actionButtons);
 
                     // Coupon Logic
                     document.getElementById('apply-coupon-btn').addEventListener('click', async function () {
