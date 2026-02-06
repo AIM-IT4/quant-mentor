@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const target = document.querySelector(href);
             if (target) {
                 // Close mobile menu if open
-                navLinks.classList.remove('mobile-active');
+                if (navLinks) navLinks.classList.remove('mobile-active');
 
                 const offsetTop = target.offsetTop - 80; // Account for fixed navbar
                 window.scrollTo({
@@ -197,6 +197,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const navbar = document.querySelector('.navbar');
 
     window.addEventListener('scroll', function () {
+        if (!navbar) return; // FIX: Prevent error on pages without navbar (e.g. admin)
+
         if (window.scrollY > 50) {
             navbar.style.background = 'var(--bg-card)';
             navbar.style.backdropFilter = 'blur(10px)';
