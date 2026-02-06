@@ -48,7 +48,8 @@ async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
         });
 
         if (response.ok) {
-            console.log('✅ Email sent successfully via Brevo to:', to);
+            const data = await response.json();
+            console.log('✅ Email sent successfully via Brevo.', { to, messageId: data.messageId });
             return { success: true };
         } else {
             const error = await response.json();
