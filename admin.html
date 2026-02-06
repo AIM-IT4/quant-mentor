@@ -2810,7 +2810,8 @@ QuantMentor
                                 <div style="display: flex; gap: 8px; justify-content: flex-end;">
                                     ${meetLink !== '#' ? `<a href="${meetLink}" target="_blank" title="Join Meeting" style="color:white; padding:6px; background:#6366f1; border-radius:4px;"><i class="fas fa-video"></i></a>` : ''}
                                     ${isActionable ?
-                                            `<button onclick="updateBookingStatus('${b.id}', 'completed')" title="Mark Completed" style="padding:6px 10px; background:rgba(34, 197, 94, 0.2); color:#22c55e; border:none; border-radius:4px; cursor:pointer;"><i class="fas fa-check"></i></button>
+                                            `<button onclick="manualSendReminder('${b.id}')" title="Send Reminder" style="padding:6px 10px; background:rgba(245, 158, 11, 0.2); color:#f59e0b; border:none; border-radius:4px; cursor:pointer;"><i class="fas fa-bell"></i></button>
+                                         <button onclick="updateBookingStatus('${b.id}', 'completed')" title="Mark Completed" style="padding:6px 10px; background:rgba(34, 197, 94, 0.2); color:#22c55e; border:none; border-radius:4px; cursor:pointer;"><i class="fas fa-check"></i></button>
                                          <button onclick="updateBookingStatus('${b.id}', 'cancelled')" title="Cancel" style="padding:6px 10px; background:rgba(239, 68, 68, 0.2); color:#ef4444; border:none; border-radius:4px; cursor:pointer;"><i class="fas fa-times"></i></button>`
                                             :
                                             `<button disabled style="opacity:0.3; background:transparent; border:none; color:white;"><i class="fas fa-ban"></i></button>`
@@ -2997,6 +2998,38 @@ QuantMentor
 
                             console.log(`✅ ${type} reminder process complete for ${booking.id}`);
                         }
+
+                        // Manual Trigger for Reminders
+                        async function manualSendReminder(bookingId) {
+                            if (!window.supabaseAdminClient) return;
+
+                            // 1. Fetch Booking
+                            const { data: booking, error } = await window.supabaseAdminClient
+                                .from('bookings')
+                                .select('*')
+                                .eq('id', bookingId)
+                                .single();
+
+                            if (error || !booking) {
+                                alert('Error fetching booking details.');
+                                return;
+                            }
+
+                            // 2. Ask User
+                            const choice = prompt(`Send reminder for ${booking.name}?\n\nType '24h' for Tomorrow's Reminder\nType '10m' for Urgent Reminder`);
+
+                            if (choice === '24h' || choice === '10m') {
+                                if (confirm(`Are you sure you want to send the ${choice} email now?`)) {
+                                    await sendReminder(booking, choice);
+                                    alert(`✅ ${choice} Reminder Sent!`);
+                                }
+                            } else if (choice) {
+                                alert('Invalid option. Please type "24h" or "10m".');
+                            }
+                        }
+
+                        // Export Manual Trigger
+                        window.manualSendReminder = manualSendReminder;
 
                         // Initialize Polling
                         // Run once on load, then every 60 seconds
