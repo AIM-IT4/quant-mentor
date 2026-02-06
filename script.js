@@ -1693,16 +1693,28 @@ if (bookingForm) {
                     }
 
                     // Fetch existing bookings for this date (to prevent collision)
+                    // booking_date is DATE type, so we should query with YYYY-MM-DD
                     const { data: bookingsData, error: bookingsError } = await window.supabaseClient
                         .from('bookings')
                         .select('booking_time')
-                        .eq('booking_date', dateObj.toLocaleDateString('en-IN', {
-                            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-                        }));
+                        .eq('booking_date', dateValue); // Use dateValue (YYYY-MM-DD) directly
 
                     if (bookingsData) {
-                        existingBookings = bookingsData.map(b => b.booking_time);
-                        console.log('📅 Existing bookings for ' + dateValue + ':', existingBookings);
+                        // DB returns booking_time as "14:00:00" (TIME type)
+                        // We need to match it with our generated label "2:00 PM"
+                        // So let's convert DB times to our display format for comparison
+                        existingBookings = bookingsData.map(b => {
+                            // b.booking_time is likely "14:00:00"
+                            const [h, m] = b.booking_time.split(':');
+                            const date = new Date();
+                            date.setHours(parseInt(h), parseInt(m));
+                            return date.toLocaleTimeString('en-US', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                hour12: true
+                            });
+                        });
+                        console.log('📅 Existing bookings for ' + dateValue + ' (DB raw -> formatted):', bookingsData, existingBookings);
                     }
                 }
 
