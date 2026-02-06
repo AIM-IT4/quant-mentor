@@ -1538,6 +1538,14 @@ h3 {
     border-radius: var(--radius-xl);
     transform: scale(0.9);
     transition: transform var(--transition-normal);
+
+    /* Strict Height & Pinned Layout */
+    max-height: 85vh;
+    /* Fits comfortably on 14" screens */
+    overflow: hidden;
+    /* No outer scroll */
+    display: flex;
+    flex-direction: column;
 }
 
 .modal.active .modal-content {
@@ -1559,12 +1567,18 @@ h3 {
     color: var(--text-secondary);
     cursor: pointer;
     transition: all var(--transition-fast);
+    z-index: 10;
 }
 
 .modal-close:hover {
     background: var(--error);
     border-color: var(--error);
     color: white;
+}
+
+.modal-header {
+    flex-shrink: 0;
+    /* Never shrink */
 }
 
 .modal-header h3 {
@@ -1574,7 +1588,16 @@ h3 {
 }
 
 .modal-body {
-    margin-bottom: 24px;
+    margin-bottom: 0;
+    /* Managed by flex gap or padding */
+    flex: 1;
+    /* Take all remaining space */
+    overflow-y: auto;
+    /* Scroll ONLY the body */
+    min-height: 0;
+    /* Crucial for flex scrolling */
+    padding-right: 4px;
+    /* Space for scrollbar */
 }
 
 .modal-body p {
@@ -1593,7 +1616,10 @@ h3 {
 
 .modal-footer {
     padding-top: 20px;
+    margin-top: 16px;
     border-top: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+    /* Never shrink */
 }
 
 .modal-note {
@@ -1916,7 +1942,7 @@ body.light-mode .theme-toggle .fa-moon {
     .logo-text {
         font-size: 1.1rem;
     }
-    
+
     .logo-img {
         width: 45px;
         height: 45px;
@@ -1943,7 +1969,7 @@ body.light-mode .theme-toggle .fa-moon {
     body.light-mode .nav-links {
         background: rgba(255, 255, 255, 0.98) !important;
     }
-    
+
     body.light-mode .nav-links a {
         color: #0f172a !important;
     }
@@ -1951,7 +1977,7 @@ body.light-mode .theme-toggle .fa-moon {
     body.light-mode .mobile-menu-btn,
     body.light-mode .theme-toggle {
         color: #0f172a !important;
-        border-color: rgba(0,0,0,0.1);
+        border-color: rgba(0, 0, 0, 0.1);
     }
 }
 
