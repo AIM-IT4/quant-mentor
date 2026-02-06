@@ -2471,7 +2471,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Helper to copy product link for social sharing
 window.copyProductLink = function (id) {
-    const shareUrl = `${window.location.origin}/product.html?id=${id}`;
+    if (id === undefined || id === null || id === '') {
+        console.error('❌ copyProductLink called with invalid ID:', id);
+        alert('❌ Error: Invalid Product ID');
+        return;
+    }
+    const safeId = String(id).trim(); // Ensure it is a clean string
+    console.log('🔗 copyProductLink called with ID:', safeId);
+
+    const shareUrl = `${window.location.origin}/product.html?id=${safeId}`;
+    console.log('🔗 Generated Share URL:', shareUrl);
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(shareUrl).then(() => {
