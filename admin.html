@@ -2837,7 +2837,7 @@ QuantMentor
                 if (newStatus === 'completed') {
                     const { data, error } = await window.supabaseAdminClient
                         .from('bookings')
-                        .select('user_email, user_name, session_type') // Ensure columns exist
+                        .select('email, name, service_name') // Correct column names verified from SQL
                         .eq('id', id)
                         .single();
                     if (!error) bookingDetails = data;

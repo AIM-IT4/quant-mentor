@@ -2608,21 +2608,26 @@ window.copyProductLink = function (id) {
  * Send Testimonial Request Email on Session Completion
  */
 async function sendTestimonialRequestEmail(bookingData) {
-    if (!bookingData || !bookingData.user_email) return;
+    // Map DB columns (email, name, service_name) to function variables
+    const userEmail = bookingData.email || bookingData.user_email;
+    const userName = bookingData.name || bookingData.user_name;
+    const sessionType = bookingData.service_name || bookingData.session_type;
 
-    console.log('📧 Sending Testimonial Request to:', bookingData.user_email);
+    if (!userEmail) return;
+
+    console.log('📧 Sending Testimonial Request to:', userEmail);
 
     const config = getBrevoConfig();
     if (config.apiKey && config.apiKey !== 'xkeysib-your-api-key-here') {
         const testimonialLink = window.location.origin + '/index.html#testimonials'; // Point to testimonials section
-        const customerName = bookingData.user_name || 'Valued Learner';
+        const customerName = userName || 'Valued Learner';
 
         const htmlContent = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <h2 style="color: #2563eb;">🚀 Session Completed!</h2>
                 <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
                 <p>Hi <strong>${customerName}</strong>,</p>
-                <p>Thank you for attending the session: <strong>${bookingData.session_type || 'Mentorship Session'}</strong>.</p>
+                <p>Thank you for attending the session: <strong>${sessionType || 'Mentorship Session'}</strong>.</p>
                 <p>I hope you found it valuable! 💡</p>
                 <br>
                 <p><strong>Could you do me a quick favor?</strong></p>
@@ -2641,7 +2646,7 @@ async function sendTestimonialRequestEmail(bookingData) {
 
 Hi ${customerName},
 
-Thank you for attending the session: ${bookingData.session_type}. I hope you found it valuable!
+Thank you for attending the session: ${sessionType}. I hope you found it valuable!
 
 Could you do me a quick favor?
 Please share your feedback or a short testimonial here:
@@ -2654,7 +2659,7 @@ ${BUSINESS_NAME}`;
 
         try {
             const result = await sendEmailWithBrevo(
-                bookingData.user_email,
+                userEmail,
                 `Thanks for the session! How was it? 🚀`,
                 htmlContent,
                 textContent
