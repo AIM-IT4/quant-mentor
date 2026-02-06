@@ -116,6 +116,25 @@ body.light-mode .gradient-orb {
     opacity: 0.15;
 }
 
+/* Product Page Specifics in Light Mode */
+body.light-mode .product-detail-card {
+    background: #ffffff;
+    border-color: var(--border-light);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .product-detail-image {
+    background: var(--bg-tertiary);
+}
+
+body.light-mode .product-description-full {
+    color: var(--text-secondary);
+}
+
+body.light-mode .product-price-tag {
+    color: var(--text-primary);
+}
+
 /* --------------------------------
    Reset & Base Styles
    -------------------------------- */
