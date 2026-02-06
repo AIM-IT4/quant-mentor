@@ -241,171 +241,168 @@
         });
 
         async function loadProduct(id) {
-            console.log('🔍 loadProduct called with ID:', id);
-            console.log('🔍 ID Type:', typeof id);
+            try {
+                console.log('🔍 loadProduct called with ID:', id);
+                console.log('🔍 ID Type:', typeof id);
 
-            const { data: product, error } = await window.supabaseClient
-                .from('products')
-                .select('*')
-                .eq('id', id)
-                .single();
+                const { data: product, error } = await window.supabaseClient
+                    .from('products')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
 
-            console.log('🔍 Supabase Response:', { product, error });
+                console.log('🔍 Supabase Response:', { product, error });
 
-            if (error || !product) {
-                console.error('Product load error:', error);
-                showError();
-                return;
-            }
-
-            // Populate UI
-            document.getElementById('p-title').textContent = product.name;
-
-            // Description (strip HTML if needed or safe innerHTML)
-            const descEl = document.getElementById('p-desc');
-            descEl.innerHTML = product.description || 'No description available.';
-
-            // Image
-            if (product.cover_image_url) {
-                const img = document.getElementById('p-image');
-                img.src = product.cover_image_url;
-                img.style.display = 'block';
-                document.getElementById('p-placeholder').style.display = 'none';
-            }
-
-            // Price
-            const priceEl = document.getElementById('p-price');
-            const buyBtn = document.getElementById('buy-btn');
-
-            // We'll reuse script.js convertPrice if available, else fallback
-            let priceText = '₹' + product.price;
-            if (window.convertPrice && window.getUserCountry) {
-                const country = await window.getUserCountry();
-                const localPrice = await window.convertPrice(product.price, country);
-                if (localPrice.currency.code !== 'INR') {
-                    priceText = `${localPrice.currency.symbol}${localPrice.amount} ${localPrice.currency.code}`;
+                if (error || !product) {
+                    console.error('Product load error:', error);
+                    showError();
+                    return;
                 }
-            }
 
-            if (product.price === 0) {
-                priceEl.textContent = 'Free';
-                priceEl.style.color = '#22c55e';
-                buyBtn.innerHTML = '<i class="fas fa-download"></i> Download Free';
-                buyBtn.classList.replace('btn-primary', 'btn-success'); // Assuming green button
-                buyBtn.style.background = '#22c55e';
-            } else {
-                priceEl.textContent = priceText;
-                buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${priceText}`;
-            }
+                // Populate UI
+                document.getElementById('p-title').textContent = product.name;
 
-            // Set Page Title
-            document.title = `${product.name} | QuantMentor`;
+                // Description (strip HTML if needed or safe innerHTML)
+                const descEl = document.getElementById('p-desc');
+                descEl.innerHTML = product.description || 'No description available.';
 
-            // Coupon Logic
-            const couponSection = document.getElementById('coupon-section');
-            if (product.price > 0) {
-                couponSection.style.display = 'block';
-            }
+                // Image
+                if (product.cover_image_url) {
+                    const img = document.getElementById('p-image');
+                    img.src = product.cover_image_url;
+                    img.style.display = 'block';
+                    document.getElementById('p-placeholder').style.display = 'none';
+                }
 
-            document.getElementById('apply-coupon-btn').addEventListener('click', async function () {
-                const code = document.getElementById('coupon-input').value.trim();
-                if (!code) return;
+                // Price
+                const priceEl = document.getElementById('p-price');
+                const buyBtn = document.getElementById('buy-btn');
 
-                // Check against product coupon
-                if (product.coupon_code && code.toLowerCase() === product.coupon_code.toLowerCase()) {
-                    const discount = product.coupon_percent || 0;
-                    const originalPrice = parseFloat(buyBtn.dataset.price); // Current base price (local or INR)
+                // We'll reuse script.js convertPrice if available, else fallback
+                let priceText = '₹' + product.price;
+                if (window.convertPrice && window.getUserCountry) {
+                    const country = await window.getUserCountry();
+                    const localPrice = await window.convertPrice(product.price, country);
+                    if (localPrice.currency.code !== 'INR') {
+                        priceText = `${localPrice.currency.symbol}${localPrice.amount} ${localPrice.currency.code}`;
+                    }
+                }
 
-                    // Calculate new price
-                    const discountedPrice = Math.max(0, Math.round(originalPrice * (100 - discount) / 100));
+                if (product.price === 0) {
+                    priceEl.textContent = 'Free';
+                    priceEl.style.color = '#22c55e';
+                    buyBtn.innerHTML = '<i class="fas fa-download"></i> Download Free';
+                    buyBtn.classList.replace('btn-primary', 'btn-success'); // Assuming green button
+                    buyBtn.style.background = '#22c55e';
+                } else {
+                    priceEl.textContent = priceText;
+                    buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${priceText}`;
+                }
 
-                    // Update UI
-                    const currentCurrency = buyBtn.dataset.currency;
-                    const currencySymbol = currentCurrency === 'INR' ? '₹' : (await window.convertPrice(1, await window.getUserCountry())).currency.symbol; // Approx symbol fetch
+                // Set Page Title
+                document.title = `${product.name} | QuantMentor`;
 
-                    // We need to fetch symbol properly or store it. 
-                    // Let's use a simpler heuristic or just text if non-INR is complex to re-fetch here.
-                    // Actually, we can just update the display logic to be simple.
+                // Coupon Logic
+                const couponSection = document.getElementById('coupon-section');
+                if (product.price > 0) {
+                    couponSection.style.display = 'block';
+                }
 
-                    let priceDisplay = '';
-                    if (currentCurrency === 'INR') {
-                        priceDisplay = `₹${discountedPrice}`;
-                        priceEl.innerHTML = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">₹${originalPrice}</span> ${priceDisplay}`;
+                document.getElementById('apply-coupon-btn').addEventListener('click', async function () {
+                    const code = document.getElementById('coupon-input').value.trim();
+                    if (!code) return;
+
+                    // Check against product coupon
+                    if (product.coupon_code && code.toLowerCase() === product.coupon_code.toLowerCase()) {
+                        const discount = product.coupon_percent || 0;
+                        const originalPrice = parseFloat(buyBtn.dataset.price); // Current base price (local or INR)
+
+                        // Calculate new price
+                        const discountedPrice = Math.max(0, Math.round(originalPrice * (100 - discount) / 100));
+
+                        // Update UI
+                        const currentCurrency = buyBtn.dataset.currency;
+                        const currencySymbol = currentCurrency === 'INR' ? '₹' : (await window.convertPrice(1, await window.getUserCountry())).currency.symbol; // Approx symbol fetch
+
+                        // We need to fetch symbol properly or store it. 
+                        let priceDisplay = '';
+                        if (currentCurrency === 'INR') {
+                            priceDisplay = `₹${discountedPrice}`;
+                            priceEl.innerHTML = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">₹${originalPrice}</span> ${priceDisplay}`;
+                        } else {
+                            priceDisplay = `${discountedPrice} ${currentCurrency}`;
+                            priceEl.innerHTML = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">${originalPrice} ${currentCurrency}</span> ${priceDisplay}`;
+                        }
+
+                        // Update Button Data
+                        buyBtn.dataset.price = discountedPrice;
+                        buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${priceDisplay}`;
+
+                        alert(`Coupon '${code}' applied! ${discount}% OFF`);
+
+                        // Disable input
+                        document.getElementById('coupon-input').disabled = true;
+                        this.disabled = true;
+                        this.textContent = 'Applied';
                     } else {
-                        // For foreign currency, we just stick to the code if we don't have symbol easy
-                        priceDisplay = `${discountedPrice} ${currentCurrency}`;
-                        priceEl.innerHTML = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">${originalPrice} ${currentCurrency}</span> ${priceDisplay}`;
+                        alert('Invalid coupon code for this product.');
                     }
+                });
 
-                    // Update Button Data
-                    buyBtn.dataset.price = discountedPrice;
-                    buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${priceDisplay}`;
+                buyBtn.onclick = function () {
+                    if (typeof window.initRazorpayCheckout === 'function') {
+                        // Calculate checkout parameters
+                        let checkoutPrice = product.price;
+                        let checkoutCurrency = 'INR';
 
-                    alert(`Coupon '${code}' applied! ${discount}% OFF`);
+                        // Use calculated local price if available (from window.currentProductLocalPrice which we can mimic or re-calculate)
+                        // Or better, just rely on what we computed above?
+                        // Actually, let's just re-use the logic if we have it, or fallback to INR.
 
-                    // Disable input
-                    document.getElementById('coupon-input').disabled = true;
-                    this.disabled = true;
-                    this.textContent = 'Applied';
-                } else {
-                    alert('Invalid coupon code for this product.');
-                }
-            });
+                        // Check if we found a local price during render
+                        if (window.convertPrice && window.getUserCountry) {
+                            // We already did this above, but local variables scope might be tricky if not stored.
+                            // Let's just fetch it again or store it in dataset.
+                        }
 
-            buyBtn.onclick = function () {
-                if (typeof window.initRazorpayCheckout === 'function') {
-                    // Calculate checkout parameters
-                    let checkoutPrice = product.price;
-                    let checkoutCurrency = 'INR';
+                        // For simplicity and robustness, let's grab it from the display or re-calculate IF needed.
+                        // But wait, initRazorpayCheckout takes (name, amount, currency, loggingAmount).
 
-                    // Use calculated local price if available (from window.currentProductLocalPrice which we can mimic or re-calculate)
-                    // Or better, just rely on what we computed above?
-                    // Actually, let's just re-use the logic if we have it, or fallback to INR.
+                        // Let's assume INR default to avoid complexity, OR re-do the async check?
+                        // No, onclick can't easily be async without care.
+                        // Let's store the computed values on the button dataset when loading!
 
-                    // Check if we found a local price during render
-                    if (window.convertPrice && window.getUserCountry) {
-                        // We already did this above, but local variables scope might be tricky if not stored.
-                        // Let's just fetch it again or store it in dataset.
+                        const finalPrice = parseFloat(buyBtn.dataset.price || product.price);
+                        const finalCurrency = buyBtn.dataset.currency || 'INR';
+                        const loggingPrice = product.price;
+
+                        window.initRazorpayCheckout(product.name, finalPrice, finalCurrency, loggingPrice);
+                    } else {
+                        alert('Payment system loading... please try again.');
                     }
+                };
 
-                    // For simplicity and robustness, let's grab it from the display or re-calculate IF needed.
-                    // But wait, initRazorpayCheckout takes (name, amount, currency, loggingAmount).
+                // Store price on button for the handler
+                buyBtn.dataset.price = product.price;
+                buyBtn.dataset.currency = 'INR';
 
-                    // Let's assume INR default to avoid complexity, OR re-do the async check?
-                    // No, onclick can't easily be async without care.
-                    // Let's store the computed values on the button dataset when loading!
-
-                    const finalPrice = parseFloat(buyBtn.dataset.price || product.price);
-                    const finalCurrency = buyBtn.dataset.currency || 'INR';
-                    const loggingPrice = product.price;
-
-                    window.initRazorpayCheckout(product.name, finalPrice, finalCurrency, loggingPrice);
-                } else {
-                    alert('Payment system loading... please try again.');
+                if (window.convertPrice && window.getUserCountry) {
+                    const country = await window.getUserCountry();
+                    const localPrice = await window.convertPrice(product.price, country);
+                    if (localPrice.currency.code !== 'INR') {
+                        buyBtn.dataset.price = localPrice.amount;
+                        buyBtn.dataset.currency = localPrice.currency.code;
+                    }
                 }
-            };
 
-            // Store price on button for the handler
-            buyBtn.dataset.price = product.price;
-            buyBtn.dataset.currency = 'INR';
+                // Show Content
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('product-content').style.display = 'grid';
 
-            if (window.convertPrice && window.getUserCountry) {
-                const country = await window.getUserCountry();
-                const localPrice = await window.convertPrice(product.price, country);
-                if (localPrice.currency.code !== 'INR') {
-                    buyBtn.dataset.price = localPrice.amount;
-                    buyBtn.dataset.currency = localPrice.currency.code;
-                }
+            } catch (err) {
+                console.error(err);
+                showError();
             }
-
-            // Show Content
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('product-content').style.display = 'grid';
-
-        } catch (err) {
-            console.error(err);
-            showError();
-        }
         }
 
         function showError() {
