@@ -902,366 +902,365 @@ Brief Q&A"></textarea>
             <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
                 <button onclick="cropImage()"
                     style="width: auto; background: linear-gradient(135deg, #22c55e, #16a34a);">Crop & Save</button>
-                <button onclick="closeCropperModal()"
-                    style="width: auto; background: transparent; border: 1px solid var(--border);">Cancel</button>
-            </div>
-        </div>
-    </div>
+                <button onclick="closeCropperModal()" </div>
 
-    <script>
-        // Global variables and functions
-        let supabaseAdminClient = null;
-        let cropper = null;
-        let croppedCoverBlob = null;
-        let quill = null;
-        let blogQuill = null;
+                    <!-- Main Script (Includes Email Logic & Config) -->
+                    <script src="script.js"></script>
 
-        function togglePriceInput(checkbox) {
-            const input = document.getElementById('productPrice');
-            if (checkbox.checked) {
-                input.value = 0;
-                input.disabled = true;
-            } else {
-                input.disabled = false;
-            }
-        }
-        const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDEwMTI2NSwiZXhwIjoyMDg1Njc3MjY1fQ.C87qk8sAOx9NI0p7sV5ndb8n_lktUA9EmjNMFjYItAg';
+                    <script>
+                        // Global variables and functions
+                        let supabaseAdminClient = null;
+                        let cropper = null;
+                        let croppedCoverBlob = null;
+                        let quill = null;
+                        let blogQuill = null;
 
-        // Check Password Function (globally accessible)
-        // Check Password Function (globally accessible)
-        function checkPassword() {
-            try {
-                console.log('Login button clicked');
-                const pwd = document.getElementById('adminPassword').value;
-                if (pwd === 'admin123') {
-                    console.log('Password correct, logging in...');
-                    document.getElementById('loginOverlay').style.display = 'none';
-                    document.getElementById('adminContainer').style.display = 'block';
+                        function togglePriceInput(checkbox) {
+                            const input = document.getElementById('productPrice');
+                            if (checkbox.checked) {
+                                input.value = 0;
+                                input.disabled = true;
+                            } else {
+                                input.disabled = false;
+                            }
+                        }
+                        const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
+                        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDEwMTI2NSwiZXhwIjoyMDg1Njc3MjY1fQ.C87qk8sAOx9NI0p7sV5ndb8n_lktUA9EmjNMFjYItAg';
 
-                    // Force redraw and scroll to top
-                    setTimeout(() => {
-                        window.scrollTo(0, 0);
-                    }, 100);
+                        // Check Password Function (globally accessible)
+                        // Check Password Function (globally accessible)
+                        function checkPassword() {
+                            try {
+                                console.log('Login button clicked');
+                                const pwd = document.getElementById('adminPassword').value;
+                                if (pwd === 'admin123') {
+                                    console.log('Password correct, logging in...');
+                                    document.getElementById('loginOverlay').style.display = 'none';
+                                    document.getElementById('adminContainer').style.display = 'block';
 
-                    // Execute load functions safely
-                    try { if (typeof loadProducts === 'function') loadProducts(); } catch (e) { console.error('Products load error', e); }
-                    try { if (typeof loadSessions === 'function') loadSessions(); } catch (e) { console.error('Sessions load error', e); }
-                    try { if (typeof loadRescheduleRequests === 'function') loadRescheduleRequests(); } catch (e) { console.error('Reschedule load error', e); }
-                    try { if (typeof loadCancellationRequests === 'function') loadCancellationRequests(); } catch (e) { console.error('Cancellation load error', e); }
-                    try { if (typeof loadBlogs === 'function') loadBlogs(); } catch (e) { console.error('Blogs load error', e); }
-                    try { if (typeof loadPendingTestimonials === 'function') loadPendingTestimonials(); } catch (e) { console.error('Testimonials load error', e); }
-                    try { if (typeof loadAvailability === 'function') loadAvailability(); } catch (e) { console.error('Availability load error', e); }
-                    try { if (typeof loadBookings === 'function') loadBookings(); } catch (e) { console.error('Bookings load error', e); }
-                    try { if (typeof initDashboard === 'function') initDashboard(); } catch (e) { console.error('Dashboard init error', e); }
-                    try { if (typeof initDashboard === 'function') initDashboard(); } catch (e) { console.error('Dashboard init error', e); }
-                } else {
-                    alert('Incorrect password');
-                }
-            } catch (err) {
-                alert('Login Critical Error: ' + err.message);
-                console.error(err);
-            }
-        }
+                                    // Force redraw and scroll to top
+                                    setTimeout(() => {
+                                        window.scrollTo(0, 0);
+                                    }, 100);
 
-        // Global functions for Cropper
-        function closeCropperModal() {
-            const modal = document.getElementById('cropperModal');
-            modal.style.display = 'none';
-            if (cropper) {
-                cropper.destroy();
-                cropper = null;
-            }
-            // If validated blob doesn't exist (cancelled), clear input
-            if (!croppedCoverBlob) {
-                document.getElementById('productCover').value = '';
-            }
-        }
+                                    // Execute load functions safely
+                                    try { if (typeof loadProducts === 'function') loadProducts(); } catch (e) { console.error('Products load error', e); }
+                                    try { if (typeof loadSessions === 'function') loadSessions(); } catch (e) { console.error('Sessions load error', e); }
+                                    try { if (typeof loadRescheduleRequests === 'function') loadRescheduleRequests(); } catch (e) { console.error('Reschedule load error', e); }
+                                    try { if (typeof loadCancellationRequests === 'function') loadCancellationRequests(); } catch (e) { console.error('Cancellation load error', e); }
+                                    try { if (typeof loadBlogs === 'function') loadBlogs(); } catch (e) { console.error('Blogs load error', e); }
+                                    try { if (typeof loadPendingTestimonials === 'function') loadPendingTestimonials(); } catch (e) { console.error('Testimonials load error', e); }
+                                    try { if (typeof loadAvailability === 'function') loadAvailability(); } catch (e) { console.error('Availability load error', e); }
+                                    try { if (typeof loadBookings === 'function') loadBookings(); } catch (e) { console.error('Bookings load error', e); }
+                                    try { if (typeof initDashboard === 'function') initDashboard(); } catch (e) { console.error('Dashboard init error', e); }
+                                    try { if (typeof initDashboard === 'function') initDashboard(); } catch (e) { console.error('Dashboard init error', e); }
+                                } else {
+                                    alert('Incorrect password');
+                                }
+                            } catch (err) {
+                                alert('Login Critical Error: ' + err.message);
+                                console.error(err);
+                            }
+                        }
 
-        function cropImage() {
-            if (!cropper) return;
-            const canvas = cropper.getCroppedCanvas(); // Free size based on crop
+                        // Global functions for Cropper
+                        function closeCropperModal() {
+                            const modal = document.getElementById('cropperModal');
+                            modal.style.display = 'none';
+                            if (cropper) {
+                                cropper.destroy();
+                                cropper = null;
+                            }
+                            // If validated blob doesn't exist (cancelled), clear input
+                            if (!croppedCoverBlob) {
+                                document.getElementById('productCover').value = '';
+                            }
+                        }
 
-            canvas.toBlob((blob) => {
-                croppedCoverBlob = blob;
-                console.log('✅ Cropped blob created', blob);
+                        function cropImage() {
+                            if (!cropper) return;
+                            const canvas = cropper.getCroppedCanvas(); // Free size based on crop
 
-                // Visual feedback
-                const label = document.querySelector('label[for="productCover"]');
-                if (label) {
-                    label.innerHTML = 'Cover Image <span style="color:#22c55e">(Cropped & Ready)</span>';
-                }
+                            canvas.toBlob((blob) => {
+                                croppedCoverBlob = blob;
+                                console.log('✅ Cropped blob created', blob);
 
-                // Close modal manually without clearing input (since we have the blob)
-                const modal = document.getElementById('cropperModal');
-                modal.style.display = 'none';
-                if (cropper) {
-                    cropper.destroy();
-                    cropper = null;
-                }
-            }, 'image/jpeg', 0.9);
-        }
+                                // Visual feedback
+                                const label = document.querySelector('label[for="productCover"]');
+                                if (label) {
+                                    label.innerHTML = 'Cover Image <span style="color:#22c55e">(Cropped & Ready)</span>';
+                                }
 
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', async function () {
-            console.log('Admin page DOM loaded');
+                                // Close modal manually without clearing input (since we have the blob)
+                                const modal = document.getElementById('cropperModal');
+                                modal.style.display = 'none';
+                                if (cropper) {
+                                    cropper.destroy();
+                                    cropper = null;
+                                }
+                            }, 'image/jpeg', 0.9);
+                        }
 
-            // Initialize Quill
-            try {
-                quill = new Quill('#productDescEditor', {
-                    theme: 'snow',
-                    placeholder: 'Detailed product description...',
-                    modules: {
-                        toolbar: [
-                            ['bold', 'italic', 'underline', 'strike'],
-                            ['blockquote', 'code-block'],
-                            [{ 'header': 1 }, { 'header': 2 }],
-                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                            [{ 'script': 'sub' }, { 'script': 'super' }],
-                            [{ 'indent': '-1' }, { 'indent': '+1' }],
-                            [{ 'size': ['small', false, 'large', 'huge'] }],
-                            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                            [{ 'color': [] }, { 'background': [] }],
-                            [{ 'align': [] }],
-                            ['clean']
-                        ]
-                    }
-                });
-            } catch (e) { console.error('Quill init error:', e); }
+                        // Initialize when DOM is loaded
+                        document.addEventListener('DOMContentLoaded', async function () {
+                            console.log('Admin page DOM loaded');
 
-            // Cropper Event Listener
-            const productCoverInput = document.getElementById('productCover');
-            const cropperImage = document.getElementById('cropperImage');
-            const cropperModal = document.getElementById('cropperModal');
+                            // Initialize Quill
+                            try {
+                                quill = new Quill('#productDescEditor', {
+                                    theme: 'snow',
+                                    placeholder: 'Detailed product description...',
+                                    modules: {
+                                        toolbar: [
+                                            ['bold', 'italic', 'underline', 'strike'],
+                                            ['blockquote', 'code-block'],
+                                            [{ 'header': 1 }, { 'header': 2 }],
+                                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                            [{ 'script': 'sub' }, { 'script': 'super' }],
+                                            [{ 'indent': '-1' }, { 'indent': '+1' }],
+                                            [{ 'size': ['small', false, 'large', 'huge'] }],
+                                            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                                            [{ 'color': [] }, { 'background': [] }],
+                                            [{ 'align': [] }],
+                                            ['clean']
+                                        ]
+                                    }
+                                });
+                            } catch (e) { console.error('Quill init error:', e); }
 
-            if (productCoverInput) {
-                productCoverInput.addEventListener('change', function (e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        // Reset previous blob
-                        croppedCoverBlob = null;
+                            // Cropper Event Listener
+                            const productCoverInput = document.getElementById('productCover');
+                            const cropperImage = document.getElementById('cropperImage');
+                            const cropperModal = document.getElementById('cropperModal');
 
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            cropperImage.src = e.target.result;
-                            cropperModal.style.display = 'flex';
+                            if (productCoverInput) {
+                                productCoverInput.addEventListener('change', function (e) {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                        // Reset previous blob
+                                        croppedCoverBlob = null;
 
-                            // Initialize Cropper
-                            if (cropper) cropper.destroy();
-                            cropper = new Cropper(cropperImage, {
-                                aspectRatio: NaN, // Free aspect ratio
-                                viewMode: 1,
-                                autoCropArea: 1,
+                                        const reader = new FileReader();
+                                        reader.onload = function (e) {
+                                            cropperImage.src = e.target.result;
+                                            cropperModal.style.display = 'flex';
+
+                                            // Initialize Cropper
+                                            if (cropper) cropper.destroy();
+                                            cropper = new Cropper(cropperImage, {
+                                                aspectRatio: NaN, // Free aspect ratio
+                                                viewMode: 1,
+                                                autoCropArea: 1,
+                                            });
+                                        }
+                                        reader.readAsDataURL(file);
+                                    }
+                                });
+                            }
+
+                            // ... (keep existing login listeners)
+                            const loginBtn = document.getElementById('loginBtn');
+                            const passwordInput = document.getElementById('adminPassword');
+                            // ... (rest of listeners)
+
+                            if (loginBtn) {
+                                loginBtn.addEventListener('click', function (e) {
+                                    e.preventDefault();
+                                    checkPassword();
+                                });
+                            }
+
+                            if (passwordInput) {
+                                passwordInput.addEventListener('keypress', function (e) {
+                                    if (e.key === 'Enter') checkPassword();
+                                });
+                            }
+
+                            // Initialize Supabase
+                            try {
+                                // ... (keep existing)
+                                if (typeof window.supabase !== 'undefined') {
+                                    if (!window.supabaseAdminClient) {
+                                        window.supabaseAdminClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                                    }
+                                }
+                            } catch (e) { console.error(e); }
+
+                            console.log('✅ Brevo email configuration loaded from global scope');
+
+                            // Handle Form Submission
+                            document.getElementById('productForm').addEventListener('submit', async (e) => {
+                                console.log('Product Form Submit Triggered');
+                                e.preventDefault();
+                                const btn = document.getElementById('productSubmitBtn');
+                                const status = document.getElementById('uploadStatus');
+
+                                btn.disabled = true;
+                                btn.textContent = 'Uploading...';
+                                status.className = 'status';
+
+                                try {
+                                    console.log('Admin Panel Version: Service Key Active');
+                                    console.log('Key Prefix:', SUPABASE_KEY ? SUPABASE_KEY.substring(0, 15) : 'None');
+
+                                    const productId = document.getElementById('productId').value.trim();
+                                    const name = document.getElementById('productName').value;
+                                    const price = document.getElementById('productPrice').value;
+                                    const originalPrice = document.getElementById('productOriginalPrice').value || 0;
+                                    const enablePPP = document.getElementById('productPPP').checked;
+                                    const discount = document.getElementById('productDiscount').value || 0;
+                                    const couponCode = document.getElementById('productCouponCode').value || null;
+                                    let desc = quill ? quill.root.innerHTML : '';
+                                    if (desc === '<p><br></p>') desc = '';
+                                    console.log('Update Payload:', { name, price, desc, id: productId }); // Debug Log
+                                    const file = document.getElementById('productFile').files[0];
+                                    const coverFileInput = document.getElementById('productCover').files[0];
+                                    const coverFileToUpload = croppedCoverBlob || coverFileInput;
+
+                                    // For new products, file is required; for edits, file is optional
+                                    if (!productId && !file) throw new Error('Please select a resource file');
+
+                                    let fileUrl = null;
+                                    let coverUrl = null;
+
+                                    // 1. Upload Resource File (if selected)
+                                    if (file) {
+                                        const fileExt = file.name.split('.').pop();
+                                        const fileName = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_res_${Date.now()}.${fileExt}`;
+
+                                        const { data: uploadData, error: uploadError } = await window.supabaseAdminClient.storage
+                                            .from('resources')
+                                            .upload(fileName, file);
+
+                                        if (uploadError) throw uploadError;
+
+                                        const { data: publicUrlData } = window.supabaseAdminClient.storage
+                                            .from('resources')
+                                            .getPublicUrl(fileName);
+
+                                        fileUrl = publicUrlData.publicUrl;
+                                    }
+
+                                    // 2. Upload Cover Image (if selected or cropped)
+                                    if (coverFileToUpload) {
+                                        // Blob might not have name, so default to jpg if missing
+                                        const fileExt = coverFileToUpload.name ? coverFileToUpload.name.split('.').pop() : 'jpg';
+                                        const fileName = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_cover_${Date.now()}.${fileExt}`;
+
+                                        const { data: uploadData, error: uploadError } = await window.supabaseAdminClient.storage
+                                            .from('product-covers')
+                                            .upload(fileName, coverFileToUpload);
+
+                                        if (uploadError) throw uploadError;
+
+                                        const { data: publicUrlData } = window.supabaseAdminClient.storage
+                                            .from('product-covers')
+                                            .getPublicUrl(fileName);
+
+                                        coverUrl = publicUrlData.publicUrl;
+                                    }
+
+                                    // 3. Save or Update Metadata in Database
+                                    const productData = {
+                                        name: name,
+                                        price: parseFloat(price),
+                                        original_price: parseFloat(originalPrice),
+                                        enable_ppp: enablePPP,
+                                        discount_percentage: parseInt(discount) || 0,
+                                        coupon_code: couponCode,
+                                        description: desc
+                                    };
+
+                                    // Only update URLs if new files were uploaded
+                                    if (fileUrl) productData.file_url = fileUrl;
+                                    if (coverUrl) productData.cover_image_url = coverUrl;
+
+                                    let dbError;
+                                    if (productId) {
+                                        // Update existing product
+                                        const result = await window.supabaseAdminClient
+                                            .from('products')
+                                            .update(productData)
+                                            .eq('id', productId)
+                                            .select();
+
+                                        if (!result.error && result.data && result.data.length === 0) {
+                                            throw new Error('Update failed: ID matched no rows. Refresh and try again.');
+                                        }
+                                        dbError = result.error;
+                                    } else {
+                                        // Insert new product
+                                        const result = await window.supabaseAdminClient
+                                            .from('products')
+                                            .insert([productData]);
+                                        dbError = result.error;
+                                    }
+
+                                    if (dbError) throw dbError;
+
+                                    // Success
+                                    status.textContent = productId ? '✅ Product updated successfully!' : '✅ Product added successfully!';
+                                    status.classList.add('success');
+                                    document.getElementById('productForm').reset();
+                                    if (quill) quill.setText('');
+
+                                    // Reset Cropper State
+                                    croppedCoverBlob = null;
+                                    const cLabel = document.querySelector('label[for="productCover"]');
+                                    if (cLabel) cLabel.innerHTML = 'Cover Image (Required)';
+
+                                    document.getElementById('productId').value = '';
+                                    document.getElementById('productSubmitBtn').textContent = 'Upload & Save Product';
+                                    document.getElementById('cancelEditBtn').style.display = 'none';
+                                    document.getElementById('fileUploadGroup').style.display = 'block';
+                                    loadProducts();
+
+                                } catch (error) {
+                                    console.error('Error:', error);
+                                    alert('Error: ' + error.message); // Expose error to user
+                                    status.textContent = '❌ Error: ' + error.message;
+                                    status.classList.add('error');
+                                } finally {
+                                    btn.disabled = false;
+                                    btn.textContent = 'Upload & Save Product';
+                                }
                             });
-                        }
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
 
-            // ... (keep existing login listeners)
-            const loginBtn = document.getElementById('loginBtn');
-            const passwordInput = document.getElementById('adminPassword');
-            // ... (rest of listeners)
+                            // Load Products - defined outside DOMContentLoaded
+                            async function loadProducts() {
+                                const list = document.getElementById('productsList');
 
-            if (loginBtn) {
-                loginBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    checkPassword();
-                });
-            }
+                                if (!window.supabaseAdminClient) {
+                                    list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
+                                    return;
+                                }
 
-            if (passwordInput) {
-                passwordInput.addEventListener('keypress', function (e) {
-                    if (e.key === 'Enter') checkPassword();
-                });
-            }
+                                const { data, error } = await window.supabaseAdminClient
+                                    .from('products')
+                                    .select('*')
+                                    .order('created_at', { ascending: false });
 
-            // Initialize Supabase
-            try {
-                // ... (keep existing)
-                if (typeof window.supabase !== 'undefined') {
-                    if (!window.supabaseAdminClient) {
-                        window.supabaseAdminClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                    }
-                }
-            } catch (e) { console.error(e); }
+                                if (error) {
+                                    list.innerHTML = `<p style="color: red">Error loading products: ${error.message}</p>`;
+                                    return;
+                                }
 
-            console.log('✅ Brevo email configuration loaded from global scope');
+                                if (data.length === 0) {
+                                    list.innerHTML = '<p class="text-muted">No products found.</p>';
+                                    return;
+                                }
 
-            // Handle Form Submission
-            document.getElementById('productForm').addEventListener('submit', async (e) => {
-                console.log('Product Form Submit Triggered');
-                e.preventDefault();
-                const btn = document.getElementById('productSubmitBtn');
-                const status = document.getElementById('uploadStatus');
+                                list.innerHTML = data.map(p => {
+                                    const price = p.price;
+                                    const originalPrice = p.original_price || 0;
+                                    const discountPercent = p.discount_percentage || 0;
+                                    const discountedPrice = discountPercent > 0 ? Math.round(price * (1 - discountPercent / 100)) : price;
+                                    const hasPPP = p.enable_ppp ? '<span style="background: rgba(99, 102, 241, 0.2); color: #6366f1; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px;">PPP Enabled</span>' : '';
+                                    const coverImg = p.cover_image_url ?
+                                        `<img src="${p.cover_image_url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 15px;" alt="Cover">` :
+                                        `<div style="width: 50px; height: 50px; background: var(--border); border-radius: 4px; margin-right: 15px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-image" style="color: var(--text-muted);"></i></div>`;
 
-                btn.disabled = true;
-                btn.textContent = 'Uploading...';
-                status.className = 'status';
-
-                try {
-                    console.log('Admin Panel Version: Service Key Active');
-                    console.log('Key Prefix:', SUPABASE_KEY ? SUPABASE_KEY.substring(0, 15) : 'None');
-
-                    const productId = document.getElementById('productId').value.trim();
-                    const name = document.getElementById('productName').value;
-                    const price = document.getElementById('productPrice').value;
-                    const originalPrice = document.getElementById('productOriginalPrice').value || 0;
-                    const enablePPP = document.getElementById('productPPP').checked;
-                    const discount = document.getElementById('productDiscount').value || 0;
-                    const couponCode = document.getElementById('productCouponCode').value || null;
-                    let desc = quill ? quill.root.innerHTML : '';
-                    if (desc === '<p><br></p>') desc = '';
-                    console.log('Update Payload:', { name, price, desc, id: productId }); // Debug Log
-                    const file = document.getElementById('productFile').files[0];
-                    const coverFileInput = document.getElementById('productCover').files[0];
-                    const coverFileToUpload = croppedCoverBlob || coverFileInput;
-
-                    // For new products, file is required; for edits, file is optional
-                    if (!productId && !file) throw new Error('Please select a resource file');
-
-                    let fileUrl = null;
-                    let coverUrl = null;
-
-                    // 1. Upload Resource File (if selected)
-                    if (file) {
-                        const fileExt = file.name.split('.').pop();
-                        const fileName = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_res_${Date.now()}.${fileExt}`;
-
-                        const { data: uploadData, error: uploadError } = await window.supabaseAdminClient.storage
-                            .from('resources')
-                            .upload(fileName, file);
-
-                        if (uploadError) throw uploadError;
-
-                        const { data: publicUrlData } = window.supabaseAdminClient.storage
-                            .from('resources')
-                            .getPublicUrl(fileName);
-
-                        fileUrl = publicUrlData.publicUrl;
-                    }
-
-                    // 2. Upload Cover Image (if selected or cropped)
-                    if (coverFileToUpload) {
-                        // Blob might not have name, so default to jpg if missing
-                        const fileExt = coverFileToUpload.name ? coverFileToUpload.name.split('.').pop() : 'jpg';
-                        const fileName = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_cover_${Date.now()}.${fileExt}`;
-
-                        const { data: uploadData, error: uploadError } = await window.supabaseAdminClient.storage
-                            .from('product-covers')
-                            .upload(fileName, coverFileToUpload);
-
-                        if (uploadError) throw uploadError;
-
-                        const { data: publicUrlData } = window.supabaseAdminClient.storage
-                            .from('product-covers')
-                            .getPublicUrl(fileName);
-
-                        coverUrl = publicUrlData.publicUrl;
-                    }
-
-                    // 3. Save or Update Metadata in Database
-                    const productData = {
-                        name: name,
-                        price: parseFloat(price),
-                        original_price: parseFloat(originalPrice),
-                        enable_ppp: enablePPP,
-                        discount_percentage: parseInt(discount) || 0,
-                        coupon_code: couponCode,
-                        description: desc
-                    };
-
-                    // Only update URLs if new files were uploaded
-                    if (fileUrl) productData.file_url = fileUrl;
-                    if (coverUrl) productData.cover_image_url = coverUrl;
-
-                    let dbError;
-                    if (productId) {
-                        // Update existing product
-                        const result = await window.supabaseAdminClient
-                            .from('products')
-                            .update(productData)
-                            .eq('id', productId)
-                            .select();
-
-                        if (!result.error && result.data && result.data.length === 0) {
-                            throw new Error('Update failed: ID matched no rows. Refresh and try again.');
-                        }
-                        dbError = result.error;
-                    } else {
-                        // Insert new product
-                        const result = await window.supabaseAdminClient
-                            .from('products')
-                            .insert([productData]);
-                        dbError = result.error;
-                    }
-
-                    if (dbError) throw dbError;
-
-                    // Success
-                    status.textContent = productId ? '✅ Product updated successfully!' : '✅ Product added successfully!';
-                    status.classList.add('success');
-                    document.getElementById('productForm').reset();
-                    if (quill) quill.setText('');
-
-                    // Reset Cropper State
-                    croppedCoverBlob = null;
-                    const cLabel = document.querySelector('label[for="productCover"]');
-                    if (cLabel) cLabel.innerHTML = 'Cover Image (Required)';
-
-                    document.getElementById('productId').value = '';
-                    document.getElementById('productSubmitBtn').textContent = 'Upload & Save Product';
-                    document.getElementById('cancelEditBtn').style.display = 'none';
-                    document.getElementById('fileUploadGroup').style.display = 'block';
-                    loadProducts();
-
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error: ' + error.message); // Expose error to user
-                    status.textContent = '❌ Error: ' + error.message;
-                    status.classList.add('error');
-                } finally {
-                    btn.disabled = false;
-                    btn.textContent = 'Upload & Save Product';
-                }
-            });
-
-            // Load Products - defined outside DOMContentLoaded
-            async function loadProducts() {
-                const list = document.getElementById('productsList');
-
-                if (!window.supabaseAdminClient) {
-                    list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
-                    return;
-                }
-
-                const { data, error } = await window.supabaseAdminClient
-                    .from('products')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) {
-                    list.innerHTML = `<p style="color: red">Error loading products: ${error.message}</p>`;
-                    return;
-                }
-
-                if (data.length === 0) {
-                    list.innerHTML = '<p class="text-muted">No products found.</p>';
-                    return;
-                }
-
-                list.innerHTML = data.map(p => {
-                    const price = p.price;
-                    const originalPrice = p.original_price || 0;
-                    const discountPercent = p.discount_percentage || 0;
-                    const discountedPrice = discountPercent > 0 ? Math.round(price * (1 - discountPercent / 100)) : price;
-                    const hasPPP = p.enable_ppp ? '<span style="background: rgba(99, 102, 241, 0.2); color: #6366f1; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px;">PPP Enabled</span>' : '';
-                    const coverImg = p.cover_image_url ?
-                        `<img src="${p.cover_image_url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 15px;" alt="Cover">` :
-                        `<div style="width: 50px; height: 50px; background: var(--border); border-radius: 4px; margin-right: 15px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-image" style="color: var(--text-muted);"></i></div>`;
-
-                    return `
+                                    return `
                 <div class="product-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border);">
                     <div style="display: flex; align-items: center;">
                         ${coverImg}
@@ -1269,12 +1268,12 @@ Brief Q&A"></textarea>
                             <strong>${p.name}</strong> ${p.price === 0 ? '<span style="background: #22c55e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px;">FREE RESOURCE</span>' : ''} ${hasPPP}<br>
                             <span style="color: var(--text-muted); font-size: 0.9em;">
                                 ${originalPrice > price ?
-                            `<span style="text-decoration: line-through; color: #ef4444; margin-right: 5px;">₹${originalPrice}</span>` : ''}
+                                            `<span style="text-decoration: line-through; color: #ef4444; margin-right: 5px;">₹${originalPrice}</span>` : ''}
                                 ${discountPercent > 0 ?
-                            `<span style="text-decoration: line-through; color: #ef4444;">₹${price}</span> 
+                                            `<span style="text-decoration: line-through; color: #ef4444;">₹${price}</span> 
                                      <span style="color: #22c55e; font-weight: bold;">₹${discountedPrice}</span>
                                      <span style="background: #22c55e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px;">${discountPercent}% OFF</span>` :
-                            `₹${price}`}
+                                            `₹${price}`}
                             </span>
                         </div>
                     </div>
@@ -1288,231 +1287,231 @@ Brief Q&A"></textarea>
                     </div>
                 </div>
             `}).join('');
-            }
+                            }
 
-            // Helper to copy product link
-            window.copyProductLink = (id) => {
-                const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
-                const shareUrl = `${baseUrl}?id=${id}`;
-                navigator.clipboard.writeText(shareUrl).then(() => {
-                    alert('✅ Shareable link copied to clipboard!\n' + shareUrl);
-                }).catch(err => {
-                    console.error('Copy failed:', err);
-                    alert('❌ Copy failed. Link: ' + shareUrl);
-                });
-            };
-
-
-            // Edit Product
-            async function editProduct(id) {
-                const { data, error } = await window.supabaseAdminClient
-                    .from('products')
-                    .select('*')
-                    .eq('id', id)
-                    .single();
-
-                if (error) {
-                    alert('❌ Error loading product: ' + error.message);
-                    return;
-                }
-
-                document.getElementById('productId').value = data.id;
-                document.getElementById('productName').value = data.name;
-                document.getElementById('productPrice').value = data.price;
-                document.getElementById('productOriginalPrice').value = data.original_price || '';
-                document.getElementById('productPPP').checked = data.enable_ppp || false;
-                document.getElementById('productDiscount').value = data.discount_percentage || 0;
-                document.getElementById('productCouponCode').value = data.coupon_code || '';
-
-                // Handle Free Resource Checkbox
-                const freeCheck = document.getElementById('productFree');
-                if (freeCheck) {
-                    freeCheck.checked = (data.price === 0);
-                    togglePriceInput(freeCheck);
-                }
-
-                if (quill) quill.root.innerHTML = data.description || '';
-                document.getElementById('productSubmitBtn').textContent = 'Update Product';
-                document.getElementById('cancelEditBtn').style.display = 'inline-block';
-
-                // Show file input for edit mode so user can optionally update the file
-                document.getElementById('fileUploadGroup').style.display = 'block';
-
-                // Scroll to form
-                document.getElementById('productForm').scrollIntoView({ behavior: 'smooth' });
-
-                // Reset any existing cropped blob
-                croppedCoverBlob = null;
-                const label = document.querySelector('label[for="productCover"]');
-                if (label) label.innerHTML = 'Cover Image (Required)';
-                document.getElementById('productCover').value = '';
-            }
-
-            // Cancel Product Edit
-            function cancelProductEdit() {
-                document.getElementById('productId').value = '';
-                document.getElementById('productName').value = '';
-                document.getElementById('productPrice').value = '';
-                document.getElementById('productOriginalPrice').value = '';
-                document.getElementById('productPPP').checked = false;
-                document.getElementById('productDiscount').value = '';
-                document.getElementById('productCouponCode').value = '';
-
-                const freeCheck = document.getElementById('productFree');
-                if (freeCheck) {
-                    freeCheck.checked = false;
-                    togglePriceInput(freeCheck);
-                }
-
-                if (quill) quill.setText('');
-                document.getElementById('productSubmitBtn').textContent = 'Upload & Save Product';
-                document.getElementById('cancelEditBtn').style.display = 'none';
-                document.getElementById('fileUploadGroup').style.display = 'block';
-                document.getElementById('fileUploadGroup').querySelector('input').required = false;
-
-                // Reset cropped blob
-                croppedCoverBlob = null;
-                const label = document.querySelector('label[for="productCover"]');
-                if (label) label.innerHTML = 'Cover Image (Required)';
-                document.getElementById('productCover').value = '';
-            }
-
-            // Delete Product
-            async function deleteProduct(id) {
-                console.log('🗑️ Attempting to delete product:', id);
-                if (!confirm('⚠️ Are you sure you want to delete this product?')) return;
-
-                try {
-                    const { data, error } = await window.supabaseAdminClient
-                        .from('products')
-                        .delete()
-                        .eq('id', id)
-                        .select();
-
-                    console.log('🗑️ Delete result:', { data, error });
-
-                    if (error) throw error;
-
-                    alert('✅ Product deleted successfully!');
-                    await loadProducts();
-                } catch (error) {
-                    console.error('❌ Delete error:', error);
-                    alert('❌ Error deleting product: ' + error.message);
-                }
-            }
+                            // Helper to copy product link
+                            window.copyProductLink = (id) => {
+                                const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
+                                const shareUrl = `${baseUrl}?id=${id}`;
+                                navigator.clipboard.writeText(shareUrl).then(() => {
+                                    alert('✅ Shareable link copied to clipboard!\n' + shareUrl);
+                                }).catch(err => {
+                                    console.error('Copy failed:', err);
+                                    alert('❌ Copy failed. Link: ' + shareUrl);
+                                });
+                            };
 
 
+                            // Edit Product
+                            async function editProduct(id) {
+                                const { data, error } = await window.supabaseAdminClient
+                                    .from('products')
+                                    .select('*')
+                                    .eq('id', id)
+                                    .single();
 
-            // Handle Session Form Submission
-            document.getElementById('sessionForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const btn = document.getElementById('sessionSubmitBtn');
-                const originalText = btn.textContent;
-                btn.disabled = true;
-                btn.textContent = 'Saving...';
+                                if (error) {
+                                    alert('❌ Error loading product: ' + error.message);
+                                    return;
+                                }
 
-                try {
-                    const sessionId = document.getElementById('sessionId').value;
-                    const name = document.getElementById('sessionName').value;
-                    const duration = parseInt(document.getElementById('sessionDuration').value);
-                    const price = parseInt(document.getElementById('sessionPrice').value);
-                    const description = document.getElementById('sessionDesc').value;
-                    const featuresText = document.getElementById('sessionFeatures').value;
-                    const features = featuresText.split('\n').filter(f => f.trim() !== '');
-                    const isPopular = document.getElementById('sessionPopular').checked;
-                    const isActive = document.getElementById('sessionActive').checked;
+                                document.getElementById('productId').value = data.id;
+                                document.getElementById('productName').value = data.name;
+                                document.getElementById('productPrice').value = data.price;
+                                document.getElementById('productOriginalPrice').value = data.original_price || '';
+                                document.getElementById('productPPP').checked = data.enable_ppp || false;
+                                document.getElementById('productDiscount').value = data.discount_percentage || 0;
+                                document.getElementById('productCouponCode').value = data.coupon_code || '';
 
-                    const sessionData = {
-                        name,
-                        duration,
-                        price,
-                        description,
-                        features,
-                        is_popular: isPopular,
-                        is_active: isActive
-                    };
+                                // Handle Free Resource Checkbox
+                                const freeCheck = document.getElementById('productFree');
+                                if (freeCheck) {
+                                    freeCheck.checked = (data.price === 0);
+                                    togglePriceInput(freeCheck);
+                                }
 
-                    if (sessionId) {
-                        // Update existing session
-                        const { error } = await window.supabaseAdminClient
-                            .from('sessions')
-                            .update(sessionData)
-                            .eq('id', sessionId);
-                        if (error) throw error;
-                        alert('✅ Session updated successfully!');
-                    } else {
-                        // Create new session
-                        const { error } = await window.supabaseAdminClient
-                            .from('sessions')
-                            .insert([sessionData]);
-                        if (error) throw error;
-                        alert('✅ New session created successfully!');
-                    }
+                                if (quill) quill.root.innerHTML = data.description || '';
+                                document.getElementById('productSubmitBtn').textContent = 'Update Product';
+                                document.getElementById('cancelEditBtn').style.display = 'inline-block';
 
-                    document.getElementById('sessionForm').reset();
-                    document.getElementById('sessionId').value = '';
-                    await loadSessions();
-                } catch (error) {
-                    console.error('Error saving session:', error);
-                    alert('❌ Error: ' + error.message);
-                } finally {
-                    btn.disabled = false;
-                    btn.textContent = originalText;
-                }
-            });
+                                // Show file input for edit mode so user can optionally update the file
+                                document.getElementById('fileUploadGroup').style.display = 'block';
 
-            // Reset Session Form
-            document.getElementById('sessionResetBtn').addEventListener('click', () => {
-                document.getElementById('sessionForm').reset();
-                document.getElementById('sessionId').value = '';
-                document.getElementById('sessionSubmitBtn').textContent = 'Save Session';
-            });
+                                // Scroll to form
+                                document.getElementById('productForm').scrollIntoView({ behavior: 'smooth' });
 
-            // Global functions for session management
-            window.checkPassword = checkPassword;
-            window.loadProducts = loadProducts;
-            window.editProduct = editProduct;
-            window.deleteProduct = deleteProduct;
-            window.cancelProductEdit = cancelProductEdit;
-            window.editSession = editSession;
-            window.deleteSession = deleteSession;
+                                // Reset any existing cropped blob
+                                croppedCoverBlob = null;
+                                const label = document.querySelector('label[for="productCover"]');
+                                if (label) label.innerHTML = 'Cover Image (Required)';
+                                document.getElementById('productCover').value = '';
+                            }
 
-            // Reschedule Request Functions
-            window.loadRescheduleRequests = loadRescheduleRequests;
-            window.approveReschedule = approveReschedule;
-            window.showAlternativeModal = showAlternativeModal;
-            window.closeAlternativeModal = closeAlternativeModal;
-            window.submitAlternative = submitAlternative;
-            window.rejectReschedule = rejectReschedule;
-        }); // End of DOMContentLoaded
+                            // Cancel Product Edit
+                            function cancelProductEdit() {
+                                document.getElementById('productId').value = '';
+                                document.getElementById('productName').value = '';
+                                document.getElementById('productPrice').value = '';
+                                document.getElementById('productOriginalPrice').value = '';
+                                document.getElementById('productPPP').checked = false;
+                                document.getElementById('productDiscount').value = '';
+                                document.getElementById('productCouponCode').value = '';
 
-        // Reschedule Request Functions
-        async function loadRescheduleRequests() {
-            const list = document.getElementById('rescheduleRequestsList');
+                                const freeCheck = document.getElementById('productFree');
+                                if (freeCheck) {
+                                    freeCheck.checked = false;
+                                    togglePriceInput(freeCheck);
+                                }
 
-            if (!window.supabaseAdminClient) {
-                list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
-                return;
-            }
+                                if (quill) quill.setText('');
+                                document.getElementById('productSubmitBtn').textContent = 'Upload & Save Product';
+                                document.getElementById('cancelEditBtn').style.display = 'none';
+                                document.getElementById('fileUploadGroup').style.display = 'block';
+                                document.getElementById('fileUploadGroup').querySelector('input').required = false;
 
-            try {
-                const { data, error } = await window.supabaseAdminClient
-                    .from('bookings')
-                    .select('*')
-                    .eq('status', 'reschedule_requested')
-                    .order('created_at', { ascending: false });
+                                // Reset cropped blob
+                                croppedCoverBlob = null;
+                                const label = document.querySelector('label[for="productCover"]');
+                                if (label) label.innerHTML = 'Cover Image (Required)';
+                                document.getElementById('productCover').value = '';
+                            }
 
-                if (error) {
-                    list.innerHTML = `<p style="color: red">Error loading requests: ${error.message}</p>`;
-                    return;
-                }
+                            // Delete Product
+                            async function deleteProduct(id) {
+                                console.log('🗑️ Attempting to delete product:', id);
+                                if (!confirm('⚠️ Are you sure you want to delete this product?')) return;
 
-                if (!data || data.length === 0) {
-                    list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No pending reschedule requests.</p>';
-                    return;
-                }
+                                try {
+                                    const { data, error } = await window.supabaseAdminClient
+                                        .from('products')
+                                        .delete()
+                                        .eq('id', id)
+                                        .select();
 
-                list.innerHTML = data.map(booking => `
+                                    console.log('🗑️ Delete result:', { data, error });
+
+                                    if (error) throw error;
+
+                                    alert('✅ Product deleted successfully!');
+                                    await loadProducts();
+                                } catch (error) {
+                                    console.error('❌ Delete error:', error);
+                                    alert('❌ Error deleting product: ' + error.message);
+                                }
+                            }
+
+
+
+                            // Handle Session Form Submission
+                            document.getElementById('sessionForm').addEventListener('submit', async (e) => {
+                                e.preventDefault();
+                                const btn = document.getElementById('sessionSubmitBtn');
+                                const originalText = btn.textContent;
+                                btn.disabled = true;
+                                btn.textContent = 'Saving...';
+
+                                try {
+                                    const sessionId = document.getElementById('sessionId').value;
+                                    const name = document.getElementById('sessionName').value;
+                                    const duration = parseInt(document.getElementById('sessionDuration').value);
+                                    const price = parseInt(document.getElementById('sessionPrice').value);
+                                    const description = document.getElementById('sessionDesc').value;
+                                    const featuresText = document.getElementById('sessionFeatures').value;
+                                    const features = featuresText.split('\n').filter(f => f.trim() !== '');
+                                    const isPopular = document.getElementById('sessionPopular').checked;
+                                    const isActive = document.getElementById('sessionActive').checked;
+
+                                    const sessionData = {
+                                        name,
+                                        duration,
+                                        price,
+                                        description,
+                                        features,
+                                        is_popular: isPopular,
+                                        is_active: isActive
+                                    };
+
+                                    if (sessionId) {
+                                        // Update existing session
+                                        const { error } = await window.supabaseAdminClient
+                                            .from('sessions')
+                                            .update(sessionData)
+                                            .eq('id', sessionId);
+                                        if (error) throw error;
+                                        alert('✅ Session updated successfully!');
+                                    } else {
+                                        // Create new session
+                                        const { error } = await window.supabaseAdminClient
+                                            .from('sessions')
+                                            .insert([sessionData]);
+                                        if (error) throw error;
+                                        alert('✅ New session created successfully!');
+                                    }
+
+                                    document.getElementById('sessionForm').reset();
+                                    document.getElementById('sessionId').value = '';
+                                    await loadSessions();
+                                } catch (error) {
+                                    console.error('Error saving session:', error);
+                                    alert('❌ Error: ' + error.message);
+                                } finally {
+                                    btn.disabled = false;
+                                    btn.textContent = originalText;
+                                }
+                            });
+
+                            // Reset Session Form
+                            document.getElementById('sessionResetBtn').addEventListener('click', () => {
+                                document.getElementById('sessionForm').reset();
+                                document.getElementById('sessionId').value = '';
+                                document.getElementById('sessionSubmitBtn').textContent = 'Save Session';
+                            });
+
+                            // Global functions for session management
+                            window.checkPassword = checkPassword;
+                            window.loadProducts = loadProducts;
+                            window.editProduct = editProduct;
+                            window.deleteProduct = deleteProduct;
+                            window.cancelProductEdit = cancelProductEdit;
+                            window.editSession = editSession;
+                            window.deleteSession = deleteSession;
+
+                            // Reschedule Request Functions
+                            window.loadRescheduleRequests = loadRescheduleRequests;
+                            window.approveReschedule = approveReschedule;
+                            window.showAlternativeModal = showAlternativeModal;
+                            window.closeAlternativeModal = closeAlternativeModal;
+                            window.submitAlternative = submitAlternative;
+                            window.rejectReschedule = rejectReschedule;
+                        }); // End of DOMContentLoaded
+
+                        // Reschedule Request Functions
+                        async function loadRescheduleRequests() {
+                            const list = document.getElementById('rescheduleRequestsList');
+
+                            if (!window.supabaseAdminClient) {
+                                list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
+                                return;
+                            }
+
+                            try {
+                                const { data, error } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .select('*')
+                                    .eq('status', 'reschedule_requested')
+                                    .order('created_at', { ascending: false });
+
+                                if (error) {
+                                    list.innerHTML = `<p style="color: red">Error loading requests: ${error.message}</p>`;
+                                    return;
+                                }
+
+                                if (!data || data.length === 0) {
+                                    list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No pending reschedule requests.</p>';
+                                    return;
+                                }
+
+                                list.innerHTML = data.map(booking => `
                     <div class="reschedule-item">
                         <div class="reschedule-header">
                             <div>
@@ -1541,9 +1540,9 @@ Brief Q&A"></textarea>
                         </div>
 
                         ${(function () {
-                        const link = booking.meet_link || 'https://meet.google.com/hfp-npyq-qho';
-                        return `<div style="background: rgba(34, 197, 94, 0.1); padding: 8px 12px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9em; color: #22c55e;"><i class="fas fa-video"></i> <strong>Meet Link:</strong> <a href="${link}" target="_blank" style="color: inherit; text-decoration: underline;">${link}</a></div>`;
-                    })()}
+                                        const link = booking.meet_link || 'https://meet.google.com/hfp-npyq-qho';
+                                        return `<div style="background: rgba(34, 197, 94, 0.1); padding: 8px 12px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9em; color: #22c55e;"><i class="fas fa-video"></i> <strong>Meet Link:</strong> <a href="${link}" target="_blank" style="color: inherit; text-decoration: underline;">${link}</a></div>`;
+                                    })()}
                         
                         ${booking.reschedule_reason ? `<p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9em;"><strong>Reason:</strong> ${booking.reschedule_reason}</p>` : ''}
                         
@@ -1560,55 +1559,55 @@ Brief Q&A"></textarea>
                         </div>
                     </div>
                 `).join('');
-            } catch (error) {
-                console.error('Error loading reschedule requests:', error);
-                list.innerHTML = `<p style="color: red">Error: ${error.message}</p>`;
-            }
-        }
+                            } catch (error) {
+                                console.error('Error loading reschedule requests:', error);
+                                list.innerHTML = `<p style="color: red">Error: ${error.message}</p>`;
+                            }
+                        }
 
-        // Approve Reschedule Request
-        async function approveReschedule(bookingId, email) {
-            if (!confirm('✓ Approve this reschedule request?\n\nThe booking will be updated with the requested date/time.')) {
-                return;
-            }
+                        // Approve Reschedule Request
+                        async function approveReschedule(bookingId, email) {
+                            if (!confirm('✓ Approve this reschedule request?\n\nThe booking will be updated with the requested date/time.')) {
+                                return;
+                            }
 
-            try {
-                // Get the current booking to retrieve requested dates
-                const { data: booking, error: fetchError } = await window.supabaseAdminClient
-                    .from('bookings')
-                    .select('*')
-                    .eq('id', bookingId)
-                    .single();
+                            try {
+                                // Get the current booking to retrieve requested dates
+                                const { data: booking, error: fetchError } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .select('*')
+                                    .eq('id', bookingId)
+                                    .single();
 
-                if (fetchError) throw fetchError;
+                                if (fetchError) throw fetchError;
 
-                // Check if reschedule was requested
-                if (!booking.requested_date || !booking.requested_time) {
-                    alert('❌ Error: No reschedule request found for this booking.');
-                    return;
-                }
+                                // Check if reschedule was requested
+                                if (!booking.requested_date || !booking.requested_time) {
+                                    alert('❌ Error: No reschedule request found for this booking.');
+                                    return;
+                                }
 
-                // Update the booking
-                const { error: updateError } = await window.supabaseAdminClient
-                    .from('bookings')
-                    .update({
-                        booking_date: booking.requested_date,
-                        booking_time: booking.requested_time,
-                        status: 'upcoming',
-                        requested_date: null,
-                        requested_time: null,
-                        reschedule_reason: null
-                    })
-                    .eq('id', bookingId);
+                                // Update the booking
+                                const { error: updateError } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .update({
+                                        booking_date: booking.requested_date,
+                                        booking_time: booking.requested_time,
+                                        status: 'upcoming',
+                                        requested_date: null,
+                                        requested_time: null,
+                                        reschedule_reason: null
+                                    })
+                                    .eq('id', bookingId);
 
-                if (updateError) throw updateError;
+                                if (updateError) throw updateError;
 
-                // Notify user via Brevo
-                const meetLink = booking.meet_link || 'https://meet.google.com/hfp-npyq-qho';
-                // Use booking name if available
-                const customerName = booking.name || 'Customer';
+                                // Notify user via Brevo
+                                const meetLink = booking.meet_link || 'https://meet.google.com/hfp-npyq-qho';
+                                // Use booking name if available
+                                const customerName = booking.name || 'Customer';
 
-                const htmlContent = `
+                                const htmlContent = `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                         <h2 style="color: #10b981;">✅ Reschedule Request Approved</h2>
                         <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
@@ -1624,7 +1623,7 @@ Brief Q&A"></textarea>
                         <p style="color: #6b7280;">Best regards,<br>QuantMentor</p>
                     </div>
                 `;
-                const textContent = `
+                                const textContent = `
 ✅ RESCHEDULE REQUEST APPROVED
 ━━━━━━━━━━━━━━━━━━━━
 Hi ${customerName},
@@ -1644,69 +1643,69 @@ QuantMentor
 ━━━━━━━━━━━━━━━━━━━━
                 `.trim();
 
-                await sendEmailWithBrevo(email, `Reschedule Approved - Booking ${bookingId}`, htmlContent, textContent);
+                                await sendEmailWithBrevo(email, `Reschedule Approved - Booking ${bookingId}`, htmlContent, textContent);
 
-                alert('✅ Reschedule request approved!\n\nUser has been notified.');
-                await loadRescheduleRequests();
-            } catch (error) {
-                console.error('Error approving reschedule:', error);
-                alert('❌ Error approving request: ' + error.message);
-            }
-        }
+                                alert('✅ Reschedule request approved!\n\nUser has been notified.');
+                                await loadRescheduleRequests();
+                            } catch (error) {
+                                console.error('Error approving reschedule:', error);
+                                alert('❌ Error approving request: ' + error.message);
+                            }
+                        }
 
-        // Show Alternative Date Modal
-        function showAlternativeModal(bookingId, email) {
-            document.getElementById('altBookingId').value = bookingId;
-            document.getElementById('altDate').value = '';
-            document.getElementById('altTime').value = '';
-            document.getElementById('altMessage').value = '';
-            document.getElementById('alternativeModal').style.display = 'flex';
-        }
+                        // Show Alternative Date Modal
+                        function showAlternativeModal(bookingId, email) {
+                            document.getElementById('altBookingId').value = bookingId;
+                            document.getElementById('altDate').value = '';
+                            document.getElementById('altTime').value = '';
+                            document.getElementById('altMessage').value = '';
+                            document.getElementById('alternativeModal').style.display = 'flex';
+                        }
 
-        // Close Alternative Modal
-        function closeAlternativeModal() {
-            document.getElementById('alternativeModal').style.display = 'none';
-        }
+                        // Close Alternative Modal
+                        function closeAlternativeModal() {
+                            document.getElementById('alternativeModal').style.display = 'none';
+                        }
 
-        // Submit Alternative Date
-        async function submitAlternative() {
-            const bookingId = document.getElementById('altBookingId').value;
-            const altDate = document.getElementById('altDate').value;
-            const altTime = document.getElementById('altTime').value;
-            const message = document.getElementById('altMessage').value;
+                        // Submit Alternative Date
+                        async function submitAlternative() {
+                            const bookingId = document.getElementById('altBookingId').value;
+                            const altDate = document.getElementById('altDate').value;
+                            const altTime = document.getElementById('altTime').value;
+                            const message = document.getElementById('altMessage').value;
 
-            if (!altDate || !altTime) {
-                alert('Please select both date and time');
-                return;
-            }
+                            if (!altDate || !altTime) {
+                                alert('Please select both date and time');
+                                return;
+                            }
 
-            try {
-                // Get current booking for email
-                const { data: booking, error: fetchError } = await window.supabaseAdminClient
-                    .from('bookings')
-                    .select('*')
-                    .eq('id', bookingId)
-                    .single();
+                            try {
+                                // Get current booking for email
+                                const { data: booking, error: fetchError } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .select('*')
+                                    .eq('id', bookingId)
+                                    .single();
 
-                if (fetchError) throw fetchError;
+                                if (fetchError) throw fetchError;
 
-                // Update booking with alternative date
-                const { error: updateError } = await window.supabaseAdminClient
-                    .from('bookings')
-                    .update({
-                        booking_date: altDate,
-                        booking_time: altTime,
-                        status: 'upcoming',
-                        requested_date: null,
-                        requested_time: null,
-                        reschedule_reason: null
-                    })
-                    .eq('id', bookingId);
+                                // Update booking with alternative date
+                                const { error: updateError } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .update({
+                                        booking_date: altDate,
+                                        booking_time: altTime,
+                                        status: 'upcoming',
+                                        requested_date: null,
+                                        requested_time: null,
+                                        reschedule_reason: null
+                                    })
+                                    .eq('id', bookingId);
 
-                if (updateError) throw updateError;
+                                if (updateError) throw updateError;
 
-                // Notify user via Brevo
-                const htmlContent = `
+                                // Notify user via Brevo
+                                const htmlContent = `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                         <h2 style="color: #f59e0b;">📅 Alternative Date Offered</h2>
                         <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
@@ -1722,7 +1721,7 @@ QuantMentor
                         <p style="color: #6b7280;">Best regards,<br>QuantMentor</p>
                     </div>
                 `;
-                const textContent = `
+                                const textContent = `
 📅 ALTERNATIVE DATE OFFERED
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
@@ -1740,42 +1739,42 @@ If this doesn't work for you, please contact us to reschedule.
 ━━━━━━━━━━━━━━━━━━━━
                 `.trim();
 
-                await sendEmailWithBrevo(booking.email, `Alternative Date Offered - Booking ${bookingId}`, htmlContent, textContent);
+                                await sendEmailWithBrevo(booking.email, `Alternative Date Offered - Booking ${bookingId}`, htmlContent, textContent);
 
-                alert('✅ Alternative date sent to user!');
-                closeAlternativeModal();
-                await loadRescheduleRequests();
-            } catch (error) {
-                console.error('Error submitting alternative:', error);
-                alert('❌ Error: ' + error.message);
-            }
-        }
+                                alert('✅ Alternative date sent to user!');
+                                closeAlternativeModal();
+                                await loadRescheduleRequests();
+                            } catch (error) {
+                                console.error('Error submitting alternative:', error);
+                                alert('❌ Error: ' + error.message);
+                            }
+                        }
 
-        // Reject Reschedule Request
-        async function rejectReschedule(bookingId, email) {
-            const reason = prompt('Please provide a reason for rejection (optional):');
-            if (reason === null) return; // User cancelled
+                        // Reject Reschedule Request
+                        async function rejectReschedule(bookingId, email) {
+                            const reason = prompt('Please provide a reason for rejection (optional):');
+                            if (reason === null) return; // User cancelled
 
-            if (!confirm('✕ Reject this reschedule request?\n\nThe booking will remain at the original date/time.')) {
-                return;
-            }
+                            if (!confirm('✕ Reject this reschedule request?\n\nThe booking will remain at the original date/time.')) {
+                                return;
+                            }
 
-            try {
-                // Clear reschedule request fields and keep original schedule
-                const { error: updateError } = await window.supabaseAdminClient
-                    .from('bookings')
-                    .update({
-                        status: 'upcoming',
-                        requested_date: null,
-                        requested_time: null,
-                        reschedule_reason: null
-                    })
-                    .eq('id', bookingId);
+                            try {
+                                // Clear reschedule request fields and keep original schedule
+                                const { error: updateError } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .update({
+                                        status: 'upcoming',
+                                        requested_date: null,
+                                        requested_time: null,
+                                        reschedule_reason: null
+                                    })
+                                    .eq('id', bookingId);
 
-                if (updateError) throw updateError;
+                                if (updateError) throw updateError;
 
-                // Notify user via Brevo
-                const htmlContent = `
+                                // Notify user via Brevo
+                                const htmlContent = `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                         <h2 style="color: #ef4444;">❌ Reschedule Request Rejected</h2>
                         <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
@@ -1788,7 +1787,7 @@ If this doesn't work for you, please contact us to reschedule.
                         <p style="color: #6b7280;">Best regards,<br>QuantMentor</p>
                     </div>
                 `;
-                const textContent = `
+                                const textContent = `
 ❌ RESCHEDULE REQUEST REJECTED
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
@@ -1802,53 +1801,53 @@ Please contact us if you need further assistance.
 ━━━━━━━━━━━━━━━━━━━━
                 `.trim();
 
-                await sendEmailWithBrevo(email, `Reschedule Request Rejected - Booking ${bookingId}`, htmlContent, textContent);
+                                await sendEmailWithBrevo(email, `Reschedule Request Rejected - Booking ${bookingId}`, htmlContent, textContent);
 
-                alert('✅ Reschedule request rejected.\n\nUser has been notified.');
-                await loadRescheduleRequests();
-            } catch (error) {
-                console.error('Error rejecting reschedule:', error);
-                alert('❌ Error: ' + error.message);
-            }
-        }
+                                alert('✅ Reschedule request rejected.\n\nUser has been notified.');
+                                await loadRescheduleRequests();
+                            } catch (error) {
+                                console.error('Error rejecting reschedule:', error);
+                                alert('❌ Error: ' + error.message);
+                            }
+                        }
 
-        // =============================================
-        // CANCELLATION REQUEST MANAGEMENT
-        // =============================================
+                        // =============================================
+                        // CANCELLATION REQUEST MANAGEMENT
+                        // =============================================
 
-        // Load Cancellation Requests
-        async function loadCancellationRequests() {
-            const list = document.getElementById('cancellationRequestsList');
-            console.log('📋 Loading cancellation requests...');
+                        // Load Cancellation Requests
+                        async function loadCancellationRequests() {
+                            const list = document.getElementById('cancellationRequestsList');
+                            console.log('📋 Loading cancellation requests...');
 
-            if (!window.supabaseAdminClient) {
-                list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
-                console.error('❌ Supabase not initialized');
-                return;
-            }
+                            if (!window.supabaseAdminClient) {
+                                list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
+                                console.error('❌ Supabase not initialized');
+                                return;
+                            }
 
-            try {
-                const { data, error } = await window.supabaseAdminClient
-                    .from('bookings')
-                    .select('*')
-                    .eq('status', 'cancellation_requested')
-                    .order('created_at', { ascending: false });
+                            try {
+                                const { data, error } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .select('*')
+                                    .eq('status', 'cancellation_requested')
+                                    .order('created_at', { ascending: false });
 
-                console.log('📋 Cancellation requests result:', { data, error });
+                                console.log('📋 Cancellation requests result:', { data, error });
 
-                if (error) {
-                    list.innerHTML = `<p style="color: red">Error loading requests: ${error.message}</p>`;
-                    console.error('❌ Error:', error);
-                    return;
-                }
+                                if (error) {
+                                    list.innerHTML = `<p style="color: red">Error loading requests: ${error.message}</p>`;
+                                    console.error('❌ Error:', error);
+                                    return;
+                                }
 
-                if (!data || data.length === 0) {
-                    list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No pending cancellation requests.</p>';
-                    console.log('📋 No cancellation requests found');
-                    return;
-                }
+                                if (!data || data.length === 0) {
+                                    list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No pending cancellation requests.</p>';
+                                    console.log('📋 No cancellation requests found');
+                                    return;
+                                }
 
-                list.innerHTML = data.map(booking => `
+                                list.innerHTML = data.map(booking => `
                     <div class="reschedule-item" style="border-left: 3px solid #ef4444;">
                         <div class="reschedule-header">
                             <div>
@@ -1894,15 +1893,15 @@ Please contact us if you need further assistance.
                         </p>
                     </div>
                 `).join('');
-            } catch (error) {
-                console.error('Error loading cancellation requests:', error);
-                list.innerHTML = `<p style="color: red">Error: ${error.message}</p>`;
-            }
-        }
+                            } catch (error) {
+                                console.error('Error loading cancellation requests:', error);
+                                list.innerHTML = `<p style="color: red">Error: ${error.message}</p>`;
+                            }
+                        }
 
-        // Approve Refund and mark as processed
-        async function approveRefund(bookingId, email, refundAmount, paymentId) {
-            const confirmMessage = `💰 Approve Refund?
+                        // Approve Refund and mark as processed
+                        async function approveRefund(bookingId, email, refundAmount, paymentId) {
+                            const confirmMessage = `💰 Approve Refund?
 
 Refund Amount: ₹${refundAmount}
 Payment ID: ${paymentId || 'N/A'}
@@ -1914,24 +1913,24 @@ After clicking OK:
 
 Proceed?`;
 
-            if (!confirm(confirmMessage)) {
-                return;
-            }
+                            if (!confirm(confirmMessage)) {
+                                return;
+                            }
 
-            try {
-                // Update booking status to cancelled and refund as processed
-                const { error: updateError } = await window.supabaseAdminClient
-                    .from('bookings')
-                    .update({
-                        status: 'cancelled',
-                        refund_status: 'processed'
-                    })
-                    .eq('id', bookingId);
+                            try {
+                                // Update booking status to cancelled and refund as processed
+                                const { error: updateError } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .update({
+                                        status: 'cancelled',
+                                        refund_status: 'processed'
+                                    })
+                                    .eq('id', bookingId);
 
-                if (updateError) throw updateError;
+                                if (updateError) throw updateError;
 
-                // Send refund confirmation email to user via Brevo
-                const htmlContent = `
+                                // Send refund confirmation email to user via Brevo
+                                const htmlContent = `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                         <h2 style="color: #10b981;">💰 Refund Processed</h2>
                         <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
@@ -1947,7 +1946,7 @@ Proceed?`;
                         <p style="color: #6b7280;">Best regards,<br>QuantMentor</p>
                     </div>
                 `;
-                const textContent = `
+                                const textContent = `
 💰 REFUND PROCESSED
 ━━━━━━━━━━━━━━━━━━━━
 Booking ID: ${bookingId}
@@ -1966,9 +1965,9 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
 ━━━━━━━━━━━━━━━━━━━━
                 `.trim();
 
-                await sendEmailWithBrevo(email, `Refund Processed - Booking ${bookingId}`, htmlContent, textContent);
+                                await sendEmailWithBrevo(email, `Refund Processed - Booking ${bookingId}`, htmlContent, textContent);
 
-                alert(`✅ Refund Approved!
+                                alert(`✅ Refund Approved!
 
 📧 User has been notified.
 
@@ -1978,38 +1977,38 @@ Amount: ₹${refundAmount}
 
 Go to: Razorpay Dashboard → Transactions → Search Payment ID → Issue Refund`);
 
-                await loadCancellationRequests();
-            } catch (error) {
-                console.error('Error approving refund:', error);
-                alert('❌ Error: ' + error.message);
-            }
-        }
+                                await loadCancellationRequests();
+                            } catch (error) {
+                                console.error('Error approving refund:', error);
+                                alert('❌ Error: ' + error.message);
+                            }
+                        }
 
-        // Reject Cancellation Request
-        async function rejectCancellation(bookingId, email) {
-            // ... (keep existing)
-            const reason = prompt('Please provide a reason for rejection:');
-            if (reason === null) return; // User clicked Cancel
+                        // Reject Cancellation Request
+                        async function rejectCancellation(bookingId, email) {
+                            // ... (keep existing)
+                            const reason = prompt('Please provide a reason for rejection:');
+                            if (reason === null) return; // User clicked Cancel
 
-            if (!confirm('✕ Reject this cancellation request?\n\nThe booking will remain active.')) {
-                return;
-            }
+                            if (!confirm('✕ Reject this cancellation request?\n\nThe booking will remain active.')) {
+                                return;
+                            }
 
-            try {
-                // Revert booking to confirmed status
-                const { error: updateError } = await window.supabaseAdminClient
-                    .from('bookings')
-                    .update({
-                        status: 'confirmed',
-                        refund_status: 'rejected',
-                        cancellation_reason: null
-                    })
-                    .eq('id', bookingId);
+                            try {
+                                // Revert booking to confirmed status
+                                const { error: updateError } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .update({
+                                        status: 'confirmed',
+                                        refund_status: 'rejected',
+                                        cancellation_reason: null
+                                    })
+                                    .eq('id', bookingId);
 
-                if (updateError) throw updateError;
+                                if (updateError) throw updateError;
 
-                // Notify user via Brevo
-                const htmlContent = `
+                                // Notify user via Brevo
+                                const htmlContent = `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                         <h2 style="color: #ef4444;">❌ Cancellation Request Rejected</h2>
                         <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
@@ -2023,7 +2022,7 @@ Go to: Razorpay Dashboard → Transactions → Search Payment ID → Issue Refun
                         <p style="color: #6b7280;">Best regards,<br>QuantMentor</p>
                     </div>
                 `;
-                const textContent = `
+                                const textContent = `
 ❌ CANCELLATION REQUEST REJECTED
 ━━━━━━━━━━━━━━━━━━━━
 Hi,
@@ -2042,240 +2041,240 @@ QuantMentor
 ━━━━━━━━━━━━━━━━━━━━
                 `.trim();
 
-                await sendEmailWithBrevo(email, `Cancellation Request Rejected - Booking ${bookingId}`, htmlContent, textContent);
+                                await sendEmailWithBrevo(email, `Cancellation Request Rejected - Booking ${bookingId}`, htmlContent, textContent);
 
-                alert('✅ Cancellation request rejected.\n\nUser has been notified. Booking remains active.');
-                await loadCancellationRequests();
-            } catch (error) {
-                console.error('Error rejecting cancellation:', error);
-                alert('❌ Error: ' + error.message);
-            }
-        }
-
-        // Logout function
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                document.getElementById('adminContainer').style.display = 'none';
-                document.getElementById('loginOverlay').style.display = 'flex';
-                document.getElementById('adminPassword').value = '';
-                // Optional: refresh page to clear any in-memory state
-                window.location.reload();
-            }
-        }
-
-        // Export cancellation functions to window
-        window.loadCancellationRequests = loadCancellationRequests;
-        window.approveRefund = approveRefund;
-        window.rejectCancellation = rejectCancellation;
-
-        // Helper function to format dates
-        function formatDate(dateString) {
-            if (!dateString) return 'N/A';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', {
-                weekday: 'short',
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-        }
-
-        // --- DASHBOARD LOGIC ---
-        let revenueChart = null;
-        let distributionChart = null;
-
-        async function initDashboard() {
-            console.log('📊 Initializing Dashboard...');
-            document.getElementById('adminContainer').style.display = 'block'; // Ensure container is visible
-            await updateDashboardStats();
-            await updateDashboardCharts();
-        }
-
-        async function updateDashboardStats() {
-            try {
-                // 1. Fetch Bookings Stats (Confirmed + Completed)
-                const { data: bookingsData } = await window.supabaseAdminClient
-                    .from('bookings')
-                    .select('service_price, status')
-                    .in('status', ['confirmed', 'completed', 'upcoming']);
-
-                // 2. Fetch Purchases Stats
-                const { data: purchasesData } = await window.supabaseAdminClient
-                    .from('purchases')
-                    .select('amount');
-
-                const totalBookingsRevenue = (bookingsData || []).reduce((sum, b) => sum + (b.service_price || 0), 0);
-                const totalPurchasesRevenue = (purchasesData || []).reduce((sum, p) => sum + (p.amount || 0), 0);
-
-                console.log('💰 Revenue Debug:', {
-                    bookingsCount: bookingsData?.length,
-                    purchasesCount: purchasesData?.length,
-                    totalBookingsRevenue,
-                    totalPurchasesRevenue,
-                    firstPurchase: purchasesData?.[0],
-                    allPurchases: purchasesData
-                });
-
-                // Round to avoid fractional paise display issues
-                const totalRevenue = Math.round(totalBookingsRevenue + totalPurchasesRevenue);
-                document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toLocaleString()}`;
-                document.getElementById('totalBookings').textContent = (bookingsData || []).length;
-                document.getElementById('totalSales').textContent = (purchasesData || []).length;
-            } catch (err) {
-                console.error('❌ Failed to load stats:', err);
-            }
-        }
-
-        async function updateDashboardCharts() {
-            const range = parseInt(document.getElementById('revenueRange').value);
-            const cutoffDate = new Date();
-            cutoffDate.setDate(cutoffDate.getDate() - range);
-
-            try {
-                // Fetch daily data for the range
-                // FIX: Use created_at for ALL revenue types to show "Sales/Bookings made" in the selected timeframe.
-                // This ensures that if a user books today for next week, the revenue shows up TODAY (when the sale occurred).
-                const { data: bookings, error: bookingsError } = await window.supabaseAdminClient
-                    .from('bookings')
-                    .select('service_price, created_at, service_name') // Fetch created_at
-                    .gte('created_at', cutoffDate.toISOString()) // Filter by created_at
-                    .in('status', ['confirmed', 'completed', 'pending', 'upcoming']);
-
-                if (bookingsError) console.error('Error fetching chart bookings:', bookingsError);
-
-                const { data: purchases, error: purchasesError } = await window.supabaseAdminClient
-                    .from('purchases')
-                    .select('amount, created_at, product_name')
-                    .gte('created_at', cutoffDate.toISOString());
-
-                if (purchasesError) console.error('Error fetching chart purchases:', purchasesError);
-
-                console.log('📈 Chart Data Source:', {
-                    bookingsCount: bookings?.length,
-                    purchasesCount: purchases?.length,
-                    cutoff: cutoffDate.toISOString().split('T')[0]
-                });
-
-                // Prepare data for Line Chart (Revenue over time)
-                const dailyData = {};
-                for (let i = 0; i <= range; i++) {
-                    const d = new Date();
-                    d.setDate(d.getDate() - i);
-                    // Use local YYYY-MM-DD to match booking_date format
-                    const dateKey = d.toLocaleDateString('en-CA'); // YYYY-MM-DD format
-                    dailyData[dateKey] = 0;
-                }
-
-                (bookings || []).forEach(b => {
-                    const bDate = new Date(b.created_at); // Use created_at
-                    const dateKey = bDate.toLocaleDateString('en-CA');
-                    // If the date falls within our generated range keys, add it
-                    if (dailyData[dateKey] !== undefined) {
-                        dailyData[dateKey] += (b.service_price || 0);
-                    }
-                });
-
-                (purchases || []).forEach(p => {
-                    // Purchases are timestampz, convert to YYYY-MM-DD local
-                    const pDate = new Date(p.created_at);
-                    const dateKey = pDate.toLocaleDateString('en-CA');
-                    if (dailyData[dateKey] !== undefined) dailyData[dateKey] += (p.amount || 0);
-                });
-
-                const labels = Object.keys(dailyData).sort();
-                const values = labels.map(l => Math.round(dailyData[l])); // Round chart values
-
-                console.log('📊 Chart Visualization Data:', { labels, values, dailyData });
-
-                // Destroy old chart if exists
-                if (revenueChart) revenueChart.destroy();
-
-                const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
-                revenueChart = new Chart(ctxRevenue, {
-                    type: 'line',
-                    data: {
-                        labels: labels.map(l => {
-                            const [y, m, d] = l.split('-');
-                            return `${d}/${m}`; // DD/MM
-                        }),
-                        datasets: [{
-                            label: 'Daily Revenue (₹)',
-                            data: values,
-                            borderColor: '#6366f1',
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-                            x: { grid: { display: false } }
+                                alert('✅ Cancellation request rejected.\n\nUser has been notified. Booking remains active.');
+                                await loadCancellationRequests();
+                            } catch (error) {
+                                console.error('Error rejecting cancellation:', error);
+                                alert('❌ Error: ' + error.message);
+                            }
                         }
-                    }
-                });
 
-                // Distribution Chart (Pie)
-                const distribution = {};
-                (bookings || []).forEach(b => {
-                    const name = b.service_name || 'Mentorship';
-                    distribution[name] = (distribution[name] || 0) + 1;
-                });
-                (purchases || []).forEach(p => {
-                    const name = p.product_name || 'Resources';
-                    distribution[name] = (distribution[name] || 0) + 1;
-                });
-
-                if (distributionChart) distributionChart.destroy();
-                const ctxDist = document.getElementById('distributionChart').getContext('2d');
-                distributionChart = new Chart(ctxDist, {
-                    type: 'doughnut',
-                    data: {
-                        labels: Object.keys(distribution),
-                        datasets: [{
-                            data: Object.values(distribution),
-                            backgroundColor: [
-                                '#6366f1', '#a855f7', '#ec4899', '#f43f5e', '#ef4444', '#f59e0b'
-                            ],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 12 } }
+                        // Logout function
+                        function logout() {
+                            if (confirm('Are you sure you want to logout?')) {
+                                document.getElementById('adminContainer').style.display = 'none';
+                                document.getElementById('loginOverlay').style.display = 'flex';
+                                document.getElementById('adminPassword').value = '';
+                                // Optional: refresh page to clear any in-memory state
+                                window.location.reload();
+                            }
                         }
-                    }
-                });
 
-            } catch (err) {
-                console.error('❌ Failed to update charts:', err);
-            }
-        }
-        window.updateDashboardCharts = updateDashboardCharts;
-        // --- BLOG MANAGEMENT LOGIC ---
-        async function loadBlogs() {
-            const list = document.getElementById('blogsList');
-            if (!window.supabaseAdminClient) {
-                list.innerHTML = '<p style="color:red">Supabase Admin Client missing</p>';
-                return;
-            }
-            try {
-                const { data, error } = await window.supabaseAdminClient
-                    .from('blogs')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+                        // Export cancellation functions to window
+                        window.loadCancellationRequests = loadCancellationRequests;
+                        window.approveRefund = approveRefund;
+                        window.rejectCancellation = rejectCancellation;
 
-                if (error) throw error;
-                if (!data || data.length === 0) {
-                    list.innerHTML = '<p style="text-align:center; color:var(--text-muted)">No articles found.</p>';
-                    return;
-                }
-                list.innerHTML = data.map(b => `
+                        // Helper function to format dates
+                        function formatDate(dateString) {
+                            if (!dateString) return 'N/A';
+                            const date = new Date(dateString);
+                            return date.toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                            });
+                        }
+
+                        // --- DASHBOARD LOGIC ---
+                        let revenueChart = null;
+                        let distributionChart = null;
+
+                        async function initDashboard() {
+                            console.log('📊 Initializing Dashboard...');
+                            document.getElementById('adminContainer').style.display = 'block'; // Ensure container is visible
+                            await updateDashboardStats();
+                            await updateDashboardCharts();
+                        }
+
+                        async function updateDashboardStats() {
+                            try {
+                                // 1. Fetch Bookings Stats (Confirmed + Completed)
+                                const { data: bookingsData } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .select('service_price, status')
+                                    .in('status', ['confirmed', 'completed', 'upcoming']);
+
+                                // 2. Fetch Purchases Stats
+                                const { data: purchasesData } = await window.supabaseAdminClient
+                                    .from('purchases')
+                                    .select('amount');
+
+                                const totalBookingsRevenue = (bookingsData || []).reduce((sum, b) => sum + (b.service_price || 0), 0);
+                                const totalPurchasesRevenue = (purchasesData || []).reduce((sum, p) => sum + (p.amount || 0), 0);
+
+                                console.log('💰 Revenue Debug:', {
+                                    bookingsCount: bookingsData?.length,
+                                    purchasesCount: purchasesData?.length,
+                                    totalBookingsRevenue,
+                                    totalPurchasesRevenue,
+                                    firstPurchase: purchasesData?.[0],
+                                    allPurchases: purchasesData
+                                });
+
+                                // Round to avoid fractional paise display issues
+                                const totalRevenue = Math.round(totalBookingsRevenue + totalPurchasesRevenue);
+                                document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toLocaleString()}`;
+                                document.getElementById('totalBookings').textContent = (bookingsData || []).length;
+                                document.getElementById('totalSales').textContent = (purchasesData || []).length;
+                            } catch (err) {
+                                console.error('❌ Failed to load stats:', err);
+                            }
+                        }
+
+                        async function updateDashboardCharts() {
+                            const range = parseInt(document.getElementById('revenueRange').value);
+                            const cutoffDate = new Date();
+                            cutoffDate.setDate(cutoffDate.getDate() - range);
+
+                            try {
+                                // Fetch daily data for the range
+                                // FIX: Use created_at for ALL revenue types to show "Sales/Bookings made" in the selected timeframe.
+                                // This ensures that if a user books today for next week, the revenue shows up TODAY (when the sale occurred).
+                                const { data: bookings, error: bookingsError } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .select('service_price, created_at, service_name') // Fetch created_at
+                                    .gte('created_at', cutoffDate.toISOString()) // Filter by created_at
+                                    .in('status', ['confirmed', 'completed', 'pending', 'upcoming']);
+
+                                if (bookingsError) console.error('Error fetching chart bookings:', bookingsError);
+
+                                const { data: purchases, error: purchasesError } = await window.supabaseAdminClient
+                                    .from('purchases')
+                                    .select('amount, created_at, product_name')
+                                    .gte('created_at', cutoffDate.toISOString());
+
+                                if (purchasesError) console.error('Error fetching chart purchases:', purchasesError);
+
+                                console.log('📈 Chart Data Source:', {
+                                    bookingsCount: bookings?.length,
+                                    purchasesCount: purchases?.length,
+                                    cutoff: cutoffDate.toISOString().split('T')[0]
+                                });
+
+                                // Prepare data for Line Chart (Revenue over time)
+                                const dailyData = {};
+                                for (let i = 0; i <= range; i++) {
+                                    const d = new Date();
+                                    d.setDate(d.getDate() - i);
+                                    // Use local YYYY-MM-DD to match booking_date format
+                                    const dateKey = d.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+                                    dailyData[dateKey] = 0;
+                                }
+
+                                (bookings || []).forEach(b => {
+                                    const bDate = new Date(b.created_at); // Use created_at
+                                    const dateKey = bDate.toLocaleDateString('en-CA');
+                                    // If the date falls within our generated range keys, add it
+                                    if (dailyData[dateKey] !== undefined) {
+                                        dailyData[dateKey] += (b.service_price || 0);
+                                    }
+                                });
+
+                                (purchases || []).forEach(p => {
+                                    // Purchases are timestampz, convert to YYYY-MM-DD local
+                                    const pDate = new Date(p.created_at);
+                                    const dateKey = pDate.toLocaleDateString('en-CA');
+                                    if (dailyData[dateKey] !== undefined) dailyData[dateKey] += (p.amount || 0);
+                                });
+
+                                const labels = Object.keys(dailyData).sort();
+                                const values = labels.map(l => Math.round(dailyData[l])); // Round chart values
+
+                                console.log('📊 Chart Visualization Data:', { labels, values, dailyData });
+
+                                // Destroy old chart if exists
+                                if (revenueChart) revenueChart.destroy();
+
+                                const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+                                revenueChart = new Chart(ctxRevenue, {
+                                    type: 'line',
+                                    data: {
+                                        labels: labels.map(l => {
+                                            const [y, m, d] = l.split('-');
+                                            return `${d}/${m}`; // DD/MM
+                                        }),
+                                        datasets: [{
+                                            label: 'Daily Revenue (₹)',
+                                            data: values,
+                                            borderColor: '#6366f1',
+                                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                                            fill: true,
+                                            tension: 0.4
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: { legend: { display: false } },
+                                        scales: {
+                                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                                            x: { grid: { display: false } }
+                                        }
+                                    }
+                                });
+
+                                // Distribution Chart (Pie)
+                                const distribution = {};
+                                (bookings || []).forEach(b => {
+                                    const name = b.service_name || 'Mentorship';
+                                    distribution[name] = (distribution[name] || 0) + 1;
+                                });
+                                (purchases || []).forEach(p => {
+                                    const name = p.product_name || 'Resources';
+                                    distribution[name] = (distribution[name] || 0) + 1;
+                                });
+
+                                if (distributionChart) distributionChart.destroy();
+                                const ctxDist = document.getElementById('distributionChart').getContext('2d');
+                                distributionChart = new Chart(ctxDist, {
+                                    type: 'doughnut',
+                                    data: {
+                                        labels: Object.keys(distribution),
+                                        datasets: [{
+                                            data: Object.values(distribution),
+                                            backgroundColor: [
+                                                '#6366f1', '#a855f7', '#ec4899', '#f43f5e', '#ef4444', '#f59e0b'
+                                            ],
+                                            borderWidth: 0
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: {
+                                            legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 12 } }
+                                        }
+                                    }
+                                });
+
+                            } catch (err) {
+                                console.error('❌ Failed to update charts:', err);
+                            }
+                        }
+                        window.updateDashboardCharts = updateDashboardCharts;
+                        // --- BLOG MANAGEMENT LOGIC ---
+                        async function loadBlogs() {
+                            const list = document.getElementById('blogsList');
+                            if (!window.supabaseAdminClient) {
+                                list.innerHTML = '<p style="color:red">Supabase Admin Client missing</p>';
+                                return;
+                            }
+                            try {
+                                const { data, error } = await window.supabaseAdminClient
+                                    .from('blogs')
+                                    .select('*')
+                                    .order('created_at', { ascending: false });
+
+                                if (error) throw error;
+                                if (!data || data.length === 0) {
+                                    list.innerHTML = '<p style="text-align:center; color:var(--text-muted)">No articles found.</p>';
+                                    return;
+                                }
+                                list.innerHTML = data.map(b => `
                     <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
                         <div>
                             <strong style="font-size:1.1em; color:white;">${b.title}</strong>
@@ -2290,107 +2289,107 @@ QuantMentor
                         </div>
                     </div>
                 `).join('');
-            } catch (e) { list.innerHTML = `<p style="color:red">Error: ${e.message}</p>`; }
-        }
+                            } catch (e) { list.innerHTML = `<p style="color:red">Error: ${e.message}</p>`; }
+                        }
 
-        async function saveBlog(e) {
-            e.preventDefault();
-            const id = document.getElementById('blogId').value;
-            const title = document.getElementById('blogTitle').value;
-            // Auto slug
-            let slug = document.getElementById('blogSlug').value;
-            if (!slug) slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now();
+                        async function saveBlog(e) {
+                            e.preventDefault();
+                            const id = document.getElementById('blogId').value;
+                            const title = document.getElementById('blogTitle').value;
+                            // Auto slug
+                            let slug = document.getElementById('blogSlug').value;
+                            if (!slug) slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now();
 
-            const excerpt = document.getElementById('blogExcerpt').value;
-            const content = blogQuill ? blogQuill.root.innerHTML : '';
-            const cover = document.getElementById('blogCover').value;
-            const published = document.getElementById('blogPublished').checked;
+                            const excerpt = document.getElementById('blogExcerpt').value;
+                            const content = blogQuill ? blogQuill.root.innerHTML : '';
+                            const cover = document.getElementById('blogCover').value;
+                            const published = document.getElementById('blogPublished').checked;
 
-            const payload = { title, slug, excerpt, content, cover_image_url: cover, is_published: published };
+                            const payload = { title, slug, excerpt, content, cover_image_url: cover, is_published: published };
 
-            try {
-                let error;
-                if (id) {
-                    const res = await window.supabaseAdminClient.from('blogs').update(payload).eq('id', id);
-                    error = res.error;
-                } else {
-                    const res = await window.supabaseAdminClient.from('blogs').insert([payload]);
-                    error = res.error;
-                }
-                if (error) throw error;
-                alert('Article saved successfully!');
-                cancelBlogEdit();
-                loadBlogs();
-            } catch (e) { alert('Error: ' + e.message); }
-        }
+                            try {
+                                let error;
+                                if (id) {
+                                    const res = await window.supabaseAdminClient.from('blogs').update(payload).eq('id', id);
+                                    error = res.error;
+                                } else {
+                                    const res = await window.supabaseAdminClient.from('blogs').insert([payload]);
+                                    error = res.error;
+                                }
+                                if (error) throw error;
+                                alert('Article saved successfully!');
+                                cancelBlogEdit();
+                                loadBlogs();
+                            } catch (e) { alert('Error: ' + e.message); }
+                        }
 
-        async function editBlog(id) {
-            try {
-                const { data, error } = await window.supabaseAdminClient.from('blogs').select('*').eq('id', id).single();
-                if (error) throw error;
+                        async function editBlog(id) {
+                            try {
+                                const { data, error } = await window.supabaseAdminClient.from('blogs').select('*').eq('id', id).single();
+                                if (error) throw error;
 
-                document.getElementById('blogId').value = data.id;
-                document.getElementById('blogTitle').value = data.title;
-                document.getElementById('blogSlug').value = data.slug;
-                document.getElementById('blogExcerpt').value = data.excerpt || '';
-                document.getElementById('blogCover').value = data.cover_image_url || '';
-                document.getElementById('blogPublished').checked = data.is_published;
-                if (blogQuill) blogQuill.root.innerHTML = data.content || '';
+                                document.getElementById('blogId').value = data.id;
+                                document.getElementById('blogTitle').value = data.title;
+                                document.getElementById('blogSlug').value = data.slug;
+                                document.getElementById('blogExcerpt').value = data.excerpt || '';
+                                document.getElementById('blogCover').value = data.cover_image_url || '';
+                                document.getElementById('blogPublished').checked = data.is_published;
+                                if (blogQuill) blogQuill.root.innerHTML = data.content || '';
 
-                document.getElementById('blogSubmitBtn').textContent = 'Update Article';
-                document.getElementById('blogCancelBtn').style.display = 'inline-block';
-                document.getElementById('blogForm').scrollIntoView({ behavior: 'smooth' });
-            } catch (e) { alert('Error: ' + e.message); }
-        }
+                                document.getElementById('blogSubmitBtn').textContent = 'Update Article';
+                                document.getElementById('blogCancelBtn').style.display = 'inline-block';
+                                document.getElementById('blogForm').scrollIntoView({ behavior: 'smooth' });
+                            } catch (e) { alert('Error: ' + e.message); }
+                        }
 
-        async function deleteBlog(id) {
-            if (!confirm('Are you sure you want to delete this article?')) return;
-            const { error } = await window.supabaseAdminClient.from('blogs').delete().eq('id', id);
-            if (error) alert('Error: ' + error.message);
-            else loadBlogs();
-        }
+                        async function deleteBlog(id) {
+                            if (!confirm('Are you sure you want to delete this article?')) return;
+                            const { error } = await window.supabaseAdminClient.from('blogs').delete().eq('id', id);
+                            if (error) alert('Error: ' + error.message);
+                            else loadBlogs();
+                        }
 
-        function cancelBlogEdit() {
-            document.getElementById('blogForm').reset();
-            document.getElementById('blogId').value = '';
-            if (blogQuill) blogQuill.setText('');
-            document.getElementById('blogSubmitBtn').textContent = 'Save Article';
-            document.getElementById('blogCancelBtn').style.display = 'none';
-        }
+                        function cancelBlogEdit() {
+                            document.getElementById('blogForm').reset();
+                            document.getElementById('blogId').value = '';
+                            if (blogQuill) blogQuill.setText('');
+                            document.getElementById('blogSubmitBtn').textContent = 'Save Article';
+                            document.getElementById('blogCancelBtn').style.display = 'none';
+                        }
 
-        // Export to Window
-        window.loadBlogs = loadBlogs;
-        window.editBlog = editBlog;
-        window.deleteBlog = deleteBlog;
-        window.cancelBlogEdit = cancelBlogEdit;
+                        // Export to Window
+                        window.loadBlogs = loadBlogs;
+                        window.editBlog = editBlog;
+                        window.deleteBlog = deleteBlog;
+                        window.cancelBlogEdit = cancelBlogEdit;
 
-        // Export Session Functions
-        // Session Management Functions - GLOBAL SCOPE
-        async function loadSessions() {
-            const list = document.getElementById('sessionsList');
+                        // Export Session Functions
+                        // Session Management Functions - GLOBAL SCOPE
+                        async function loadSessions() {
+                            const list = document.getElementById('sessionsList');
 
-            if (!window.supabaseAdminClient) {
-                if (list) list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
-                return;
-            }
+                            if (!window.supabaseAdminClient) {
+                                if (list) list.innerHTML = '<p style="color: red">Supabase not initialized</p>';
+                                return;
+                            }
 
-            const { data, error } = await window.supabaseAdminClient
-                .from('sessions')
-                .select('*')
-                .order('created_at', { ascending: false });
+                            const { data, error } = await window.supabaseAdminClient
+                                .from('sessions')
+                                .select('*')
+                                .order('created_at', { ascending: false });
 
-            if (error) {
-                if (list) list.innerHTML = `<p style="color: red">Error loading sessions: ${error.message}</p>`;
-                return;
-            }
+                            if (error) {
+                                if (list) list.innerHTML = `<p style="color: red">Error loading sessions: ${error.message}</p>`;
+                                return;
+                            }
 
-            if (!data || data.length === 0) {
-                if (list) list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No sessions found.</p>';
-                return;
-            }
+                            if (!data || data.length === 0) {
+                                if (list) list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No sessions found.</p>';
+                                return;
+                            }
 
-            if (list) {
-                list.innerHTML = data.map(session => `
+                            if (list) {
+                                list.innerHTML = data.map(session => `
                     <div class="session-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); ${!session.is_active ? 'opacity: 0.6;' : ''}">
                         <div>
                             <strong>${session.name}</strong>
@@ -2407,102 +2406,102 @@ QuantMentor
                         </div>
                     </div>
                 `).join('');
-            }
-        }
+                            }
+                        }
 
-        // Edit Session
-        async function editSession(id) {
-            const { data, error } = await window.supabaseAdminClient
-                .from('sessions')
-                .select('*')
-                .eq('id', id)
-                .single();
+                        // Edit Session
+                        async function editSession(id) {
+                            const { data, error } = await window.supabaseAdminClient
+                                .from('sessions')
+                                .select('*')
+                                .eq('id', id)
+                                .single();
 
-            if (error) {
-                alert('❌ Error loading session: ' + error.message);
-                return;
-            }
+                            if (error) {
+                                alert('❌ Error loading session: ' + error.message);
+                                return;
+                            }
 
-            document.getElementById('sessionId').value = data.id;
-            document.getElementById('sessionName').value = data.name;
-            document.getElementById('sessionDuration').value = data.duration;
-            document.getElementById('sessionPrice').value = data.price;
-            document.getElementById('sessionDesc').value = data.description || '';
-            document.getElementById('sessionFeatures').value = data.features ? data.features.join('\n') : '';
-            document.getElementById('sessionPopular').checked = data.is_popular;
-            document.getElementById('sessionActive').checked = data.is_active;
-            document.getElementById('sessionSubmitBtn').textContent = 'Update Session';
+                            document.getElementById('sessionId').value = data.id;
+                            document.getElementById('sessionName').value = data.name;
+                            document.getElementById('sessionDuration').value = data.duration;
+                            document.getElementById('sessionPrice').value = data.price;
+                            document.getElementById('sessionDesc').value = data.description || '';
+                            document.getElementById('sessionFeatures').value = data.features ? data.features.join('\n') : '';
+                            document.getElementById('sessionPopular').checked = data.is_popular;
+                            document.getElementById('sessionActive').checked = data.is_active;
+                            document.getElementById('sessionSubmitBtn').textContent = 'Update Session';
 
-            // Scroll to form
-            document.getElementById('sessionForm').scrollIntoView({ behavior: 'smooth' });
-        }
+                            // Scroll to form
+                            document.getElementById('sessionForm').scrollIntoView({ behavior: 'smooth' });
+                        }
 
-        // Delete Session
-        async function deleteSession(id) {
-            if (!confirm('⚠️ Are you sure you want to delete this session?')) return;
+                        // Delete Session
+                        async function deleteSession(id) {
+                            if (!confirm('⚠️ Are you sure you want to delete this session?')) return;
 
-            try {
-                const { error } = await window.supabaseAdminClient
-                    .from('sessions')
-                    .delete()
-                    .eq('id', id);
+                            try {
+                                const { error } = await window.supabaseAdminClient
+                                    .from('sessions')
+                                    .delete()
+                                    .eq('id', id);
 
-                if (error) throw error;
+                                if (error) throw error;
 
-                alert('✅ Session deleted successfully!');
-                await loadSessions();
-            } catch (error) {
-                alert('❌ Error deleting session: ' + error.message);
-            }
-        }
+                                alert('✅ Session deleted successfully!');
+                                await loadSessions();
+                            } catch (error) {
+                                alert('❌ Error deleting session: ' + error.message);
+                            }
+                        }
 
-        // Init Blog Components
-        const blogEditorEl = document.getElementById('blogContentEditor');
-        if (blogEditorEl) {
-            try {
-                blogQuill = new Quill('#blogContentEditor', {
-                    theme: 'snow',
-                    placeholder: 'Write your article...',
-                    modules: { toolbar: [['bold', 'italic', 'underline', 'strike'], ['blockquote', 'code-block'], [{ 'header': 1 }, { 'header': 2 }], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link', 'image'], ['clean']] }
-                });
-            } catch (e) { console.error('Blog Quill Init Error', e); }
-        }
+                        // Init Blog Components
+                        const blogEditorEl = document.getElementById('blogContentEditor');
+                        if (blogEditorEl) {
+                            try {
+                                blogQuill = new Quill('#blogContentEditor', {
+                                    theme: 'snow',
+                                    placeholder: 'Write your article...',
+                                    modules: { toolbar: [['bold', 'italic', 'underline', 'strike'], ['blockquote', 'code-block'], [{ 'header': 1 }, { 'header': 2 }], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link', 'image'], ['clean']] }
+                                });
+                            } catch (e) { console.error('Blog Quill Init Error', e); }
+                        }
 
-        const blogF = document.getElementById('blogForm');
-        if (blogF) blogF.addEventListener('submit', saveBlog);
+                        const blogF = document.getElementById('blogForm');
+                        if (blogF) blogF.addEventListener('submit', saveBlog);
 
-        // --- TESTIMONIALS MANAGEMENT ---
-        async function loadPendingTestimonials() {
-            const container = document.getElementById('pendingTestimonialsList');
-            const section = document.getElementById('testimonialsSection');
+                        // --- TESTIMONIALS MANAGEMENT ---
+                        async function loadPendingTestimonials() {
+                            const container = document.getElementById('pendingTestimonialsList');
+                            const section = document.getElementById('testimonialsSection');
 
-            if (!window.supabaseAdminClient) {
-                container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Supabase not connected</p>';
-                section.style.display = 'block';
-                return;
-            }
+                            if (!window.supabaseAdminClient) {
+                                container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Supabase not connected</p>';
+                                section.style.display = 'block';
+                                return;
+                            }
 
-            try {
-                const { data, error } = await window.supabaseAdminClient
-                    .from('testimonials')
-                    .select('*')
-                    .eq('is_published', false)
-                    .order('created_at', { ascending: false });
+                            try {
+                                const { data, error } = await window.supabaseAdminClient
+                                    .from('testimonials')
+                                    .select('*')
+                                    .eq('is_published', false)
+                                    .order('created_at', { ascending: false });
 
-                if (error) throw error;
+                                if (error) throw error;
 
-                section.style.display = 'block';
+                                section.style.display = 'block';
 
-                if (!data || data.length === 0) {
-                    container.innerHTML = '<p style="color: var(--success); text-align: center; padding: 30px;"><i class="fas fa-check-circle"></i> No pending reviews. All caught up!</p>';
-                    return;
-                }
+                                if (!data || data.length === 0) {
+                                    container.innerHTML = '<p style="color: var(--success); text-align: center; padding: 30px;"><i class="fas fa-check-circle"></i> No pending reviews. All caught up!</p>';
+                                    return;
+                                }
 
-                container.innerHTML = '<div style="display: grid; gap: 20px;">';
+                                container.innerHTML = '<div style="display: grid; gap: 20px;">';
 
-                data.forEach(t => {
-                    const date = new Date(t.created_at).toLocaleString();
-                    container.innerHTML += `
+                                data.forEach(t => {
+                                    const date = new Date(t.created_at).toLocaleString();
+                                    container.innerHTML += `
                         <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
                                 <div>
@@ -2523,98 +2522,98 @@ QuantMentor
                             </div>
                         </div>
                     `;
-                });
+                                });
 
-                container.innerHTML += '</div>';
+                                container.innerHTML += '</div>';
 
-            } catch (e) {
-                console.error('Error loading testimonials:', e);
-                container.innerHTML = '<p style="color: var(--danger); text-align: center;">Error loading reviews: ' + e.message + '</p>';
-            }
-        }
+                            } catch (e) {
+                                console.error('Error loading testimonials:', e);
+                                container.innerHTML = '<p style="color: var(--danger); text-align: center;">Error loading reviews: ' + e.message + '</p>';
+                            }
+                        }
 
-        async function approveTestimonial(id) {
-            if (!confirm('Approve this review? It will be visible on the website.')) return;
+                        async function approveTestimonial(id) {
+                            if (!confirm('Approve this review? It will be visible on the website.')) return;
 
-            try {
-                const { error } = await window.supabaseAdminClient
-                    .from('testimonials')
-                    .update({ is_published: true, is_verified: true })
-                    .eq('id', id);
+                            try {
+                                const { error } = await window.supabaseAdminClient
+                                    .from('testimonials')
+                                    .update({ is_published: true, is_verified: true })
+                                    .eq('id', id);
 
-                if (error) throw error;
+                                if (error) throw error;
 
-                alert('Review approved successfully!');
-                loadPendingTestimonials();
-            } catch (e) {
-                alert('Error: ' + e.message);
-            }
-        }
+                                alert('Review approved successfully!');
+                                loadPendingTestimonials();
+                            } catch (e) {
+                                alert('Error: ' + e.message);
+                            }
+                        }
 
-        async function rejectTestimonial(id) {
-            if (!confirm('Reject and delete this review?')) return;
+                        async function rejectTestimonial(id) {
+                            if (!confirm('Reject and delete this review?')) return;
 
-            try {
-                const { error } = await window.supabaseAdminClient
-                    .from('testimonials')
-                    .delete()
-                    .eq('id', id);
+                            try {
+                                const { error } = await window.supabaseAdminClient
+                                    .from('testimonials')
+                                    .delete()
+                                    .eq('id', id);
 
-                if (error) throw error;
+                                if (error) throw error;
 
-                alert('Review rejected and deleted.');
-                loadPendingTestimonials();
-            } catch (e) {
-                alert('Error: ' + e.message);
-            }
-        }
+                                alert('Review rejected and deleted.');
+                                loadPendingTestimonials();
+                            } catch (e) {
+                                alert('Error: ' + e.message);
+                            }
+                        }
 
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+                        function escapeHtml(text) {
+                            if (!text) return '';
+                            const div = document.createElement('div');
+                            div.textContent = text;
+                            return div.innerHTML;
+                        }
 
-        // ================================
-        // Availability Management (Global)
-        // ================================
-        async function loadAvailability() {
-            const tbody = document.getElementById('availabilityTableBody');
-            if (!window.supabaseAdminClient) {
-                console.warn('Supabase client not ready for availability');
-                return;
-            }
+                        // ================================
+                        // Availability Management (Global)
+                        // ================================
+                        async function loadAvailability() {
+                            const tbody = document.getElementById('availabilityTableBody');
+                            if (!window.supabaseAdminClient) {
+                                console.warn('Supabase client not ready for availability');
+                                return;
+                            }
 
-            try {
-                // Get existing patterns
-                let { data: patterns, error } = await window.supabaseAdminClient
-                    .from('availability_patterns')
-                    .select('*')
-                    .order('id', { ascending: true });
+                            try {
+                                // Get existing patterns
+                                let { data: patterns, error } = await window.supabaseAdminClient
+                                    .from('availability_patterns')
+                                    .select('*')
+                                    .order('id', { ascending: true });
 
-                if (error) {
-                    if (error.code === '42P01') {
-                        throw new Error('Table "availability_patterns" does not exist. Please run the SQL script.');
-                    }
-                    throw error;
-                }
+                                if (error) {
+                                    if (error.code === '42P01') {
+                                        throw new Error('Table "availability_patterns" does not exist. Please run the SQL script.');
+                                    }
+                                    throw error;
+                                }
 
-                // Define default text days if DB is empty or partial
-                const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                                // Define default text days if DB is empty or partial
+                                const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-                // Map or Create defaults
-                const displayPatterns = DAYS.map(day => {
-                    const existing = patterns?.find(p => p.day_of_week === day);
-                    return existing || {
-                        day_of_week: day,
-                        is_active: (day !== 'Sunday'),
-                        start_time: '10:00:00',
-                        end_time: '18:00:00'
-                    };
-                });
+                                // Map or Create defaults
+                                const displayPatterns = DAYS.map(day => {
+                                    const existing = patterns?.find(p => p.day_of_week === day);
+                                    return existing || {
+                                        day_of_week: day,
+                                        is_active: (day !== 'Sunday'),
+                                        start_time: '10:00:00',
+                                        end_time: '18:00:00'
+                                    };
+                                });
 
-                tbody.innerHTML = displayPatterns.map(p => `
+                                tbody.innerHTML = displayPatterns.map(p => `
                     <tr data-day="${p.day_of_week}">
                         <td style="font-weight: 500;">${p.day_of_week}</td>
                         <td style="text-align: center;">
@@ -2629,166 +2628,166 @@ QuantMentor
                     </tr>
                 `).join('');
 
-            } catch (err) {
-                console.error('Error loading availability:', err);
-                tbody.innerHTML = `<tr><td colspan="4" style="color:var(--danger); text-align:center;">Error: ${err.message}</td></tr>`;
-            }
-        }
+                            } catch (err) {
+                                console.error('Error loading availability:', err);
+                                tbody.innerHTML = `<tr><td colspan="4" style="color:var(--danger); text-align:center;">Error: ${err.message}</td></tr>`;
+                            }
+                        }
 
-        async function saveAvailability() {
-            if (!window.supabaseAdminClient) {
-                alert('Supabase not initialized');
-                return;
-            }
+                        async function saveAvailability() {
+                            if (!window.supabaseAdminClient) {
+                                alert('Supabase not initialized');
+                                return;
+                            }
 
-            const btn = document.querySelector('button[onclick="saveAvailability()"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-            btn.disabled = true;
+                            const btn = document.querySelector('button[onclick="saveAvailability()"]');
+                            const originalText = btn.innerHTML;
+                            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                            btn.disabled = true;
 
-            const rows = document.querySelectorAll('#availabilityTableBody tr');
-            const updates = [];
+                            const rows = document.querySelectorAll('#availabilityTableBody tr');
+                            const updates = [];
 
-            rows.forEach(row => {
-                const day = row.dataset.day;
-                if (!day) return;
+                            rows.forEach(row => {
+                                const day = row.dataset.day;
+                                if (!day) return;
 
-                const isActive = row.querySelector('.avail-active').checked;
-                const start = row.querySelector('.avail-start').value;
-                const end = row.querySelector('.avail-end').value;
+                                const isActive = row.querySelector('.avail-active').checked;
+                                const start = row.querySelector('.avail-start').value;
+                                const end = row.querySelector('.avail-end').value;
 
-                updates.push({
-                    day_of_week: day,
-                    is_active: isActive,
-                    start_time: start,
-                    end_time: end
-                });
-            });
+                                updates.push({
+                                    day_of_week: day,
+                                    is_active: isActive,
+                                    start_time: start,
+                                    end_time: end
+                                });
+                            });
 
-            try {
-                const { error } = await window.supabaseAdminClient
-                    .from('availability_patterns')
-                    .upsert(updates, { onConflict: 'day_of_week' });
+                            try {
+                                const { error } = await window.supabaseAdminClient
+                                    .from('availability_patterns')
+                                    .upsert(updates, { onConflict: 'day_of_week' });
 
-                if (error) throw error;
-                alert('✅ Availability schedule saved!');
-            } catch (err) {
-                console.error('Error saving schedule:', err);
-                alert('❌ Failed to save: ' + err.message);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
+                                if (error) throw error;
+                                alert('✅ Availability schedule saved!');
+                            } catch (err) {
+                                console.error('Error saving schedule:', err);
+                                alert('❌ Failed to save: ' + err.message);
+                            } finally {
+                                btn.innerHTML = originalText;
+                                btn.disabled = false;
+                            }
+                        }
 
-        // Export functions globally
-        window.loadAvailability = loadAvailability;
-        window.saveAvailability = saveAvailability;
-        window.loadPendingTestimonials = loadPendingTestimonials;
-        window.approveTestimonial = approveTestimonial;
-        window.rejectTestimonial = rejectTestimonial;
+                        // Export functions globally
+                        window.loadAvailability = loadAvailability;
+                        window.saveAvailability = saveAvailability;
+                        window.loadPendingTestimonials = loadPendingTestimonials;
+                        window.approveTestimonial = approveTestimonial;
+                        window.rejectTestimonial = rejectTestimonial;
 
-        // ================================
-        // All Bookings Management
-        // ================================
-        let currentBookingFilter = 'all';
+                        // ================================
+                        // All Bookings Management
+                        // ================================
+                        let currentBookingFilter = 'all';
 
-        async function loadBookings(filter = 'all') {
-            currentBookingFilter = filter;
+                        async function loadBookings(filter = 'all') {
+                            currentBookingFilter = filter;
 
-            // Update UI buttons
-            document.querySelectorAll('.filter-tabs button').forEach(btn => {
-                btn.style.background = 'transparent';
-                btn.classList.remove('active');
-            });
-            const activeBtn = document.getElementById(`btn-filter-${filter}`);
-            if (activeBtn) {
-                activeBtn.style.background = 'var(--surface)';
-                activeBtn.classList.add('active');
-            }
+                            // Update UI buttons
+                            document.querySelectorAll('.filter-tabs button').forEach(btn => {
+                                btn.style.background = 'transparent';
+                                btn.classList.remove('active');
+                            });
+                            const activeBtn = document.getElementById(`btn-filter-${filter}`);
+                            if (activeBtn) {
+                                activeBtn.style.background = 'var(--surface)';
+                                activeBtn.classList.add('active');
+                            }
 
-            const tbody = document.getElementById('allBookingsList');
-            if (!tbody) return;
+                            const tbody = document.getElementById('allBookingsList');
+                            if (!tbody) return;
 
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Loading...</td></tr>';
+                            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Loading...</td></tr>';
 
-            if (!window.supabaseAdminClient) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Supabase Admin Client not ready</td></tr>';
-                return;
-            }
+                            if (!window.supabaseAdminClient) {
+                                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Supabase Admin Client not ready</td></tr>';
+                                return;
+                            }
 
-            try {
-                let query = window.supabaseAdminClient
-                    .from('bookings')
-                    .select('*')
-                    .order('booking_date', { ascending: false })
-                    .order('booking_time', { ascending: false });
+                            try {
+                                let query = window.supabaseAdminClient
+                                    .from('bookings')
+                                    .select('*')
+                                    .order('booking_date', { ascending: false })
+                                    .order('booking_time', { ascending: false });
 
-                // Execute Query
-                const { data, error } = await query;
+                                // Execute Query
+                                const { data, error } = await query;
 
-                console.log('📚 Raw bookings data:', { data, error });
+                                console.log('📚 Raw bookings data:', { data, error });
 
-                if (error) {
-                    console.error('Supabase Error:', error);
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Supabase Error: ${error.message}</td></tr>`;
-                    return;
-                }
+                                if (error) {
+                                    console.error('Supabase Error:', error);
+                                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Supabase Error: ${error.message}</td></tr>`;
+                                    return;
+                                }
 
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No bookings found.</td></tr>';
-                    return;
-                }
+                                if (!data || data.length === 0) {
+                                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No bookings found.</td></tr>';
+                                    return;
+                                }
 
-                // Filter Logic using JavaScript
-                let filteredData = data;
-                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+                                // Filter Logic using JavaScript
+                                let filteredData = data;
+                                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-                if (filter === 'upcoming') {
-                    // Filter: status != completed AND != cancelled
-                    // Show ALL active bookings regardless of date (so past confirmed sessions appear)
-                    filteredData = data.filter(b => {
-                        return (b.status !== 'completed' && b.status !== 'cancelled');
-                    });
-                } else if (filter === 'completed') {
-                    filteredData = data.filter(b => b.status === 'completed');
-                } else if (filter === 'cancelled') {
-                    filteredData = data.filter(b => b.status === 'cancelled');
-                }
+                                if (filter === 'upcoming') {
+                                    // Filter: status != completed AND != cancelled
+                                    // Show ALL active bookings regardless of date (so past confirmed sessions appear)
+                                    filteredData = data.filter(b => {
+                                        return (b.status !== 'completed' && b.status !== 'cancelled');
+                                    });
+                                } else if (filter === 'completed') {
+                                    filteredData = data.filter(b => b.status === 'completed');
+                                } else if (filter === 'cancelled') {
+                                    filteredData = data.filter(b => b.status === 'cancelled');
+                                }
 
-                console.log(`📚 Filtered data for '${filter}':`, filteredData);
+                                console.log(`📚 Filtered data for '${filter}':`, filteredData);
 
-                if (filteredData.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No <strong>${filter}</strong> bookings found.<br><small>(Raw: ${data.length}, Filtered: 0)</small></td></tr>`;
-                    return;
-                }
+                                if (filteredData.length === 0) {
+                                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No <strong>${filter}</strong> bookings found.<br><small>(Raw: ${data.length}, Filtered: 0)</small></td></tr>`;
+                                    return;
+                                }
 
-                tbody.innerHTML = filteredData.map(b => {
-                    // Format Date
-                    const dateObj = new Date(b.booking_date);
-                    const formattedDate = dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+                                tbody.innerHTML = filteredData.map(b => {
+                                    // Format Date
+                                    const dateObj = new Date(b.booking_date);
+                                    const formattedDate = dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 
-                    // Format Booking Time (e.g. 14:00:00 -> 02:00 PM)
-                    let formattedTime = b.booking_time;
-                    if (b.booking_time && b.booking_time.includes(':')) {
-                        const [h, m] = b.booking_time.split(':');
-                        const d = new Date();
-                        d.setHours(h, m);
-                        formattedTime = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                    }
+                                    // Format Booking Time (e.g. 14:00:00 -> 02:00 PM)
+                                    let formattedTime = b.booking_time;
+                                    if (b.booking_time && b.booking_time.includes(':')) {
+                                        const [h, m] = b.booking_time.split(':');
+                                        const d = new Date();
+                                        d.setHours(h, m);
+                                        formattedTime = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                                    }
 
-                    // Status Color
-                    let statusColor = '#94a3b8'; // gray
-                    if (b.status === 'confirmed') statusColor = '#22c55e'; // green
-                    if (b.status === 'pending') statusColor = '#f59e0b'; // orange
-                    if (b.status === 'cancelled') statusColor = '#ef4444'; // red
-                    if (b.status === 'completed') statusColor = '#3b82f6'; // blue
-                    if (b.status === 'upcoming' || b.status === 'Upcoming') statusColor = '#0ea5e9'; // light blue
+                                    // Status Color
+                                    let statusColor = '#94a3b8'; // gray
+                                    if (b.status === 'confirmed') statusColor = '#22c55e'; // green
+                                    if (b.status === 'pending') statusColor = '#f59e0b'; // orange
+                                    if (b.status === 'cancelled') statusColor = '#ef4444'; // red
+                                    if (b.status === 'completed') statusColor = '#3b82f6'; // blue
+                                    if (b.status === 'upcoming' || b.status === 'Upcoming') statusColor = '#0ea5e9'; // light blue
 
-                    const isActionable = b.status === 'confirmed' || b.status === 'pending' || b.status === 'upcoming' || b.status === 'Upcoming';
-                    const meetLink = b.meet_link || '#';
+                                    const isActionable = b.status === 'confirmed' || b.status === 'pending' || b.status === 'upcoming' || b.status === 'Upcoming';
+                                    const meetLink = b.meet_link || '#';
 
-                    return `
+                                    return `
                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                             <td style="padding: 12px;">
                                 <div style="font-weight: 500;">${formattedDate}</div>
@@ -2811,75 +2810,75 @@ QuantMentor
                                 <div style="display: flex; gap: 8px; justify-content: flex-end;">
                                     ${meetLink !== '#' ? `<a href="${meetLink}" target="_blank" title="Join Meeting" style="color:white; padding:6px; background:#6366f1; border-radius:4px;"><i class="fas fa-video"></i></a>` : ''}
                                     ${isActionable ?
-                            `<button onclick="updateBookingStatus('${b.id}', 'completed')" title="Mark Completed" style="padding:6px 10px; background:rgba(34, 197, 94, 0.2); color:#22c55e; border:none; border-radius:4px; cursor:pointer;"><i class="fas fa-check"></i></button>
+                                            `<button onclick="updateBookingStatus('${b.id}', 'completed')" title="Mark Completed" style="padding:6px 10px; background:rgba(34, 197, 94, 0.2); color:#22c55e; border:none; border-radius:4px; cursor:pointer;"><i class="fas fa-check"></i></button>
                                          <button onclick="updateBookingStatus('${b.id}', 'cancelled')" title="Cancel" style="padding:6px 10px; background:rgba(239, 68, 68, 0.2); color:#ef4444; border:none; border-radius:4px; cursor:pointer;"><i class="fas fa-times"></i></button>`
-                            :
-                            `<button disabled style="opacity:0.3; background:transparent; border:none; color:white;"><i class="fas fa-ban"></i></button>`
-                        }
+                                            :
+                                            `<button disabled style="opacity:0.3; background:transparent; border:none; color:white;"><i class="fas fa-ban"></i></button>`
+                                        }
                                 </div>
                             </td>
                         </tr>
                     `;
-                }).join('');
+                                }).join('');
 
-            } catch (err) {
-                console.error('Error loading bookings:', err);
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Error: ${err.message}</td></tr>`;
-            }
-        }
+                            } catch (err) {
+                                console.error('Error loading bookings:', err);
+                                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Error: ${err.message}</td></tr>`;
+                            }
+                        }
 
-        async function updateBookingStatus(id, newStatus) {
-            if (!confirm(`Are you sure you want to mark this booking as ${newStatus}?`)) return;
+                        async function updateBookingStatus(id, newStatus) {
+                            if (!confirm(`Are you sure you want to mark this booking as ${newStatus}?`)) return;
 
-            try {
-                // Fetch booking details first if completing, to get email/name
-                let bookingDetails = null;
-                if (newStatus === 'completed') {
-                    const { data, error } = await window.supabaseAdminClient
-                        .from('bookings')
-                        .select('email, name, service_name') // Correct column names verified from SQL
-                        .eq('id', id)
-                        .single();
-                    if (!error) bookingDetails = data;
-                }
+                            try {
+                                // Fetch booking details first if completing, to get email/name
+                                let bookingDetails = null;
+                                if (newStatus === 'completed') {
+                                    const { data, error } = await window.supabaseAdminClient
+                                        .from('bookings')
+                                        .select('email, name, service_name') // Correct column names verified from SQL
+                                        .eq('id', id)
+                                        .single();
+                                    if (!error) bookingDetails = data;
+                                }
 
-                const { error } = await window.supabaseAdminClient
-                    .from('bookings')
-                    .update({ status: newStatus })
-                    .eq('id', id);
+                                const { error } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .update({ status: newStatus })
+                                    .eq('id', id);
 
-                if (error) throw error;
+                                if (error) throw error;
 
-                // Send Email if Completed
-                if (newStatus === 'completed' && bookingDetails) {
-                    if (window.sendTestimonialRequestEmail) {
-                        const sent = await window.sendTestimonialRequestEmail(bookingDetails);
-                        if (sent) alert(`✅ Status: Completed.\n📧 Testimonial email sent to ${bookingDetails.user_email}`);
-                        else alert('✅ Status: Completed.\n⚠️ Email failed to send (check console).');
-                    } else {
-                        console.warn('sendTestimonialRequestEmail function missing');
-                        alert('✅ Status Updated (Email function missing)');
-                    }
-                } else {
-                    alert(`✅ Booking marked as ${newStatus}!`);
-                }
+                                // Send Email if Completed
+                                if (newStatus === 'completed' && bookingDetails) {
+                                    if (window.sendTestimonialRequestEmail) {
+                                        const sent = await window.sendTestimonialRequestEmail(bookingDetails);
+                                        if (sent) alert(`✅ Status: Completed.\n📧 Testimonial email sent to ${bookingDetails.user_email}`);
+                                        else alert('✅ Status: Completed.\n⚠️ Email failed to send (check console).');
+                                    } else {
+                                        console.warn('sendTestimonialRequestEmail function missing');
+                                        alert('✅ Status Updated (Email function missing)');
+                                    }
+                                } else {
+                                    alert(`✅ Booking marked as ${newStatus}!`);
+                                }
 
-                loadBookings(currentBookingFilter);
-                // Also update stats
-                updateDashboardStats();
-            } catch (err) {
-                alert('Error updating status: ' + err.message);
-            }
-        }
+                                loadBookings(currentBookingFilter);
+                                // Also update stats
+                                updateDashboardStats();
+                            } catch (err) {
+                                alert('Error updating status: ' + err.message);
+                            }
+                        }
 
-        // Export
-        window.loadBookings = loadBookings;
-        window.updateBookingStatus = updateBookingStatus;
-
-
+                        // Export
+                        window.loadBookings = loadBookings;
+                        window.updateBookingStatus = updateBookingStatus;
 
 
-    </script>
+
+
+                    </script>
 </body>
 
 </html>
