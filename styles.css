@@ -1610,6 +1610,182 @@ h3 {
 }
 
 /* --------------------------------
+/* Admin panel quick styling */
+.admin {
+    padding: 60px 0;
+    background: var(--bg-primary);
+}
+
+.admin-grid {
+    align-items: start;
+}
+
+.admin-card h3 {
+    margin-bottom: 8px;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 8px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.admin-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Fix for Long Product Descriptions in Modal */
+#modalDescription,
+.modal-description-text {
+    white-space: normal !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* Aggressively reset child elements to handle copy-pasted rich text */
+.modal-description-text * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    background-color: transparent !important;
+}
+
+/* Force text colors to match theme, overriding inline styles */
+.modal-description-text p,
+.modal-description-text span,
+.modal-description-text div,
+.modal-description-text li,
+.modal-description-text td {
+    color: var(--text-secondary) !important;
+}
+
+.modal-description-text strong,
+.modal-description-text b,
+.modal-description-text h1,
+.modal-description-text h2,
+.modal-description-text h3,
+.modal-description-text h4 {
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+}
+
+.modal-description-text a {
+    color: var(--accent-primary) !important;
+    text-decoration: underline;
+}
+
+.modal-description-text img {
+    max-width: 100% !important;
+    height: auto !important;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.modal-description-text p {
+    margin-bottom: 0.8em;
+}
+
+.modal-description-text ul,
+.modal-description-text ol {
+    margin-left: 20px;
+    margin-bottom: 0.8em;
+}
+
+.modal-body {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
+}
+
+/* --------------------------------
+   Coupon Code Styles
+   -------------------------------- */
+.coupon-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 16px;
+}
+
+.coupon-row input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: all var(--transition-fast);
+}
+
+.coupon-row input:focus {
+    border-color: var(--accent-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.1);
+}
+
+.coupon-row .btn-secondary {
+    padding: 12px 20px;
+    white-space: nowrap;
+}
+
+#modalCouponFeedback,
+#coupon-feedback {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    min-height: 1.2em;
+}
+
+/* --------------------------------
+   Theme Toggle Button
+   -------------------------------- */
+.theme-toggle {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    margin-left: 16px;
+    font-size: 1.2rem;
+    z-index: 1000;
+}
+
+.theme-toggle:hover {
+    background: var(--bg-secondary);
+    color: var(--accent-primary);
+    transform: rotate(15deg);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Sun/Moon icons */
+.theme-toggle .fa-sun {
+    display: none;
+}
+
+.theme-toggle .fa-moon {
+    display: block;
+}
+
+body.light-mode .theme-toggle .fa-sun {
+    display: block;
+}
+
+body.light-mode .theme-toggle .fa-moon {
+    display: none;
+}
+
+/* --------------------------------
    Responsive Design
    -------------------------------- */
 @media (max-width: 1024px) {
@@ -1662,27 +1838,32 @@ h3 {
 
 /* Responsive adjustment: Bulletproof Mobile Menu */
 @media (max-width: 768px) {
+    :root {
+        --section-padding: 60px 0;
+    }
+
     .nav-actions {
         display: flex;
         align-items: center;
         gap: 16px;
         position: relative;
-        z-index: 2000; /* Stays above menu overlay */
+        z-index: 2000;
     }
 
     .theme-toggle {
         margin-left: 0;
         margin-right: 0;
-        background: var(--bg-primary); 
+        background: var(--bg-primary);
     }
 
     .mobile-menu-btn {
         z-index: 2000;
         color: var(--text-primary);
+        display: block;
     }
 
     .nav-links {
-        display: flex !important; /* Fixed flex layout */
+        display: flex !important;
         position: fixed;
         inset: 0;
         background: var(--bg-primary);
@@ -1741,7 +1922,24 @@ h3 {
         height: 45px;
     }
 
-    /* SPECIFIC LIGHT MODE OVERRIDES FOR MOBILE */
+    .hero-stats {
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .hero-cta {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .services-grid,
+    .products-grid,
+    .testimonials-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Light Mode Overrides */
     body.light-mode .nav-links {
         background: rgba(255, 255, 255, 0.98) !important;
     }
@@ -1754,5 +1952,19 @@ h3 {
     body.light-mode .theme-toggle {
         color: #0f172a !important;
         border-color: rgba(0,0,0,0.1);
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-links {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-form-wrapper {
+        padding: 24px;
+    }
+
+    .profile-card {
+        padding: 24px;
     }
 }
