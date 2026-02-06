@@ -289,6 +289,61 @@
                 } else {
                     priceEl.textContent = priceText;
                     buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${priceText}`;
+
+                    // Add Coupon UI if price > 0
+                    const couponContainer = document.createElement('div');
+                    couponContainer.id = 'coupon-section';
+                    couponContainer.style.marginBottom = '24px';
+                    couponContainer.innerHTML = `
+                        <div style="display: flex; gap: 10px; max-width: 400px;">
+                            <input type="text" id="coupon-input" placeholder="Have a coupon code?" 
+                                style="flex: 1; padding: 12px; border: 1px solid var(--border-light); border-radius: var(--radius-md); background: var(--bg-secondary); color: var(--text-primary);">
+                            <button id="apply-coupon-btn" class="btn btn-secondary" style="padding: 12px 20px;">
+                                Apply
+                            </button>
+                        </div>
+                    `;
+                    // Insert after price
+                    priceEl.parentNode.insertBefore(couponContainer, priceEl.nextSibling);
+
+                    // Coupon Logic
+                    document.getElementById('apply-coupon-btn').addEventListener('click', async function () {
+                        const codeInput = document.getElementById('coupon-input');
+                        const code = codeInput.value.trim();
+                        if (!code) return;
+
+                        if (product.coupon_code && code.toLowerCase() === product.coupon_code.toLowerCase()) {
+                            const discount = product.coupon_percent || 0;
+                            const originalPrice = parseFloat(buyBtn.dataset.price);
+                            // Calculate new price
+                            const discountedPrice = Math.max(0, Math.round(originalPrice * (100 - discount) / 100));
+
+                            // Update Display
+                            let priceDisplay = '';
+                            const currentCurrency = buyBtn.dataset.currency || 'INR';
+
+                            if (currentCurrency === 'INR') {
+                                priceDisplay = `₹${discountedPrice}`;
+                                priceEl.innerHTML = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">₹${originalPrice}</span> ${priceDisplay}`;
+                            } else {
+                                priceDisplay = `${discountedPrice} ${currentCurrency}`;
+                                priceEl.innerHTML = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">${originalPrice} ${currentCurrency}</span> ${priceDisplay}`;
+                            }
+
+                            // Update Button
+                            buyBtn.dataset.price = discountedPrice;
+                            buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${priceDisplay}`;
+
+                            alert(`Coupon '${code}' applied! ${discount}% OFF`);
+
+                            // Disable input
+                            codeInput.disabled = true;
+                            this.disabled = true;
+                            this.textContent = 'Applied';
+                        } else {
+                            alert('Invalid coupon code for this product.');
+                        }
+                    });
                 }
 
                 // Set Page Title
