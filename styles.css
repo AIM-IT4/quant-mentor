@@ -282,7 +282,7 @@ h3 {
 .logo {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
     font-weight: 700;
     font-size: 1.5rem;
     color: var(--text-primary);
@@ -293,8 +293,8 @@ h3 {
 }
 
 .logo-img {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     border-radius: 12px;
     object-fit: contain;
 }
