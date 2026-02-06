@@ -190,10 +190,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     window.addEventListener('scroll', function () {
         if (window.scrollY > 50) {
-            navbar.style.background = 'rgba(10, 10, 15, 0.95)';
-            navbar.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.3)';
+            navbar.style.background = 'var(--bg-card)';
+            navbar.style.backdropFilter = 'blur(10px)';
+            navbar.style.borderBottom = '1px solid var(--border-light)';
+            navbar.style.boxShadow = 'var(--shadow-md)';
         } else {
-            navbar.style.background = 'rgba(10, 10, 15, 0.8)';
+            navbar.style.background = 'transparent';
+            navbar.style.backdropFilter = 'none';
+            navbar.style.borderBottom = 'none';
             navbar.style.boxShadow = 'none';
         }
     });
@@ -367,40 +371,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
-
-    // --------------------------------
-    // Custom Main Form Validation
-    // --------------------------------
-    const mainUserModal = document.getElementById('user-details-modal');
-    if (mainUserModal) {
-        const mainUserForm = document.getElementById('main-user-details-form');
-        if (mainUserForm) {
-            mainUserForm.onsubmit = function (e) {
-                e.preventDefault();
-
-                const udName = document.getElementById('main-ud-name').value.trim();
-                const udEmail = document.getElementById('main-ud-email').value.trim();
-                // Phone is optional now
-                const udPhone = document.getElementById('main-ud-phone').value.trim() || '';
-
-                if (udName && udEmail) {
-                    mainUserModal.style.display = 'none';
-                    document.getElementById('productModal').classList.remove('active');
-                    document.body.style.overflow = '';
-
-                    // Retrieve payment details from last click context (stored via previous logic or closure?)
-                    // The previous implementation defined this inline inside the click handler.
-                    // IMPORTANT: We need to ensure we have access to the variables.
-                    // Actually, the previous step REPLACED the click handler, defining this submit logic INSIDE it.
-                    // This block here is redundant or misplaced if I'm not careful.
-                    // Ah, I am replacing lines 256-316 (original read), which is the coupon handler and service booking.
-                    // The MAIN FORM VALIDATION was inside the 'modalPayBtn' click handler in previous step.
-                    // I should NOT redefine it here unless I want to globalize it (which is hard without context variables).
-                    // I will stick to improving the COUPON HANDLER here.
-                }
-            };
-        }
-    }
 
     // --------------------------------
     // Contact Form Handling
