@@ -1605,12 +1605,16 @@ Brief Q&A"></textarea>
 
                 // Notify user via Brevo
                 const meetLink = booking.meet_link || 'https://meet.google.com/hfp-npyq-qho';
+                // Use booking name if available
+                const customerName = booking.name || 'Customer';
+
                 const htmlContent = `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                         <h2 style="color: #10b981;">✅ Reschedule Request Approved</h2>
                         <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
-                        <p><strong>Booking ID:</strong> ${bookingId}</p>
+                        <p>Hi <strong>${customerName}</strong>,</p>
                         <p>Your reschedule request has been approved!</p>
+                        <p><strong>Booking ID:</strong> ${bookingId}</p>
                         <h3 style="color: #2563eb;">New Schedule:</h3>
                         <p><strong>📅 Date:</strong> ${booking.requested_date}</p>
                         <p><strong>⏰ Time:</strong> ${booking.requested_time}</p>
@@ -1623,7 +1627,7 @@ Brief Q&A"></textarea>
                 const textContent = `
 ✅ RESCHEDULE REQUEST APPROVED
 ━━━━━━━━━━━━━━━━━━━━
-Booking ID: ${bookingId}
+Hi ${customerName},
 
 Your reschedule request has been approved!
 
@@ -1634,6 +1638,9 @@ New Schedule:
 Meet Link: ${meetLink}
 
 Your session is now confirmed for the new date/time.
+
+Best regards,
+QuantMentor
 ━━━━━━━━━━━━━━━━━━━━
                 `.trim();
 
@@ -2006,8 +2013,9 @@ Go to: Razorpay Dashboard → Transactions → Search Payment ID → Issue Refun
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                         <h2 style="color: #ef4444;">❌ Cancellation Request Rejected</h2>
                         <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
-                        <p><strong>Booking ID:</strong> ${bookingId}</p>
+                        <p>Hi,</p>
                         <p>Your cancellation request could not be processed.</p>
+                        <p><strong>Booking ID:</strong> ${bookingId}</p>
                         ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
                         <p>Your booking remains active. Please attend the session as scheduled.</p>
                         <p>If you have any questions, please contact us at <a href="mailto:jha.8@alumni.iitj.ac.in">jha.8@alumni.iitj.ac.in</a></p>
@@ -2018,8 +2026,9 @@ Go to: Razorpay Dashboard → Transactions → Search Payment ID → Issue Refun
                 const textContent = `
 ❌ CANCELLATION REQUEST REJECTED
 ━━━━━━━━━━━━━━━━━━━━
-Booking ID: ${bookingId}
+Hi,
 
+Booking ID: ${bookingId}
 Your cancellation request could not be processed.
 
 ${reason ? `Reason: ${reason}` : ''}
@@ -2027,6 +2036,9 @@ ${reason ? `Reason: ${reason}` : ''}
 Your booking remains active. Please attend the session as scheduled.
 
 If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
+
+Best regards,
+QuantMentor
 ━━━━━━━━━━━━━━━━━━━━
                 `.trim();
 

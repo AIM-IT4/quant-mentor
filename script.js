@@ -1298,10 +1298,12 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
         console.log('🆓 Free product detected');
         const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
         if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
-            // Prompt for email to send free download
+            // Prompt for Name and Email to send free download
+            const customerName = prompt('Enter your Name:') || 'Customer';
             const customerEmail = prompt('Enter your email to receive the free download:');
+
             if (customerEmail && customerEmail.includes('@')) {
-                sendProductEmail(customerEmail, productName, 'FREE', downloadLink);
+                sendProductEmail(customerEmail, productName, 'FREE', downloadLink, customerName);
                 alert('🎉 Free Download!\n\nCheck your email for the download link.\n\n📩 IMPORTANT: Please check your Spam/Junk folder if you don\'t see the email in your Inbox.\n\nClick OK to also open it now.');
                 window.open(downloadLink, '_blank');
             } else {
@@ -1360,7 +1362,8 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
 
             const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
 
-            // Get customer email from Razorpay response or prompt
+            // Get customer Name and Email
+            const customerName = prompt('Enter your Name for the receipt:') || 'Customer';
             const customerEmail = prompt('Enter your email to receive the download link:');
 
             if (customerEmail && customerEmail.includes('@')) {
@@ -1369,6 +1372,7 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
                     try {
                         console.log('📊 Logging purchase to database:', {
                             customerEmail,
+                            customerName,
                             productName,
                             loggedAmount,
                             currencyPaid: currency,
@@ -1392,7 +1396,7 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
 
                 if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
                     // Send email to customer via Brevo
-                    sendProductEmail(customerEmail, productName, paymentId, downloadLink);
+                    sendProductEmail(customerEmail, productName, paymentId, downloadLink, customerName);
 
                     // Send Admin Notification
                     const adminSubject = `💰 New Product Sale: ${productName}`;
@@ -1470,7 +1474,7 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
  * Send product purchase email to customer via Brevo (replaces EmailJS)
  * Free tier: 300 emails/day = 9,000/month
  */
-async function sendProductEmail(customerEmail, productName, paymentId, downloadLink) {
+async function sendProductEmail(customerEmail, productName, paymentId, downloadLink, customerName = 'Customer') {
     const FORMSPREE_ID = 'mjgozran';
 
     console.log('📧 sendProductEmail called with:', customerEmail);
@@ -1484,6 +1488,8 @@ async function sendProductEmail(customerEmail, productName, paymentId, downloadL
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <h2 style="color: #2563eb;">🎉 Thank you for your purchase!</h2>
                 <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                <p>Hi <strong>${customerName}</strong>,</p>
+                <p>Thank you for downloading our resources. Here are your details:</p>
                 <p><strong>📦 Product:</strong> ${productName}</p>
                 <p><strong>🆔 Payment ID:</strong> ${paymentId}</p>
                 <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
@@ -1495,6 +1501,8 @@ async function sendProductEmail(customerEmail, productName, paymentId, downloadL
         `;
 
         const textContent = `🎉 Thank you for your purchase!
+
+Hi ${customerName},
 
 Product: ${productName}
 Payment ID: ${paymentId}
@@ -2130,6 +2138,8 @@ New Booking Details:
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <h2 style="color: #2563eb;">🎉 Your session has been booked!</h2>
                 <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                <p>Hi <strong>${booking.name}</strong>,</p>
+                <p>Your session is confirmed. Here are the details:</p>
                 <p><strong>📋 Session:</strong> ${booking.sessionType} (${booking.duration} mins)</p>
                 <p><strong>📅 Date:</strong> ${booking.date}</p>
                 <p><strong>⏰ Time:</strong> ${booking.time}</p>
@@ -2146,6 +2156,8 @@ New Booking Details:
         `;
 
         const textContent = `🎉 Your session has been booked!
+
+Hi ${booking.name},
 
 Session: ${booking.sessionType} (${booking.duration} mins)
 Date: ${booking.date}
