@@ -410,6 +410,97 @@
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('product-content').style.display = 'grid';
 
+                // --- NEW: User Details Modal Logic ---
+                const modalOverlay = document.createElement('div');
+                modalOverlay.id = 'user-details-modal';
+                modalOverlay.style.display = 'none';
+                modalOverlay.style.position = 'fixed';
+                modalOverlay.style.top = '0';
+                modalOverlay.style.left = '0';
+                modalOverlay.style.width = '100%';
+                modalOverlay.style.height = '100%';
+                modalOverlay.style.background = 'rgba(0,0,0,0.8)';
+                modalOverlay.style.zIndex = '1000';
+                modalOverlay.style.alignItems = 'center';
+                modalOverlay.style.justifyContent = 'center';
+                modalOverlay.style.backdropFilter = 'blur(5px)';
+
+                modalOverlay.innerHTML = `
+                    <div style="background: var(--bg-card); padding: 30px; border-radius: var(--radius-lg); width: 100%; max-width: 400px; border: 1px solid var(--border-light); box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+                        <h3 style="margin-bottom: 20px; font-size: 1.5rem; text-align: center; color: var(--text-primary);">Enter Your Details</h3>
+                        <p style="color:var(--text-secondary); text-align:center; margin-bottom: 24px;">Please provide via secure form so we can send your resource via email.</p>
+                        
+                        <form id="user-details-form" style="display: flex; flex-direction: column; gap: 16px;">
+                            <div>
+                                <label style="display:block; color:var(--text-secondary); margin-bottom:8px; font-size:0.9rem;">Full Name *</label>
+                                <input type="text" id="ud-name" required placeholder="John Doe" style="width:100%; padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
+                            </div>
+                            <div>
+                                <label style="display:block; color:var(--text-secondary); margin-bottom:8px; font-size:0.9rem;">Email Address *</label>
+                                <input type="email" id="ud-email" required placeholder="john@example.com" style="width:100%; padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
+                            </div>
+                            <div>
+                                <label style="display:block; color:var(--text-secondary); margin-bottom:8px; font-size:0.9rem;">Phone Number *</label>
+                                <input type="tel" id="ud-phone" required placeholder="+91 9876543210" style="width:100%; padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary" style="width:100%; padding:14px; margin-top:10px; font-size:1.1rem;">
+                                Proceed to Payment <i class="fas fa-arrow-right" style="margin-left:8px;"></i>
+                            </button>
+                            <button type="button" id="ud-close" style="background:none; border:none; color:var(--text-muted); padding:10px; cursor:pointer;">Cancel</button>
+                        </form>
+                    </div>
+                `;
+                document.body.appendChild(modalOverlay);
+
+                // Update Buy Button Handler
+                buyBtn.onclick = function (e) {
+                    e.preventDefault();
+                    modalOverlay.style.display = 'flex';
+                };
+
+                // Close Modal Handler
+                document.getElementById('ud-close').onclick = function () {
+                    modalOverlay.style.display = 'none';
+                };
+
+                // Form Submit Handler
+                document.getElementById('user-details-form').onsubmit = function (e) {
+                    e.preventDefault();
+
+                    const name = document.getElementById('ud-name').value.trim();
+                    const email = document.getElementById('ud-email').value.trim();
+                    const phone = document.getElementById('ud-phone').value.trim();
+
+                    if (name && email && phone) {
+                        if (typeof window.initRazorpayCheckout === 'function') {
+                            modalOverlay.style.display = 'none';
+
+                            // Calculate checkout parameters
+                            let checkoutPrice = product.price;
+                            let checkoutCurrency = 'INR';
+                            const loggingPrice = product.price;
+
+                            if (buyBtn.dataset.price) {
+                                checkoutPrice = parseFloat(buyBtn.dataset.price);
+                            }
+                            if (buyBtn.dataset.currency) {
+                                checkoutCurrency = buyBtn.dataset.currency;
+                            }
+
+                            // Pass User Details to Init
+                            window.initRazorpayCheckout(product.name, checkoutPrice, checkoutCurrency, loggingPrice, {
+                                name: name,
+                                email: email,
+                                phone: phone
+                            });
+                        } else {
+                            alert('Payment system loading... please try again.');
+                        }
+                    }
+                };
+
+
             } catch (err) {
                 console.error(err);
                 showError();

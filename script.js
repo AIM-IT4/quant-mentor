@@ -1291,17 +1291,17 @@ async function fetchProductLinks() {
     }
 }
 
-function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountForLogging = null) {
-    console.log('🚀 initRazorpayCheckout called:', { productName, amount, currency, inrAmountForLogging });
+function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountForLogging = null, userDetails = null) {
+    console.log('🚀 initRazorpayCheckout called:', { productName, amount, currency, inrAmountForLogging, userDetails });
 
     // Handle FREE products (0 value) - skip payment, go directly to download
     if (amount <= 0) {
         console.log('🆓 Free product detected');
         const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
         if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
-            // Prompt for Name and Email to send free download
-            const customerName = prompt('Enter your Name:') || 'Customer';
-            const customerEmail = prompt('Enter your email to receive the free download:');
+            // Use provided details or prompt if missing
+            const customerName = (userDetails && userDetails.name) ? userDetails.name : (prompt('Enter your Name:') || 'Customer');
+            const customerEmail = (userDetails && userDetails.email) ? userDetails.email : prompt('Enter your email to receive the free download:');
 
             if (customerEmail && customerEmail.includes('@')) {
                 sendProductEmail(customerEmail, productName, 'FREE', downloadLink, customerName);
@@ -1352,6 +1352,11 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
         "currency": currency,
         "name": BUSINESS_NAME,
         "description": productName,
+        "prefill": {
+            "name": userDetails ? userDetails.name : "",
+            "email": userDetails ? userDetails.email : "",
+            "contact": userDetails ? userDetails.phone : ""
+        },
         "handler": async function (response) {
             console.log('Payment success:', response);
             // ✅ Payment successful!
@@ -1363,9 +1368,9 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
 
             const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
 
-            // Get customer Name and Email
-            const customerName = prompt('Enter your Name for the receipt:') || 'Customer';
-            const customerEmail = prompt('Enter your email to receive the download link:');
+            // Get customer Name and Email from prefill or prompt
+            const customerName = (userDetails && userDetails.name) ? userDetails.name : (prompt('Enter your Name for the receipt:') || 'Customer');
+            const customerEmail = (userDetails && userDetails.email) ? userDetails.email : prompt('Enter your email to receive the download link:');
 
             if (customerEmail && customerEmail.includes('@')) {
                 // Log purchase to Supabase for statistics
@@ -1406,11 +1411,12 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
                             <h2 style="color: #16a34a;">💰 New Sale!</h2>
                             <p><strong>Product:</strong> ${productName}</p>
                             <p><strong>Amount:</strong> ₹${Math.round(loggedAmount)}</p>
+                            <p><strong>Customer Name:</strong> ${customerName}</p>
                             <p><strong>Customer Email:</strong> ${customerEmail}</p>
                             <p><strong>Payment ID:</strong> ${paymentId}</p>
                         </div>
                     `;
-                    const adminText = `New Sale!\nProduct: ${productName}\nAmount: ₹${Math.round(loggedAmount)}\nEmail: ${customerEmail}\nID: ${paymentId}`;
+                    const adminText = `New Sale!\nProduct: ${productName}\nAmount: ₹${Math.round(loggedAmount)}\nName: ${customerName}\nEmail: ${customerEmail}\nID: ${paymentId}`;
                     sendAdminNotification(adminSubject, adminBody, adminText);
 
                     alert('🎉 Payment Successful!\n\nPayment ID: ' + paymentId + '\n\nDownload link sent to: ' + customerEmail + '\n\n📩 IMPORTANT: Please check your Spam/Junk folder if you don\'t see the email in your Inbox.\n\nClick OK to also open it now.');
@@ -1638,11 +1644,50 @@ if (modalPayBtn) {
             return;
         }
 
-        document.getElementById('productModal').classList.remove('active');
-        document.body.style.overflow = '';
+        // --- NEW: Open User Details Modal instead of direct Checkout ---
+        const mainUserModal = document.getElementById('user-details-modal');
+        const mainUserForm = document.getElementById('main-user-details-form');
+        const mainUserClose = document.getElementById('main-ud-close');
 
-        console.log('Calling initRazorpayCheckout...');
-        initRazorpayCheckout(productName, payAmount, payCurrency, logAmountInr);
+        if (mainUserModal && mainUserForm) {
+            // Close Product Modal first (optional, or keep it open behind)
+            // document.getElementById('productModal').classList.remove('active');
+
+            // Show User Details Modal
+            mainUserModal.style.display = 'flex';
+
+            // Handle Close
+            mainUserClose.onclick = function () {
+                mainUserModal.style.display = 'none';
+            };
+
+            // Handle Submit
+            mainUserForm.onsubmit = function (e) {
+                e.preventDefault();
+
+                const udName = document.getElementById('main-ud-name').value.trim();
+                const udEmail = document.getElementById('main-ud-email').value.trim();
+                const udPhone = document.getElementById('main-ud-phone').value.trim();
+
+                if (udName && udEmail && udPhone) {
+                    mainUserModal.style.display = 'none';
+                    document.getElementById('productModal').classList.remove('active');
+                    document.body.style.overflow = '';
+
+                    console.log('Calling initRazorpayCheckout with User Details...');
+                    initRazorpayCheckout(productName, payAmount, payCurrency, logAmountInr, {
+                        name: udName,
+                        email: udEmail,
+                        phone: udPhone
+                    });
+                }
+            };
+        } else {
+            console.error('User details modal not found, falling back to direct checkout');
+            document.getElementById('productModal').classList.remove('active');
+            document.body.style.overflow = '';
+            initRazorpayCheckout(productName, payAmount, payCurrency, logAmountInr);
+        }
     });
 } else {
     console.error('❌ Pay button (modalPayBtn) not found in DOM');
