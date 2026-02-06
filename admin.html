@@ -2853,7 +2853,7 @@ QuantMentor
                                 if (newStatus === 'completed' && bookingDetails) {
                                     if (window.sendTestimonialRequestEmail) {
                                         const sent = await window.sendTestimonialRequestEmail(bookingDetails);
-                                        if (sent) alert(`✅ Status: Completed.\n📧 Testimonial email sent to ${bookingDetails.user_email}`);
+                                        if (sent) alert(`✅ Status: Completed.\n📧 Testimonial email sent to ${bookingDetails.email}`);
                                         else alert('✅ Status: Completed.\n⚠️ Email failed to send (check console).');
                                     } else {
                                         console.warn('sendTestimonialRequestEmail function missing');
