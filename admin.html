@@ -2898,6 +2898,111 @@ QuantMentor
 
 
 
+                        // ================================
+                        // Automated Reminder System (Polling)
+                        // ================================
+                        async function checkAndSendReminders() {
+                            if (!window.supabaseAdminClient) return;
+
+                            console.log('⏰ Checking for due reminders...');
+
+                            try {
+                                // Fetch confirmed bookings that haven't finished yet
+                                // "upcoming" or "confirmed" status
+                                // Filter by date >= today to optimize
+                                const today = new Date().toISOString().split('T')[0];
+
+                                const { data: bookings, error } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .select('*')
+                                    .eq('status', 'confirmed')
+                                    .gte('booking_date', today); // Only future/today bookings
+
+                                if (error) throw error;
+                                if (!bookings || bookings.length === 0) return;
+
+                                const now = new Date();
+
+                                for (const b of bookings) {
+                                    // Construct Session Start Date Object
+                                    // booking_date is YYYY-MM-DD, booking_time is HH:MM:SS
+                                    const sessionStart = new Date(`${b.booking_date}T${b.booking_time}`);
+                                    const timeDiff = sessionStart - now; // Milliseconds
+                                    const hoursDiff = timeDiff / (1000 * 60 * 60);
+                                    const minutesDiff = timeDiff / (1000 * 60);
+
+                                    // 1. 24-Hour Reminder (Between 23.5 and 25 hours)
+                                    if (hoursDiff >= 23.5 && hoursDiff <= 25 && !b.reminder_24h_sent) {
+                                        await sendReminder(b, '24h');
+                                    }
+
+                                    // 2. 10-Minute Reminder (Between 0 and 15 minutes)
+                                    else if (minutesDiff > 0 && minutesDiff <= 15 && !b.reminder_10m_sent) {
+                                        await sendReminder(b, '10m');
+                                    }
+                                }
+
+                            } catch (err) {
+                                console.error('Reminder Check Error:', err);
+                            }
+                        }
+
+                        async function sendReminder(booking, type) {
+                            console.log(`📧 Sending ${type} reminder for ${booking.email}`);
+
+                            const meetLink = booking.meet_link || '#';
+                            const userName = booking.name || 'Learner';
+                            let subject, userBody, adminBody;
+
+                            if (type === '24h') {
+                                subject = `Reminder: Session Tomorrow - ${booking.service_name}`;
+                                userBody = `
+                                    <p>Hi ${userName},</p>
+                                    <p>This is a friendly reminder that you have a session scheduled for tomorrow.</p>
+                                    <p><strong>Topic:</strong> ${booking.service_name}</p>
+                                    <p><strong>Time:</strong> ${booking.booking_time} IST</p>
+                                    <p>See you there! 🚀</p>
+                                    <br>
+                                    <p>Best,<br>QuantMentor</p>
+                                `;
+                                adminBody = `24h Reminder sent to ${booking.email} for ${booking.service_name}`;
+                            } else {
+                                subject = `Starting Soon: Your Session in 10 Minutes! ⏰`;
+                                userBody = `
+                                    <p>Hi ${userName},</p>
+                                    <p>Your session fails starts in about 10 minutes.</p>
+                                    <p><strong>Join Here:</strong> <a href="${meetLink}">${meetLink}</a></p>
+                                    <p>Please be ready with your questions.</p>
+                                    <br>
+                                    <p>Best,<br>QuantMentor</p>
+                                `;
+                                adminBody = `10m Urgent Reminder sent to ${booking.email}. Link: ${meetLink}`;
+                            }
+
+                            // 1. Send to User
+                            await sendEmailWithBrevo(booking.email, subject, userBody, userBody.replace(/<[^>]*>?/gm, ''));
+
+                            // 2. Send to Admin (Notification)
+                            // Re-using sendEmailWithBrevo to alert admin as well
+                            const adminEmail = 'jha.8@alumni.iitj.ac.in';
+                            await sendEmailWithBrevo(adminEmail, `Admin Alert: ${type} Reminder Sent`, `<p>${adminBody}</p>`, adminBody);
+
+                            // 3. Update Database
+                            const updateField = (type === '24h') ? { reminder_24h_sent: true } : { reminder_10m_sent: true };
+
+                            await window.supabaseAdminClient
+                                .from('bookings')
+                                .update(updateField)
+                                .eq('id', booking.id);
+
+                            console.log(`✅ ${type} reminder process complete for ${booking.id}`);
+                        }
+
+                        // Initialize Polling
+                        // Run once on load, then every 60 seconds
+                        setTimeout(checkAndSendReminders, 5000); // 5s delay on start
+                        setInterval(checkAndSendReminders, 60 * 1000); // Every 60 seconds
+
                     </script>
 </body>
 
