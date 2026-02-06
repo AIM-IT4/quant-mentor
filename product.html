@@ -306,10 +306,9 @@
                     couponContainer.id = 'coupon-section';
                     couponContainer.style.marginBottom = '24px';
                     couponContainer.innerHTML = `
-                        <div style="display: flex; gap: 10px; max-width: 400px;">
-                            <input type="text" id="coupon-input" placeholder="Have a coupon code?" 
-                                style="flex: 1; padding: 12px; border: 1px solid var(--border-light); border-radius: var(--radius-md); background: var(--bg-secondary); color: var(--text-primary);">
-                            <button id="apply-coupon-btn" class="btn btn-secondary" style="padding: 12px 20px;">
+                        <div class="coupon-row">
+                            <input type="text" id="coupon-input" placeholder="Have a coupon code?" />
+                            <button id="apply-coupon-btn" class="btn btn-secondary" type="button">
                                 Apply
                             </button>
                         </div>

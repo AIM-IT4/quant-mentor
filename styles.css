@@ -1817,6 +1817,46 @@ h3 {
 }
 
 /* --------------------------------
+   Coupon Code Styles
+   -------------------------------- */
+.coupon-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 16px;
+}
+
+.coupon-row input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: all var(--transition-fast);
+}
+
+.coupon-row input:focus {
+    border-color: var(--accent-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.1);
+}
+
+.coupon-row .btn-secondary {
+    padding: 12px 20px;
+    white-space: nowrap;
+}
+
+#modalCouponFeedback,
+#coupon-feedback {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    min-height: 1.2em;
+}
+
+/* --------------------------------
    Theme Toggle Button
    -------------------------------- */
 .theme-toggle {
