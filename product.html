@@ -206,7 +206,12 @@
         document.addEventListener('DOMContentLoaded', async function () {
             // Get Product ID from URL
             const urlParams = new URLSearchParams(window.location.search);
-            const productId = urlParams.get('id');
+            let productId = urlParams.get('id');
+
+            // Bug fix: If ID has wrapping quotes (e.g. "'123'"), strip them
+            if (productId) {
+                productId = productId.replace(/^['"]|['"]$/g, '');
+            }
 
             if (!productId) {
                 showError();
@@ -253,8 +258,12 @@
 
                 console.log('🔍 Supabase Response:', { product, error });
 
+                // visual debug for user
+                // alert('Debug: Loading Product ID: ' + id);
+
                 if (error || !product) {
                     console.error('Product load error:', error);
+                    // alert('Debug: Supabase Error: ' + JSON.stringify(error));
                     showError();
                     return;
                 }
