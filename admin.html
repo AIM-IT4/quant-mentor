@@ -2687,10 +2687,8 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
                     .order('booking_time', { ascending: false });
 
                 if (filter === 'upcoming') {
-                    // Filter: status confirmed/pending AND date >= today
-                    // Simple approach: status != completed/cancelled
+                    // Filter: status confirmed/pending
                     query = query.in('status', ['confirmed', 'pending']);
-                    // Ideally check date too, but status is usually key
                 } else if (filter === 'completed') {
                     query = query.eq('status', 'completed');
                 } else if (filter === 'cancelled') {
@@ -2698,10 +2696,17 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
                 }
 
                 const { data, error } = await query;
-                if (error) throw error;
+
+                console.log(`📚 loadBookings('${filter}') result:`, { data, error });
+
+                if (error) {
+                    console.error('Supabase Error:', error);
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Supabase Error: ${error.message}</td></tr>`;
+                    return;
+                }
 
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No bookings found.</td></tr>';
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No bookings found for filter: <strong>${filter}</strong>.<br><small>(Check console for details)</small></td></tr>`;
                     return;
                 }
 
