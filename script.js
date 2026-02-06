@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 feedbackEl.className = '';
             }
 
-            if (inputCode && couponInfo.code && inputCode.toLowerCase() === couponInfo.code.toLowerCase()) {
+            if (inputCode && couponInfo.code && inputCode === couponInfo.code) {
                 const discount = parseInt(couponInfo.percent) || 0;
                 const discounted = Math.max(0, Math.round(basePrice * (100 - discount) / 100));
                 modalPriceEl.textContent = '₹' + discounted;

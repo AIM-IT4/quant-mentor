@@ -384,7 +384,7 @@
 
                         if (!code) return;
 
-                        if (product.coupon_code && code.toLowerCase() === product.coupon_code.toLowerCase()) {
+                        if (product.coupon_code && code === product.coupon_code) {
                             const discount = product.discount_percentage || 0;
                             const originalPrice = parseFloat(buyBtn.dataset.price);
                             // Calculate new price
