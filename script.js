@@ -1066,7 +1066,7 @@ async function loadSessionsFromSupabase() {
 async function updateServicesSection(sessions) {
     const servicesContainer = document.querySelector('.services-grid');
     if (!servicesContainer) {
-        console.error('Services container not found');
+        // console.log('Services container not found (likely on non-index page)');
         return;
     }
 
@@ -1146,8 +1146,15 @@ async function updateServicesSection(sessions) {
 // Update Booking Form with Dynamic Sessions
 async function updateBookingForm(sessions) {
     const bookingSelect = document.getElementById('bookingService');
-    if (!bookingSelect) {
-        console.error('Booking select not found');
+    const bookingForm = document.getElementById('bookingForm');
+    const bookingService = document.getElementById('bookingService');
+    const bookingDate = document.getElementById('bookingDate');
+    const priceDisplay = document.getElementById('priceDisplay');
+    const bookingPrice = document.getElementById('bookingPrice');
+
+    // Check if elements exist (might be missing on admin page)
+    if (!bookingForm || !bookingService || !bookingDate || !priceDisplay || !bookingPrice) {
+        // console.log('Booking form elements not found (likely on non-index page). Skipping init.');
         return;
     }
 
