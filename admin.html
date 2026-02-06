@@ -2783,8 +2783,9 @@ QuantMentor
                     if (b.status === 'pending') statusColor = '#f59e0b'; // orange
                     if (b.status === 'cancelled') statusColor = '#ef4444'; // red
                     if (b.status === 'completed') statusColor = '#3b82f6'; // blue
+                    if (b.status === 'upcoming' || b.status === 'Upcoming') statusColor = '#0ea5e9'; // light blue
 
-                    const isActionable = b.status === 'confirmed' || b.status === 'pending';
+                    const isActionable = b.status === 'confirmed' || b.status === 'pending' || b.status === 'upcoming' || b.status === 'Upcoming';
                     const meetLink = b.meet_link || '#';
 
                     return `
