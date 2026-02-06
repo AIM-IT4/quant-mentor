@@ -28,52 +28,30 @@
     <link rel="stylesheet" href="styles.css">
     <style>
         .product-page-container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 120px 20px 60px;
             min-height: 80vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .product-detail-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-xl);
-            padding: 40px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1.8fr 1fr;
             gap: 60px;
-            width: 100%;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            align-items: start;
         }
 
-        .product-detail-image {
-            background: var(--bg-tertiary);
-            border-radius: var(--radius-lg);
+        /* Left Column: Main Content */
+        .product-main-content {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            height: 400px;
-            position: relative;
+            flex-direction: column;
+            gap: 30px;
         }
 
-        .product-detail-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
+        .product-header {
+            margin-bottom: 20px;
         }
 
-        .product-detail-placeholder {
-            font-size: 5rem;
-            color: var(--text-muted);
-        }
-
-        .product-info h1 {
+        .product-title {
             font-size: 2.5rem;
+            line-height: 1.2;
             margin-bottom: 16px;
             background: var(--accent-gradient);
             -webkit-background-clip: text;
@@ -81,42 +59,114 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .product-price-tag {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 24px;
+        .product-image-container {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border-light);
+            aspect-ratio: 16/9;
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: center;
         }
 
-        .product-description-full {
+        .product-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-description-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+        }
+
+        .product-description-container h3 {
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .product-description-text {
             color: var(--text-secondary);
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 40px;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            white-space: pre-line;
+            /* Preserves line breaks */
         }
 
-        .action-buttons {
+        /* Right Column: Sticky Checkout Card */
+        .product-checkout-sidebar {
+            position: sticky;
+            top: 20px;
+            /* Adjust based on navbar height */
+        }
+
+        .checkout-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             display: flex;
-            gap: 20px;
+            flex-direction: column;
+            gap: 24px;
         }
 
-        @media (max-width: 768px) {
-            .product-detail-card {
+        .checkout-price {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .checkout-features {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .feature-item i {
+            color: var(--accent-primary);
+        }
+
+        .btn-buy-full {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            justify-content: center;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            .product-page-container {
                 grid-template-columns: 1fr;
                 gap: 40px;
-                padding: 24px;
+                padding-top: 100px;
             }
 
-            .product-detail-image {
-                height: 300px;
+            .product-checkout-sidebar {
+                position: static;
+                order: -1;
+                /* Show checkout top on mobile? Or bottom? Topmate usually puts basic info top, but full buy bottom. Let's keep standard stack for now. */
+                order: 1;
+                /* Actually, content first, buy card below is often better for detail heavy stuff, OR Title top, Buy Card, Description. */
             }
 
-            .product-info h1 {
-                font-size: 2rem;
-            }
+            /* Let's keep Title in main content so standard flow is Title/Img/Desc -> Buy. 
+               But user might want Buy button higher. 
+               For now, standard column stacking. */
         }
     </style>
 </head>
@@ -143,47 +193,65 @@
     </nav>
 
     <div class="product-page-container">
-        <div id="loading" style="text-align:center;">
+        <div id="loading" style="grid-column: 1 / -1; text-align:center;">
             <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: var(--accent-primary);"></i>
             <p style="margin-top: 20px; color: var(--text-muted);">Loading product details...</p>
         </div>
 
-        <div id="product-content" class="product-detail-card" style="display: none;">
-            <div class="product-detail-image">
-                <img id="p-image" src="" alt="Product Cover" style="display: none;">
-                <div id="p-placeholder" class="product-detail-placeholder">
-                    <i class="fas fa-file-pdf"></i>
-                </div>
-            </div>
-
-            <div class="product-info">
-                <h1 id="p-title">Product Title</h1>
-                <div class="product-price-tag" id="p-price">₹0</div>
-                <div class="product-description-full" id="p-desc">
-                    Product description...
-                </div>
-
-                <div class="action-buttons">
-                    <button id="buy-btn" class="btn btn-primary" style="padding: 16px 40px; font-size: 1.1rem;">
-                        <i class="fas fa-shopping-cart"></i> Buy Now
-                    </button>
-                    <a href="index.html#products" class="btn btn-secondary">
-                        Browse More
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div id="error-content" style="display: none; text-align: center;">
+        <div id="error-content" style="grid-column: 1 / -1; display: none; text-align: center;">
             <h2 style="color: #ef4444; margin-bottom: 20px;">Product Not Found</h2>
             <p style="color: var(--text-secondary); margin-bottom: 30px;">The product you are looking for does not exist
                 or has been removed.</p>
             <a href="index.html" class="btn btn-primary">Return Home</a>
         </div>
+
+        <!-- NEW 2-COLUMN LAYOUT -->
+        <!-- Populated via JS -->
+        <div id="left-col" class="product-main-content" style="display: none;">
+            <div class="product-header">
+                <h1 id="p-title" class="product-title">Product Title</h1>
+            </div>
+
+            <div class="product-image-container">
+                <img id="p-image" src="" alt="Product Cover" style="display: none;">
+                <div id="p-placeholder" style="font-size: 4rem; color: var(--text-muted);">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+            </div>
+
+            <div class="product-description-container">
+                <h3>About this Resource</h3>
+                <div id="p-desc" class="product-description-text">
+                    Loading description...
+                </div>
+            </div>
+        </div>
+
+        <div id="right-col" class="product-checkout-sidebar" style="display: none;">
+            <div class="checkout-card">
+                <div id="p-price" class="checkout-price">₹0</div>
+
+                <div class="checkout-features">
+                    <div class="feature-item"><i class="fas fa-check-circle"></i> <span>Instant Digital Download</span>
+                    </div>
+                    <div class="feature-item"><i class="fas fa-lock"></i> <span>Secure Payment via Razorpay</span></div>
+                    <div class="feature-item"><i class="fas fa-envelope"></i> <span>Delivered to Email</span></div>
+                </div>
+
+                <!-- Coupon Section will be injected here via JS -->
+                <!-- <div id="coupon-section"></div> -->
+
+                <!-- Action Button -->
+                <button id="buy-btn" class="btn btn-primary btn-buy-full">
+                    <i class="fas fa-shopping-cart"></i> Buy Now
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Footer -->
-    <footer style="border-top: 1px solid var(--border-subtle); padding: 40px 0; background: var(--bg-secondary);">
+    <footer
+        style="border-top: 1px solid var(--border-subtle); padding: 40px 0; background: var(--bg-secondary); grid-column: 1/-1;">
         <div class="nav-container" style="text-align: center;">
             <p style="color: var(--text-muted);">&copy; 2026 QuantMentor. All rights reserved.</p>
         </div>
@@ -304,8 +372,10 @@
                         </div>
                     `;
                     // Insert coupon before action buttons
-                    const actionButtons = document.querySelector('.action-buttons');
-                    priceEl.parentNode.insertBefore(couponContainer, actionButtons);
+                    // const actionButtons = document.querySelector('.action-buttons');
+                    // priceEl.parentNode.insertBefore(couponContainer, actionButtons);
+                    // NEW: Insert before Buy Button container or just inside the card before the button
+                    buyBtn.parentNode.insertBefore(couponContainer, buyBtn);
 
                     // Coupon Logic
                     document.getElementById('apply-coupon-btn').addEventListener('click', async function () {
@@ -389,7 +459,8 @@
 
                 // Show Content
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('product-content').style.display = 'grid';
+                document.getElementById('left-col').style.display = 'flex';
+                document.getElementById('right-col').style.display = 'flex';
 
             } catch (err) {
                 console.error(err);
