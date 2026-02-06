@@ -905,17 +905,43 @@ window.openProductModal = async function (id) {
         const pppInfoElement = document.getElementById('pppInfo');
         const pppTextElement = document.getElementById('pppText');
 
-        if (product.price === 0 || !product.price) {
+        // Check if Free or Paid
+        const isFree = (product.price === 0 || !product.price);
+        const modalPayBtn = document.getElementById('modalPayBtn');
+        const couponRow = document.querySelector('.coupon-row');
+        const modalNote = document.querySelector('.modal-note');
+
+        if (isFree) {
             priceElement.textContent = 'FREE';
             if (pppInfoElement) pppInfoElement.style.display = 'none';
-        } else if (isLocalCurrency) {
-            // Show local currency only
-            priceElement.innerHTML = `<span style="font-size:1.3em;font-weight:600;">${formatPrice(localPrice)}</span>`;
-            if (pppInfoElement) pppInfoElement.style.display = 'none';
+
+            // UI Updates for FREE
+            if (couponRow) couponRow.style.display = 'none';
+            if (modalNote) modalNote.style.display = 'none';
+
+            if (modalPayBtn) {
+                modalPayBtn.innerHTML = '<i class="fas fa-download"></i> Download Now';
+                modalPayBtn.style.background = '#22c55e'; // Green for download
+            }
         } else {
-            // Show INR for Indian users
-            priceElement.textContent = '₹' + product.price;
-            if (pppInfoElement) pppInfoElement.style.display = 'none';
+            // UI Updates for PAID (Reset)
+            if (couponRow) couponRow.style.display = 'flex';
+            if (modalNote) modalNote.style.display = 'block';
+
+            if (modalPayBtn) {
+                modalPayBtn.innerHTML = '<i class="fas fa-credit-card"></i> Pay Now';
+                modalPayBtn.style.background = ''; // Reset to default primary color
+            }
+
+            if (isLocalCurrency) {
+                // Show local currency only
+                priceElement.innerHTML = `<span style="font-size:1.3em;font-weight:600;">${formatPrice(localPrice)}</span>`;
+                if (pppInfoElement) pppInfoElement.style.display = 'none';
+            } else {
+                // Show INR for Indian users
+                priceElement.textContent = '₹' + product.price;
+                if (pppInfoElement) pppInfoElement.style.display = 'none';
+            }
         }
 
         window.currentDiscountedPrice = undefined;
