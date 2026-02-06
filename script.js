@@ -2665,6 +2665,7 @@ ${BUSINESS_NAME}`;
         }
     } else {
         console.warn('⚠️ Brevo API Key not configured. Skipping email.');
+        alert('⚠️ Email NOT Sent.\n\nReason: Brevo API Key is missing.\n\nPlease open script.js (Line 3) and paste your actual API key there.');
         return false;
     }
 }
