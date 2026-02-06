@@ -2121,36 +2121,59 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
 
             try {
                 // Fetch daily data for the range
-                const { data: bookings } = await window.supabaseAdminClient
+                // FIX: Filter by booking_date for bookings, so we see revenue when the session happens
+                const { data: bookings, error: bookingsError } = await window.supabaseAdminClient
                     .from('bookings')
                     .select('service_price, booking_date, service_name')
-                    .gte('created_at', cutoffDate.toISOString());
+                    .gte('booking_date', cutoffDate.toISOString().split('T')[0])
+                    .in('status', ['confirmed', 'completed', 'pending']); // Include likely revenue
 
-                const { data: purchases } = await window.supabaseAdminClient
+                if (bookingsError) console.error('Error fetching chart bookings:', bookingsError);
+
+                const { data: purchases, error: purchasesError } = await window.supabaseAdminClient
                     .from('purchases')
                     .select('amount, created_at, product_name')
                     .gte('created_at', cutoffDate.toISOString());
+
+                if (purchasesError) console.error('Error fetching chart purchases:', purchasesError);
+
+                console.log('📈 Chart Data Source:', {
+                    bookingsCount: bookings?.length,
+                    purchasesCount: purchases?.length,
+                    cutoff: cutoffDate.toISOString().split('T')[0]
+                });
 
                 // Prepare data for Line Chart (Revenue over time)
                 const dailyData = {};
                 for (let i = 0; i <= range; i++) {
                     const d = new Date();
                     d.setDate(d.getDate() - i);
-                    dailyData[d.toISOString().split('T')[0]] = 0;
+                    // Use local YYYY-MM-DD to match booking_date format
+                    const dateKey = d.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+                    dailyData[dateKey] = 0;
                 }
 
                 (bookings || []).forEach(b => {
-                    const date = b.booking_date; // bookings use booking_date
-                    if (dailyData[date] !== undefined) dailyData[date] += (b.service_price || 0);
+                    const date = b.booking_date; // "YYYY-MM-DD"
+                    // If the date falls within our generated range keys, add it
+                    if (dailyData[date] !== undefined) {
+                        dailyData[date] += (b.service_price || 0);
+                    } else {
+                        console.warn('Booking date outside chart range headers:', date);
+                    }
                 });
 
                 (purchases || []).forEach(p => {
-                    const date = p.created_at.split('T')[0];
-                    if (dailyData[date] !== undefined) dailyData[date] += (p.amount || 0);
+                    // Purchases are timestampz, convert to YYYY-MM-DD local
+                    const pDate = new Date(p.created_at);
+                    const dateKey = pDate.toLocaleDateString('en-CA');
+                    if (dailyData[dateKey] !== undefined) dailyData[dateKey] += (p.amount || 0);
                 });
 
                 const labels = Object.keys(dailyData).sort();
                 const values = labels.map(l => Math.round(dailyData[l])); // Round chart values
+
+                console.log('📊 Chart Visualization Data:', { labels, values, dailyData });
 
                 // Destroy old chart if exists
                 if (revenueChart) revenueChart.destroy();
@@ -2159,7 +2182,10 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
                 revenueChart = new Chart(ctxRevenue, {
                     type: 'line',
                     data: {
-                        labels: labels.map(l => l.split('-').slice(1).reverse().join('/')), // MM/DD -> DD/MM
+                        labels: labels.map(l => {
+                            const [y, m, d] = l.split('-');
+                            return `${d}/${m}`; // DD/MM
+                        }),
                         datasets: [{
                             label: 'Daily Revenue (₹)',
                             data: values,
