@@ -2745,12 +2745,10 @@ QuantMentor
                 const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
                 if (filter === 'upcoming') {
-                    // Filter: status != completed AND != cancelled AND date >= today
-                    // Note: 'pending' or 'confirmed' are valid statuses for upcoming
-                    // We also include today's bookings.
+                    // Filter: status != completed AND != cancelled
+                    // Show ALL active bookings regardless of date (so past confirmed sessions appear)
                     filteredData = data.filter(b => {
-                        return (b.status !== 'completed' && b.status !== 'cancelled') &&
-                            (b.booking_date >= today);
+                        return (b.status !== 'completed' && b.status !== 'cancelled');
                     });
                 } else if (filter === 'completed') {
                     filteredData = data.filter(b => b.status === 'completed');
