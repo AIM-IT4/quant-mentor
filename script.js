@@ -1605,8 +1605,14 @@ if (modalPayBtn) {
 
         console.log('🚀 Final Payment Config:', { payAmount, payCurrency, logAmountInr });
 
-        if (isNaN(payAmount) || payAmount <= 0) {
+        if (isNaN(payAmount)) {
             alert('Error parsing price. Please try again.');
+            return;
+        }
+
+        // Allow 0 for free products, initiate checkout flow (handler will separate free vs paid)
+        if (payAmount < 0) {
+            alert('Invalid price detected.');
             return;
         }
 
