@@ -312,10 +312,20 @@
                     const actionButtons = document.querySelector('.action-buttons');
                     priceEl.parentNode.insertBefore(couponContainer, actionButtons);
 
+                    // Create Feedback Element
+                    const feedbackMsg = document.createElement('div');
+                    feedbackMsg.id = 'coupon-feedback';
+                    feedbackMsg.style.marginTop = '8px';
+                    feedbackMsg.style.fontSize = '0.9rem';
+                    couponContainer.appendChild(feedbackMsg);
+
                     // Coupon Logic
                     document.getElementById('apply-coupon-btn').addEventListener('click', async function () {
                         const codeInput = document.getElementById('coupon-input');
                         const code = codeInput.value.trim();
+                        feedbackMsg.textContent = ''; // Reset
+                        feedbackMsg.style.color = 'var(--text-muted)';
+
                         if (!code) return;
 
                         if (product.coupon_code && code.toLowerCase() === product.coupon_code.toLowerCase()) {
@@ -340,14 +350,18 @@
                             buyBtn.dataset.price = discountedPrice;
                             buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${priceDisplay}`;
 
-                            alert(`Coupon '${code}' applied! ${discount}% OFF`);
+                            // Success Feedback
+                            feedbackMsg.textContent = `Coupon '${code}' applied! ${discount}% OFF applied successfully.`;
+                            feedbackMsg.style.color = '#22c55e'; // Success Green
 
                             // Disable input
                             codeInput.disabled = true;
                             this.disabled = true;
                             this.textContent = 'Applied';
                         } else {
-                            alert('Invalid coupon code for this product.');
+                            // Error Feedback
+                            feedbackMsg.textContent = 'Invalid coupon code for this product.';
+                            feedbackMsg.style.color = '#ef4444'; // Error Red
                         }
                     });
                 }
