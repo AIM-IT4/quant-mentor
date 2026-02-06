@@ -2595,3 +2595,80 @@ window.copyProductLink = function (id) {
         prompt('Copy this link to share:', shareUrl);
     }
 };
+
+/**
+ * Send Testimonial Request Email on Session Completion
+ */
+async function sendTestimonialRequestEmail(bookingData) {
+    if (!bookingData || !bookingData.user_email) return;
+
+    console.log('📧 Sending Testimonial Request to:', bookingData.user_email);
+
+    const config = getBrevoConfig();
+    if (config.apiKey && config.apiKey !== 'xkeysib-your-api-key-here') {
+        const testimonialLink = window.location.origin + '/index.html#testimonials'; // Point to testimonials section
+        const customerName = bookingData.user_name || 'Valued Learner';
+
+        const htmlContent = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #2563eb;">🚀 Session Completed!</h2>
+                <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                <p>Hi <strong>${customerName}</strong>,</p>
+                <p>Thank you for attending the session: <strong>${bookingData.session_type || 'Mentorship Session'}</strong>.</p>
+                <p>I hope you found it valuable! 💡</p>
+                <br>
+                <p><strong>Could you do me a quick favor?</strong></p>
+                <p>It would mean a lot if you could share your feedback or a short testimonial. It helps others trust the process.</p>
+                
+                <a href="${testimonialLink}" style="display: inline-block; background: #22c55e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 15px 0;">Leave a Review / Testimonial</a>
+                
+                <p style="margin-top: 20px; color: #6b7280;">If the button doesn't work, click here: <a href="${testimonialLink}">${testimonialLink}</a></p>
+                <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                <p style="color: #6b7280;">Keep learning & growing! 🚀</p>
+                <p style="color: #6b7280;">Best regards,<br>${BUSINESS_NAME}</p>
+            </div>
+        `;
+
+        const textContent = `🚀 Session Completed!
+
+Hi ${customerName},
+
+Thank you for attending the session: ${bookingData.session_type}. I hope you found it valuable!
+
+Could you do me a quick favor?
+Please share your feedback or a short testimonial here:
+${testimonialLink}
+
+It helps others trust the process.
+
+Best regards,
+${BUSINESS_NAME}`;
+
+        try {
+            const result = await sendEmailWithBrevo(
+                bookingData.user_email,
+                `Thanks for the session! How was it? 🚀`,
+                htmlContent,
+                textContent
+            );
+
+            if (result.success) {
+                console.log('✅ Testimonial email sent successfully.');
+                return true;
+            } else {
+                console.error('❌ Failed to send testimonial email:', result.error);
+                return false;
+            }
+        } catch (error) {
+            console.error('❌ Error sending testimonial email:', error);
+            return false;
+        }
+    } else {
+        console.warn('⚠️ Brevo API Key not configured. Skipping email.');
+        return false;
+    }
+}
+
+// Make it available globally so admin.html can use it
+window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
+

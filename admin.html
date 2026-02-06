@@ -2833,6 +2833,17 @@ QuantMentor
             if (!confirm(`Are you sure you want to mark this booking as ${newStatus}?`)) return;
 
             try {
+                // Fetch booking details first if completing, to get email/name
+                let bookingDetails = null;
+                if (newStatus === 'completed') {
+                    const { data, error } = await window.supabaseAdminClient
+                        .from('bookings')
+                        .select('user_email, user_name, session_type') // Ensure columns exist
+                        .eq('id', id)
+                        .single();
+                    if (!error) bookingDetails = data;
+                }
+
                 const { error } = await window.supabaseAdminClient
                     .from('bookings')
                     .update({ status: newStatus })
@@ -2840,7 +2851,20 @@ QuantMentor
 
                 if (error) throw error;
 
-                alert(`Booking marked as ${newStatus}`);
+                // Send Email if Completed
+                if (newStatus === 'completed' && bookingDetails) {
+                    if (window.sendTestimonialRequestEmail) {
+                        const sent = await window.sendTestimonialRequestEmail(bookingDetails);
+                        if (sent) alert(`✅ Status: Completed.\n📧 Testimonial email sent to ${bookingDetails.user_email}`);
+                        else alert('✅ Status: Completed.\n⚠️ Email failed to send (check console).');
+                    } else {
+                        console.warn('sendTestimonialRequestEmail function missing');
+                        alert('✅ Status Updated (Email function missing)');
+                    }
+                } else {
+                    alert(`✅ Booking marked as ${newStatus}!`);
+                }
+
                 loadBookings(currentBookingFilter);
                 // Also update stats
                 updateDashboardStats();
