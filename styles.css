@@ -135,6 +135,28 @@ body.light-mode .product-price-tag {
     color: var(--text-primary);
 }
 
+/* Hard explicit override for mobile menu background in light mode */
+@media (max-width: 768px) {
+    body.light-mode .nav-links {
+        background: #ffffff !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    body.light-mode .nav-links a {
+        color: #0f172a !important;
+        /* Slate-900 */
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    body.light-mode .nav-links a:hover {
+        color: var(--accent-primary) !important;
+    }
+
+    body.light-mode .mobile-menu-btn {
+        color: #0f172a !important;
+    }
+}
+
 /* --------------------------------
    Reset & Base Styles
    -------------------------------- */
@@ -1937,10 +1959,12 @@ body.light-mode .theme-toggle .fa-moon {
     }
 
     .nav-links a {
-        font-size: 1.2rem;
+        font-size: 1.25rem;
+        font-weight: 600;
         width: 100%;
         display: block;
-        padding: 12px 0;
+        padding: 16px 0;
+        color: var(--text-primary);
         border-bottom: 1px solid var(--border-subtle);
     }
 
