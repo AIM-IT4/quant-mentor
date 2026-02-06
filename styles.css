@@ -258,16 +258,20 @@ h3 {
 /* --------------------------------
    Navbar
    -------------------------------- */
+/* Navbar - Professional Look */
 .navbar {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
-    padding: 16px 0;
-    background: rgba(10, 10, 15, 0.8);
-    backdrop-filter: blur(20px);
+    padding: 12px 0;
+    /* Reduced padding for sleeker look */
+    background: rgba(10, 10, 15, 0.85);
+    /* Slightly less transparency for better contrast */
+    backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border-subtle);
+    transition: all var(--transition-normal);
 }
 
 .nav-container {
@@ -282,20 +286,25 @@ h3 {
 .logo {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 12px;
+    /* Balanced gap */
     font-weight: 700;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    /* Balanced text size */
     color: var(--text-primary);
+    letter-spacing: -0.5px;
+    /* Tighter tracking for modern look */
 }
 
 .logo-icon {
-    font-size: 2rem;
+    font-size: 1.8rem;
 }
 
 .logo-img {
-    width: 150px;
-    height: 150px;
-    border-radius: 12px;
+    width: 60px;
+    /* Professional size (larger than 40px, but not huge) */
+    height: 60px;
+    border-radius: 10px;
     object-fit: contain;
 }
 
