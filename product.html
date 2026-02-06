@@ -77,6 +77,7 @@
             margin-bottom: 16px;
             background: var(--accent-gradient);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -158,8 +159,16 @@
             <div class="product-info">
                 <h1 id="p-title">Product Title</h1>
                 <div class="product-price-tag" id="p-price">₹0</div>
-                <div class="product-description-full" id="p-desc">
-                    Product description...
+
+                <!-- Coupon Section -->
+                <div id="coupon-section" style="margin-bottom: 24px; display: none;">
+                    <div style="display: flex; gap: 10px; max-width: 400px;">
+                        <input type="text" id="coupon-input" placeholder="Have a coupon code?"
+                            style="flex: 1; padding: 12px; border: 1px solid var(--border-light); border-radius: var(--radius-md); background: var(--bg-secondary); color: var(--text-primary);">
+                        <button id="apply-coupon-btn" class="btn btn-secondary" style="padding: 12px 20px;">
+                            Apply
+                        </button>
+                    </div>
                 </div>
 
                 <div class="action-buttons">
@@ -288,9 +297,56 @@
                 // Set Page Title
                 document.title = `${product.name} | QuantMentor`;
 
-                // Setup Buy Button using script.js's openProductModal logic or direct open
-                // Actually, script.js `openProductModal` handles the payment flow perfectly.
-                // We can just call `openProductModal(id)`!
+                // Coupon Logic
+                const couponSection = document.getElementById('coupon-section');
+                if (product.price > 0) {
+                    couponSection.style.display = 'block';
+                }
+
+                document.getElementById('apply-coupon-btn').addEventListener('click', async function () {
+                    const code = document.getElementById('coupon-input').value.trim();
+                    if (!code) return;
+
+                    // Check against product coupon
+                    if (product.coupon_code && code.toLowerCase() === product.coupon_code.toLowerCase()) {
+                        const discount = product.coupon_percent || 0;
+                        const originalPrice = parseFloat(buyBtn.dataset.price); // Current base price (local or INR)
+
+                        // Calculate new price
+                        const discountedPrice = Math.max(0, Math.round(originalPrice * (100 - discount) / 100));
+
+                        // Update UI
+                        const currentCurrency = buyBtn.dataset.currency;
+                        const currencySymbol = currentCurrency === 'INR' ? '₹' : (await window.convertPrice(1, await window.getUserCountry())).currency.symbol; // Approx symbol fetch
+
+                        // We need to fetch symbol properly or store it. 
+                        // Let's use a simpler heuristic or just text if non-INR is complex to re-fetch here.
+                        // Actually, we can just update the display logic to be simple.
+
+                        let priceDisplay = '';
+                        if (currentCurrency === 'INR') {
+                            priceDisplay = `₹${discountedPrice}`;
+                            priceEl.innerHTML = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">₹${originalPrice}</span> ${priceDisplay}`;
+                        } else {
+                            // For foreign currency, we just stick to the code if we don't have symbol easy
+                            priceDisplay = `${discountedPrice} ${currentCurrency}`;
+                            priceEl.innerHTML = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">${originalPrice} ${currentCurrency}</span> ${priceDisplay}`;
+                        }
+
+                        // Update Button Data
+                        buyBtn.dataset.price = discountedPrice;
+                        buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${priceDisplay}`;
+
+                        alert(`Coupon '${code}' applied! ${discount}% OFF`);
+
+                        // Disable input
+                        document.getElementById('coupon-input').disabled = true;
+                        this.disabled = true;
+                        this.textContent = 'Applied';
+                    } else {
+                        alert('Invalid coupon code for this product.');
+                    }
+                });
 
                 buyBtn.onclick = function () {
                     if (typeof window.initRazorpayCheckout === 'function') {
