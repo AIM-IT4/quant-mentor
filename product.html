@@ -293,12 +293,50 @@
                 // We can just call `openProductModal(id)`!
 
                 buyBtn.onclick = function () {
-                    if (window.openProductModal) {
-                        window.openProductModal(id);
+                    if (typeof window.initRazorpayCheckout === 'function') {
+                        // Calculate checkout parameters
+                        let checkoutPrice = product.price;
+                        let checkoutCurrency = 'INR';
+
+                        // Use calculated local price if available (from window.currentProductLocalPrice which we can mimic or re-calculate)
+                        // Or better, just rely on what we computed above?
+                        // Actually, let's just re-use the logic if we have it, or fallback to INR.
+
+                        // Check if we found a local price during render
+                        if (window.convertPrice && window.getUserCountry) {
+                            // We already did this above, but local variables scope might be tricky if not stored.
+                            // Let's just fetch it again or store it in dataset.
+                        }
+
+                        // For simplicity and robustness, let's grab it from the display or re-calculate IF needed.
+                        // But wait, initRazorpayCheckout takes (name, amount, currency, loggingAmount).
+
+                        // Let's assume INR default to avoid complexity, OR re-do the async check?
+                        // No, onclick can't easily be async without care.
+                        // Let's store the computed values on the button dataset when loading!
+
+                        const finalPrice = parseFloat(buyBtn.dataset.price || product.price);
+                        const finalCurrency = buyBtn.dataset.currency || 'INR';
+                        const loggingPrice = product.price;
+
+                        window.initRazorpayCheckout(product.name, finalPrice, finalCurrency, loggingPrice);
                     } else {
                         alert('Payment system loading... please try again.');
                     }
                 };
+
+                // Store price on button for the handler
+                buyBtn.dataset.price = product.price;
+                buyBtn.dataset.currency = 'INR';
+
+                if (window.convertPrice && window.getUserCountry) {
+                    const country = await window.getUserCountry();
+                    const localPrice = await window.convertPrice(product.price, country);
+                    if (localPrice.currency.code !== 'INR') {
+                        buyBtn.dataset.price = localPrice.amount;
+                        buyBtn.dataset.currency = localPrice.currency.code;
+                    }
+                }
 
                 // Show Content
                 document.getElementById('loading').style.display = 'none';
