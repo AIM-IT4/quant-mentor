@@ -3015,16 +3015,34 @@ QuantMentor
                                 return;
                             }
 
-                            // 2. Ask User
-                            const choice = prompt(`Send reminder for ${booking.name}?\n\nType '24h' for Tomorrow's Reminder\nType '10m' for Urgent Reminder`);
+                            // 2. Calculate Context (Smart Auto-Detect)
+                            const sessionStart = new Date(`${booking.booking_date}T${booking.booking_time}`);
+                            const now = new Date();
+                            const diffMs = sessionStart - now;
+                            // Convert to hours (can be negative if in progress)
+                            const diffHours = diffMs / (1000 * 60 * 60);
 
-                            if (choice === '24h' || choice === '10m') {
-                                if (confirm(`Are you sure you want to send the ${choice} email now?`)) {
-                                    await sendReminder(booking, choice);
-                                    alert(`✅ ${choice} Reminder Sent!`);
-                                }
-                            } else if (choice) {
-                                alert('Invalid option. Please type "24h" or "10m".');
+                            let type = '24h';
+                            let contextMsg = 'Session is Tomorrow/Later';
+
+                            // If less than 2 hours remaining, switch to Urgent/Meeting Link template
+                            if (diffHours <= 2) {
+                                type = '10m'; // Urgent template
+                                contextMsg = 'Session is Starting Soon (< 2h)';
+                            }
+
+                            // 3. Confirm with Admin
+                            const proceed = confirm(
+                                `Send Reminder for ${booking.name}?\n\n` +
+                                `📅 Session Time: ${sessionStart.toLocaleString()}\n` +
+                                `🤖 Auto-Detected Context: ${contextMsg}\n` +
+                                `📧 Email Template: ${type === '24h' ? 'Standard Reminder' : 'Urgent/Joining Link'}\n\n` +
+                                `Click OK to send.`
+                            );
+
+                            if (proceed) {
+                                await sendReminder(booking, type);
+                                alert(`✅ ${type === '24h' ? 'Standard' : 'Urgent'} Reminder Sent!`);
                             }
                         }
 
