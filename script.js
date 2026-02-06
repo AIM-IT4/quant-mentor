@@ -60,8 +60,35 @@ async function sendAdminNotification(subject, htmlContent, textContent) {
     return sendEmailWithBrevo(ADMIN_EMAIL, subject, htmlContent, textContent);
 }
 
+// --- Theme Initial Check (Prevent Flashing) ---
+(function () {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+    }
+})();
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log('🚀 DOM loaded, initializing all components...');
+
+    // --------------------------------
+    // Theme Toggle Logic
+    // --------------------------------
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function () {
+            document.body.classList.toggle('light-mode');
+
+            // Save preference
+            if (document.body.classList.contains('light-mode')) {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+
+            console.log('🌓 Theme toggled:', document.body.classList.contains('light-mode') ? 'Light' : 'Dark');
+        });
+    }
 
     // --- Dynamic Stats & Supabase Init ---
     const STATS_CONFIG = {
