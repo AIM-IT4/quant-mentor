@@ -1672,22 +1672,37 @@ if (bookingForm) {
                 const dateObj = new Date(dateValue);
                 const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
 
-                // 2. Fetch Availability Pattern for this day from Supabase
+                // 2. Fetch Availability Pattern & Existing Bookings from Supabase
                 let availability = null;
                 let hasRecord = false;
+                let existingBookings = [];
 
                 if (window.supabaseClient) {
-                    const { data, error } = await window.supabaseClient
+                    // Fetch slots availability
+                    const { data: availData, error: availError } = await window.supabaseClient
                         .from('availability_patterns')
                         .select('*')
                         .eq('day_of_week', dayName)
                         .single();
 
-                    if (data) {
+                    if (availData) {
                         hasRecord = true;
-                        if (data.is_active) {
-                            availability = data;
+                        if (availData.is_active) {
+                            availability = availData;
                         }
+                    }
+
+                    // Fetch existing bookings for this date (to prevent collision)
+                    const { data: bookingsData, error: bookingsError } = await window.supabaseClient
+                        .from('bookings')
+                        .select('booking_time')
+                        .eq('booking_date', dateObj.toLocaleDateString('en-IN', {
+                            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                        }));
+
+                    if (bookingsData) {
+                        existingBookings = bookingsData.map(b => b.booking_time);
+                        console.log('📅 Existing bookings for ' + dateValue + ':', existingBookings);
                     }
                 }
 
@@ -1707,7 +1722,7 @@ if (bookingForm) {
                     return;
                 }
 
-                // 3. Generate Slots (Hourly)
+                // 3. Generate Slots (30-minute intervals)
                 const startHour = parseInt(availability.start_time.split(':')[0]);
                 const endHour = parseInt(availability.end_time.split(':')[0]);
 
@@ -1720,13 +1735,15 @@ if (bookingForm) {
                     });
                 };
 
-                for (let h = startHour; h < endHour; h++) {
-                    // Create Date object in IST (Mentor time)
-                    // We assume input date is consistent
-                    const slotDateIST = new Date(dateValue + `T${h.toString().padStart(2, '0')}:00:00+05:30`);
+                // Generate slots from startHour to endHour with 30 min intervals
+                // Create a base date in IST (Mentor time)
+                // We construct the start time: 
+                let currentSlot = new Date(dateValue + `T${startHour.toString().padStart(2, '0')}:00:00+05:30`);
+                const endTime = new Date(dateValue + `T${endHour.toString().padStart(2, '0')}:00:00+05:30`);
 
+                while (currentSlot < endTime) {
                     // Convert to User Timezone for display
-                    const displayTime = slotDateIST.toLocaleTimeString('en-US', {
+                    const displayTime = currentSlot.toLocaleTimeString('en-US', {
                         timeZone: userTimeZone,
                         hour: 'numeric',
                         minute: '2-digit',
@@ -1734,19 +1751,28 @@ if (bookingForm) {
                     });
 
                     // Format timezone name (e.g., IST, GMT, EST)
-                    const tzName = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short', timeZone: userTimeZone }).formatToParts(slotDateIST).find(p => p.type === 'timeZoneName')?.value || '';
+                    const tzName = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short', timeZone: userTimeZone }).formatToParts(currentSlot).find(p => p.type === 'timeZoneName')?.value || '';
 
-                    // Create option value (keep generic or strict? Let's keep strict "10:00 AM" format for backend compatibility, but show converted)
-                    // Wait, existing backend expects simple string. Let's send the "IST Time" as value to keep it simple for now, 
-                    // or send full string. The Admin Notification needs to know the time.
-                    // Let's stick to sending the IST time string as value "10:00 AM", but display "10:00 AM IST (4:30 AM Your Time)"
+                    const istTimeLabel = formatTime(currentSlot); // e.g. "10:00 AM" or "10:30 AM"
 
-                    const istTimeLabel = formatTime(slotDateIST); // e.g. "10:00 AM"
+                    const option = document.createElement('option');
+                    option.value = istTimeLabel;
 
-                    const optionIndex = document.createElement('option');
-                    optionIndex.value = istTimeLabel;
-                    optionIndex.textContent = `${istTimeLabel} IST (${displayTime} ${tzName})`;
-                    timeSelect.appendChild(optionIndex);
+                    // Check collision
+                    const isBooked = existingBookings.includes(istTimeLabel);
+
+                    if (isBooked) {
+                        option.textContent = `${istTimeLabel} IST - Booked ❌`;
+                        option.disabled = true;
+                        option.style.color = '#ef4444'; // Red color
+                    } else {
+                        option.textContent = `${istTimeLabel} IST (${displayTime} ${tzName})`;
+                    }
+
+                    timeSelect.appendChild(option);
+
+                    // Add 30 minutes
+                    currentSlot.setMinutes(currentSlot.getMinutes() + 30);
                 }
 
             } catch (err) {
