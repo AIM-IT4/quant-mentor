@@ -529,6 +529,8 @@ h3 {
     background: conic-gradient(from 180deg, transparent, var(--accent-primary), transparent 30%);
     animation: rotate 4s linear infinite;
     opacity: 0.1;
+    pointer-events: none;
+    /* Fix: Prevent glow from blocking clicks */
 }
 
 @keyframes rotate {
