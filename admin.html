@@ -2121,12 +2121,13 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
 
             try {
                 // Fetch daily data for the range
-                // FIX: Filter by booking_date for bookings, so we see revenue when the session happens
+                // FIX: Use created_at for ALL revenue types to show "Sales/Bookings made" in the selected timeframe.
+                // This ensures that if a user books today for next week, the revenue shows up TODAY (when the sale occurred).
                 const { data: bookings, error: bookingsError } = await window.supabaseAdminClient
                     .from('bookings')
-                    .select('service_price, booking_date, service_name')
-                    .gte('booking_date', cutoffDate.toISOString().split('T')[0])
-                    .in('status', ['confirmed', 'completed', 'pending']); // Include likely revenue
+                    .select('service_price, created_at, service_name') // Fetch created_at
+                    .gte('created_at', cutoffDate.toISOString()) // Filter by created_at
+                    .in('status', ['confirmed', 'completed', 'pending', 'upcoming']);
 
                 if (bookingsError) console.error('Error fetching chart bookings:', bookingsError);
 
@@ -2154,12 +2155,11 @@ If you have any questions, please contact us at jha.8@alumni.iitj.ac.in
                 }
 
                 (bookings || []).forEach(b => {
-                    const date = b.booking_date; // "YYYY-MM-DD"
+                    const bDate = new Date(b.created_at); // Use created_at
+                    const dateKey = bDate.toLocaleDateString('en-CA');
                     // If the date falls within our generated range keys, add it
-                    if (dailyData[date] !== undefined) {
-                        dailyData[date] += (b.service_price || 0);
-                    } else {
-                        console.warn('Booking date outside chart range headers:', date);
+                    if (dailyData[dateKey] !== undefined) {
+                        dailyData[dateKey] += (b.service_price || 0);
                     }
                 });
 
