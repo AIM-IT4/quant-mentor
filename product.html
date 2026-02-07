@@ -170,6 +170,198 @@
             .coupon-row input {
                 width: 100%;
             }
+
+            .product-badges {
+                flex-wrap: wrap;
+            }
+
+            .reviews-carousel-section {
+                padding: 40px 15px;
+            }
+
+            .reviews-carousel-container {
+                padding: 0 40px;
+            }
+
+            .carousel-btn {
+                width: 35px;
+                height: 35px;
+            }
+
+            .carousel-btn.prev {
+                left: 0;
+            }
+
+            .carousel-btn.next {
+                right: 0;
+            }
+
+            .review-slide {
+                min-width: 100%;
+                padding: 20px;
+            }
+        }
+
+        /* Product Badges */
+        .product-badges {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .product-badge-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fef08a;
+            color: #1a1a1a;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .product-badge-item i {
+            font-size: 1rem;
+        }
+
+        .product-badge-item.rating {
+            background: #fef08a;
+        }
+
+        .product-badge-item.rating i {
+            color: #1a1a1a;
+        }
+
+        .product-badge-item.digital {
+            background: #fef08a;
+        }
+
+        .product-badge-item.sales {
+            background: #fef08a;
+        }
+
+        /* Reviews Carousel Section */
+        .reviews-carousel-section {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .reviews-carousel-section h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+        }
+
+        .reviews-carousel-container {
+            position: relative;
+            overflow: hidden;
+            padding: 0 50px;
+        }
+
+        .reviews-carousel-track {
+            display: flex;
+            transition: transform 0.4s ease-in-out;
+        }
+
+        .review-slide {
+            min-width: 100%;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        .review-card {
+            background: #fef3e2;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .review-card .review-text {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #333;
+            margin-bottom: 20px;
+            font-style: normal;
+        }
+
+        .review-card .review-author {
+            font-weight: 700;
+            color: #1a1a1a;
+            font-size: 1rem;
+        }
+
+        .review-card .review-date {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+
+        .carousel-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .carousel-btn.prev {
+            left: 0;
+        }
+
+        .carousel-btn.next {
+            right: 0;
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .carousel-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border-light);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .carousel-dot.active {
+            background: var(--accent-primary);
+            transform: scale(1.2);
+        }
+
+        .no-reviews-message {
+            color: var(--text-muted);
+            padding: 40px;
+            font-style: italic;
         }
     </style>
 </head>
@@ -219,6 +411,18 @@
             </div>
 
             <div class="product-info">
+                <!-- Product Badges -->
+                <div class="product-badges" id="p-badges">
+                    <span class="product-badge-item rating" id="p-rating-badge">
+                        <i class="fas fa-star"></i> <span id="p-rating">5</span>
+                    </span>
+                    <span class="product-badge-item digital">
+                        <i class="far fa-check-square"></i> Digital Product
+                    </span>
+                    <span class="product-badge-item sales" id="p-sales-badge">
+                        <i class="fas fa-bolt"></i> <span id="p-sales">0</span> Sales
+                    </span>
+                </div>
                 <h1 id="p-title">Product Title</h1>
                 <div class="product-price-tag" id="p-price">₹0</div>
                 <div class="product-description-full" id="p-desc">
@@ -243,6 +447,25 @@
             <a href="index.html" class="btn btn-primary">Return Home</a>
         </div>
     </div>
+
+    <!-- Reviews Carousel Section -->
+    <section class="reviews-carousel-section" id="reviews-section" style="display: none;">
+        <h2>What are people saying</h2>
+        <div class="reviews-carousel-container">
+            <button class="carousel-btn prev" id="carousel-prev" onclick="moveCarousel(-1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="reviews-carousel-track" id="carousel-track">
+                <!-- Reviews will be loaded dynamically -->
+            </div>
+            <button class="carousel-btn next" id="carousel-next" onclick="moveCarousel(1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="carousel-dots" id="carousel-dots">
+            <!-- Dots will be added dynamically -->
+        </div>
+    </section>
 
     <!-- Footer -->
     <footer style="border-top: 1px solid var(--border-subtle); padding: 40px 0; background: var(--bg-secondary);">
@@ -327,6 +550,17 @@
                     img.style.display = 'block';
                     document.getElementById('p-placeholder').style.display = 'none';
                 }
+
+                // Update Product Badges (Rating, Sales)
+                if (product.average_rating !== undefined) {
+                    document.getElementById('p-rating').textContent = product.average_rating || 5;
+                }
+                if (product.sales_count !== undefined) {
+                    document.getElementById('p-sales').textContent = product.sales_count || 0;
+                }
+
+                // Load Product-Specific Reviews
+                loadProductReviews(id);
 
                 // Price
                 const priceEl = document.getElementById('p-price');
@@ -570,6 +804,142 @@
             }
         }
 
+        // Reviews Carousel Variables
+        let currentSlide = 0;
+        let totalSlides = 0;
+
+        // Load product-specific reviews from junction table
+        async function loadProductReviews(productId) {
+            try {
+                // Fetch reviews linked to this product
+                const { data: linkedReviews, error: linkError } = await window.supabaseClient
+                    .from('product_reviews')
+                    .select(`
+                        display_order,
+                        testimonials (
+                            id,
+                            name,
+                            review,
+                            rating,
+                            created_at
+                        )
+                    `)
+                    .eq('product_id', productId)
+                    .order('display_order', { ascending: true });
+
+                if (linkError) {
+                    console.log('No product_reviews table or error:', linkError);
+                    // Fallback: load some published testimonials
+                    return loadFallbackReviews();
+                }
+
+                if (!linkedReviews || linkedReviews.length === 0) {
+                    // Fallback: load published testimonials as carousel
+                    return loadFallbackReviews();
+                }
+
+                // Extract testimonials data
+                const reviews = linkedReviews
+                    .filter(r => r.testimonials)
+                    .map(r => r.testimonials);
+
+                if (reviews.length > 0) {
+                    renderReviewsCarousel(reviews);
+                }
+            } catch (e) {
+                console.error('Error loading product reviews:', e);
+                loadFallbackReviews();
+            }
+        }
+
+        // Fallback: Load published testimonials if no product_reviews linked
+        async function loadFallbackReviews() {
+            try {
+                const { data: reviews, error } = await window.supabaseClient
+                    .from('testimonials')
+                    .select('*')
+                    .eq('is_published', true)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+
+                if (!error && reviews && reviews.length > 0) {
+                    renderReviewsCarousel(reviews);
+                }
+            } catch (e) {
+                console.error('Fallback reviews load error:', e);
+            }
+        }
+
+        // Render reviews into carousel
+        function renderReviewsCarousel(reviews) {
+            const track = document.getElementById('carousel-track');
+            const dotsContainer = document.getElementById('carousel-dots');
+            const section = document.getElementById('reviews-section');
+
+            if (!track || !reviews || reviews.length === 0) return;
+
+            totalSlides = reviews.length;
+            currentSlide = 0;
+
+            // Build slides
+            track.innerHTML = reviews.map((r, index) => {
+                const date = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                const escapedReview = r.review.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const escapedName = r.name.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return `
+                    <div class="review-slide">
+                        <div class="review-card">
+                            <p class="review-text">"${escapedReview}"</p>
+                            <p class="review-author">— ${escapedName}</p>
+                            <p class="review-date">${date}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Build dots
+            if (dotsContainer && totalSlides > 1) {
+                dotsContainer.innerHTML = reviews.map((_, i) =>
+                    `<button class="carousel-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></button>`
+                ).join('');
+            }
+
+            // Show section
+            section.style.display = 'block';
+
+            // Hide arrows if only 1 review
+            if (totalSlides <= 1) {
+                document.getElementById('carousel-prev').style.display = 'none';
+                document.getElementById('carousel-next').style.display = 'none';
+            }
+        }
+
+        // Move carousel by direction (-1 or +1)
+        function moveCarousel(direction) {
+            currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+            updateCarousel();
+        }
+
+        // Go to specific slide
+        function goToSlide(index) {
+            currentSlide = index;
+            updateCarousel();
+        }
+
+        // Update carousel position
+        function updateCarousel() {
+            const track = document.getElementById('carousel-track');
+            if (track) {
+                track.style.transform = `translateX(-${currentSlide * 100}%)`;
+            }
+
+            // Update dots
+            const dots = document.querySelectorAll('.carousel-dot');
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+        }
+
         function showError() {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('error-content').style.display = 'block';
@@ -616,9 +986,6 @@
         </div>
     </div>
 
-
-
-    </script>
 </body>
 
 </html>

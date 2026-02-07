@@ -571,6 +571,40 @@
                     </small>
                 </div>
 
+                <!-- Product Rating & Sales (Displayed on Product Page) -->
+                <div class="form-row"
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                    <div class="form-group">
+                        <label><i class="fas fa-star" style="color: #fbbf24;"></i> Average Rating (1-5)</label>
+                        <input type="number" id="productRating" min="1" max="5" step="0.1" value="5" placeholder="5">
+                        <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                            Displayed on product page badges
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-bolt" style="color: #fbbf24;"></i> Sales Count</label>
+                        <input type="number" id="productSalesCount" min="0" value="0" placeholder="0">
+                        <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                            Number of sales to display
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Product Reviews Selection -->
+                <div class="form-group"
+                    style="margin-top: 20px; background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+                    <label><i class="fas fa-comments" style="color: #a855f7;"></i> Select Reviews for Product
+                        Page</label>
+                    <p style="font-size: 0.85em; color: var(--text-muted); margin: 5px 0 15px;">
+                        Check the reviews you want to display in the carousel on this product's page.
+                    </p>
+                    <div id="productReviewsCheckboxes"
+                        style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 10px;">
+                        <p style="color: var(--text-muted); text-align: center; font-size: 0.9em;">Loading reviews...
+                        </p>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label>Description</label>
                     <div style="background: white; border-radius: 4px; overflow: hidden;">
@@ -1161,6 +1195,9 @@ Brief Q&A"></textarea>
                                     }
 
                                     // 3. Save or Update Metadata in Database
+                                    const averageRating = parseFloat(document.getElementById('productRating').value) || 5;
+                                    const salesCount = parseInt(document.getElementById('productSalesCount').value) || 0;
+
                                     const productData = {
                                         name: name,
                                         price: parseFloat(price),
@@ -1168,7 +1205,9 @@ Brief Q&A"></textarea>
                                         enable_ppp: enablePPP,
                                         discount_percentage: parseInt(discount) || 0,
                                         coupon_code: couponCode,
-                                        description: desc
+                                        description: desc,
+                                        average_rating: averageRating,
+                                        sales_count: salesCount
                                     };
 
                                     // Only update URLs if new files were uploaded
@@ -1176,6 +1215,8 @@ Brief Q&A"></textarea>
                                     if (coverUrl) productData.cover_image_url = coverUrl;
 
                                     let dbError;
+                                    let savedProductId = productId; // Start with existing ID for updates
+
                                     if (productId) {
                                         // Update existing product
                                         const result = await window.supabaseAdminClient
@@ -1192,11 +1233,21 @@ Brief Q&A"></textarea>
                                         // Insert new product
                                         const result = await window.supabaseAdminClient
                                             .from('products')
-                                            .insert([productData]);
+                                            .insert([productData])
+                                            .select();
+
+                                        if (!result.error && result.data && result.data.length > 0) {
+                                            savedProductId = result.data[0].id;
+                                        }
                                         dbError = result.error;
                                     }
 
                                     if (dbError) throw dbError;
+
+                                    // 4. Save Selected Reviews to product_reviews table
+                                    if (savedProductId) {
+                                        await saveProductReviews(savedProductId);
+                                    }
 
                                     // Success
                                     status.textContent = productId ? '✅ Product updated successfully!' : '✅ Product added successfully!';
@@ -1330,6 +1381,13 @@ Brief Q&A"></textarea>
                                     togglePriceInput(freeCheck);
                                 }
 
+                                // Load Rating & Sales Count
+                                document.getElementById('productRating').value = data.average_rating || 5;
+                                document.getElementById('productSalesCount').value = data.sales_count || 0;
+
+                                // Load selected reviews for this product
+                                await loadProductReviewsSelection(data.id);
+
                                 if (quill) quill.root.innerHTML = data.description || '';
                                 document.getElementById('productSubmitBtn').textContent = 'Update Product';
                                 document.getElementById('cancelEditBtn').style.display = 'inline-block';
@@ -1375,6 +1433,106 @@ Brief Q&A"></textarea>
                                 if (label) label.innerHTML = 'Cover Image (Required)';
                                 document.getElementById('productCover').value = '';
                             }
+
+                            // Load Testimonials Checkboxes for Review Selection
+                            async function loadReviewsCheckboxes(selectedReviewIds = []) {
+                                const container = document.getElementById('productReviewsCheckboxes');
+                                if (!container) return;
+
+                                try {
+                                    const { data: testimonials, error } = await window.supabaseAdminClient
+                                        .from('testimonials')
+                                        .select('id, name, review, rating')
+                                        .eq('is_published', true)
+                                        .order('created_at', { ascending: false });
+
+                                    if (error) {
+                                        container.innerHTML = `<p style="color: red; font-size: 0.9em;">Error loading reviews: ${error.message}</p>`;
+                                        return;
+                                    }
+
+                                    if (!testimonials || testimonials.length === 0) {
+                                        container.innerHTML = '<p style="color: var(--text-muted); text-align: center; font-size: 0.9em;">No published reviews available.</p>';
+                                        return;
+                                    }
+
+                                    container.innerHTML = testimonials.map(t => {
+                                        const isChecked = selectedReviewIds.includes(t.id) ? 'checked' : '';
+                                        const stars = '★'.repeat(t.rating) + '☆'.repeat(5 - t.rating);
+                                        const shortReview = t.review.length > 60 ? t.review.substring(0, 60) + '...' : t.review;
+                                        return `
+                                            <label style="display: flex; align-items: flex-start; gap: 10px; padding: 8px; border-bottom: 1px solid var(--border); cursor: pointer;">
+                                                <input type="checkbox" class="product-review-checkbox" value="${t.id}" ${isChecked} style="margin-top: 3px;">
+                                                <div>
+                                                    <strong style="color: var(--text);">${t.name}</strong>
+                                                    <span style="color: #fbbf24; margin-left: 8px;">${stars}</span>
+                                                    <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 0.85em;">"${shortReview}"</p>
+                                                </div>
+                                            </label>
+                                        `;
+                                    }).join('');
+
+                                } catch (e) {
+                                    container.innerHTML = `<p style="color: red;">Error: ${e.message}</p>`;
+                                }
+                            }
+
+                            // Load product's existing selected reviews
+                            async function loadProductReviewsSelection(productId) {
+                                let selectedIds = [];
+
+                                try {
+                                    const { data: links, error } = await window.supabaseAdminClient
+                                        .from('product_reviews')
+                                        .select('testimonial_id')
+                                        .eq('product_id', productId);
+
+                                    if (!error && links) {
+                                        selectedIds = links.map(l => l.testimonial_id);
+                                    }
+                                } catch (e) {
+                                    console.log('product_reviews table may not exist yet:', e);
+                                }
+
+                                await loadReviewsCheckboxes(selectedIds);
+                            }
+
+                            // Save selected reviews to product_reviews table
+                            async function saveProductReviews(productId) {
+                                const checkboxes = document.querySelectorAll('.product-review-checkbox:checked');
+                                const selectedTestimonialIds = Array.from(checkboxes).map(cb => cb.value);
+
+                                try {
+                                    // First, delete existing links for this product
+                                    await window.supabaseAdminClient
+                                        .from('product_reviews')
+                                        .delete()
+                                        .eq('product_id', productId);
+
+                                    // If no reviews selected, we're done
+                                    if (selectedTestimonialIds.length === 0) return;
+
+                                    // Insert new links
+                                    const links = selectedTestimonialIds.map((tid, index) => ({
+                                        product_id: productId,
+                                        testimonial_id: tid,
+                                        display_order: index
+                                    }));
+
+                                    const { error } = await window.supabaseAdminClient
+                                        .from('product_reviews')
+                                        .insert(links);
+
+                                    if (error) {
+                                        console.error('Error saving product reviews:', error);
+                                    }
+                                } catch (e) {
+                                    console.log('product_reviews save error (table may not exist yet):', e);
+                                }
+                            }
+
+                            // Initialize reviews checkboxes on page load
+                            loadReviewsCheckboxes();
 
                             // Delete Product
                             async function deleteProduct(id) {
