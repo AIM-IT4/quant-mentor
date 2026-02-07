@@ -946,6 +946,48 @@ async function displaySupabaseProducts(products) {
                 ? `<span style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; font-weight: 600; margin-left: 8px;">${localPrice.currency.code}</span>`
                 : '';
 
+            // Handle original price display (fix for INR showing when using other currencies)
+            let originalPriceDisplay = '';
+            if (product.original_price > product.price) {
+                if (isLocalCurrency) {
+                    // Estimate original price in local currency based on the rate used for the main price
+                    // This ensures consistency without a separate API call
+                    const rate = localPrice.rate || 1;
+                    /* 
+                       Logic: 
+                       If we applied a 1.5x PPP multiplier to the main price, we should apply it here too.
+                       The 'rate' in localPrice object returned by convertPrice is the RAW exchange rate.
+                       BUT the 'amount' in localPrice might include the 1.5x multiplier.
+                       
+                       Let's re-calculate cleanly.
+                    */
+                    let convertedOriginal = product.original_price * rate;
+
+                    // Apply PPP if main price has it (we check if currency is NOT in exclusion list)
+                    const weakersCurrencies = [
+                        'PKR', 'BDT', 'LKR', 'NPR', // South Asia
+                        'NGN', 'EGP', 'KES', 'GHS', 'ZAR', // Africa
+                        'VND', 'IDR', 'PHP', 'MYR', 'THB', // SE Asia
+                        'TRY', 'RUB', 'UAH', // Eastern Europe/Eurasia
+                        'BRL', 'MXN', 'ARS', 'COP', 'CLP', 'PEN' // Latin America
+                    ];
+
+                    if (!weakersCurrencies.includes(localPrice.currency.code)) {
+                        convertedOriginal = convertedOriginal * 1.5;
+                    }
+
+                    const originalObj = {
+                        amount: Math.round(convertedOriginal),
+                        currency: localPrice.currency
+                    };
+                    originalPriceDisplay = `<div style="display:flex;gap:8px;align-items:baseline;"><span style="text-decoration:line-through;color:var(--text-muted);font-size:0.9em">${formatPrice(originalObj)}</span>${priceDisplay}</div>`;
+                } else {
+                    originalPriceDisplay = `<div style="display:flex;gap:8px;align-items:baseline;"><span style="text-decoration:line-through;color:var(--text-muted);font-size:0.9em">₹${product.original_price}</span>${priceDisplay}</div>`;
+                }
+            } else {
+                originalPriceDisplay = priceDisplay;
+            }
+
             productCard.innerHTML = `
                 ${imageSection}
                 <div class="product-content">
@@ -961,7 +1003,7 @@ async function displaySupabaseProducts(products) {
                         <span><i class="fas fa-download"></i> Instant Access</span>
                     </div>
                     <div class="product-footer">
-                        ${isFree ? priceDisplay : (product.original_price > product.price ? `<div style="display:flex;gap:8px;align-items:baseline;"><span style="text-decoration:line-through;color:var(--text-muted);font-size:0.9em">₹${product.original_price}</span>${priceDisplay}</div>` : priceDisplay)}
+                        ${originalPriceDisplay}
                         <button class="btn btn-product" onclick="openProductModal('${product.id}')" data-price="${product.price}">${btnText}</button>
                     </div>
                 </div>
