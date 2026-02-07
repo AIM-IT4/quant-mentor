@@ -157,6 +157,41 @@
             display: block;
         }
 
+        .upload-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px dashed rgba(99, 102, 241, 0.4);
+            border-radius: 8px;
+        }
+
+        .upload-btn {
+            padding: 8px 16px;
+            background: transparent;
+            color: var(--accent-primary);
+            border: 1px solid var(--accent-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .upload-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        #uploaded-file-name {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
         .run-btn {
             padding: 10px 24px;
             background: var(--accent-gradient);
@@ -336,14 +371,20 @@ print("Daily Returns:", returns)
 print(f"Mean Return: {np.mean(returns):.4f}")
 print(f"Volatility: {np.std(returns):.4f}")
 
-# Create a simple DataFrame
-df = pd.DataFrame({
-    'Price': prices,
-    'Day': range(1, len(prices)+1)
-})
-print("\nDataFrame:")
-print(df)
+# If you uploaded a CSV, use:
+# df = pd.read_csv('/data/uploaded.csv')
+# print(df.head())
 </textarea>
+
+                    <!-- File Upload Section -->
+                    <div class="upload-section">
+                        <input type="file" id="csv-upload" accept=".csv" style="display: none;"
+                            onchange="handleFileUpload(event)">
+                        <button class="upload-btn" onclick="document.getElementById('csv-upload').click()">
+                            <i class="fas fa-upload"></i> Upload CSV
+                        </button>
+                        <span id="uploaded-file-name">No file uploaded</span>
+                    </div>
                 </div>
                 <div class="output-panel">
                     <div class="panel-header">
@@ -506,6 +547,33 @@ sys.stdout = StringIO()
             } finally {
                 runBtn.disabled = false;
                 runBtn.innerHTML = '<i class="fas fa-play"></i> Run';
+            }
+        }
+
+        // Handle CSV File Upload
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const fileName = document.getElementById('uploaded-file-name');
+            fileName.textContent = `Loading ${file.name}...`;
+
+            try {
+                const text = await file.text();
+
+                // Create /data directory in Pyodide filesystem
+                pyodide.runPython(`
+import os
+if not os.path.exists('/data'):
+    os.makedirs('/data')
+                `);
+
+                // Write file to Pyodide filesystem
+                pyodide.FS.writeFile('/data/uploaded.csv', text);
+
+                fileName.innerHTML = `<i class="fas fa-check-circle" style="color: #22c55e;"></i> ${file.name} ready — use: <code style="background:#1e1e2e; padding:2px 6px; border-radius:4px;">pd.read_csv('/data/uploaded.csv')</code>`;
+            } catch (e) {
+                fileName.innerHTML = `<i class="fas fa-times-circle" style="color: #ef4444;"></i> Error: ${e.message}`;
             }
         }
 
