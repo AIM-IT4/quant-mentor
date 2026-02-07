@@ -358,7 +358,7 @@ print(df)
 
             <div class="libraries-info">
                 <h4><i class="fas fa-cubes"></i> Available Libraries</h4>
-                <p>Pre-loaded packages for quant finance:</p>
+                <p>Pre-loaded packages for quant finance (may take ~20s to load all):</p>
                 <div class="lib-tags">
                     <span class="lib-tag">NumPy</span>
                     <span class="lib-tag">Pandas</span>
@@ -366,6 +366,7 @@ print(df)
                     <span class="lib-tag">Matplotlib</span>
                     <span class="lib-tag">scikit-learn</span>
                     <span class="lib-tag">SymPy</span>
+                    <span class="lib-tag">statsmodels</span>
                 </div>
             </div>
         </div>
@@ -423,8 +424,17 @@ print(df)
                 statusText.textContent = 'Loading NumPy & Pandas...';
                 await pyodide.loadPackage(['numpy', 'pandas']);
 
+                statusText.textContent = 'Loading SciPy...';
+                await pyodide.loadPackage(['scipy']);
+
                 statusText.textContent = 'Loading Matplotlib...';
                 await pyodide.loadPackage(['matplotlib']);
+
+                statusText.textContent = 'Loading scikit-learn...';
+                await pyodide.loadPackage(['scikit-learn']);
+
+                statusText.textContent = 'Loading SymPy & statsmodels...';
+                await pyodide.loadPackage(['sympy', 'statsmodels']);
 
                 // Setup matplotlib for non-interactive backend
                 pyodide.runPython(`
@@ -443,7 +453,7 @@ def _get_plot_base64():
                 `);
 
                 statusDot.classList.add('ready');
-                statusText.textContent = 'Ready';
+                statusText.textContent = 'Ready (all packages loaded)';
                 runBtn.disabled = false;
             } catch (e) {
                 statusText.textContent = 'Error loading Python';
