@@ -115,6 +115,12 @@
             text-decoration: line-through;
         }
 
+        .status-admin_reschedule_pending {
+            background: rgba(168, 85, 247, 0.1);
+            color: #a855f7;
+            border: 1px dashed #a855f7;
+        }
+
         .booking-details {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -443,6 +449,62 @@
                         </div>
                     ` : ''}
 
+                    ${booking.status === 'admin_reschedule_pending' ? `
+                        <div style="background: rgba(168, 85, 247, 0.1); border: 1px dashed #a855f7; padding: 20px; border-radius: 8px; margin-top: 15px;">
+                            <i class="fas fa-calendar-alt" style="color: #a855f7; font-size: 1.2em;"></i>
+                            <strong style="color: #a855f7; font-size: 1.1em; margin-left: 8px;">Admin Reschedule Request</strong>
+                            
+                            <div style="margin-top: 15px; display: grid; gap: 10px;">
+                                <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 6px;">
+                                    <small style="color: var(--text-muted);">Current Schedule:</small><br>
+                                    <span>${formatDate(booking.booking_date)} at ${booking.booking_time}</span>
+                                </div>
+                                <div style="background: rgba(168, 85, 247, 0.15); padding: 12px; border-radius: 6px; border-left: 3px solid #a855f7;">
+                                    <small style="color: #a855f7;">Proposed New Schedule:</small><br>
+                                    <strong style="color: white;">${formatDate(booking.admin_proposed_date)} at ${booking.admin_proposed_time}</strong>
+                                </div>
+                                ${booking.admin_reschedule_reason ? `
+                                    <div style="color: var(--text-muted); font-size: 0.9em;">
+                                        <i class="fas fa-info-circle"></i> Reason: ${booking.admin_reschedule_reason}
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button onclick="acceptAdminReschedule('${booking.id}')" class="btn" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                                    <i class="fas fa-check"></i> Accept New Time
+                                </button>
+                                <button onclick="toggleCounterProposeForm('${booking.id}')" class="btn btn-secondary">
+                                    <i class="fas fa-calendar-alt"></i> Suggest Different Time
+                                </button>
+                            </div>
+
+                            <div id="counter-propose-form-${booking.id}" class="reschedule-form" style="margin-top: 15px;">
+                                <h4 style="margin-bottom: 15px;">Suggest a Different Time</h4>
+                                <div class="form-group">
+                                    <label>Your Preferred Date</label>
+                                    <input type="date" id="counter-date-${booking.id}" min="${getTomorrowDate()}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Your Preferred Time</label>
+                                    <select id="counter-time-${booking.id}">
+                                        <option value="">Select time slot</option>
+                                        <option value="10:00 AM">10:00 AM</option>
+                                        <option value="11:00 AM">11:00 AM</option>
+                                        <option value="12:00 PM">12:00 PM</option>
+                                        <option value="2:00 PM">2:00 PM</option>
+                                        <option value="3:00 PM">3:00 PM</option>
+                                        <option value="4:00 PM">4:00 PM</option>
+                                        <option value="5:00 PM">5:00 PM</option>
+                                    </select>
+                                </div>
+                                <button onclick="submitCounterProposal('${booking.id}', '${booking.email}')" class="btn">
+                                    <i class="fas fa-paper-plane"></i> Send Counter-Proposal
+                                </button>
+                            </div>
+                        </div>
+                    ` : ''}
+
                     ${booking.status === 'reschedule_requested' ? `
                         <div style="background: rgba(168, 85, 247, 0.1); border: 1px dashed #a855f7; padding: 15px; border-radius: 8px; margin-top: 15px;">
                             <i class="fas fa-clock" style="color: #a855f7;"></i>
@@ -603,6 +665,184 @@ Status: Pending admin approval
             } catch (error) {
                 console.error('❌ Reschedule request failed:', error);
                 alert('❌ Error submitting reschedule request. Please email us directly at jha.8@alumni.iitj.ac.in');
+            }
+        }
+
+        // ====================================================
+        // Admin-Initiated Reschedule Response Functions
+        // ====================================================
+
+        // Toggle counter-proposal form
+        function toggleCounterProposeForm(bookingId) {
+            const form = document.getElementById(`counter-propose-form-${bookingId}`);
+            form.classList.toggle('active');
+        }
+
+        // Accept admin's proposed reschedule
+        async function acceptAdminReschedule(bookingId) {
+            if (!confirm('✓ Accept this new time?\n\nYour session will be updated to the proposed schedule.')) {
+                return;
+            }
+
+            try {
+                // 1. Fetch booking to get admin's proposed date/time
+                const { data: booking, error: fetchError } = await supabase
+                    .from('bookings')
+                    .select('*')
+                    .eq('id', bookingId)
+                    .single();
+
+                if (fetchError || !booking) {
+                    throw fetchError || new Error('Booking not found');
+                }
+
+                // 2. Update booking with proposed date/time
+                const { error: updateError } = await supabase
+                    .from('bookings')
+                    .update({
+                        booking_date: booking.admin_proposed_date,
+                        booking_time: booking.admin_proposed_time,
+                        status: 'confirmed',
+                        customer_response: 'accepted',
+                        // Clear admin proposal fields
+                        admin_proposed_date: null,
+                        admin_proposed_time: null,
+                        admin_reschedule_reason: null,
+                        admin_reschedule_requested_at: null
+                    })
+                    .eq('id', bookingId);
+
+                if (updateError) {
+                    throw updateError;
+                }
+
+                // 3. Send confirmation email to admin (via Formspree for simplicity)
+                const FORMSPREE_ID = 'mjgozran';
+                await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: `✅ Reschedule ACCEPTED - ${booking.email}`,
+                        email: booking.email,
+                        name: booking.name,
+                        booking_id: bookingId,
+                        service: booking.service_name,
+                        new_date: booking.admin_proposed_date,
+                        new_time: booking.admin_proposed_time,
+                        message: `
+✅ CUSTOMER ACCEPTED RESCHEDULE
+━━━━━━━━━━━━━━━━━━━━
+Customer: ${booking.name} (${booking.email})
+Service: ${booking.service_name}
+
+New Confirmed Schedule:
+• Date: ${booking.admin_proposed_date}
+• Time: ${booking.admin_proposed_time}
+
+Status: CONFIRMED
+━━━━━━━━━━━━━━━━━━━━
+                        `.trim()
+                    })
+                });
+
+                // 4. Send confirmation email to customer
+                const htmlContent = `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <h2 style="color: #22c55e;">✅ Session Rescheduled Successfully</h2>
+                        <p>Dear ${booking.name},</p>
+                        <p>Your session has been successfully rescheduled to the new time.</p>
+                        
+                        <div style="background: #dcfce7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
+                            <h3 style="margin-top: 0; color: #16a34a;">Your New Schedule</h3>
+                            <p>📆 Date: <strong>${booking.admin_proposed_date}</strong></p>
+                            <p>🕐 Time: <strong>${booking.admin_proposed_time}</strong></p>
+                        </div>
+
+                        <p>We look forward to seeing you!</p>
+                        <p style="color: #6b7280; margin-top: 30px;">Best regards,<br>QuantMentor</p>
+                    </div>
+                `;
+
+                await sendEmailWithBrevo(
+                    booking.email,
+                    `Session Confirmed - ${booking.service_name}`,
+                    htmlContent,
+                    `Your session has been rescheduled to ${booking.admin_proposed_date} at ${booking.admin_proposed_time}.`
+                );
+
+                alert('✅ Session rescheduled successfully!\n\nYour session is now confirmed for the new date and time.');
+                searchBookings(); // Refresh
+
+            } catch (error) {
+                console.error('❌ Error accepting reschedule:', error);
+                alert('❌ Error accepting reschedule. Please try again or contact us.');
+            }
+        }
+
+        // Submit counter-proposal (customer suggests different time)
+        async function submitCounterProposal(bookingId, email) {
+            const newDate = document.getElementById(`counter-date-${bookingId}`).value;
+            const newTime = document.getElementById(`counter-time-${bookingId}`).value;
+
+            if (!newDate || !newTime) {
+                alert('Please select both date and time for your counter-proposal.');
+                return;
+            }
+
+            try {
+                // Update booking with customer's counter-proposal
+                const { error: updateError } = await supabase
+                    .from('bookings')
+                    .update({
+                        requested_date: newDate,
+                        requested_time: newTime,
+                        status: 'reschedule_requested',
+                        customer_response: 'counter_proposed',
+                        // Clear admin proposal fields
+                        admin_proposed_date: null,
+                        admin_proposed_time: null,
+                        admin_reschedule_reason: null
+                    })
+                    .eq('id', bookingId);
+
+                if (updateError) {
+                    throw updateError;
+                }
+
+                // Notify admin via Formspree
+                const FORMSPREE_ID = 'mjgozran';
+                await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: `📅 Counter-Proposal Received - ${email}`,
+                        email: email,
+                        booking_id: bookingId,
+                        counter_proposed_date: newDate,
+                        counter_proposed_time: newTime,
+                        message: `
+📅 CUSTOMER COUNTER-PROPOSAL
+━━━━━━━━━━━━━━━━━━━━
+Customer Email: ${email}
+Booking ID: ${bookingId}
+
+Customer's Preferred Schedule:
+• Date: ${newDate}
+• Time: ${newTime}
+
+Status: Pending admin approval
+━━━━━━━━━━━━━━━━━━━━
+                        `.trim()
+                    })
+                });
+
+                alert('✅ Counter-proposal submitted!\n\nThe admin will review your preferred time and respond shortly.');
+                toggleCounterProposeForm(bookingId);
+                searchBookings(); // Refresh
+
+            } catch (error) {
+                console.error('❌ Error submitting counter-proposal:', error);
+                alert('❌ Error submitting counter-proposal. Please try again or contact us.');
             }
         }
 

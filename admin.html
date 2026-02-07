@@ -2810,7 +2810,8 @@ QuantMentor
                                 <div style="display: flex; gap: 8px; justify-content: flex-end;">
                                     ${meetLink !== '#' ? `<a href="${meetLink}" target="_blank" title="Join Meeting" style="color:white; padding:6px; background:#6366f1; border-radius:4px;"><i class="fas fa-video"></i></a>` : ''}
                                     ${isActionable ?
-                                            `<button onclick="manualSendReminder('${b.id}')" title="Send Reminder" style="padding:6px 10px; background:rgba(245, 158, 11, 0.2); color:#f59e0b; border:none; border-radius:4px; cursor:pointer;"><i class="fas fa-bell"></i></button>
+                                            `<button onclick="adminInitiateReschedule('${b.id}')" title="Reschedule Session" style="padding:6px 10px; background:rgba(168, 85, 247, 0.2); color:#a855f7; border:none; border-radius:4px; cursor:pointer;"><i class="fas fa-calendar-alt"></i></button>
+                                             <button onclick="manualSendReminder('${b.id}')" title="Send Reminder" style="padding:6px 10px; background:rgba(245, 158, 11, 0.2); color:#f59e0b; border:none; border-radius:4px; cursor:pointer;"><i class="fas fa-bell"></i></button>
                                          <button onclick="updateBookingStatus('${b.id}', 'completed')" title="Mark Completed" style="padding:6px 10px; background:rgba(34, 197, 94, 0.2); color:#22c55e; border:none; border-radius:4px; cursor:pointer;"><i class="fas fa-check"></i></button>
                                          <button onclick="updateBookingStatus('${b.id}', 'cancelled')" title="Cancel" style="padding:6px 10px; background:rgba(239, 68, 68, 0.2); color:#ef4444; border:none; border-radius:4px; cursor:pointer;"><i class="fas fa-times"></i></button>`
                                             :
@@ -3048,6 +3049,167 @@ QuantMentor
 
                         // Export Manual Trigger
                         window.manualSendReminder = manualSendReminder;
+
+                        // ====================================================
+                        // Admin-Initiated Reschedule
+                        // ====================================================
+                        async function adminInitiateReschedule(bookingId) {
+                            if (!window.supabaseAdminClient) {
+                                alert('❌ Admin not authenticated.');
+                                return;
+                            }
+
+                            // 1. Fetch Booking Details
+                            const { data: booking, error } = await window.supabaseAdminClient
+                                .from('bookings')
+                                .select('*')
+                                .eq('id', bookingId)
+                                .single();
+
+                            if (error || !booking) {
+                                alert('❌ Error fetching booking details.');
+                                console.error(error);
+                                return;
+                            }
+
+                            // 2. Prompt for new date/time using native prompts (simple approach)
+                            const proposedDate = prompt(
+                                `📅 Reschedule Session for ${booking.name}\n\n` +
+                                `Current: ${booking.booking_date} at ${booking.booking_time}\n\n` +
+                                `Enter PROPOSED NEW DATE (YYYY-MM-DD):`,
+                                new Date(Date.now() + 86400000).toISOString().split('T')[0] // Default: tomorrow
+                            );
+
+                            if (!proposedDate) return; // Cancelled
+
+                            const proposedTime = prompt(
+                                `Enter PROPOSED NEW TIME:\n\n` +
+                                `Examples: 10:00 AM, 2:30 PM, 5:00 PM`,
+                                '10:00 AM'
+                            );
+
+                            if (!proposedTime) return; // Cancelled
+
+                            const reason = prompt(
+                                `(Optional) Reason for rescheduling:\n\n` +
+                                `This will be shown to the customer.`,
+                                ''
+                            );
+
+                            // 3. Confirm with admin
+                            const confirmMsg = `📆 CONFIRM RESCHEDULE REQUEST\n\n` +
+                                `Customer: ${booking.name} (${booking.email})\n` +
+                                `Service: ${booking.service_name}\n\n` +
+                                `FROM: ${booking.booking_date} at ${booking.booking_time}\n` +
+                                `TO: ${proposedDate} at ${proposedTime}\n` +
+                                `${reason ? 'Reason: ' + reason : ''}\n\n` +
+                                `This will send an email to the customer asking them to accept or suggest a different time.\n\n` +
+                                `Proceed?`;
+
+                            if (!confirm(confirmMsg)) return;
+
+                            try {
+                                // 4. Update booking in database
+                                const { error: updateError } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .update({
+                                        admin_proposed_date: proposedDate,
+                                        admin_proposed_time: proposedTime,
+                                        admin_reschedule_reason: reason || null,
+                                        admin_reschedule_requested_at: new Date().toISOString(),
+                                        status: 'admin_reschedule_pending',
+                                        customer_response: null // Reset any previous response
+                                    })
+                                    .eq('id', bookingId);
+
+                                if (updateError) {
+                                    console.error('❌ Database update failed:', updateError);
+                                    throw updateError;
+                                }
+
+                                // 5. Send email to customer
+                                const myBookingsLink = window.location.origin + '/my-bookings.html';
+
+                                const htmlContent = `
+                                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                                        <h2 style="color: #a855f7;">📅 Session Reschedule Request</h2>
+                                        <p>Dear ${booking.name},</p>
+                                        <p>We need to reschedule your upcoming session. Please review the proposed new time below.</p>
+                                        
+                                        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                                            <h3 style="margin-top: 0;">Original Schedule</h3>
+                                            <p>📆 Date: <strong>${booking.booking_date}</strong></p>
+                                            <p>🕐 Time: <strong>${booking.booking_time}</strong></p>
+                                        </div>
+
+                                        <div style="background: #ede9fe; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #a855f7;">
+                                            <h3 style="margin-top: 0; color: #7c3aed;">Proposed New Schedule</h3>
+                                            <p>📆 Date: <strong>${proposedDate}</strong></p>
+                                            <p>🕐 Time: <strong>${proposedTime}</strong></p>
+                                            ${reason ? `<p>📝 Reason: ${reason}</p>` : ''}
+                                        </div>
+
+                                        <p>Please visit your bookings page to respond:</p>
+                                        <a href="${myBookingsLink}" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #a855f7); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 10px 0;">View My Bookings</a>
+
+                                        <p style="margin-top: 20px;">You can either:</p>
+                                        <ul>
+                                            <li>✅ <strong>Accept</strong> the proposed new time</li>
+                                            <li>📅 <strong>Suggest</strong> a different time that works for you</li>
+                                        </ul>
+
+                                        <p style="color: #6b7280; margin-top: 30px;">Best regards,<br>QuantMentor</p>
+                                    </div>
+                                `;
+
+                                const textContent = `
+Session Reschedule Request
+
+Dear ${booking.name},
+
+We need to reschedule your upcoming session.
+
+ORIGINAL SCHEDULE:
+- Date: ${booking.booking_date}
+- Time: ${booking.booking_time}
+
+PROPOSED NEW SCHEDULE:
+- Date: ${proposedDate}
+- Time: ${proposedTime}
+${reason ? '- Reason: ' + reason : ''}
+
+Please visit your bookings page to respond: ${myBookingsLink}
+
+You can either:
+- Accept the proposed new time
+- Suggest a different time that works for you
+
+Best regards,
+QuantMentor
+                                `;
+
+                                await sendEmailWithBrevo(
+                                    booking.email,
+                                    `Session Reschedule Request - ${booking.service_name}`,
+                                    htmlContent,
+                                    textContent
+                                );
+
+                                alert(`✅ Reschedule request sent to ${booking.email}!\n\nThe customer will receive an email to accept or suggest a different time.`);
+
+                                // Refresh bookings list
+                                if (typeof loadAllBookings === 'function') {
+                                    loadAllBookings();
+                                }
+
+                            } catch (err) {
+                                console.error('❌ Error initiating reschedule:', err);
+                                alert('❌ Error sending reschedule request. Please try again.');
+                            }
+                        }
+
+                        // Export function to window
+                        window.adminInitiateReschedule = adminInitiateReschedule;
 
                         // Initialize Polling
                         // Run once on load, then every 60 seconds
