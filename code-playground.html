@@ -135,7 +135,8 @@
 
         #python-output {
             width: 100%;
-            height: 400px;
+            min-height: 400px;
+            max-height: 600px;
             background: #1e1e2e;
             color: #a6e3a1;
             border: 1px solid var(--border-light);
@@ -146,6 +147,14 @@
             line-height: 1.5;
             overflow-y: auto;
             white-space: pre-wrap;
+        }
+
+        #python-output img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: block;
         }
 
         .run-btn {
@@ -411,8 +420,27 @@ print(df)
                 statusText.textContent = 'Loading Python...';
                 pyodide = await loadPyodide();
 
-                statusText.textContent = 'Loading NumPy...';
+                statusText.textContent = 'Loading NumPy & Pandas...';
                 await pyodide.loadPackage(['numpy', 'pandas']);
+
+                statusText.textContent = 'Loading Matplotlib...';
+                await pyodide.loadPackage(['matplotlib']);
+
+                // Setup matplotlib for non-interactive backend
+                pyodide.runPython(`
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import io, base64
+
+def _get_plot_base64():
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='#1e1e2e')
+    buf.seek(0)
+    img_str = base64.b64encode(buf.read()).decode('utf-8')
+    plt.close('all')
+    return img_str
+                `);
 
                 statusDot.classList.add('ready');
                 statusText.textContent = 'Ready';
@@ -446,14 +474,25 @@ sys.stdout = StringIO()
                 // Run user code
                 await pyodide.runPythonAsync(code);
 
-                // Get output
-                const result = pyodide.runPython('sys.stdout.getvalue()');
-                output.textContent = result || '(No output)';
-                output.style.color = '#a6e3a1';
+                // Get text output
+                const textResult = pyodide.runPython('sys.stdout.getvalue()');
+
+                // Check if there's a plot to display
+                let plotHtml = '';
+                try {
+                    const hasFigures = pyodide.runPython('len(plt.get_fignums()) > 0');
+                    if (hasFigures) {
+                        const imgBase64 = pyodide.runPython('_get_plot_base64()');
+                        plotHtml = `<img src="data:image/png;base64,${imgBase64}" alt="Plot">`;
+                    }
+                } catch (plotErr) {
+                    // No plot, that's fine
+                }
+
+                output.innerHTML = `<pre style="margin:0; color:#a6e3a1; white-space:pre-wrap;">${textResult || '(No text output)'}</pre>${plotHtml}`;
 
             } catch (e) {
-                output.textContent = 'Error:\n' + e.message;
-                output.style.color = '#f38ba8';
+                output.innerHTML = `<pre style="margin:0; color:#f38ba8;">Error:\n${e.message}</pre>`;
             } finally {
                 runBtn.disabled = false;
                 runBtn.innerHTML = '<i class="fas fa-play"></i> Run';
