@@ -86,8 +86,11 @@
             display: block;
         }
 
+        /* Python Editor */
         .python-editor-container {
-            height: 800px;
+            height: 85vh;
+            /* Use viewport height */
+            min-height: 600px;
             background: var(--bg-card);
             border: 1px solid var(--border-light);
             border-radius: 12px;
@@ -100,13 +103,41 @@
             border: none;
         }
 
-        @media (max-width: 900px) {
-            .python-editor-container {
-                height: 600px;
-            }
+        /* C++ Godbolt Embed */
+        .godbolt-container {
+            height: 85vh;
+            /* Use viewport height */
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 0;
+            /* Remove padding to let iframe fill */
+        }
 
-            .godbolt-container iframe {
-                height: 500px;
+        .godbolt-container .panel-header {
+            padding: 15px 20px;
+            margin: 0;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--bg-secondary);
+        }
+
+        .godbolt-container iframe {
+            width: 100%;
+            flex: 1;
+            /* Fill remaining space */
+            border: none;
+        }
+
+        @media (max-width: 900px) {
+
+            .python-editor-container,
+            .godbolt-container {
+                height: 80vh;
+                min-height: 500px;
             }
         }
     </style>
