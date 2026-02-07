@@ -349,7 +349,47 @@
                     buyBtn.classList.replace('btn-primary', 'btn-success');
                     buyBtn.style.background = '#22c55e';
                 } else {
-                    priceEl.textContent = priceText;
+                    // Logic for Slashed Original Price (PPP Aware)
+                    let originalPriceDisplay = '';
+                    if (product.original_price > product.price) {
+                        let originalText = `₹${product.original_price}`;
+
+                        if (window.convertPrice && window.getUserCountry) {
+                            // We need to re-calculate the original price in local currency
+                            // ensuring we apply the same PPP logic if applicable
+                            const country = await window.getUserCountry();
+                            const localPrice = await window.convertPrice(product.price, country);
+
+                            if (localPrice.currency.code !== 'INR') {
+                                const rate = localPrice.rate || 1;
+                                let convertedOriginal = product.original_price * rate;
+
+                                // PPP Exclusion List (Same as script.js)
+                                const weakersCurrencies = [
+                                    'PKR', 'BDT', 'LKR', 'NPR',
+                                    'NGN', 'EGP', 'KES', 'GHS', 'ZAR',
+                                    'VND', 'IDR', 'PHP', 'MYR', 'THB',
+                                    'TRY', 'RUB', 'UAH',
+                                    'BRL', 'MXN', 'ARS', 'COP', 'CLP', 'PEN'
+                                ];
+
+                                if (!weakersCurrencies.includes(localPrice.currency.code)) {
+                                    convertedOriginal = convertedOriginal * 1.5;
+                                }
+
+                                const originalObj = {
+                                    amount: Math.round(convertedOriginal),
+                                    currency: localPrice.currency
+                                };
+                                // Use formatPrice if available globally from script.js, else manual
+                                originalText = `${originalObj.currency.symbol}${originalObj.amount.toLocaleString()}`;
+                            }
+                        }
+
+                        originalPriceDisplay = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">${originalText}</span>`;
+                    }
+
+                    priceEl.innerHTML = `${originalPriceDisplay}${priceText}`;
                     buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${priceText}`;
 
                     // Add Coupon UI if price > 0
