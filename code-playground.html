@@ -371,19 +371,21 @@ print("Daily Returns:", returns)
 print(f"Mean Return: {np.mean(returns):.4f}")
 print(f"Volatility: {np.std(returns):.4f}")
 
-# If you uploaded a CSV, use:
+# If you uploaded a file, use:
 # df = pd.read_csv('/data/uploaded.csv')
-# print(df.head())
+# df = pd.read_excel('/data/uploaded.xlsx')
+# with open('/data/uploaded.txt', 'r') as f: print(f.read())
 </textarea>
 
                     <!-- File Upload Section -->
+                    <!-- File Upload Section -->
                     <div class="upload-section">
-                        <input type="file" id="csv-upload" accept=".csv" style="display: none;"
+                        <input type="file" id="file-upload" accept=".csv, .xlsx, .xls, .txt" style="display: none;"
                             onchange="handleFileUpload(event)">
-                        <button class="upload-btn" onclick="document.getElementById('csv-upload').click()">
-                            <i class="fas fa-upload"></i> Upload CSV
+                        <button class="upload-btn" onclick="document.getElementById('file-upload').click()">
+                            <i class="fas fa-upload"></i> Upload Data File
                         </button>
-                        <span id="uploaded-file-name">No file uploaded</span>
+                        <span id="uploaded-file-name" style="font-size: 0.85em;">Supports CSV, Excel, TXT</span>
                     </div>
                 </div>
                 <div class="output-panel">
@@ -477,6 +479,9 @@ print(f"Volatility: {np.std(returns):.4f}")
                 statusText.textContent = 'Loading SymPy & statsmodels...';
                 await pyodide.loadPackage(['sympy', 'statsmodels']);
 
+                statusText.textContent = 'Loading openpyxl (Excel support)...';
+                await pyodide.loadPackage(['openpyxl']);
+
                 // Setup matplotlib for non-interactive backend
                 pyodide.runPython(`
 import matplotlib
@@ -550,7 +555,7 @@ sys.stdout = StringIO()
             }
         }
 
-        // Handle CSV File Upload
+        // Handle File Upload
         async function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -559,9 +564,15 @@ sys.stdout = StringIO()
             fileName.textContent = `Loading ${file.name}...`;
 
             try {
-                const text = await file.text();
+                // Get file extension
+                const ext = file.name.split('.').pop().toLowerCase();
+                const saveName = `uploaded.${ext}`;
 
-                // Create /data directory in Pyodide filesystem
+                // Read as ArrayBuffer to handle both text and binary (Excel)
+                const arrayBuffer = await file.arrayBuffer();
+                const uint8Array = new Uint8Array(arrayBuffer);
+
+                // Create /data directory if not exists
                 pyodide.runPython(`
 import os
 if not os.path.exists('/data'):
@@ -569,11 +580,17 @@ if not os.path.exists('/data'):
                 `);
 
                 // Write file to Pyodide filesystem
-                pyodide.FS.writeFile('/data/uploaded.csv', text);
+                pyodide.FS.writeFile(`/data/${saveName}`, uint8Array);
 
-                fileName.innerHTML = `<i class="fas fa-check-circle" style="color: #22c55e;"></i> ${file.name} ready — use: <code style="background:#1e1e2e; padding:2px 6px; border-radius:4px;">pd.read_csv('/data/uploaded.csv')</code>`;
+                let codeSnippet = '';
+                if (ext === 'csv') codeSnippet = `pd.read_csv('/data/${saveName}')`;
+                else if (ext === 'xlsx' || ext === 'xls') codeSnippet = `pd.read_excel('/data/${saveName}')`;
+                else codeSnippet = `open('/data/${saveName}', 'r').read()`;
+
+                fileName.innerHTML = `<i class="fas fa-check-circle" style="color: #22c55e;"></i> ${file.name} saved as <b>${saveName}</b><br><code style="background:#1e1e2e; padding:2px 6px; border-radius:4px; font-size:0.8em;">${codeSnippet}</code>`;
             } catch (e) {
                 fileName.innerHTML = `<i class="fas fa-times-circle" style="color: #ef4444;"></i> Error: ${e.message}`;
+                console.error(e);
             }
         }
 
