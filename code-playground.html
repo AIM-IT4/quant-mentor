@@ -11,8 +11,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 
-    <!-- Pyodide -->
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Pyodide removed (using JupyterLite) -->
 
     <style>
         .playground-container {
@@ -85,216 +86,23 @@
             display: block;
         }
 
-        /* Python Editor */
         .python-editor-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            height: 800px;
             background: var(--bg-card);
             border: 1px solid var(--border-light);
             border-radius: 12px;
             overflow: hidden;
         }
 
-        .editor-panel,
-        .output-panel {
-            padding: 20px;
-        }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-light);
-        }
-
-        .panel-title {
-            font-weight: 600;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        #python-code {
+        .python-editor-container iframe {
             width: 100%;
-            height: 400px;
-            background: #1e1e2e;
-            color: #cdd6f4;
-            border: 1px solid var(--border-light);
-            border-radius: 8px;
-            padding: 15px;
-            font-family: 'Fira Code', 'Consolas', monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            resize: vertical;
-            tab-size: 4;
-        }
-
-        #python-output {
-            width: 100%;
-            min-height: 400px;
-            max-height: 600px;
-            background: #1e1e2e;
-            color: #a6e3a1;
-            border: 1px solid var(--border-light);
-            border-radius: 8px;
-            padding: 15px;
-            font-family: 'Fira Code', 'Consolas', monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-
-        #python-output img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin-top: 15px;
-            display: block;
-        }
-
-        .upload-section {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-            padding: 10px;
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px dashed rgba(99, 102, 241, 0.4);
-            border-radius: 8px;
-        }
-
-        .upload-btn {
-            padding: 8px 16px;
-            background: transparent;
-            color: var(--accent-primary);
-            border: 1px solid var(--accent-primary);
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-        }
-
-        .upload-btn:hover {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        #uploaded-file-name {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .run-btn {
-            padding: 10px 24px;
-            background: var(--accent-gradient);
-            color: white;
+            height: 100%;
             border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: transform 0.2s ease;
-        }
-
-        .run-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .run-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .pyodide-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #f59e0b;
-        }
-
-        .status-dot.ready {
-            background: #22c55e;
-        }
-
-        /* C++ Godbolt Embed */
-        .godbolt-container {
-            background: var(--bg-card);
-            border: 1px solid var(--border-light);
-            border-radius: 12px;
-            overflow: hidden;
-            padding: 20px;
-        }
-
-        .godbolt-container iframe {
-            width: 100%;
-            height: 600px;
-            border: none;
-            border-radius: 8px;
-        }
-
-        .libraries-info {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            border-radius: 8px;
-        }
-
-        .libraries-info h4 {
-            margin: 0 0 10px;
-            color: var(--accent-primary);
-            font-size: 0.95rem;
-        }
-
-        .libraries-info p {
-            margin: 0;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .lib-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .lib-tag {
-            padding: 4px 10px;
-            background: rgba(99, 102, 241, 0.2);
-            color: var(--accent-primary);
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 500;
         }
 
         @media (max-width: 900px) {
             .python-editor-container {
-                grid-template-columns: 1fr;
-            }
-
-            #python-code,
-            #python-output {
-                height: 300px;
+                height: 600px;
             }
 
             .godbolt-container iframe {
@@ -348,68 +156,24 @@
             </button>
         </div>
 
-        <!-- Python Section -->
+        <!-- Python Section (JupyterLite) -->
         <div class="compiler-section active" id="python-section">
             <div class="python-editor-container">
-                <div class="editor-panel">
-                    <div class="panel-header">
-                        <span class="panel-title"><i class="fab fa-python"></i> Python Code</span>
-                        <div class="pyodide-status">
-                            <span class="status-dot" id="pyodide-status-dot"></span>
-                            <span id="pyodide-status-text">Loading Python...</span>
-                        </div>
-                    </div>
-                    <textarea id="python-code" spellcheck="false">import numpy as np
-import pandas as pd
-
-# Example: Calculate portfolio returns
-prices = np.array([100, 102, 105, 103, 108])
-returns = np.diff(prices) / prices[:-1]
-
-print("Daily Prices:", prices)
-print("Daily Returns:", returns)
-print(f"Mean Return: {np.mean(returns):.4f}")
-print(f"Volatility: {np.std(returns):.4f}")
-
-# If you uploaded a file, use:
-# df = pd.read_csv('/data/uploaded.csv')
-# df = pd.read_excel('/data/uploaded.xlsx')
-# with open('/data/uploaded.txt', 'r') as f: print(f.read())
-</textarea>
-
-                    <!-- File Upload Section -->
-                    <!-- File Upload Section -->
-                    <div class="upload-section">
-                        <input type="file" id="file-upload" accept=".csv, .xlsx, .xls, .txt" style="display: none;"
-                            onchange="handleFileUpload(event)">
-                        <button class="upload-btn" onclick="document.getElementById('file-upload').click()">
-                            <i class="fas fa-upload"></i> Upload Data File
-                        </button>
-                        <span id="uploaded-file-name" style="font-size: 0.85em;">Supports CSV, Excel, TXT</span>
-                    </div>
-                </div>
-                <div class="output-panel">
-                    <div class="panel-header">
-                        <span class="panel-title"><i class="fas fa-terminal"></i> Output</span>
-                        <button class="run-btn" id="run-python-btn" onclick="runPython()" disabled>
-                            <i class="fas fa-play"></i> Run
-                        </button>
-                    </div>
-                    <div id="python-output">Click "Run" to execute your code...</div>
-                </div>
+                <iframe src="https://jupyterlite.github.io/demo/lab/index.html" title="JupyterLite Notebook"></iframe>
             </div>
 
             <div class="libraries-info">
-                <h4><i class="fas fa-cubes"></i> Available Libraries</h4>
-                <p>Pre-loaded packages for quant finance (may take ~20s to load all):</p>
+                <h4><i class="fas fa-cubes"></i> Jupyter Notebook Environment</h4>
+                <p>Full JupyterLab interface running in your browser. Includes:</p>
                 <div class="lib-tags">
                     <span class="lib-tag">NumPy</span>
                     <span class="lib-tag">Pandas</span>
-                    <span class="lib-tag">SciPy</span>
                     <span class="lib-tag">Matplotlib</span>
-                    <span class="lib-tag">scikit-learn</span>
+                    <span class="lib-tag">SciPy</span>
+                    <span class="lib-tag">Interactive Cells</span>
+                    <span class="lib-tag">File System</span>
                     <span class="lib-tag">SymPy</span>
-                    <span class="lib-tag">statsmodels</span>
+                    <span class="lib-tag">scikit-learn</span>
                 </div>
             </div>
         </div>
@@ -452,148 +216,6 @@ print(f"Volatility: {np.std(returns):.4f}")
 
     <script src="script.js"></script>
     <script>
-        let pyodide = null;
-
-        // Initialize Pyodide
-        async function initPyodide() {
-            const statusDot = document.getElementById('pyodide-status-dot');
-            const statusText = document.getElementById('pyodide-status-text');
-            const runBtn = document.getElementById('run-python-btn');
-
-            try {
-                statusText.textContent = 'Loading Python...';
-                pyodide = await loadPyodide();
-
-                statusText.textContent = 'Loading NumPy & Pandas...';
-                await pyodide.loadPackage(['numpy', 'pandas']);
-
-                statusText.textContent = 'Loading SciPy...';
-                await pyodide.loadPackage(['scipy']);
-
-                statusText.textContent = 'Loading Matplotlib...';
-                await pyodide.loadPackage(['matplotlib']);
-
-                statusText.textContent = 'Loading scikit-learn...';
-                await pyodide.loadPackage(['scikit-learn']);
-
-                statusText.textContent = 'Loading SymPy & statsmodels...';
-                await pyodide.loadPackage(['sympy', 'statsmodels']);
-
-                statusText.textContent = 'Loading openpyxl (Excel support)...';
-                await pyodide.loadPackage(['openpyxl']);
-
-                // Setup matplotlib for non-interactive backend
-                pyodide.runPython(`
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import io, base64
-
-def _get_plot_base64():
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='#1e1e2e')
-    buf.seek(0)
-    img_str = base64.b64encode(buf.read()).decode('utf-8')
-    plt.close('all')
-    return img_str
-                `);
-
-                statusDot.classList.add('ready');
-                statusText.textContent = 'Ready (all packages loaded)';
-                runBtn.disabled = false;
-            } catch (e) {
-                statusText.textContent = 'Error loading Python';
-                console.error('Pyodide init error:', e);
-            }
-        }
-
-        // Run Python Code
-        async function runPython() {
-            if (!pyodide) return;
-
-            const code = document.getElementById('python-code').value;
-            const output = document.getElementById('python-output');
-            const runBtn = document.getElementById('run-python-btn');
-
-            runBtn.disabled = true;
-            runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
-            output.textContent = '';
-
-            try {
-                // Redirect stdout
-                pyodide.runPython(`
-import sys
-from io import StringIO
-sys.stdout = StringIO()
-                `);
-
-                // Run user code
-                await pyodide.runPythonAsync(code);
-
-                // Get text output
-                const textResult = pyodide.runPython('sys.stdout.getvalue()');
-
-                // Check if there's a plot to display
-                let plotHtml = '';
-                try {
-                    const hasFigures = pyodide.runPython('len(plt.get_fignums()) > 0');
-                    if (hasFigures) {
-                        const imgBase64 = pyodide.runPython('_get_plot_base64()');
-                        plotHtml = `<img src="data:image/png;base64,${imgBase64}" alt="Plot">`;
-                    }
-                } catch (plotErr) {
-                    // No plot, that's fine
-                }
-
-                output.innerHTML = `<pre style="margin:0; color:#a6e3a1; white-space:pre-wrap;">${textResult || '(No text output)'}</pre>${plotHtml}`;
-
-            } catch (e) {
-                output.innerHTML = `<pre style="margin:0; color:#f38ba8;">Error:\n${e.message}</pre>`;
-            } finally {
-                runBtn.disabled = false;
-                runBtn.innerHTML = '<i class="fas fa-play"></i> Run';
-            }
-        }
-
-        // Handle File Upload
-        async function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const fileName = document.getElementById('uploaded-file-name');
-            fileName.textContent = `Loading ${file.name}...`;
-
-            try {
-                // Get file extension
-                const ext = file.name.split('.').pop().toLowerCase();
-                const saveName = `uploaded.${ext}`;
-
-                // Read as ArrayBuffer to handle both text and binary (Excel)
-                const arrayBuffer = await file.arrayBuffer();
-                const uint8Array = new Uint8Array(arrayBuffer);
-
-                // Create /data directory if not exists
-                pyodide.runPython(`
-import os
-if not os.path.exists('/data'):
-    os.makedirs('/data')
-                `);
-
-                // Write file to Pyodide filesystem
-                pyodide.FS.writeFile(`/data/${saveName}`, uint8Array);
-
-                let codeSnippet = '';
-                if (ext === 'csv') codeSnippet = `pd.read_csv('/data/${saveName}')`;
-                else if (ext === 'xlsx' || ext === 'xls') codeSnippet = `pd.read_excel('/data/${saveName}')`;
-                else codeSnippet = `open('/data/${saveName}', 'r').read()`;
-
-                fileName.innerHTML = `<i class="fas fa-check-circle" style="color: #22c55e;"></i> ${file.name} saved as <b>${saveName}</b><br><code style="background:#1e1e2e; padding:2px 6px; border-radius:4px; font-size:0.8em;">${codeSnippet}</code>`;
-            } catch (e) {
-                fileName.innerHTML = `<i class="fas fa-times-circle" style="color: #ef4444;"></i> Error: ${e.message}`;
-                console.error(e);
-            }
-        }
-
         // Switch Language Tab
         function switchLanguage(lang) {
             document.querySelectorAll('.lang-tab').forEach(tab => tab.classList.remove('active'));
@@ -602,11 +224,6 @@ if not os.path.exists('/data'):
             document.querySelector(`[data-lang="${lang}"]`).classList.add('active');
             document.getElementById(`${lang}-section`).classList.add('active');
         }
-
-        // Init on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            initPyodide();
-        });
     </script>
 </body>
 
