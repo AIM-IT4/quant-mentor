@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Playground | QuantMentor</title>
+    <meta name="description" content="Free Python and C++ code compiler for quant finance practice">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Pyodide -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+
+    <style>
+        .playground-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 100px 20px 60px;
+            min-height: 100vh;
+        }
+
+        .playground-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .playground-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .playground-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .language-tabs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .lang-tab {
+            padding: 12px 30px;
+            border: 1px solid var(--border-light);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lang-tab:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .lang-tab.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        .lang-tab i {
+            font-size: 1.2rem;
+        }
+
+        .compiler-section {
+            display: none;
+        }
+
+        .compiler-section.active {
+            display: block;
+        }
+
+        /* Python Editor */
+        .python-editor-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .editor-panel,
+        .output-panel {
+            padding: 20px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .panel-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #python-code {
+            width: 100%;
+            height: 400px;
+            background: #1e1e2e;
+            color: #cdd6f4;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            tab-size: 4;
+        }
+
+        #python-output {
+            width: 100%;
+            height: 400px;
+            background: #1e1e2e;
+            color: #a6e3a1;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .run-btn {
+            padding: 10px 24px;
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .run-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .run-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .pyodide-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #f59e0b;
+        }
+
+        .status-dot.ready {
+            background: #22c55e;
+        }
+
+        /* C++ Godbolt Embed */
+        .godbolt-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .godbolt-container iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .libraries-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+        }
+
+        .libraries-info h4 {
+            margin: 0 0 10px;
+            color: var(--accent-primary);
+            font-size: 0.95rem;
+        }
+
+        .libraries-info p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .lib-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .lib-tag {
+            padding: 4px 10px;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--accent-primary);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 900px) {
+            .python-editor-container {
+                grid-template-columns: 1fr;
+            }
+
+            #python-code,
+            #python-output {
+                height: 300px;
+            }
+
+            .godbolt-container iframe {
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script src="config.js"></script>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="assets/images/logo.png" alt="QuantMentor" class="logo-img"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                <span class="logo-icon" style="display:none;">📊</span>
+                <span class="logo-text">QuantMentor</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#products">Products</a></li>
+                <li><a href="index.html#contact">Book Session</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                </button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="playground-container">
+        <div class="playground-header">
+            <h1><i class="fas fa-code"></i> Code Playground</h1>
+            <p>Practice Python and C++ for quant finance — free, no signup required</p>
+        </div>
+
+        <!-- Language Tabs -->
+        <div class="language-tabs">
+            <button class="lang-tab active" data-lang="python" onclick="switchLanguage('python')">
+                <i class="fab fa-python"></i> Python
+            </button>
+            <button class="lang-tab" data-lang="cpp" onclick="switchLanguage('cpp')">
+                <i class="fas fa-code"></i> C++
+            </button>
+        </div>
+
+        <!-- Python Section -->
+        <div class="compiler-section active" id="python-section">
+            <div class="python-editor-container">
+                <div class="editor-panel">
+                    <div class="panel-header">
+                        <span class="panel-title"><i class="fab fa-python"></i> Python Code</span>
+                        <div class="pyodide-status">
+                            <span class="status-dot" id="pyodide-status-dot"></span>
+                            <span id="pyodide-status-text">Loading Python...</span>
+                        </div>
+                    </div>
+                    <textarea id="python-code" spellcheck="false">import numpy as np
+import pandas as pd
+
+# Example: Calculate portfolio returns
+prices = np.array([100, 102, 105, 103, 108])
+returns = np.diff(prices) / prices[:-1]
+
+print("Daily Prices:", prices)
+print("Daily Returns:", returns)
+print(f"Mean Return: {np.mean(returns):.4f}")
+print(f"Volatility: {np.std(returns):.4f}")
+
+# Create a simple DataFrame
+df = pd.DataFrame({
+    'Price': prices,
+    'Day': range(1, len(prices)+1)
+})
+print("\nDataFrame:")
+print(df)
+</textarea>
+                </div>
+                <div class="output-panel">
+                    <div class="panel-header">
+                        <span class="panel-title"><i class="fas fa-terminal"></i> Output</span>
+                        <button class="run-btn" id="run-python-btn" onclick="runPython()" disabled>
+                            <i class="fas fa-play"></i> Run
+                        </button>
+                    </div>
+                    <div id="python-output">Click "Run" to execute your code...</div>
+                </div>
+            </div>
+
+            <div class="libraries-info">
+                <h4><i class="fas fa-cubes"></i> Available Libraries</h4>
+                <p>Pre-loaded packages for quant finance:</p>
+                <div class="lib-tags">
+                    <span class="lib-tag">NumPy</span>
+                    <span class="lib-tag">Pandas</span>
+                    <span class="lib-tag">SciPy</span>
+                    <span class="lib-tag">Matplotlib</span>
+                    <span class="lib-tag">scikit-learn</span>
+                    <span class="lib-tag">SymPy</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- C++ Section -->
+        <div class="compiler-section" id="cpp-section">
+            <div class="godbolt-container">
+                <div class="panel-header">
+                    <span class="panel-title"><i class="fas fa-code"></i> C++ Compiler (Godbolt)</span>
+                    <a href="https://godbolt.org/" target="_blank"
+                        style="color: var(--accent-primary); font-size: 0.9rem;">
+                        Open in Godbolt <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+                <iframe
+                    src="https://godbolt.org/e#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:'%23include+%3Ciostream%3E%0A%23include+%3Cvector%3E%0A%23include+%3Cnumeric%3E%0A%23include+%3Ccmath%3E%0A%0A//+Calculate+portfolio+returns%0Adouble+mean(const+std::vector%3Cdouble%3E%26+v)+%7B%0A++++return+std::accumulate(v.begin(),+v.end(),+0.0)+/+v.size()%3B%0A%7D%0A%0Adouble+stddev(const+std::vector%3Cdouble%3E%26+v)+%7B%0A++++double+m+%3D+mean(v)%3B%0A++++double+sum+%3D+0.0%3B%0A++++for+(double+x+:+v)+sum+%2B%3D+(x+-+m)+*+(x+-+m)%3B%0A++++return+std::sqrt(sum+/+v.size())%3B%0A%7D%0A%0Aint+main()+%7B%0A++++std::vector%3Cdouble%3E+prices+%3D+%7B100,+102,+105,+103,+108%7D%3B%0A++++std::vector%3Cdouble%3E+returns%3B%0A++++%0A++++for+(size_t+i+%3D+1%3B+i+%3C+prices.size()%3B+%2B%2Bi)+%7B%0A++++++++returns.push_back((prices%5Bi%5D+-+prices%5Bi-1%5D)+/+prices%5Bi-1%5D)%3B%0A++++%7D%0A++++%0A++++std::cout+%3C%3C+%22Mean+Return:+%22+%3C%3C+mean(returns)+%3C%3C+std::endl%3B%0A++++std::cout+%3C%3C+%22Volatility:+%22+%3C%3C+stddev(returns)+%3C%3C+std::endl%3B%0A++++%0A++++return+0%3B%0A%7D'),l:'5',n:'1',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:executor,i:(argsPanelShown:'1',compilationPanelShown:'0',compiler:g132,compilerName:'',compilerOutShown:'0',execArgs:'',execStdin:'',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'-O2+-std%3Dc%2B%2B17',overrides:!(),runtimeTools:!(),source:1,stdinPanelShown:'1',wrap:'1'),l:'5',n:'0',o:'Executor+x86-64+gcc+13.2+(C%2B%2B,+Editor+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4"></iframe>
+            </div>
+
+            <div class="libraries-info">
+                <h4><i class="fas fa-cubes"></i> Full C++ Support</h4>
+                <p>Complete STL and modern C++ features available:</p>
+                <div class="lib-tags">
+                    <span class="lib-tag">C++17/20</span>
+                    <span class="lib-tag">STL Containers</span>
+                    <span class="lib-tag">Algorithms</span>
+                    <span class="lib-tag">Numerics</span>
+                    <span class="lib-tag">Threading</span>
+                    <span class="lib-tag">Boost (optional)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="border-top: 1px solid var(--border-subtle); padding: 40px 0; background: var(--bg-secondary);">
+        <div class="nav-container" style="text-align: center;">
+            <p style="color: var(--text-muted);">&copy; 2026 QuantMentor. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        let pyodide = null;
+
+        // Initialize Pyodide
+        async function initPyodide() {
+            const statusDot = document.getElementById('pyodide-status-dot');
+            const statusText = document.getElementById('pyodide-status-text');
+            const runBtn = document.getElementById('run-python-btn');
+
+            try {
+                statusText.textContent = 'Loading Python...';
+                pyodide = await loadPyodide();
+
+                statusText.textContent = 'Loading NumPy...';
+                await pyodide.loadPackage(['numpy', 'pandas']);
+
+                statusDot.classList.add('ready');
+                statusText.textContent = 'Ready';
+                runBtn.disabled = false;
+            } catch (e) {
+                statusText.textContent = 'Error loading Python';
+                console.error('Pyodide init error:', e);
+            }
+        }
+
+        // Run Python Code
+        async function runPython() {
+            if (!pyodide) return;
+
+            const code = document.getElementById('python-code').value;
+            const output = document.getElementById('python-output');
+            const runBtn = document.getElementById('run-python-btn');
+
+            runBtn.disabled = true;
+            runBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+            output.textContent = '';
+
+            try {
+                // Redirect stdout
+                pyodide.runPython(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+                `);
+
+                // Run user code
+                await pyodide.runPythonAsync(code);
+
+                // Get output
+                const result = pyodide.runPython('sys.stdout.getvalue()');
+                output.textContent = result || '(No output)';
+                output.style.color = '#a6e3a1';
+
+            } catch (e) {
+                output.textContent = 'Error:\n' + e.message;
+                output.style.color = '#f38ba8';
+            } finally {
+                runBtn.disabled = false;
+                runBtn.innerHTML = '<i class="fas fa-play"></i> Run';
+            }
+        }
+
+        // Switch Language Tab
+        function switchLanguage(lang) {
+            document.querySelectorAll('.lang-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.compiler-section').forEach(sec => sec.classList.remove('active'));
+
+            document.querySelector(`[data-lang="${lang}"]`).classList.add('active');
+            document.getElementById(`${lang}-section`).classList.add('active');
+        }
+
+        // Init on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initPyodide();
+        });
+    </script>
+</body>
+
+</html>
