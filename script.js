@@ -756,7 +756,28 @@ async function convertPrice(inrPrice, countryCode) {
     const currency = getCurrencyForCountry(countryCode);
     const rates = await fetchExchangeRates();
     const rate = rates[currency.code] || 1;
-    const convertedAmount = Math.round(inrPrice * rate);
+
+    // Calculate raw conversion
+    let convertedAmount = inrPrice * rate;
+
+    // PPP Adjustment: Apply 1.5x multiplier for stronger currencies (Developed Markets)
+    // We EXCLUDE weaker currencies to ensure fair pricing for developing nations.
+    // List includes: South Asia, SE Asia, Africa, Latin America, etc.
+    const weakersCurrencies = [
+        'PKR', 'BDT', 'LKR', 'NPR', // South Asia
+        'NGN', 'EGP', 'KES', 'GHS', 'ZAR', // Africa
+        'VND', 'IDR', 'PHP', 'MYR', 'THB', // SE Asia
+        'TRY', 'RUB', 'UAH', // Eastern Europe/Eurasia
+        'BRL', 'MXN', 'ARS', 'COP', 'CLP', 'PEN' // Latin America
+    ];
+
+    if (currency.code !== 'INR' && !weakersCurrencies.includes(currency.code)) {
+        // console.log(`📈 Applying PPP Multiplier (1.5x) for ${currency.code}`);
+        convertedAmount = convertedAmount * 1.5;
+        // Round to nice numbers (e.g. 9.00 instead of 9.13) if possible, but for now standard rounding
+    }
+
+    convertedAmount = Math.round(convertedAmount);
 
     return {
         amount: convertedAmount,
