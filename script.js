@@ -1814,31 +1814,15 @@ if (modalPayBtn) {
 // ⚠️ YOUR EMAIL - Where booking notifications will be sent
 const ADMIN_EMAIL = 'jha.8@alumni.iitj.ac.in';
 
-// Fallback Google Meet link (only used if unique link generation fails)
-const FALLBACK_MEET_LINK = "https://meet.google.com/hfp-npyq-qho";
+// Google Meet link for all sessions (reliable, no setup needed)
+const GOOGLE_MEET_LINK = "https://meet.google.com/hfp-npyq-qho";
 
 /**
- * Generate a unique Daily.co meeting link for each booking
- * Daily.co allows instant rooms without login for 1:1 calls
- * Format: https://quantmentor.whereby.com/{unique-room}
- * Using Whereby.com - completely free, no login needed for anyone
+ * Get meeting link for booking
+ * Using your existing Google Meet link - most reliable option
  */
 function generateUniqueMeetLink(customerName, bookingDate) {
-    // Sanitize customer name (remove special chars, keep alphanumeric)
-    const sanitizedName = customerName
-        .replace(/[^a-zA-Z0-9]/g, '')
-        .substring(0, 10)
-        .toLowerCase();
-
-    // Create a short unique ID from timestamp + random
-    const timestamp = Date.now().toString(36);
-    const randomPart = Math.random().toString(36).substring(2, 6);
-
-    // Format: quantmentor-customername-abc123
-    const roomName = `qm-${sanitizedName}-${timestamp}${randomPart}`;
-
-    // Using Whereby.com - free, no login required
-    return `https://whereby.com/${roomName}`;
+    return GOOGLE_MEET_LINK;
 }
 
 // Session types (loaded dynamically from Supabase)
