@@ -1814,8 +1814,28 @@ if (modalPayBtn) {
 // ⚠️ YOUR EMAIL - Where booking notifications will be sent
 const ADMIN_EMAIL = 'jha.8@alumni.iitj.ac.in';
 
-// Google Meet link for sessions (you can also generate unique links per booking)
-const GOOGLE_MEET_LINK = "https://meet.google.com/hfp-npyq-qho";
+// Fallback Google Meet link (only used if unique link generation fails)
+const FALLBACK_MEET_LINK = "https://meet.google.com/hfp-npyq-qho";
+
+/**
+ * Generate a unique Jitsi Meet link for each booking
+ * Format: https://meet.jit.si/QuantMentor-{sanitizedName}-{timestamp}
+ */
+function generateUniqueMeetLink(customerName, bookingDate) {
+    // Sanitize customer name (remove special chars, keep alphanumeric)
+    const sanitizedName = customerName
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .substring(0, 15);
+
+    // Create a short unique ID from timestamp + random
+    const timestamp = Date.now().toString(36); // Base36 for shorter string
+    const randomPart = Math.random().toString(36).substring(2, 6);
+
+    // Format: QuantMentor-CustomerName-abc123xyz
+    const roomName = `QuantMentor-${sanitizedName}-${timestamp}${randomPart}`;
+
+    return `https://meet.jit.si/${roomName}`;
+}
 
 // Session types (loaded dynamically from Supabase)
 let SESSION_TYPES = {};
@@ -2187,6 +2207,10 @@ async function handleSessionPaymentSuccess(response) {
     console.log('📧 Booking object:', booking);
     console.log('📧 Email to send to:', booking.email);
 
+    // Generate unique meeting link for this booking
+    const uniqueMeetLink = generateUniqueMeetLink(booking.name, booking.date);
+    console.log('🔗 Generated unique meeting link:', uniqueMeetLink);
+
     // ===== STEP 1: SEND CUSTOMER EMAIL FIRST (HIGHEST PRIORITY) =====
     console.log('📧 Sending session confirmation to customer:', booking.email);
 
@@ -2207,7 +2231,7 @@ async function handleSessionPaymentSuccess(response) {
                 <p><strong>🆔 Payment ID:</strong> ${paymentId}</p>
                 <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
                 <p><strong>🔗 JOIN YOUR SESSION HERE:</strong></p>
-                <a href="${GOOGLE_MEET_LINK}" style="display: inline-block; background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0;">Join Google Meet</a>
+                <a href="${uniqueMeetLink}" style="display: inline-block; background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0;">Join Meeting</a>
                 <p style="margin-top: 20px;"><strong>🔄 Need to Reschedule?</strong></p>
                 <p>Visit: <a href="${window.location.origin}/my-bookings.html">My Bookings</a></p>
                 <p>Enter your email (${booking.email}) to view and reschedule your session.</p>
@@ -2226,7 +2250,7 @@ Amount Paid: ₹${booking.price}
 Payment ID: ${paymentId}
 
 JOIN YOUR SESSION HERE:
-${GOOGLE_MEET_LINK}
+${uniqueMeetLink}
 
 Need to Reschedule?
 Visit: ${window.location.origin}/my-bookings.html
@@ -2273,7 +2297,7 @@ ${BUSINESS_NAME}`;
                     message: booking.message,
                     status: 'upcoming',
                     payment_id: paymentId,
-                    meet_link: GOOGLE_MEET_LINK
+                    meet_link: uniqueMeetLink
                 })
                 .select();
 
@@ -2310,7 +2334,7 @@ New Booking Details:
    ${booking.message}
 
 🔗 Google Meet Link to Share:
-   ${GOOGLE_MEET_LINK}
+   ${uniqueMeetLink}
 ━━━━━━━━━━━━━━━━━━━━
     `.trim();
 
@@ -2327,7 +2351,7 @@ New Booking Details:
             <p><strong>Payment ID:</strong> ${paymentId}</p>
             <p><strong>Message:</strong> ${booking.message}</p>
             <hr>
-            <p><strong>🔗 Meeting Link:</strong> <a href="${GOOGLE_MEET_LINK}">${GOOGLE_MEET_LINK}</a></p>
+            <p><strong>🔗 Meeting Link:</strong> <a href="${uniqueMeetLink}">${uniqueMeetLink}</a></p>
         </div>
     `;
     await sendAdminNotification(`New Booking: ${booking.name} - ${booking.sessionType}`, adminHtml, emailBody);
