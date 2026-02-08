@@ -1818,23 +1818,27 @@ const ADMIN_EMAIL = 'jha.8@alumni.iitj.ac.in';
 const FALLBACK_MEET_LINK = "https://meet.google.com/hfp-npyq-qho";
 
 /**
- * Generate a unique Jitsi Meet link for each booking
- * Format: https://meet.jit.si/QuantMentor-{sanitizedName}-{timestamp}
+ * Generate a unique Daily.co meeting link for each booking
+ * Daily.co allows instant rooms without login for 1:1 calls
+ * Format: https://quantmentor.whereby.com/{unique-room}
+ * Using Whereby.com - completely free, no login needed for anyone
  */
 function generateUniqueMeetLink(customerName, bookingDate) {
     // Sanitize customer name (remove special chars, keep alphanumeric)
     const sanitizedName = customerName
         .replace(/[^a-zA-Z0-9]/g, '')
-        .substring(0, 15);
+        .substring(0, 10)
+        .toLowerCase();
 
     // Create a short unique ID from timestamp + random
-    const timestamp = Date.now().toString(36); // Base36 for shorter string
+    const timestamp = Date.now().toString(36);
     const randomPart = Math.random().toString(36).substring(2, 6);
 
-    // Format: QuantMentor-CustomerName-abc123xyz
-    const roomName = `QuantMentor-${sanitizedName}-${timestamp}${randomPart}`;
+    // Format: quantmentor-customername-abc123
+    const roomName = `qm-${sanitizedName}-${timestamp}${randomPart}`;
 
-    return `https://meet.jit.si/${roomName}`;
+    // Using Whereby.com - free, no login required
+    return `https://whereby.com/${roomName}`;
 }
 
 // Session types (loaded dynamically from Supabase)
