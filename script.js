@@ -1620,8 +1620,6 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
  * Free tier: 300 emails/day = 9,000/month
  */
 async function sendProductEmail(customerEmail, productName, paymentId, downloadLink, customerName = 'Customer') {
-    const FORMSPREE_ID = 'mjgozran';
-
     console.log('📧 sendProductEmail called with:', customerEmail);
 
     // Send to CUSTOMER via Brevo
@@ -1678,29 +1676,7 @@ ${BUSINESS_NAME}`;
     } else {
         console.log('⚠️ Brevo API key not configured. Skipping customer email.');
     }
-
-    // Also send notification to ADMIN via Formspree
-    try {
-        await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                _subject: `New Purchase: ${productName}`,
-                email: customerEmail,
-                message: `
-📦 New Product Purchase!
-━━━━━━━━━━━━━━━━━━━━
-Product: ${productName}
-Payment ID: ${paymentId}
-Customer Email: ${customerEmail}
-━━━━━━━━━━━━━━━━━━━━
-                `.trim()
-            })
-        });
-        console.log('Admin notified via Formspree');
-    } catch (error) {
-        console.error('Formspree failed:', error);
-    }
+    // Admin is already notified via sendAdminNotification in initRazorpayCheckout handler
 }
 
 // Connect to product modal - MOVED INSIDE MAIN DOMContentLoaded
@@ -2118,7 +2094,7 @@ if (bookingForm) {
             console.warn('Currency conversion failed for booking, defaulting to INR', e);
         }
 
-        // Store booking details for after payment
+        // Store booking details for after payment (with localStorage backup)
         window.pendingBooking = {
             name,
             email,
@@ -2130,6 +2106,10 @@ if (bookingForm) {
             time,
             message
         };
+        // Persist to localStorage as backup
+        try {
+            localStorage.setItem('pendingBooking', JSON.stringify(window.pendingBooking));
+        } catch (e) { console.warn('Could not persist booking to localStorage:', e); }
 
         console.log('Opening Razorpay for session:', sessionDescription, 'Price:', payAmount, payCurrency);
 
@@ -2188,135 +2168,31 @@ function initSessionPayment(description, amount, customerEmail, currency = 'INR'
  */
 async function handleSessionPaymentSuccess(response) {
     const paymentId = response.razorpay_payment_id;
-    const booking = window.pendingBooking;
+
+    // Try to get booking from window, fallback to localStorage
+    let booking = window.pendingBooking;
+    if (!booking) {
+        try {
+            const stored = localStorage.getItem('pendingBooking');
+            if (stored) booking = JSON.parse(stored);
+        } catch (e) { console.warn('Could not retrieve booking from localStorage:', e); }
+    }
+
+    if (!booking || !booking.email) {
+        console.error('❌ No booking data found!');
+        alert('Error: Booking data was lost. Please contact support with Payment ID: ' + paymentId);
+        return;
+    }
 
     console.log('📧 Booking object:', booking);
-    console.log('📧 Email to send to:', booking?.email);
+    console.log('📧 Email to send to:', booking.email);
 
-    // Store booking in Supabase database
-    console.log('📋 Attempting to store booking in Supabase...');
-    console.log('📋 Booking data:', {
-        email: booking.email,
-        name: booking.name,
-        phone: booking.phone,
-        service_name: booking.sessionType,
-        service_price: booking.price,
-        service_duration: booking.duration,
-        booking_date: booking.date,
-        booking_time: booking.time,
-        message: booking.message,
-        status: 'upcoming',
-        payment_id: paymentId
-    });
-
-    // Check if Supabase client is available
-    if (!window.supabaseClient) {
-        console.error('❌ window.supabaseClient is undefined! Cannot store booking.');
-        alert('Error: Database connection not available. Please refresh the page and try again.');
-    } else {
-        console.log('✅ window.supabaseClient is defined, attempting insert...');
-        try {
-            const { data, error } = await window.supabaseClient
-                .from('bookings')
-                .insert({
-                    email: booking.email,
-                    name: booking.name,
-                    phone: booking.phone,
-                    service_name: booking.sessionType,
-                    service_price: booking.price,
-                    service_duration: booking.duration,
-                    booking_date: booking.date,
-                    booking_time: booking.time,
-                    message: booking.message,
-                    status: 'upcoming',
-                    payment_id: paymentId
-                })
-                .select();
-
-            if (error) {
-                console.error('❌ Supabase insert failed:', error);
-                console.error('Error details:', JSON.stringify(error, null, 2));
-                throw error;
-            }
-
-            console.log('✅ Booking stored in Supabase:', data);
-        } catch (error) {
-            console.error('❌ Error storing booking in database:', error);
-            console.error('Full error:', error.message, error.stack);
-            // Continue with email notifications even if database insert fails
-        }
-    }
-
-    // Create email body for admin notification
-    const emailSubject = `New Session Booking: ${booking.sessionType}`;
-    const emailBody = `
-New Booking Details:
-━━━━━━━━━━━━━━━━━━━━
-📋 Session: ${booking.sessionType} (${booking.duration} mins)
-💰 Amount Paid: ₹${booking.price}
-🆔 Payment ID: ${paymentId}
-
-👤 Customer Details:
-   Name: ${booking.name}
-   Email: ${booking.email}
-   Phone: ${booking.phone}
-
-📅 Scheduled For:
-   Date: ${booking.date}
-   Time: ${booking.time}
-
-📝 Customer Message:
-   ${booking.message}
-
-🔗 Google Meet Link to Share:
-   ${GOOGLE_MEET_LINK}
-━━━━━━━━━━━━━━━━━━━━
-    `.trim();
-
-    // Send email via Formspree (free)
-    const FORMSPREE_ID = 'mjgozran';
-
-    try {
-        await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                _subject: emailSubject,
-                email: booking.email,
-                name: booking.name,
-                message: emailBody
-            })
-        });
-        console.log('Email notification sent');
-    } catch (error) {
-        console.error('Formspree email failed:', error);
-    }
-
-    // Send Admin Notification via Brevo (Unified System)
-    const adminHtml = `
-        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-            <h2 style="color: #4f46e5;">🆕 New Session Booking</h2>
-            <p><strong>Customer:</strong> ${booking.name}</p>
-            <p><strong>Email:</strong> ${booking.email}</p>
-            <p><strong>Phone:</strong> ${booking.phone}</p>
-            <hr>
-            <p><strong>Session:</strong> ${booking.sessionType}</p>
-            <p><strong>Price:</strong> ₹${booking.price}</p>
-            <p><strong>Date:</strong> ${booking.date} at ${booking.time}</p>
-            <p><strong>Payment ID:</strong> ${paymentId}</p>
-            <p><strong>Message:</strong> ${booking.message}</p>
-            <hr>
-            <p><strong>🔗 Meeting Link:</strong> <a href="${GOOGLE_MEET_LINK}">${GOOGLE_MEET_LINK}</a></p>
-        </div>
-    `;
-    await sendAdminNotification(`New Booking: ${booking.name} - ${booking.sessionType}`, adminHtml, emailBody);
-
-    // Send confirmation email to CUSTOMER with Meet link via Brevo
+    // ===== STEP 1: SEND CUSTOMER EMAIL FIRST (HIGHEST PRIORITY) =====
     console.log('📧 Sending session confirmation to customer:', booking.email);
 
     const config = getBrevoConfig();
     if (config.apiKey && config.apiKey !== 'xkeysib-your-api-key-here') {
-        console.log('📧 Brevo is available, sending...');
+        console.log('📧 Brevo is available, sending customer email FIRST...');
 
         const htmlContent = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -2378,6 +2254,86 @@ ${BUSINESS_NAME}`;
     } else {
         console.log('⚠️ Brevo API key not configured - customer confirmation email not sent');
     }
+
+    // ===== STEP 2: STORE IN SUPABASE (SECONDARY) =====
+    console.log('📋 Attempting to store booking in Supabase...');
+    if (window.supabaseClient) {
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('bookings')
+                .insert({
+                    email: booking.email,
+                    name: booking.name,
+                    phone: booking.phone,
+                    service_name: booking.sessionType,
+                    service_price: booking.price,
+                    service_duration: booking.duration,
+                    booking_date: booking.date,
+                    booking_time: booking.time,
+                    message: booking.message,
+                    status: 'upcoming',
+                    payment_id: paymentId
+                })
+                .select();
+
+            if (error) {
+                console.error('❌ Supabase insert failed:', error);
+            } else {
+                console.log('✅ Booking stored in Supabase:', data);
+            }
+        } catch (error) {
+            console.error('❌ Error storing booking in database:', error);
+        }
+    } else {
+        console.error('❌ Supabase client not available');
+    }
+
+    // ===== STEP 3: SEND ADMIN NOTIFICATION (TERTIARY) =====
+    const emailBody = `
+New Booking Details:
+━━━━━━━━━━━━━━━━━━━━
+📋 Session: ${booking.sessionType} (${booking.duration} mins)
+💰 Amount Paid: ₹${booking.price}
+🆔 Payment ID: ${paymentId}
+
+👤 Customer Details:
+   Name: ${booking.name}
+   Email: ${booking.email}
+   Phone: ${booking.phone}
+
+📅 Scheduled For:
+   Date: ${booking.date}
+   Time: ${booking.time}
+
+📝 Customer Message:
+   ${booking.message}
+
+🔗 Google Meet Link to Share:
+   ${GOOGLE_MEET_LINK}
+━━━━━━━━━━━━━━━━━━━━
+    `.trim();
+
+    const adminHtml = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+            <h2 style="color: #4f46e5;">🆕 New Session Booking</h2>
+            <p><strong>Customer:</strong> ${booking.name}</p>
+            <p><strong>Email:</strong> ${booking.email}</p>
+            <p><strong>Phone:</strong> ${booking.phone}</p>
+            <hr>
+            <p><strong>Session:</strong> ${booking.sessionType}</p>
+            <p><strong>Price:</strong> ₹${booking.price}</p>
+            <p><strong>Date:</strong> ${booking.date} at ${booking.time}</p>
+            <p><strong>Payment ID:</strong> ${paymentId}</p>
+            <p><strong>Message:</strong> ${booking.message}</p>
+            <hr>
+            <p><strong>🔗 Meeting Link:</strong> <a href="${GOOGLE_MEET_LINK}">${GOOGLE_MEET_LINK}</a></p>
+        </div>
+    `;
+    await sendAdminNotification(`New Booking: ${booking.name} - ${booking.sessionType}`, adminHtml, emailBody);
+
+    // Clear localStorage backup
+    try { localStorage.removeItem('pendingBooking'); } catch (e) { }
+
 
     // Show success message to customer
     alert(`🎉 Session Booked Successfully!
