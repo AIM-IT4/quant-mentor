@@ -368,7 +368,17 @@
 
 <body>
     <!-- Setup config for script.js to pick up -->
-    <script src="config.js"></script>
+    <script>
+        // Load config.js if it exists, otherwise gracefully fallback
+        (function () {
+            var script = document.createElement('script');
+            script.src = 'config.js';
+            script.onerror = function () {
+                console.log('ℹ️ config.js not found. Using fallback configuration from script.js');
+            };
+            document.head.appendChild(script);
+        })();
+    </script>
     <script src="script.js"></script>
 
     <!-- Navigation -->
