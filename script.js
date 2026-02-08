@@ -2272,7 +2272,8 @@ ${BUSINESS_NAME}`;
                     booking_time: booking.time,
                     message: booking.message,
                     status: 'upcoming',
-                    payment_id: paymentId
+                    payment_id: paymentId,
+                    meet_link: GOOGLE_MEET_LINK
                 })
                 .select();
 
