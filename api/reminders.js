@@ -71,14 +71,15 @@ export default async function handler(req, res) {
 
         for (const booking of bookings) {
             try {
-                // Parse session datetime
-                const sessionStart = new Date(`${booking.booking_date}T${booking.booking_time}`);
+                // Parse session datetime - assuming IST timezone (+05:30)
+                // Add IST offset to make it timezone-aware
+                const sessionStart = new Date(`${booking.booking_date}T${booking.booking_time}+05:30`);
                 const timeDiff = sessionStart - now; // milliseconds
                 const hoursDiff = timeDiff / (1000 * 60 * 60);
                 const minutesDiff = timeDiff / (1000 * 60);
 
-                // 24-Hour Reminder (23.5 to 25 hours before)
-                if (hoursDiff >= 23.5 && hoursDiff <= 25 && !booking.reminder_24h_sent) {
+                // 24-Hour Reminder (23 to 25 hours before)
+                if (hoursDiff >= 23 && hoursDiff <= 25 && !booking.reminder_24h_sent) {
                     await sendReminder(booking, '24h', {
                         SUPABASE_URL, SUPABASE_KEY, BREVO_API_KEY,
                         ADMIN_EMAIL, SENDER_EMAIL, SENDER_NAME
@@ -86,13 +87,23 @@ export default async function handler(req, res) {
                     results.reminders24h.push(booking.email);
                 }
 
-                // 10-Minute Reminder (0 to 15 minutes before)
-                else if (minutesDiff > 0 && minutesDiff <= 15 && !booking.reminder_10m_sent) {
+                // 10-Minute Reminder (5 to 15 minutes before)
+                else if (minutesDiff > 5 && minutesDiff <= 15 && !booking.reminder_10m_sent) {
                     await sendReminder(booking, '10m', {
                         SUPABASE_URL, SUPABASE_KEY, BREVO_API_KEY,
                         ADMIN_EMAIL, SENDER_EMAIL, SENDER_NAME
                     });
                     results.reminders10m.push(booking.email);
+                }
+
+                // 5-Minute Reminder (0 to 5 minutes before)
+                else if (minutesDiff > 0 && minutesDiff <= 5 && !booking.reminder_5m_sent) {
+                    await sendReminder(booking, '5m', {
+                        SUPABASE_URL, SUPABASE_KEY, BREVO_API_KEY,
+                        ADMIN_EMAIL, SENDER_EMAIL, SENDER_NAME
+                    });
+                    results.reminders5m = results.reminders5m || [];
+                    results.reminders5m.push(booking.email);
                 }
 
             } catch (bookingError) {
@@ -144,7 +155,7 @@ async function sendReminder(booking, type, config) {
                 <p style="color: #6b7280;">Best regards,<br>${SENDER_NAME}</p>
             </div>
         `;
-    } else {
+    } else if (type === '10m') {
         subject = `Starting Soon: Your Session in 10 Minutes! ⏰`;
         htmlBody = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -157,6 +168,21 @@ async function sendReminder(booking, type, config) {
                 </div>
                 <a href="${meetLink}" style="display: inline-block; background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">Join Meeting Now</a>
                 <p style="margin-top: 20px;">Please be ready with your questions.</p>
+                <p style="color: #6b7280;">Best regards,<br>${SENDER_NAME}</p>
+            </div>
+        `;
+    } else if (type === '5m') {
+        subject = `🚨 STARTING NOW: Your Session in 5 Minutes!`;
+        htmlBody = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #fef2f2; border: 2px solid #ef4444;">
+                <h2 style="color: #ef4444;">🚨 Your Session Starts in 5 Minutes!</h2>
+                <p>Hi ${userName},</p>
+                <p><strong>Please join the meeting immediately!</strong></p>
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444;">
+                    <p><strong>📋 Session:</strong> ${booking.service_name}</p>
+                    <p><strong>🔗 Join Here:</strong> <a href="${meetLink}" style="color: #ef4444;">${meetLink}</a></p>
+                </div>
+                <a href="${meetLink}" style="display: inline-block; background: #ef4444; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px;">🚀 JOIN NOW</a>
                 <p style="color: #6b7280;">Best regards,<br>${SENDER_NAME}</p>
             </div>
         `;
@@ -195,12 +221,12 @@ async function sendReminder(booking, type, config) {
             sender: { name: SENDER_NAME, email: SENDER_EMAIL },
             to: [{ email: ADMIN_EMAIL }],
             subject: `Admin Alert: ${type} Reminder Sent`,
-            htmlContent: `<p>${type === '24h' ? '24h' : '10m'} Reminder sent to ${booking.email} for ${booking.service_name}</p><p>Meeting Link: ${meetLink}</p>`
+            htmlContent: `<p>${type} Reminder sent to ${booking.email} for ${booking.service_name}</p><p>Meeting Link: ${meetLink}</p>`
         })
     });
 
     // Update database to mark reminder as sent
-    const updateField = type === '24h' ? 'reminder_24h_sent' : 'reminder_10m_sent';
+    const updateField = type === '24h' ? 'reminder_24h_sent' : (type === '10m' ? 'reminder_10m_sent' : 'reminder_5m_sent');
 
     await fetch(
         `${SUPABASE_URL}/rest/v1/bookings?id=eq.${booking.id}`,
