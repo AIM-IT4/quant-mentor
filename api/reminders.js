@@ -40,11 +40,11 @@ export default async function handler(req, res) {
     };
 
     try {
-        // Fetch confirmed bookings
+        // Fetch confirmed/upcoming bookings (status can be 'confirmed' or 'upcoming')
         const today = new Date().toISOString().split('T')[0];
 
         const supabaseResponse = await fetch(
-            `${SUPABASE_URL}/rest/v1/bookings?status=eq.confirmed&booking_date=gte.${today}&select=*`,
+            `${SUPABASE_URL}/rest/v1/bookings?status=in.(confirmed,upcoming)&booking_date=gte.${today}&select=*`,
             {
                 headers: {
                     'apikey': SUPABASE_KEY,
