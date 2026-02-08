@@ -1632,7 +1632,7 @@ async function sendProductEmail(customerEmail, productName, paymentId, downloadL
                 <h2 style="color: #2563eb;">🎉 Thank you for your purchase!</h2>
                 <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
                 <p>Hi <strong>${customerName}</strong>,</p>
-                <p>Thank you for downloading our resources. Here are your details:</p>
+                <p>Thank you for purchasing our resources. Here are your details:</p>
                 <p><strong>📦 Product:</strong> ${productName}</p>
                 <p><strong>🆔 Payment ID:</strong> ${paymentId}</p>
                 <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
