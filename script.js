@@ -1490,6 +1490,13 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
         "currency": currency,
         "name": BUSINESS_NAME,
         "description": productName,
+        "notes": {
+            "type": "product",
+            "product_name": productName,
+            "customer_name": userDetails ? userDetails.name : "",
+            "customer_email": userDetails ? userDetails.email : "",
+            "inr_amount": inrAmountForLogging || amount
+        },
         "prefill": {
             "name": userDetails ? userDetails.name : "",
             "email": userDetails ? userDetails.email : "",
