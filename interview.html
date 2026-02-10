@@ -1019,37 +1019,17 @@
 
         function speakText(text) {
             isSpeaking = true;
-            console.log('Speaking (Chunked)...');
+            console.log('Speaking (Local Only)...');
 
-            // Stop previous
-            if (currentPuterAudio) { currentPuterAudio.pause(); currentPuterAudio = null; }
             if (synth.speaking) { synth.cancel(); }
+            if (currentPuterAudio) { currentPuterAudio.pause(); currentPuterAudio = null; }
 
             const chunks = splitTextIntoChunks(text);
             let index = 0;
-
-            // Check manual selection first
-            const manualVoice = getSelectedVoice();
-            if (manualVoice) {
-                // Bypass chain, use browser directly with selected voice
-                console.log("Using Manual Voice:", manualVoice.name);
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.voice = manualVoice;
-                utterance.rate = 1.0;
-                utterance.onend = () => {
-                    isSpeaking = false;
-                    isAIProcessing = false;
-                    if (autoVoiceMode && interviewActive) {
-                        try { recognition.start(); document.getElementById('mic-btn').classList.add('listening'); } catch (e) { }
-                    }
-                };
-                synth.speak(utterance);
-                return;
-            }
+            const voiceToUse = getSelectedVoice() || synth.getVoices().find(v => v.lang.startsWith('en'));
 
             function playNextChunk() {
                 if (index >= chunks.length) {
-                    // All done
                     isSpeaking = false;
                     isAIProcessing = false;
                     if (autoVoiceMode && interviewActive) {
@@ -1058,43 +1038,13 @@
                     return;
                 }
 
-                const chunk = chunks[index];
-                // Switch to "Brian" (British) to prove it's using the API and not fallback
-                // Add timestamp to prevent caching
-                const streamElementsUrl = `https://api.streamelements.com/kappa/v2/speech?voice=Brian&text=${encodeURIComponent(chunk)}&_=${Date.now()}`;
-                const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(chunk)}`;
-
-                // Update UI to show status
-                const statusEl = document.getElementById('mic-status') || createStatusElement();
-                statusEl.innerText = "▶️ Generating HQ Audio...";
-                statusEl.style.color = "#14b8a6";
-
-                // Chain: StreamElements -> Google -> Browser
-                playUrlAudio(streamElementsUrl)
-                    .then(() => {
-                        index++;
-                        playNextChunk();
-                    })
-                    .catch((e) => {
-                        console.warn("StreamElements failed:", e);
-                        statusEl.innerText = "⚠️ HQ Failed, Trying Backup...";
-
-                        playUrlAudio(googleUrl)
-                            .then(() => {
-                                index++;
-                                playNextChunk();
-                            })
-                            .catch(() => {
-                                console.warn("Google failed, using Browser fallback");
-                                statusEl.innerText = "⚠️ Offline Mode";
-                                useBrowserFallback(chunk, () => {
-                                    index++;
-                                    playNextChunk();
-                                });
-                            });
-                    });
+                const utterance = new SpeechSynthesisUtterance(chunks[index]);
+                if (voiceToUse) utterance.voice = voiceToUse;
+                utterance.rate = 1.0;
+                utterance.onend = () => { index++; playNextChunk(); };
+                utterance.onerror = () => { index++; playNextChunk(); };
+                synth.speak(utterance);
             }
-
             playNextChunk();
         }
 

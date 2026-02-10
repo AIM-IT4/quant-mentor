@@ -87,8 +87,8 @@ IMPORTANT:
             if (paymentId) console.log(`Starting interview for ${email} (${name}), Payment: ${paymentId}`);
 
             // Log to Supabase
-            const SUPABASE_URL = process.env.SUPABASE_URL;
-            const SUPABASE_KEY = process.env.SUPABASE_KEY;
+            const SUPABASE_URL = process.env.SUPABASE_URL || 'https://dntabmyurlrlnoajdnja.supabase.co';
+            const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
             if (SUPABASE_URL && SUPABASE_KEY) {
                 try {
                     // Fire and forget logging
