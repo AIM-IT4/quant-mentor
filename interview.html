@@ -1309,6 +1309,12 @@
         }
 
 
+        // Global Cleanup on Tab Close / Navigation
+        window.addEventListener('beforeunload', () => {
+            if (synth.speaking) synth.cancel();
+            if (currentPuterAudio) { currentPuterAudio.pause(); }
+            if (recognition) recognition.stop();
+        });
     </script>
 </body>
 
