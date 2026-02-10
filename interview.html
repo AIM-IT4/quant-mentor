@@ -942,8 +942,11 @@
             isSpeaking = true;
             console.log('Generating audio with Puter.js...');
 
-            // Use Puter.js default (Free Tier)
-            puter.ai.txt2speech(text)
+            // Use Puter.js with OpenAI provider (Alternative to ElevenLabs)
+            puter.ai.txt2speech(text, {
+                provider: "openai",
+                voice: "alloy"
+            })
                 .then(audio => {
                     audio.play();
                     audio.onended = () => {
