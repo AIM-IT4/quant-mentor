@@ -869,10 +869,13 @@
         const synth = window.speechSynthesis;
         let isSpeaking = false;
         let autoVoiceMode = false;
+        let isAIProcessing = false; // New flag to prevent race conditions
         let silenceTimer = null;
         let finalTranscript = '';
 
         recognition.onresult = (event) => {
+            if (isAIProcessing) return; // Ignore input if AI is thinking
+
             let interim = '';
             // Loop through results to handle continuous stream
             for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -886,13 +889,13 @@
             // Update UI
             document.getElementById('user-input').value = finalTranscript + interim;
 
-            // Auto-send logic with 5-second silence detection
+            // Auto-send logic with 3-second silence detection (User requested 3s)
             if (autoVoiceMode) {
                 clearTimeout(silenceTimer);
 
-                // Visual feedback: Pulse faster or change color?
+                // Visual feedback: Pulse red
                 const micBtn = document.getElementById('mic-btn');
-                micBtn.style.color = '#ef4444'; // Red (Active)
+                micBtn.style.color = '#ef4444';
 
                 silenceTimer = setTimeout(() => {
                     // Send if we have content
@@ -900,19 +903,16 @@
                         sendMessage();
                         finalTranscript = ''; // Reset for next turn
                     }
-                }, 5000); // 5 Seconds Silence Rule
-            } else {
-                document.getElementById('mic-btn').classList.remove('listening');
+                }, 3000); // 3 Seconds Silence Rule
             }
         };
 
         recognition.onend = () => {
-            if (autoVoiceMode && !isSpeaking && !interviewActive) {
-                // If expected to be listening but stopped (silence), maybe restart? 
-                // No, better to let user toggle. But for "Real Time" feel:
-                // We stop listening when processing.
-                document.getElementById('mic-btn').classList.remove('listening');
-            }
+            // If expected to be listening but stopped (silence), maybe restart? 
+            // No, better to let user toggle. But for "Real Time" feel:
+            // We stop listening when processing.
+            document.getElementById('mic-btn').classList.remove('listening');
+        }
         };
 
         recognition.onerror = (event) => {
@@ -951,6 +951,8 @@
                     audio.play();
                     audio.onended = () => {
                         isSpeaking = false;
+                        isAIProcessing = false; // AI done, allow User to speak
+
                         // Auto-listen after AI finishes
                         if (autoVoiceMode && interviewActive) {
                             try {
@@ -958,7 +960,6 @@
                                 document.getElementById('mic-btn').classList.add('listening');
                             } catch (e) {
                                 console.log('Mic restart err', e);
-                                isSpeaking = false;
                             }
                         }
                     };
@@ -1115,6 +1116,7 @@
 
             // Stop mic while processing
             if (autoVoiceMode) {
+                isAIProcessing = true; // Lock the mic
                 recognition.stop();
                 clearTimeout(silenceTimer);
                 document.getElementById('mic-btn').classList.remove('listening');
