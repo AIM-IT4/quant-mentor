@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'; // Vercel environment usually has node-fetch or global fetch. We'll rely on global fetch if possible, or standard node http. Actually Vercel supports fetch natively in Node 18+.
+// using global fetch
 
 export default async function handler(req, res) {
     // CORS headers
