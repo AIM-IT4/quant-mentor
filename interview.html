@@ -1276,7 +1276,11 @@
             document.getElementById('timer-display').textContent = `${selectedDuration}:00`;
 
             try {
-                const data = await callInterviewAPI('start');
+                const data = await callInterviewAPI('start', {
+                    email: userEmail,
+                    name: userName,
+                    paymentId: paymentId
+                });
 
                 // Switch to chat screen
                 document.getElementById('setup-screen').style.display = 'none';
