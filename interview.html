@@ -867,16 +867,33 @@
 
         const synth = window.speechSynthesis;
         let isSpeaking = false;
+        let autoVoiceMode = false;
 
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript;
-            document.getElementById('user-input').value += transcript + ' ';
-            document.getElementById('mic-btn').classList.remove('listening');
+            document.getElementById('user-input').value = transcript;
+
+            // Auto-send if in voice mode
+            if (autoVoiceMode) {
+                sendMessage();
+            } else {
+                document.getElementById('mic-btn').classList.remove('listening');
+            }
+        };
+
+        recognition.onend = () => {
+            if (autoVoiceMode && !isSpeaking && !interviewActive) {
+                // If expected to be listening but stopped (silence), maybe restart? 
+                // No, better to let user toggle. But for "Real Time" feel:
+                // We stop listening when processing.
+                document.getElementById('mic-btn').classList.remove('listening');
+            }
         };
 
         recognition.onerror = (event) => {
             console.error('Speech error:', event.error);
             document.getElementById('mic-btn').classList.remove('listening');
+            autoVoiceMode = false;
         };
 
         function toggleMic() {
@@ -888,17 +905,32 @@
             if (btn.classList.contains('listening')) {
                 recognition.stop();
                 btn.classList.remove('listening');
+                autoVoiceMode = false;
             } else {
                 recognition.start();
                 btn.classList.add('listening');
+                autoVoiceMode = true; // Enable auto-conversation
             }
         }
 
         function speakText(text) {
             if (synth.speaking) synth.cancel();
+            isSpeaking = true;
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 1;
+            utterance.rate = 1.1; // Slightly faster for natural feel
             utterance.pitch = 1;
+
+            utterance.onend = () => {
+                isSpeaking = false;
+                // Auto-listen after AI finishes (Continuous Loop)
+                if (autoVoiceMode && interviewActive) {
+                    try {
+                        recognition.start();
+                        document.getElementById('mic-btn').classList.add('listening');
+                    } catch (e) { console.log('Mic restart err', e); }
+                }
+            };
+
             synth.speak(utterance);
         }
 
