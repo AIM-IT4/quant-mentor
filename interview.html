@@ -955,10 +955,7 @@
             const voices = synth.getVoices();
             console.log("Loaded Voices:", voices.length);
             const voiceSelect = document.getElementById('voice-select');
-            // Keep the first option (Auto)
-            const autoOption = voiceSelect.options[0];
-            voiceSelect.innerHTML = '';
-            voiceSelect.appendChild(autoOption);
+            voiceSelect.innerHTML = ''; // Start fresh
 
             // Filter for English voices to keep it clean
             const englishVoices = voices.filter(v => v.lang.startsWith('en'));
