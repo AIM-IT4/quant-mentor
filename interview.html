@@ -916,10 +916,15 @@
 
         function speakText(text) {
             isSpeaking = true;
-            console.log('Generating audio with Puter.js...');
+            console.log('Generating audio with Puter.js (ElevenLabs)...');
 
-            // Use Puter.js for realistic TTS
-            puter.ai.txt2speech(text)
+            // Use Puter.js with ElevenLabs provider
+            puter.ai.txt2speech(text, {
+                provider: "elevenlabs",
+                model: "eleven_multilingual_v2",
+                voice: "TxGEqnHWrfWFTfGW9XjX", // Josh (Deep Male Voice)
+                output_format: "mp3_44100_128"
+            })
                 .then(audio => {
                     audio.play();
                     audio.onended = () => {
