@@ -1009,8 +1009,15 @@
                 }
 
                 const chunk = chunks[index];
-                const streamElementsUrl = `https://api.streamelements.com/kappa/v2/speech?voice=Matthew&text=${encodeURIComponent(chunk)}`;
+                // Switch to "Brian" (British) to prove it's using the API and not fallback
+                // Add timestamp to prevent caching
+                const streamElementsUrl = `https://api.streamelements.com/kappa/v2/speech?voice=Brian&text=${encodeURIComponent(chunk)}&_=${Date.now()}`;
                 const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(chunk)}`;
+
+                // Update UI to show status
+                const statusEl = document.getElementById('mic-status') || createStatusElement();
+                statusEl.innerText = "▶️ Generating HQ Audio...";
+                statusEl.style.color = "#14b8a6";
 
                 // Chain: StreamElements -> Google -> Browser
                 playUrlAudio(streamElementsUrl)
@@ -1018,8 +1025,10 @@
                         index++;
                         playNextChunk();
                     })
-                    .catch(() => {
-                        console.warn("StreamElements failed, trying Google...");
+                    .catch((e) => {
+                        console.warn("StreamElements failed:", e);
+                        statusEl.innerText = "⚠️ HQ Failed, Trying Backup...";
+
                         playUrlAudio(googleUrl)
                             .then(() => {
                                 index++;
@@ -1027,6 +1036,7 @@
                             })
                             .catch(() => {
                                 console.warn("Google failed, using Browser fallback");
+                                statusEl.innerText = "⚠️ Offline Mode";
                                 useBrowserFallback(chunk, () => {
                                     index++;
                                     playNextChunk();
@@ -1036,6 +1046,16 @@
             }
 
             playNextChunk();
+        }
+
+        function createStatusElement() {
+            const div = document.createElement('div');
+            div.id = 'mic-status';
+            div.style.fontSize = '0.8em';
+            div.style.marginTop = '5px';
+            div.style.textAlign = 'center';
+            document.querySelector('.input-area').appendChild(div);
+            return div;
         }
 
         function useBrowserFallback(text, callback) {
