@@ -872,6 +872,7 @@
         let isAIProcessing = false; // New flag to prevent race conditions
         let silenceTimer = null;
         let finalTranscript = '';
+        let currentPuterAudio = null; // Track audio for stopping on exit
 
         recognition.onresult = (event) => {
             if (isAIProcessing) return; // Ignore input if AI is thinking
@@ -942,38 +943,72 @@
             }
         }
 
+        function getBestVoice() {
+            const voices = synth.getVoices();
+            // Prioritize "Google US English", "Microsoft Zira", or any "Natural" voice
+            return voices.find(v => v.name.includes('Google US English')) ||
+                voices.find(v => v.name.includes('Zira')) ||
+                voices.find(v => v.name.includes('Natural')) ||
+                voices.find(v => v.lang === 'en-US') ||
+                voices[0];
+        }
+
         function speakText(text) {
             isSpeaking = true;
-            console.log('Generating audio with Puter.js...');
+            console.log('Generating audio...');
 
-            // Use Puter.js default (Free Tier) - Reverted from OpenAI/ElevenLabs for stability
-            puter.ai.txt2speech(text)
-                .then(audio => {
-                    audio.play();
-                    audio.onended = () => {
-                        isSpeaking = false;
-                        isAIProcessing = false; // AI done, allow User to speak
+            // Stop any previous audio
+            if (currentPuterAudio) { currentPuterAudio.pause(); }
+            if (synth.speaking) { synth.cancel(); }
 
-                        // Auto-listen after AI finishes
-                        if (autoVoiceMode && interviewActive) {
-                            try {
-                                recognition.start();
-                                document.getElementById('mic-btn').classList.add('listening');
-                            } catch (e) {
-                                console.log('Mic restart err', e);
-                            }
-                        }
-                    };
-                })
-                .catch(err => {
-                    console.error('Puter TTS Error:', err);
-                    isSpeaking = false;
-                    // Fallback to browser TTS if Puter fails
-                    if (synth.speaking) synth.cancel();
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.onend = () => { isSpeaking = false; };
-                    synth.speak(utterance);
-                });
+            // Use Browser TTS (Fast, Reliable, Optimized)
+            // Reverted from Puter to fix "Robotic" issues and ensure "Stop on Exit" works perfectly
+            const utterance = new SpeechSynthesisUtterance(text);
+            const bestVoice = getBestVoice();
+            if (bestVoice) utterance.voice = bestVoice;
+
+            utterance.rate = 1.0; // Normal speed
+            utterance.pitch = 1.0;
+
+            utterance.onend = () => {
+                isSpeaking = false;
+                isAIProcessing = false; // Unlock mic
+
+                // Auto-listen loop
+                if (autoVoiceMode && interviewActive) {
+                    try {
+                        recognition.start();
+                        document.getElementById('mic-btn').classList.add('listening');
+                    } catch (e) { console.log('Mic restart err', e); }
+                }
+            };
+
+            // Error listener
+            utterance.onerror = (e) => {
+                console.error("TTS Error", e);
+                isSpeaking = false;
+                isAIProcessing = false;
+            };
+
+            synth.speak(utterance);
+        }
+
+        function stopInterview() {
+            interviewActive = false;
+            autoVoiceMode = false;
+            clearInterval(timerInterval);
+
+            // Stop Audio & Mic Immediately
+            if (currentPuterAudio) { currentPuterAudio.pause(); currentPuterAudio = null; }
+            if (synth.speaking) { synth.cancel(); }
+            recognition.stop();
+            clearTimeout(silenceTimer);
+
+            // UI Updates - These IDs are not in the original HTML, so commenting out or adapting
+            // document.getElementById('interview-interface').style.display = 'none';
+            // document.getElementById('setup-panel').style.display = 'block';
+            document.getElementById('mic-btn').classList.remove('listening');
+            document.getElementById('mic-btn').style.color = ''; // Reset mic button color
         }
 
         // ── State ──
