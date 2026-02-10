@@ -943,12 +943,13 @@
             }
         }
 
-        function getBestVoice() {
+        function getMaleVoice() {
             const voices = synth.getVoices();
-            // Prioritize "Google US English", "Microsoft Zira", or any "Natural" voice
-            return voices.find(v => v.name.includes('Google US English')) ||
-                voices.find(v => v.name.includes('Zira')) ||
-                voices.find(v => v.name.includes('Natural')) ||
+            // Prioritize known Male voices
+            return voices.find(v => v.name.includes('David')) ||  // Microsoft David (Win)
+                voices.find(v => v.name.includes('Daniel')) || // Mac
+                voices.find(v => v.name.includes('Google US English')) || // Often Male-sounding
+                voices.find(v => v.name.includes('Male')) ||
                 voices.find(v => v.lang === 'en-US') ||
                 voices[0];
         }
@@ -964,11 +965,15 @@
             // Use Browser TTS (Fast, Reliable, Optimized)
             // Reverted from Puter to fix "Robotic" issues and ensure "Stop on Exit" works perfectly
             const utterance = new SpeechSynthesisUtterance(text);
-            const bestVoice = getBestVoice();
-            if (bestVoice) utterance.voice = bestVoice;
+            const bestVoice = getMaleVoice(); // Start with Male preference
+            if (bestVoice) {
+                utterance.voice = bestVoice;
+                // Lower pitch slightly for more "Senior/Male" tone if generic
+                utterance.pitch = 0.9;
+            }
 
             utterance.rate = 1.0; // Normal speed
-            utterance.pitch = 1.0;
+            // utterance.pitch = 1.0; // This line is now handled by the if(bestVoice) block
 
             utterance.onend = () => {
                 isSpeaking = false;
