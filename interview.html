@@ -738,11 +738,15 @@
             <div class="form-group">
                 <label><i class="fas fa-clock"></i> Duration & Plan</label>
                 <div class="duration-options">
+                    <div class="duration-option active" onclick="selectDuration(10, 0, this)">
+                        <div class="dur-time">10 Min Trial</div>
+                        <div class="dur-price">Free</div>
+                    </div>
                     <div class="duration-option" onclick="selectDuration(30, 499, this)">
                         <div class="dur-time">30 Mins</div>
                         <div class="dur-price">₹499</div>
                     </div>
-                    <div class="duration-option active" onclick="selectDuration(45, 799, this)">
+                    <div class="duration-option" onclick="selectDuration(45, 799, this)">
                         <div class="dur-time">45 Mins</div>
                         <div class="dur-price">₹799</div>
                     </div>
@@ -818,9 +822,9 @@
         // ── State ──
         let conversationHistory = [];
         let timerInterval = null;
-        let selectedDuration = 45;
-        let selectedPrice = 799;
-        let timeRemaining = 45 * 60;
+        let selectedDuration = 10;
+        let selectedPrice = 0;
+        let timeRemaining = 10 * 60;
         let interviewActive = false;
         let selectedTopic = '';
         let selectedDifficulty = '';
@@ -837,7 +841,12 @@
             document.querySelectorAll('.duration-option').forEach(d => d.classList.remove('active'));
             el.classList.add('active');
             // Update button
-            document.getElementById('btn-start').innerHTML = `<i class="fas fa-lock"></i> Pay ₹${price} & Start Interview`;
+            const btn = document.getElementById('btn-start');
+            if (price === 0) {
+                btn.innerHTML = `<i class="fas fa-play"></i> Start Free Trial`;
+            } else {
+                btn.innerHTML = `<i class="fas fa-lock"></i> Pay ₹${price} & Start Interview`;
+            }
         }
 
         function initiatePayment() {
@@ -846,6 +855,13 @@
 
             if (!userName || !userEmail || !userEmail.includes('@')) {
                 alert('Please enter your Name and a valid Email Address to receive the report.');
+                return;
+            }
+
+            // FREE TRIAL BYPASS
+            if (selectedPrice === 0) {
+                paymentId = 'FREE_TRIAL_' + Date.now();
+                startInterview();
                 return;
             }
 
