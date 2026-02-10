@@ -1073,6 +1073,12 @@
             const text = input.value.trim();
             if (!text || !interviewActive) return;
 
+            // Stop mic while processing
+            if (autoVoiceMode) {
+                recognition.stop();
+                document.getElementById('mic-btn').classList.remove('listening');
+            }
+
             // Add user message
             addMessage('user', text);
             conversationHistory.push({ role: 'user', content: text });
@@ -1189,10 +1195,20 @@
             const avatar = role === 'ai' ? '<i class="fas fa-brain"></i>' : '<i class="fas fa-user"></i>';
             div.innerHTML = `
                 <div class="avatar">${avatar}</div>
-                <div class="bubble">${marked.parse(content)}</div>
+                <div class="bubble">
+                    ${marked.parse(content)} 
+                    ${role === 'ai' ? `<button class="speak-btn" onclick="speakText(this.parentElement.innerText.replace('🔊',''))">🔊</button>` : ''}
+                </div>
             `;
             messagesEl.appendChild(div);
             scrollToBottom();
+
+            // Auto-speak AI response if in voice mode
+            if (role === 'ai' && autoVoiceMode) {
+                // Remove emojis/markdown for cleaner speech
+                const textToSpeak = content.replace(/[\u{1F600}-\u{1F6FF}]/gu, '').replace(/\*/g, '');
+                speakText(textToSpeak);
+            }
         }
 
         function scrollToBottom() {
