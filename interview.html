@@ -817,6 +817,14 @@
                 </select>
             </div>
 
+            <div class="form-group">
+                <label><i class="fas fa-microphone-alt"></i> Interviewer Voice</label>
+                <select id="voice-select">
+                    <option value="auto">✨ AI Recommended (High Quality)</option>
+                    <!-- Populated via JS -->
+                </select>
+            </div>
+
             <button class="btn-start" id="btn-start" onclick="initiatePayment()">
                 <i class="fas fa-play"></i> Start Free Trial
             </button>
@@ -943,15 +951,45 @@
             }
         }
 
-        function getMaleVoice() {
+        voices[0];
+        }
+
+        // Populate Voice Select
+        function populateVoiceList() {
             const voices = synth.getVoices();
-            // Prioritize known Male voices
-            return voices.find(v => v.name.includes('David')) ||  // Microsoft David (Win)
-                voices.find(v => v.name.includes('Daniel')) || // Mac
-                voices.find(v => v.name.includes('Google US English')) || // Often Male-sounding
-                voices.find(v => v.name.includes('Male')) ||
-                voices.find(v => v.lang === 'en-US') ||
-                voices[0];
+            console.log("Loaded Voices:", voices.length);
+            const voiceSelect = document.getElementById('voice-select');
+            // Keep the first option (Auto)
+            const autoOption = voiceSelect.options[0];
+            voiceSelect.innerHTML = '';
+            voiceSelect.appendChild(autoOption);
+
+            // Filter for English voices to keep it clean
+            const englishVoices = voices.filter(v => v.lang.startsWith('en'));
+
+            englishVoices.forEach((voice) => {
+                const option = document.createElement('option');
+                option.textContent = `${voice.name} (${voice.lang})`;
+                option.setAttribute('data-name', voice.name);
+                voiceSelect.appendChild(option);
+            });
+
+            // Try to select a good default if not Auto
+            // const defaultVoice = englishVoices.find(v => v.name.includes("Google US")) || englishVoices[0];
+            // if(defaultVoice) voiceSelect.value = defaultVoice.name; 
+        }
+
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = populateVoiceList;
+        }
+        // Init immediately if available
+        populateVoiceList();
+
+        function getSelectedVoice() {
+            const voiceSelect = document.getElementById('voice-select');
+            const selectedName = voiceSelect.options[voiceSelect.selectedIndex].getAttribute('data-name');
+            if (!selectedName || voiceSelect.value === 'auto') return null; // Use Auto/Chain logic
+            return synth.getVoices().find(v => v.name === selectedName);
         }
 
         // Helper to split text into chunks for API stability
@@ -996,6 +1034,25 @@
 
             const chunks = splitTextIntoChunks(text);
             let index = 0;
+
+            // Check manual selection first
+            const manualVoice = getSelectedVoice();
+            if (manualVoice) {
+                // Bypass chain, use browser directly with selected voice
+                console.log("Using Manual Voice:", manualVoice.name);
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.voice = manualVoice;
+                utterance.rate = 1.0;
+                utterance.onend = () => {
+                    isSpeaking = false;
+                    isAIProcessing = false;
+                    if (autoVoiceMode && interviewActive) {
+                        try { recognition.start(); document.getElementById('mic-btn').classList.add('listening'); } catch (e) { }
+                    }
+                };
+                synth.speak(utterance);
+                return;
+            }
 
             function playNextChunk() {
                 if (index >= chunks.length) {
