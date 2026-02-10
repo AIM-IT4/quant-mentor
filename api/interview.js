@@ -159,8 +159,16 @@ Be honest and constructive. Base scores strictly on the candidate's actual answe
 
         if (!geminiResponse.ok) {
             const errorData = await geminiResponse.text();
-            console.error('Gemini API error:', errorData);
-            return res.status(500).json({ error: 'AI service error', details: errorData });
+            console.error('Gemini API error:', geminiResponse.status, errorData);
+
+            // User-friendly error messages
+            if (geminiResponse.status === 429) {
+                return res.status(429).json({ error: 'Rate limit reached. Please wait 60 seconds and try again.' });
+            }
+            if (geminiResponse.status === 403) {
+                return res.status(403).json({ error: 'API key is invalid or disabled. Please check configuration.' });
+            }
+            return res.status(500).json({ error: 'AI service error: ' + geminiResponse.status, details: errorData });
         }
 
         const geminiData = await geminiResponse.json();
