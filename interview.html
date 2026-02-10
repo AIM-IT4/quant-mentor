@@ -956,45 +956,72 @@
 
         function speakText(text) {
             isSpeaking = true;
-            console.log('Generating audio...');
+            console.log('Generating audio (StreamElements)...');
 
             // Stop any previous audio
-            if (currentPuterAudio) { currentPuterAudio.pause(); }
+            if (currentPuterAudio) { currentPuterAudio.pause(); currentPuterAudio = null; }
             if (synth.speaking) { synth.cancel(); }
 
-            // Use Browser TTS (Fast, Reliable, Optimized)
-            // Reverted from Puter to fix "Robotic" issues and ensure "Stop on Exit" works perfectly
+            // 1. Try StreamElements (Free, High Quality, No Quota)
+            // Voice: Matthew (US Male). Fallback to Browser if it fails.
+            const streamElementsUrl = `https://api.streamelements.com/kappa/v2/speech?voice=Matthew&text=${encodeURIComponent(text)}`;
+
+            try {
+                const audio = new Audio(streamElementsUrl);
+                currentPuterAudio = audio; // Track for stopping
+
+                // Play when ready
+                audio.play().catch(e => {
+                    console.error("Audio Play Error:", e);
+                    useBrowserFallback(text);
+                });
+
+                audio.onerror = (e) => {
+                    console.warn("StreamElements TTS failed, switching to Browser TTS", e);
+                    useBrowserFallback(text);
+                };
+
+                audio.onended = () => {
+                    isSpeaking = false;
+                    isAIProcessing = false;
+                    currentPuterAudio = null;
+
+                    if (autoVoiceMode && interviewActive) {
+                        try {
+                            recognition.start();
+                            document.getElementById('mic-btn').classList.add('listening');
+                        } catch (e) { console.log('Mic restart err', e); }
+                    }
+                };
+
+            } catch (e) {
+                console.error("StreamElements Setup Error:", e);
+                useBrowserFallback(text);
+            }
+        }
+
+        function useBrowserFallback(text) {
+            console.log("Using Browser TTS Fallback");
             const utterance = new SpeechSynthesisUtterance(text);
-            const bestVoice = getMaleVoice(); // Start with Male preference
+            const bestVoice = getMaleVoice();
             if (bestVoice) {
                 utterance.voice = bestVoice;
-                // Lower pitch slightly for more "Senior/Male" tone if generic
                 utterance.pitch = 0.9;
             }
-
-            utterance.rate = 1.0; // Normal speed
-            // utterance.pitch = 1.0; // This line is now handled by the if(bestVoice) block
+            utterance.rate = 1.0;
 
             utterance.onend = () => {
                 isSpeaking = false;
-                isAIProcessing = false; // Unlock mic
-
-                // Auto-listen loop
+                isAIProcessing = false;
                 if (autoVoiceMode && interviewActive) {
                     try {
                         recognition.start();
                         document.getElementById('mic-btn').classList.add('listening');
-                    } catch (e) { console.log('Mic restart err', e); }
+                    } catch (e) { }
                 }
             };
 
-            // Error listener
-            utterance.onerror = (e) => {
-                console.error("TTS Error", e);
-                isSpeaking = false;
-                isAIProcessing = false;
-            };
-
+            utterance.onerror = () => { isSpeaking = false; isAIProcessing = false; };
             synth.speak(utterance);
         }
 
