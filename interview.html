@@ -983,8 +983,8 @@
 
         function getSelectedVoice() {
             const voiceSelect = document.getElementById('voice-select');
+            if (voiceSelect.selectedIndex < 0) return null;
             const selectedName = voiceSelect.options[voiceSelect.selectedIndex].getAttribute('data-name');
-            if (!selectedName || voiceSelect.value === 'auto') return null; // Use Auto/Chain logic
             return synth.getVoices().find(v => v.name === selectedName);
         }
 
