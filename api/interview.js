@@ -137,7 +137,7 @@ async function callGroqAPI(messages, temperature, apiKey) {
         }
     };
     const body = {
-        model: 'llama3-70b-8192',
+        model: 'llama-3.3-70b-versatile',
         messages: messages,
         temperature: temperature,
         max_tokens: 1024
