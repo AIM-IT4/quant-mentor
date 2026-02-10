@@ -85,8 +85,31 @@ IMPORTANT:
             // Log payment if present (future use)
             if (paymentId) console.log(`Starting interview for ${email} (${name}), Payment: ${paymentId}`);
 
-            const data = await callGroqAPI(conversation, 0.7, GROQ_API_KEY);
-            return res.status(200).json({ reply: data.choices[0].message.content });
+            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${GROQ_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'deepseek-r1-distill-llama-70b', // Reasoning Model
+                    messages: conversation,
+                    temperature: 0.6 // Slightly lower for reasoning consistency
+                })
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Groq API Start Error: ${response.status} ${errText}`);
+            }
+
+            const data = await response.json();
+            let reply = data.choices[0].message.content;
+
+            // CLEANUP: Remove <think> blocks from DeepSeek-R1
+            reply = reply.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+            return res.status(200).json({ reply });
         }
 
         // 2. EVALUATE (END)
@@ -113,15 +136,38 @@ IMPORTANT:
             return res.status(200).json({ reply: "Report generated and sent." });
         }
 
-        // 3. RESPOND (CHAT)
-        // Default action if not start/evaluate
-        conversation = [
-            { role: 'system', content: systemPrompt },
-            ...messages
-        ];
+        // 2. RESPOND TO CANDIDATE
+        if (action === 'respond') {
+            // ... (Repeat cleaning logic for conversation loop)
+            console.log('Sending chat context to Groq...');
+            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${GROQ_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'deepseek-r1-distill-llama-70b',
+                    messages: messages,
+                    temperature: 0.6
+                })
+            });
 
-        const data = await callGroqAPI(conversation, 0.7, GROQ_API_KEY);
-        return res.status(200).json({ reply: data.choices[0].message.content });
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Groq API Respond Error: ${response.status} ${errText}`);
+            }
+
+            const data = await response.json();
+            let reply = data.choices[0].message.content;
+
+            // CLEANUP: Remove <think> blocks
+            reply = reply.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+            return res.status(200).json({ reply });
+        }
+        // Default action if not start/evaluate/respond (should not be reached if all actions are handled)
+        return res.status(400).json({ error: 'Invalid action specified' });
 
     } catch (error) {
         console.error('API Error:', error);
