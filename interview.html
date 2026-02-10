@@ -908,11 +908,15 @@
         };
 
         recognition.onend = () => {
-            // If expected to be listening but stopped (silence), maybe restart? 
-            // No, better to let user toggle. But for "Real Time" feel:
-            // We stop listening when processing.
-            document.getElementById('mic-btn').classList.remove('listening');
-        }
+            // Auto-restart if mode is ON and we are not engaged in AI Speech/Processing
+            if (autoVoiceMode && !isAIProcessing && !isSpeaking) {
+                try {
+                    recognition.start();
+                } catch (e) { console.log('Mic auto-restart', e); }
+            } else {
+                document.getElementById('mic-btn').classList.remove('listening');
+                document.getElementById('mic-btn').style.color = '';
+            }
         };
 
         recognition.onerror = (event) => {
