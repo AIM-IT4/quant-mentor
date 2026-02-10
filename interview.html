@@ -11,6 +11,7 @@
     <link rel="apple-touch-icon" href="assets/images/logo.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
@@ -252,6 +253,53 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95em;
+            outline: none;
+        }
+
+        .input-field:focus {
+            border-color: var(--accent);
+        }
+
+        .duration-options {
+            display: flex;
+            gap: 12px;
+        }
+
+        .duration-option {
+            flex: 1;
+            padding: 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .duration-option.active {
+            border-color: var(--accent);
+            background: rgba(20, 184, 166, 0.1);
+        }
+
+        .dur-time {
+            font-weight: 600;
+            font-size: 1em;
+        }
+
+        .dur-price {
+            color: var(--accent);
+            font-size: 0.9em;
+            margin-top: 4px;
         }
 
         /* ── Chat Screen ── */
@@ -667,7 +715,7 @@
                 <span id="timer-display">45:00</span>
             </div>
             <button class="btn-end" id="btn-end" onclick="endInterview()">
-                <i class="fas fa-stop"></i> End Interview
+                <i class="fas fa-flag-checkered"></i> Finish & Get Report
             </button>
         </div>
     </nav>
@@ -677,9 +725,28 @@
         <div class="setup-card">
             <h1><i class="fas fa-brain"></i> AI Mock Interview</h1>
             <p class="subtitle">Practice with a realistic AI quant interviewer</p>
-            <div class="badge-row">
-                <span><i class="fas fa-clock"></i> 45 Minutes</span>
-                <span><i class="fas fa-chart-line"></i> Scorecard</span>
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> Your Name</label>
+                <input type="text" id="user-name" placeholder="John Doe" class="input-field">
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email Address (for report)</label>
+                <input type="email" id="user-email" placeholder="john@example.com" class="input-field">
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-clock"></i> Duration & Plan</label>
+                <div class="duration-options">
+                    <div class="duration-option" onclick="selectDuration(30, 499, this)">
+                        <div class="dur-time">30 Mins</div>
+                        <div class="dur-price">₹499</div>
+                    </div>
+                    <div class="duration-option active" onclick="selectDuration(45, 799, this)">
+                        <div class="dur-time">45 Mins</div>
+                        <div class="dur-price">₹799</div>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group">
@@ -691,7 +758,7 @@
                     <option value="Pricing, Greeks & Hedging">Pricing, Greeks & Hedging</option>
                     <option value="Fixed Income & Rate Models">Fixed Income & Rate Models</option>
                     <option value="Credit Models & XVA">Credit Models & XVA</option>
-                    <option value="Python & C++ for Quants">Programming (Python & C++)</option>
+                    <option value="Programming (Python & C++)">Programming (Python & C++)</option>
                     <option value="Risk Management, VaR & P&L Attribution">Risk & P&L Attribution</option>
                     <option value="Mental Math & Market Intuition">Mental Math & Market Intuition</option>
                     <option value="FX, Commodities & Inflation">FX, Commodities & Inflation</option>
@@ -708,8 +775,8 @@
                 </select>
             </div>
 
-            <button class="btn-start" id="btn-start" onclick="startInterview()">
-                <i class="fas fa-play"></i> Start Interview
+            <button class="btn-start" id="btn-start" onclick="initiatePayment()">
+                <i class="fas fa-lock"></i> Pay ₹799 & Start Interview
             </button>
         </div>
     </div>
@@ -751,10 +818,62 @@
         // ── State ──
         let conversationHistory = [];
         let timerInterval = null;
-        let timeRemaining = 45 * 60; // 45 minutes in seconds
+        let selectedDuration = 45;
+        let selectedPrice = 799;
+        let timeRemaining = 45 * 60;
         let interviewActive = false;
         let selectedTopic = '';
         let selectedDifficulty = '';
+        let userName = '';
+        let userEmail = '';
+        let paymentId = '';
+
+        const RAZORPAY_KEY_ID = 'rzp_live_SBbq38M84PSrrG'; // Live Key from script.js
+
+        function selectDuration(mins, price, el) {
+            selectedDuration = mins;
+            selectedPrice = price;
+            // Update UI
+            document.querySelectorAll('.duration-option').forEach(d => d.classList.remove('active'));
+            el.classList.add('active');
+            // Update button
+            document.getElementById('btn-start').innerHTML = `<i class="fas fa-lock"></i> Pay ₹${price} & Start Interview`;
+        }
+
+        function initiatePayment() {
+            userName = document.getElementById('user-name').value.trim();
+            userEmail = document.getElementById('user-email').value.trim();
+
+            if (!userName || !userEmail || !userEmail.includes('@')) {
+                alert('Please enter your Name and a valid Email Address to receive the report.');
+                return;
+            }
+
+            const options = {
+                "key": RAZORPAY_KEY_ID,
+                "amount": selectedPrice * 100, // Amount in paise
+                "currency": "INR",
+                "name": "QuantMentor AI Interview",
+                "description": `${selectedDuration} Min Mock Interview Session`,
+                "image": "assets/images/logo.png",
+                "handler": function (response) {
+                    paymentId = response.razorpay_payment_id;
+                    startInterview();
+                },
+                "prefill": {
+                    "name": userName,
+                    "email": userEmail
+                },
+                "theme": {
+                    "color": "#14b8a6"
+                }
+            };
+            const rzp1 = new Razorpay(options);
+            rzp1.on('payment.failed', function (response) {
+                alert("Payment Failed: " + response.error.description);
+            });
+            rzp1.open();
+        }
 
         // ── API Call ──
         async function callInterviewAPI(action, extraData = {}) {
@@ -782,11 +901,13 @@
         async function startInterview() {
             const btn = document.getElementById('btn-start');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Setting up interview...';
 
             selectedTopic = document.getElementById('topic-select').value;
             selectedDifficulty = document.getElementById('difficulty-select').value;
             conversationHistory = [];
+            timeRemaining = selectedDuration * 60; // Set timer based on selection
+            document.getElementById('timer-display').textContent = `${selectedDuration}:00`;
 
             try {
                 const data = await callInterviewAPI('start');
@@ -858,28 +979,30 @@
             interviewActive = false;
             clearInterval(timerInterval);
 
-            // Disable input
             document.getElementById('user-input').disabled = true;
             document.getElementById('btn-send').disabled = true;
             document.getElementById('btn-end').classList.remove('active');
 
-            // Show typing while generating scorecard
+            // Show sending status
             document.getElementById('typing').style.display = 'block';
-            addMessage('ai', '📝 Generating your performance scorecard...');
+            addMessage('ai', '📝 Analyzing performance and generating report...');
             scrollToBottom();
 
             try {
-                const data = await callInterviewAPI('evaluate');
+                // Call API to generate report and email it
+                const data = await callInterviewAPI('evaluate', {
+                    email: userEmail,
+                    name: userName
+                });
+
                 document.getElementById('typing').style.display = 'none';
 
-                // Show scorecard
-                const scorecardContent = document.getElementById('scorecard-content');
-                scorecardContent.innerHTML = marked.parse(data.reply);
-                document.getElementById('scorecard-overlay').classList.add('active');
+                // Show completion message
+                addMessage('ai', `✅ **Interview Complete!**\n\nYour detailed performance scorecard has been sent to **${userEmail}**.\n\nCheck your inbox (and spam folder) in a few minutes.`);
 
             } catch (err) {
                 document.getElementById('typing').style.display = 'none';
-                addMessage('ai', '⚠️ Could not generate scorecard. Error: ' + err.message);
+                addMessage('ai', '⚠️ Error generating report: ' + err.message);
             }
         }
 
