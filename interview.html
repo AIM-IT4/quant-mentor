@@ -954,53 +954,91 @@
                 voices[0];
         }
 
+        // Helper to split text into chunks for API stability
+        function splitTextIntoChunks(text) {
+            // Split by punctuation, keeping the punctuation
+            const rawChunks = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
+            const chunks = [];
+            // Ensure no chunk is too long (Limit 150 chars for safe URL)
+            rawChunks.forEach(chunk => {
+                if (chunk.length > 150) {
+                    const words = chunk.split(' ');
+                    let temp = '';
+                    words.forEach(word => {
+                        if ((temp + word).length > 150) { chunks.push(temp.trim()); temp = ''; }
+                        temp += word + ' ';
+                    });
+                    if (temp) chunks.push(temp.trim());
+                } else {
+                    chunks.push(chunk.trim());
+                }
+            });
+            return chunks.filter(c => c.length > 0);
+        }
+
+        async function playUrlAudio(url) {
+            return new Promise((resolve, reject) => {
+                const audio = new Audio(url);
+                currentPuterAudio = audio;
+                audio.onended = resolve;
+                audio.onerror = reject;
+                audio.play().catch(reject);
+            });
+        }
+
         function speakText(text) {
             isSpeaking = true;
-            console.log('Generating audio (StreamElements)...');
+            console.log('Speaking (Chunked)...');
 
-            // Stop any previous audio
+            // Stop previous
             if (currentPuterAudio) { currentPuterAudio.pause(); currentPuterAudio = null; }
             if (synth.speaking) { synth.cancel(); }
 
-            // 1. Try StreamElements (Free, High Quality, No Quota)
-            // Voice: Matthew (US Male). Fallback to Browser if it fails.
-            const streamElementsUrl = `https://api.streamelements.com/kappa/v2/speech?voice=Matthew&text=${encodeURIComponent(text)}`;
+            const chunks = splitTextIntoChunks(text);
+            let index = 0;
 
-            try {
-                const audio = new Audio(streamElementsUrl);
-                currentPuterAudio = audio; // Track for stopping
-
-                // Play when ready
-                audio.play().catch(e => {
-                    console.error("Audio Play Error:", e);
-                    useBrowserFallback(text);
-                });
-
-                audio.onerror = (e) => {
-                    console.warn("StreamElements TTS failed, switching to Browser TTS", e);
-                    useBrowserFallback(text);
-                };
-
-                audio.onended = () => {
+            function playNextChunk() {
+                if (index >= chunks.length) {
+                    // All done
                     isSpeaking = false;
                     isAIProcessing = false;
-                    currentPuterAudio = null;
-
                     if (autoVoiceMode && interviewActive) {
-                        try {
-                            recognition.start();
-                            document.getElementById('mic-btn').classList.add('listening');
-                        } catch (e) { console.log('Mic restart err', e); }
+                        try { recognition.start(); document.getElementById('mic-btn').classList.add('listening'); } catch (e) { }
                     }
-                };
+                    return;
+                }
 
-            } catch (e) {
-                console.error("StreamElements Setup Error:", e);
-                useBrowserFallback(text);
+                const chunk = chunks[index];
+                const streamElementsUrl = `https://api.streamelements.com/kappa/v2/speech?voice=Matthew&text=${encodeURIComponent(chunk)}`;
+                const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(chunk)}`;
+
+                // Chain: StreamElements -> Google -> Browser
+                playUrlAudio(streamElementsUrl)
+                    .then(() => {
+                        index++;
+                        playNextChunk();
+                    })
+                    .catch(() => {
+                        console.warn("StreamElements failed, trying Google...");
+                        playUrlAudio(googleUrl)
+                            .then(() => {
+                                index++;
+                                playNextChunk();
+                            })
+                            .catch(() => {
+                                console.warn("Google failed, using Browser fallback");
+                                useBrowserFallback(chunk, () => {
+                                    index++;
+                                    playNextChunk();
+                                });
+                            });
+                    });
             }
+
+            playNextChunk();
         }
 
-        function useBrowserFallback(text) {
+        function useBrowserFallback(text, callback) {
             console.log("Using Browser TTS Fallback");
             const utterance = new SpeechSynthesisUtterance(text);
             const bestVoice = getMaleVoice();
@@ -1011,17 +1049,20 @@
             utterance.rate = 1.0;
 
             utterance.onend = () => {
-                isSpeaking = false;
-                isAIProcessing = false;
-                if (autoVoiceMode && interviewActive) {
-                    try {
-                        recognition.start();
-                        document.getElementById('mic-btn').classList.add('listening');
-                    } catch (e) { }
+                if (callback) callback();
+                else {
+                    isSpeaking = false;
+                    isAIProcessing = false;
+                    if (autoVoiceMode && interviewActive) {
+                        try { recognition.start(); document.getElementById('mic-btn').classList.add('listening'); } catch (e) { }
+                    }
                 }
             };
 
-            utterance.onerror = () => { isSpeaking = false; isAIProcessing = false; };
+            utterance.onerror = () => {
+                if (callback) callback();
+                else { isSpeaking = false; isAIProcessing = false; }
+            };
             synth.speak(utterance);
         }
 
