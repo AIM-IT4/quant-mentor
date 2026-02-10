@@ -1,4 +1,4 @@
-const https = require('https');
+import https from 'https';
 
 // Helper: HTTP Request (Replace fetch to avoid dependency issues)
 function httpRequest(url, options, postData) {
