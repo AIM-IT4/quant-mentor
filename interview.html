@@ -819,6 +819,50 @@
     </div>
 
     <script>
+        // ── Speech API Setup ──
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+
+        const synth = window.speechSynthesis;
+        let isSpeaking = false;
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            document.getElementById('user-input').value += transcript + ' ';
+            document.getElementById('mic-btn').classList.remove('listening');
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech error:', event.error);
+            document.getElementById('mic-btn').classList.remove('listening');
+        };
+
+        function toggleMic() {
+            if (!SpeechRecognition) {
+                alert("Your browser doesn't support speech recognition. Try Chrome.");
+                return;
+            }
+            const btn = document.getElementById('mic-btn');
+            if (btn.classList.contains('listening')) {
+                recognition.stop();
+                btn.classList.remove('listening');
+            } else {
+                recognition.start();
+                btn.classList.add('listening');
+            }
+        }
+
+        function speakText(text) {
+            if (synth.speaking) synth.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1;
+            utterance.pitch = 1;
+            synth.speak(utterance);
+        }
+
         // ── State ──
         let conversationHistory = [];
         let timerInterval = null;
