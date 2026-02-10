@@ -1,5 +1,29 @@
-// using global fetch
-// import fetch from 'node-fetch'; 
+const https = require('https');
+
+// Helper: HTTP Request (Replace fetch to avoid dependency issues)
+function httpRequest(url, options, postData) {
+    return new Promise((resolve, reject) => {
+        const req = https.request(url, options, (res) => {
+            let data = '';
+            res.on('data', (chunk) => data += chunk);
+            res.on('end', () => {
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                    try {
+                        resolve(JSON.parse(data));
+                    } catch (e) {
+                        reject(new Error('Invalid JSON response'));
+                    }
+                } else {
+                    reject(new Error(`API Error: ${res.statusCode} ${data}`));
+                }
+            });
+        });
+
+        req.on('error', (e) => reject(e));
+        if (postData) req.write(JSON.stringify(postData));
+        req.end();
+    });
+}
 
 export default async function handler(req, res) {
     // CORS headers
@@ -21,6 +45,8 @@ export default async function handler(req, res) {
 
     const { action, messages, topic, difficulty, paymentId, email, name } = req.body;
     console.log('Action:', action, 'Topic:', topic);
+
+    // System prompt — the quant interviewer persona
     const systemPrompt = `You are a senior quant interviewer at a top-tier investment bank (Goldman Sachs / JP Morgan / Citadel level). You are conducting a live mock interview for a quantitative finance role.
 
 INTERVIEW RULES:
@@ -56,25 +82,7 @@ IMPORTANT:
             // Log payment if present (future use)
             if (paymentId) console.log(`Starting interview for ${email} (${name}), Payment: ${paymentId}`);
 
-            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${GROQ_API_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: 'llama3-70b-8192',
-                    messages: conversation,
-                    temperature: 0.7
-                })
-            });
-
-            if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(`Groq API Start Error: ${response.status} ${errText}`);
-            }
-
-            const data = await response.json();
+            const data = await callGroqAPI(conversation, 0.7, GROQ_API_KEY);
             return res.status(200).json({ reply: data.choices[0].message.content });
         }
 
@@ -87,25 +95,7 @@ IMPORTANT:
                 { role: 'user', content: 'The interview is over. Generate a detailed performance scorecard in Markdown. Include: 1. Topic-wise rating (1-10), 2. Strengths, 3. Weaknesses, 4. Actionable study plan. Do not ask any more questions. Just the report.' }
             ];
 
-            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${GROQ_API_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: 'llama3-70b-8192',
-                    messages: evalConversation,
-                    temperature: 0.3
-                })
-            });
-
-            if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(`Groq API Eval Error: ${response.status} ${errText}`);
-            }
-
-            const data = await response.json();
+            const data = await callGroqAPI(evalConversation, 0.3, GROQ_API_KEY);
             const markdownReport = data.choices[0].message.content;
 
             // Send Email
@@ -127,36 +117,31 @@ IMPORTANT:
             ...messages
         ];
 
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${GROQ_API_KEY}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: 'llama3-70b-8192',
-                messages: conversation,
-                temperature: 0.7,
-                max_tokens: 1024
-            })
-        });
-
-        if (!response.ok) {
-            const errText = await response.text();
-            // User-friendly error messages
-            if (response.status === 429) {
-                return res.status(429).json({ error: 'Rate limit reached. Please wait a moment and try again.' });
-            }
-            throw new Error(`Groq API Chat Error: ${response.status} ${errText}`);
-        }
-
-        const data = await response.json();
+        const data = await callGroqAPI(conversation, 0.7, GROQ_API_KEY);
         return res.status(200).json({ reply: data.choices[0].message.content });
 
     } catch (error) {
         console.error('API Error:', error);
         return res.status(500).json({ error: 'AI service error', details: error.message });
     }
+}
+
+// Helper: Call Groq API
+async function callGroqAPI(messages, temperature, apiKey) {
+    const options = {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+        }
+    };
+    const body = {
+        model: 'llama3-70b-8192',
+        messages: messages,
+        temperature: temperature,
+        max_tokens: 1024
+    };
+    return await httpRequest('https://api.groq.com/openai/v1/chat/completions', options, body);
 }
 
 // Helper: Simple Markdown to HTML for Email
@@ -200,24 +185,22 @@ async function sendEmailReport(toEmail, toName, reportMarkdown) {
         </div>
     `;
 
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    const options = {
         method: 'POST',
         headers: {
             'accept': 'application/json',
             'api-key': BREVO_API_KEY,
             'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-            sender: { email: 'jha.8@alumni.iitj.ac.in', name: 'QuantMentor AI' },
-            to: [{ email: toEmail, name: toName }],
-            subject: 'Your AI Interview Scorecard 📊',
-            htmlContent: htmlContent
-        })
-    });
+        }
+    };
 
-    if (!response.ok) {
-        const err = await response.text();
-        throw new Error(`Brevo API Error: ${err}`);
-    }
+    const body = {
+        sender: { email: 'jha.8@alumni.iitj.ac.in', name: 'QuantMentor AI' },
+        to: [{ email: toEmail, name: toName }],
+        subject: 'Your AI Interview Scorecard 📊',
+        htmlContent: htmlContent
+    };
+
+    await httpRequest('https://api.brevo.com/v3/smtp/email', options, body);
     console.log(`Email sent to ${toEmail}`);
 }
