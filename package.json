@@ -9,7 +9,5 @@
   "keywords": [],
   "author": "Amit Kumar Jha",
   "license": "ISC",
-  "dependencies": {
-    "node-fetch": "^3.3.2"
-  }
+  "dependencies": {}
 }

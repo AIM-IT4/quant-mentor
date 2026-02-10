@@ -1,4 +1,5 @@
-import fetch from 'node-fetch';
+// using global fetch
+// import fetch from 'node-fetch'; 
 
 export default async function handler(req, res) {
     // CORS headers
@@ -9,14 +10,17 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+    console.log('--- API Request Received ---');
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
+    console.log('GROQ_KEY_EXISTS:', !!GROQ_API_KEY);
+
     if (!GROQ_API_KEY) {
-        return res.status(500).json({ error: 'Groq API key not configured' });
+        console.error('CRITICAL: GROQ_API_KEY is missing in environment variables');
+        return res.status(500).json({ error: 'Server configuration error: Missing API Key' });
     }
 
     const { action, messages, topic, difficulty, paymentId, email, name } = req.body;
-
-    // System prompt — the quant interviewer persona
+    console.log('Action:', action, 'Topic:', topic);
     const systemPrompt = `You are a senior quant interviewer at a top-tier investment bank (Goldman Sachs / JP Morgan / Citadel level). You are conducting a live mock interview for a quantitative finance role.
 
 INTERVIEW RULES:
