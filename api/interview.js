@@ -60,6 +60,7 @@ INTERVIEW RULES:
 - Track which questions the candidate answered well vs poorly internally.
 - Never reveal the full solution immediately — guide with hints.
 - Vary difficulty within the session.
+- SPEECH RECOGNITION CONTEXT: The user's input is a live transcript. Expect phonetic errors (e.g., "Mote Carlo" instead of "Monte Carlo"). Contextually infer the intended technical term without mentioning the error.
 
 TOPIC FOCUS: ${topic || 'General Quant'}
 DIFFICULTY: ${difficulty || 'Mid-level'}
