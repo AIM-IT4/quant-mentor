@@ -122,7 +122,8 @@ IMPORTANT:
 
     } catch (error) {
         console.error('API Error:', error);
-        return res.status(500).json({ error: 'AI service error', details: error.message });
+        // RETURN ACTUAL ERROR TO FRONTEND FOR DEBUGGING
+        return res.status(500).json({ error: error.message || 'AI service error' });
     }
 }
 
