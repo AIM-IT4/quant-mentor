@@ -11,6 +11,7 @@
     <link rel="apple-touch-icon" href="assets/images/logo.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
             --bg-primary: #0a0e1a;
@@ -329,6 +330,30 @@
             line-height: 1.6;
             white-space: pre-wrap;
             word-wrap: break-word;
+        }
+
+        .message .bubble p {
+            margin-bottom: 0.8em;
+        }
+
+        .message .bubble p:last-child {
+            margin-bottom: 0;
+        }
+
+        .message .bubble code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+        }
+
+        .message .bubble pre {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
         }
 
         .message.ai .bubble {
@@ -849,7 +874,7 @@
 
                 // Show scorecard
                 const scorecardContent = document.getElementById('scorecard-content');
-                scorecardContent.innerHTML = markdownToHtml(data.reply);
+                scorecardContent.innerHTML = marked.parse(data.reply);
                 document.getElementById('scorecard-overlay').classList.add('active');
 
             } catch (err) {
@@ -907,10 +932,10 @@
             const div = document.createElement('div');
             div.className = `message ${role}`;
 
-            const avatar = role === 'ai' ? '🧠' : '👤';
+            const avatar = role === 'ai' ? '<i class="fas fa-brain"></i>' : '<i class="fas fa-user"></i>';
             div.innerHTML = `
                 <div class="avatar">${avatar}</div>
-                <div class="bubble">${markdownToHtml(content)}</div>
+                <div class="bubble">${marked.parse(content)}</div>
             `;
             messagesEl.appendChild(div);
             scrollToBottom();
@@ -933,43 +958,7 @@
             el.style.height = Math.min(el.scrollHeight, 140) + 'px';
         }
 
-        // ── Markdown to HTML (simple) ──
-        function markdownToHtml(text) {
-            if (!text) return '';
-            let html = text
-                // Escape HTML first
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                // Headers
-                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-                .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-                // Bold
-                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                // Italic
-                .replace(/\*(.+?)\*/g, '<em>$1</em>')
-                // Inline code
-                .replace(/`(.+?)`/g, '<code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:0.9em;">$1</code>')
-                // Unordered lists
-                .replace(/^- (.+)$/gm, '<li>$1</li>')
-                // Table rows
-                .replace(/^\|(.+)\|$/gm, (match, content) => {
-                    const cells = content.split('|').map(c => c.trim());
-                    if (cells.every(c => /^[-:]+$/.test(c))) return ''; // separator row
-                    const tag = cells.some(c => c === 'Topic' || c === 'Score' || c === 'Comment') ? 'th' : 'td';
-                    return '<tr>' + cells.map(c => `<${tag}>${c}</${tag}>`).join('') + '</tr>';
-                })
-                // Newlines
-                .replace(/\n\n/g, '</p><p>')
-                .replace(/\n/g, '<br>');
 
-            // Wrap consecutive <li> in <ul>
-            html = html.replace(/((<li>.*?<\/li>\s*)+)/g, '<ul>$1</ul>');
-            // Wrap consecutive <tr> in <table>
-            html = html.replace(/((<tr>.*?<\/tr>\s*)+)/g, '<table>$1</table>');
-
-            return `<p>${html}</p>`;
-        }
     </script>
 </body>
 
