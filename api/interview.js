@@ -91,8 +91,8 @@ IMPORTANT:
             const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
             if (SUPABASE_URL && SUPABASE_KEY) {
                 try {
-                    // Fire and forget logging
-                    fetch(`${SUPABASE_URL}/rest/v1/interview_sessions`, {
+                    // Log to Supabase (Await ensures completion in serverless environments)
+                    await fetch(`${SUPABASE_URL}/rest/v1/interview_sessions`, {
                         method: 'POST',
                         headers: {
                             'apikey': SUPABASE_KEY,
@@ -108,7 +108,8 @@ IMPORTANT:
                             payment_id: paymentId,
                             created_at: new Date().toISOString()
                         })
-                    }).catch(err => console.error('Supabase Log Error (Background):', err));
+                    });
+                    console.log('Logged to Supabase Successfully');
                 } catch (e) {
                     console.error('Supabase Setup Error:', e);
                 }
