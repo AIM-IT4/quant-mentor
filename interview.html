@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://js.puter.com/v2/"></script>
     <style>
         :root {
             --bg-primary: #0a0e1a;
@@ -914,24 +915,36 @@
         }
 
         function speakText(text) {
-            if (synth.speaking) synth.cancel();
             isSpeaking = true;
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 1.1; // Slightly faster for natural feel
-            utterance.pitch = 1;
+            console.log('Generating audio with Puter.js...');
 
-            utterance.onend = () => {
-                isSpeaking = false;
-                // Auto-listen after AI finishes (Continuous Loop)
-                if (autoVoiceMode && interviewActive) {
-                    try {
-                        recognition.start();
-                        document.getElementById('mic-btn').classList.add('listening');
-                    } catch (e) { console.log('Mic restart err', e); }
-                }
-            };
-
-            synth.speak(utterance);
+            // Use Puter.js for realistic TTS
+            puter.ai.txt2speech(text)
+                .then(audio => {
+                    audio.play();
+                    audio.onended = () => {
+                        isSpeaking = false;
+                        // Auto-listen after AI finishes
+                        if (autoVoiceMode && interviewActive) {
+                            try {
+                                recognition.start();
+                                document.getElementById('mic-btn').classList.add('listening');
+                            } catch (e) {
+                                console.log('Mic restart err', e);
+                                isSpeaking = false;
+                            }
+                        }
+                    };
+                })
+                .catch(err => {
+                    console.error('Puter TTS Error:', err);
+                    isSpeaking = false;
+                    // Fallback to browser TTS if Puter fails
+                    if (synth.speaking) synth.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.onend = () => { isSpeaking = false; };
+                    synth.speak(utterance);
+                });
         }
 
         // ── State ──
