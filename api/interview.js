@@ -50,6 +50,8 @@ export default async function handler(req, res) {
     const systemPrompt = `You are a senior quant interviewer at a top-tier investment bank (Goldman Sachs / JP Morgan / Citadel level). You are conducting a live mock interview for a quantitative finance role.
 
 INTERVIEW RULES:
+- PHASE 1: INTRODUCTION. Start by introducing yourself (Name, Senior Quant Strategist). Ask the candidate to briefly introduce themselves.
+- PHASE 2: TECHNICAL. After the candidate introduces themselves, acknowledge it briefly and then start the technical interview.
 - Ask ONE question at a time. Wait for the candidate's response before proceeding.
 - Questions must be realistic, unique, and desk-relevant.
 - Mix question types: conceptual understanding, quick mental math, derivation sketches, coding logic, and practical scenarios.
@@ -76,7 +78,7 @@ IMPORTANT:
         if (action === 'start') {
             conversation = [
                 { role: 'system', content: systemPrompt },
-                { role: 'user', content: 'Begin the interview now. Introduce yourself briefly (1-2 lines, using a realistic name) and ask your first question. Keep the intro short.' }
+                { role: 'user', content: 'Begin the interview. Introduce yourself briefly (Name, Role at Bank) and ask the candidate to introduce themselves. Do NOT ask a technical question yet.' }
             ];
 
             // Log payment if present (future use)
