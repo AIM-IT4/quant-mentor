@@ -1049,13 +1049,16 @@
         }
 
         function createStatusElement() {
-            const div = document.createElement('div');
-            div.id = 'mic-status';
-            div.style.fontSize = '0.8em';
-            div.style.marginTop = '5px';
-            div.style.textAlign = 'center';
-            document.querySelector('.input-area').appendChild(div);
-            return div;
+            try {
+                const div = document.createElement('div');
+                div.id = 'mic-status';
+                div.style.fontSize = '0.8em';
+                div.style.marginTop = '5px';
+                div.style.textAlign = 'center';
+                const container = document.querySelector('.chat-input-area') || document.body;
+                container.appendChild(div);
+                return div;
+            } catch (e) { console.error("Status UI Error", e); return { innerText: '', style: {} }; }
         }
 
         function useBrowserFallback(text, callback) {
