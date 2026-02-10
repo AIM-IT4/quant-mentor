@@ -111,11 +111,12 @@ Be honest and constructive. Base scores strictly on the candidate's actual answe
                 'Authorization': `Bearer ${GROQ_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'llama3-70b-8192', // Free, high performance model
+                model: 'llama-3.3-70b-versatile', // Latest Llama 3.3 70B
                 messages: conversation,
                 temperature: 0.7,
                 max_tokens: 2048,
-                top_p: 1
+                top_p: 1,
+                stream: false
             })
         });
 
