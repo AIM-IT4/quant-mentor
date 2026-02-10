@@ -92,9 +92,9 @@ IMPORTANT:
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: 'deepseek-r1-distill-llama-70b', // Reasoning Model
+                    model: 'llama-3.3-70b-versatile',
                     messages: conversation,
-                    temperature: 0.6 // Slightly lower for reasoning consistency
+                    temperature: 0.7
                 })
             });
 
@@ -104,12 +104,7 @@ IMPORTANT:
             }
 
             const data = await response.json();
-            let reply = data.choices[0].message.content;
-
-            // CLEANUP: Remove <think> blocks from DeepSeek-R1
-            reply = reply.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-            return res.status(200).json({ reply });
+            return res.status(200).json({ reply: data.choices[0].message.content });
         }
 
         // 2. EVALUATE (END)
@@ -147,9 +142,9 @@ IMPORTANT:
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: 'deepseek-r1-distill-llama-70b',
+                    model: 'llama-3.3-70b-versatile',
                     messages: messages,
-                    temperature: 0.6
+                    temperature: 0.7
                 })
             });
 
@@ -159,12 +154,7 @@ IMPORTANT:
             }
 
             const data = await response.json();
-            let reply = data.choices[0].message.content;
-
-            // CLEANUP: Remove <think> blocks
-            reply = reply.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-            return res.status(200).json({ reply });
+            return res.status(200).json({ reply: data.choices[0].message.content });
         }
         // Default action if not start/evaluate/respond (should not be reached if all actions are handled)
         return res.status(400).json({ error: 'Invalid action specified' });
