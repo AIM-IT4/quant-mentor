@@ -1118,10 +1118,22 @@
         function useBrowserFallback(text, callback) {
             console.log("Using Browser TTS Fallback");
             const utterance = new SpeechSynthesisUtterance(text);
-            const bestVoice = getMaleVoice();
+            // Try to get selected voice, or find a good default
+            let bestVoice = getSelectedVoice();
+            if (!bestVoice) {
+                const voices = synth.getVoices();
+                bestVoice = voices.find(v => v.name.includes('Desktop Mark')) || // Win
+                    voices.find(v => v.name.includes('David')) || // Win
+                    voices.find(v => v.name.includes('Daniel')) || // Mac
+                    voices.find(v => v.name.includes('Google US English')) || // Chrome
+                    voices.find(v => v.lang === 'en-US' && v.name.includes('Male')) ||
+                    voices[0];
+            }
+
             if (bestVoice) {
                 utterance.voice = bestVoice;
-                utterance.pitch = 0.9;
+                if (bestVoice.name.includes('David') || bestVoice.name.includes('Mark')) utterance.pitch = 1.0;
+                else utterance.pitch = 0.9;
             }
             utterance.rate = 1.0;
 
