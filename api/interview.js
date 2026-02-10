@@ -11,9 +11,9 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-    if (!GEMINI_API_KEY) {
-        return res.status(500).json({ error: 'Gemini API key not configured' });
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+    if (!GROQ_API_KEY) {
+        return res.status(500).json({ error: 'Groq API key not configured' });
     }
 
     const { action, messages, topic, difficulty } = req.body;
@@ -51,62 +51,31 @@ IMPORTANT:
 - For coding questions, ask about approach/pseudocode, not full syntax.`;
 
     try {
-        let geminiMessages = [];
+        let conversation = [];
 
+        // 1. Construct messages for Groq (OpenAI-compatible format)
         if (action === 'start') {
-            geminiMessages = [
-                {
-                    role: 'user',
-                    parts: [{ text: `${systemPrompt}\n\nBegin the interview now. Introduce yourself briefly (1-2 lines, use a realistic name) and ask your first question. Keep the intro short — get to the question quickly.` }]
-                }
+            conversation = [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: 'Begin the interview now. Introduce yourself briefly (1-2 lines, using a realistic name) and ask your first question. Keep the intro short.' }
             ];
         } else if (action === 'respond') {
-            // Build conversation history
-            geminiMessages = messages.map((msg, i) => {
-                if (i === 0) {
-                    // First message includes system prompt
-                    return {
-                        role: msg.role === 'assistant' ? 'model' : 'user',
-                        parts: [{ text: i === 0 && msg.role === 'user' ? `${systemPrompt}\n\n${msg.content}` : msg.content }]
-                    };
-                }
-                return {
-                    role: msg.role === 'assistant' ? 'model' : 'user',
-                    parts: [{ text: msg.content }]
-                };
-            });
-
-            // Inject system prompt into first user message if not already there
-            if (geminiMessages.length > 0 && geminiMessages[0].role === 'model') {
-                geminiMessages.unshift({
-                    role: 'user',
-                    parts: [{ text: `${systemPrompt}\n\nBegin the interview.` }]
-                });
-            }
-        } else if (action === 'evaluate') {
-            // Build full conversation for evaluation
-            geminiMessages = [
-                {
-                    role: 'user',
-                    parts: [{ text: `${systemPrompt}\n\nBegin the interview.` }]
-                }
+            conversation = [
+                { role: 'system', content: systemPrompt },
+                ...messages.map(msg => ({
+                    role: msg.role === 'assistant' ? 'assistant' : 'user',
+                    content: msg.content
+                }))
             ];
-
-            // Add conversation history
-            if (messages && messages.length > 0) {
-                for (const msg of messages) {
-                    geminiMessages.push({
-                        role: msg.role === 'assistant' ? 'model' : 'user',
-                        parts: [{ text: msg.content }]
-                    });
-                }
-            }
-
-            // Ask for evaluation
-            geminiMessages.push({
-                role: 'user',
-                parts: [{
-                    text: `The interview is now over. Please provide a detailed performance scorecard in this EXACT format:
+        } else if (action === 'evaluate') {
+            conversation = [
+                { role: 'system', content: systemPrompt },
+                ...messages.map(msg => ({
+                    role: msg.role === 'assistant' ? 'assistant' : 'user',
+                    content: msg.content
+                })),
+                {
+                    role: 'user', content: `The interview is now over. Please provide a detailed performance scorecard in this EXACT format:
 
 ## 📊 Interview Performance Scorecard
 
@@ -128,51 +97,44 @@ IMPORTANT:
 
 ### 🎯 Interview Readiness: (Ready / Almost Ready / Needs More Prep)
 
-Be honest and constructive. Base scores strictly on the candidate's actual answers during this session.` }]
-            });
+Be honest and constructive. Base scores strictly on the candidate's actual answers during this session.` }
+            ];
         } else {
             return res.status(400).json({ error: 'Invalid action. Use: start, respond, evaluate' });
         }
 
-        // Call Gemini API
-        const geminiResponse = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: geminiMessages,
-                    generationConfig: {
-                        temperature: 0.8,
-                        topP: 0.95,
-                        maxOutputTokens: 2048
-                    },
-                    safetySettings: [
-                        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-                        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-                        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-                        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
-                    ]
-                })
-            }
-        );
+        // 2. Call Groq API
+        const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${GROQ_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'llama3-70b-8192', // Free, high performance model
+                messages: conversation,
+                temperature: 0.7,
+                max_tokens: 2048,
+                top_p: 1
+            })
+        });
 
-        if (!geminiResponse.ok) {
-            const errorData = await geminiResponse.text();
-            console.error('Gemini API error:', geminiResponse.status, errorData);
+        if (!groqResponse.ok) {
+            const errorData = await groqResponse.text();
+            console.error('Groq API error:', groqResponse.status, errorData);
 
             // User-friendly error messages
-            if (geminiResponse.status === 429) {
-                return res.status(429).json({ error: 'Rate limit reached. Please wait 60 seconds and try again.' });
+            if (groqResponse.status === 429) {
+                return res.status(429).json({ error: 'Rate limit reached. Please wait a moment and try again.' });
             }
-            if (geminiResponse.status === 403) {
-                return res.status(403).json({ error: 'API key is invalid or disabled. Please check configuration.' });
+            if (groqResponse.status === 401 || groqResponse.status === 403) {
+                return res.status(403).json({ error: 'API key is invalid. Please check GROQ_API_KEY configuration.' });
             }
-            return res.status(500).json({ error: 'AI service error: ' + geminiResponse.status, details: errorData });
+            return res.status(500).json({ error: 'AI service error: ' + groqResponse.status, details: errorData });
         }
 
-        const geminiData = await geminiResponse.json();
-        const reply = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+        const groqData = await groqResponse.json();
+        const reply = groqData.choices?.[0]?.message?.content;
 
         if (!reply) {
             return res.status(500).json({ error: 'No response from AI' });
