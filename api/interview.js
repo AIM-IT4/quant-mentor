@@ -86,6 +86,34 @@ IMPORTANT:
             // Log payment if present (future use)
             if (paymentId) console.log(`Starting interview for ${email} (${name}), Payment: ${paymentId}`);
 
+            // Log to Supabase
+            const SUPABASE_URL = process.env.SUPABASE_URL;
+            const SUPABASE_KEY = process.env.SUPABASE_KEY;
+            if (SUPABASE_URL && SUPABASE_KEY) {
+                try {
+                    // Fire and forget logging
+                    fetch(`${SUPABASE_URL}/rest/v1/interview_sessions`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify({
+                            email: email || 'anonymous',
+                            name: name || 'Anonymous',
+                            topic: topic,
+                            difficulty: difficulty,
+                            payment_id: paymentId,
+                            created_at: new Date().toISOString()
+                        })
+                    }).catch(err => console.error('Supabase Log Error (Background):', err));
+                } catch (e) {
+                    console.error('Supabase Setup Error:', e);
+                }
+            }
+
             const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
                 headers: {
