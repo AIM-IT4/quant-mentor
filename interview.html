@@ -862,21 +862,45 @@
         // ── Speech API Setup ──
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
-        recognition.continuous = false;
+        recognition.continuous = true; // Keep listening even if user pauses
         recognition.lang = 'en-US';
-        recognition.interimResults = false;
+        recognition.interimResults = true; // Show real-time typing
 
         const synth = window.speechSynthesis;
         let isSpeaking = false;
         let autoVoiceMode = false;
+        let silenceTimer = null;
+        let finalTranscript = '';
 
         recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            document.getElementById('user-input').value = transcript;
+            let interim = '';
+            // Loop through results to handle continuous stream
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript + ' ';
+                } else {
+                    interim += event.results[i][0].transcript;
+                }
+            }
 
-            // Auto-send if in voice mode
+            // Update UI
+            document.getElementById('user-input').value = finalTranscript + interim;
+
+            // Auto-send logic with 5-second silence detection
             if (autoVoiceMode) {
-                sendMessage();
+                clearTimeout(silenceTimer);
+
+                // Visual feedback: Pulse faster or change color?
+                const micBtn = document.getElementById('mic-btn');
+                micBtn.style.color = '#ef4444'; // Red (Active)
+
+                silenceTimer = setTimeout(() => {
+                    // Send if we have content
+                    if (document.getElementById('user-input').value.trim().length > 0) {
+                        sendMessage();
+                        finalTranscript = ''; // Reset for next turn
+                    }
+                }, 5000); // 5 Seconds Silence Rule
             } else {
                 document.getElementById('mic-btn').classList.remove('listening');
             }
@@ -1094,7 +1118,9 @@
             // Stop mic while processing
             if (autoVoiceMode) {
                 recognition.stop();
+                clearTimeout(silenceTimer);
                 document.getElementById('mic-btn').classList.remove('listening');
+                document.getElementById('mic-btn').style.color = ''; // Reset color
             }
 
             // Add user message
