@@ -697,6 +697,43 @@
                 padding: 4px 10px;
             }
         }
+
+        /* Speech Styles */
+        .mic-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: color 0.3s;
+            margin-right: 5px;
+            padding: 8px;
+        }
+
+        .mic-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .mic-btn.listening {
+            color: #ef4444;
+            animation: pulse 1s infinite;
+        }
+
+        .speak-btn {
+            background: none;
+            border: none;
+            color: #cbd5e1;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin-left: 8px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .speak-btn:hover {
+            opacity: 1;
+            color: white;
+        }
     </style>
 </head>
 
@@ -795,6 +832,8 @@
             <div class="input-wrapper">
                 <textarea id="user-input" placeholder="Type your answer..." rows="1" onkeydown="handleKeyDown(event)"
                     oninput="autoResize(this)"></textarea>
+                <button id="mic-btn" class="mic-btn" onclick="toggleMic()" title="Speak answer"><i
+                        class="fas fa-microphone"></i></button>
                 <button class="btn-send" id="btn-send" onclick="sendMessage()">
                     <i class="fas fa-paper-plane"></i>
                 </button>
