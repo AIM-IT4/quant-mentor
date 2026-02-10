@@ -940,337 +940,332 @@
 
         function speakText(text) {
             isSpeaking = true;
-            console.log('Generating audio with Puter.js (ElevenLabs)...');
+            console.log('Generating audio with Puter.js...');
 
             // Use Puter.js default (Free Tier)
-            // ElevenLabs quota exceeded, switching to standard Puter voice
             puter.ai.txt2speech(text)
                 .then(audio => {
                     audio.play();
                     audio.onended = () => {
-             
-                .then(audio => {
-                        audio.play();
-                        audio.onended = () => {
-                            isSpeaking = false;
-                            // Auto-listen after AI finishes
-                            if (autoVoiceMode && interviewActive) {
-                                try {
-                                    recognition.start();
-                                    document.getElementById('mic-btn').classList.add('listening');
-                                } catch (e) {
-                                    console.log('Mic restart err', e);
-                                    isSpeaking = false;
-                                }
-                            }
-                        };
-                    })
-                            .catch(err => {
-                                console.error('Puter TTS Error:', err);
+                        isSpeaking = false;
+                        // Auto-listen after AI finishes
+                        if (autoVoiceMode && interviewActive) {
+                            try {
+                                recognition.start();
+                                document.getElementById('mic-btn').classList.add('listening');
+                            } catch (e) {
+                                console.log('Mic restart err', e);
                                 isSpeaking = false;
-                                // Fallback to browser TTS if Puter fails
-                                if (synth.speaking) synth.cancel();
-                                const utterance = new SpeechSynthesisUtterance(text);
-                                utterance.onend = () => { isSpeaking = false; };
-                                synth.speak(utterance);
-                            });
-                    }
-
-                    // ── State ──
-                    let conversationHistory = [];
-                    let timerInterval = null;
-                    let selectedDuration = 10;
-                    let selectedPrice = 0;
-                    let timeRemaining = 10 * 60;
-                    let interviewActive = false;
-                    let selectedTopic = '';
-                    let selectedDifficulty = '';
-                    let userName = '';
-                    let userEmail = '';
-                    let paymentId = '';
-
-                    const RAZORPAY_KEY_ID = 'rzp_live_SBbq38M84PSrrG'; // Live Key from script.js
-
-                    function selectDuration(mins, price, el) {
-                        selectedDuration = mins;
-                        selectedPrice = price;
-                        // Update UI
-                        document.querySelectorAll('.duration-option').forEach(d => d.classList.remove('active'));
-                        el.classList.add('active');
-                        // Update button
-                        const btn = document.getElementById('btn-start');
-                        if (price === 0) {
-                            btn.innerHTML = `<i class="fas fa-play"></i> Start Free Trial`;
-                        } else {
-                            btn.innerHTML = `<i class="fas fa-lock"></i> Pay ₹${price} & Start Interview`;
-                        }
-                    }
-
-                    function initiatePayment() {
-                        userName = document.getElementById('user-name').value.trim();
-                        userEmail = document.getElementById('user-email').value.trim();
-
-                        if (!userName || !userEmail || !userEmail.includes('@')) {
-                            alert('Please enter your Name and a valid Email Address to receive the report.');
-                            return;
-                        }
-
-                        // FREE TRIAL BYPASS
-                        if (selectedPrice === 0) {
-                            paymentId = 'FREE_TRIAL_' + Date.now();
-                            startInterview();
-                            return;
-                        }
-
-                        const options = {
-                            "key": RAZORPAY_KEY_ID,
-                            "amount": selectedPrice * 100, // Amount in paise
-                            "currency": "INR",
-                            "name": "QuantMentor AI Interview",
-                            "description": `${selectedDuration} Min Mock Interview Session`,
-                            "image": "assets/images/logo.png",
-                            "handler": function (response) {
-                                paymentId = response.razorpay_payment_id;
-                                startInterview();
-                            },
-                            "prefill": {
-                                "name": userName,
-                                "email": userEmail
-                            },
-                            "theme": {
-                                "color": "#14b8a6"
                             }
-                        };
-                        const rzp1 = new Razorpay(options);
-                        rzp1.on('payment.failed', function (response) {
-                            alert("Payment Failed: " + response.error.description);
-                        });
-                        rzp1.open();
-                    }
-
-                    // ── API Call ──
-                    async function callInterviewAPI(action, extraData = {}) {
-                        const response = await fetch('/api/interview', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                action,
-                                messages: conversationHistory,
-                                topic: selectedTopic,
-                                difficulty: selectedDifficulty,
-                                ...extraData
-                            })
-                        });
-
-                        if (!response.ok) {
-                            const err = await response.json();
-                            throw new Error(err.error || 'API request failed');
                         }
+                    };
+                })
+                .catch(err => {
+                    console.error('Puter TTS Error:', err);
+                    isSpeaking = false;
+                    // Fallback to browser TTS if Puter fails
+                    if (synth.speaking) synth.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.onend = () => { isSpeaking = false; };
+                    synth.speak(utterance);
+                });
+        }
 
-                        return response.json();
-                    }
+        // ── State ──
+        let conversationHistory = [];
+        let timerInterval = null;
+        let selectedDuration = 10;
+        let selectedPrice = 0;
+        let timeRemaining = 10 * 60;
+        let interviewActive = false;
+        let selectedTopic = '';
+        let selectedDifficulty = '';
+        let userName = '';
+        let userEmail = '';
+        let paymentId = '';
 
-                    // ── Start Interview ──
-                    async function startInterview() {
-                        const btn = document.getElementById('btn-start');
-                        btn.disabled = true;
-                        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Setting up interview...';
+        const RAZORPAY_KEY_ID = 'rzp_live_SBbq38M84PSrrG'; // Live Key from script.js
 
-                        selectedTopic = document.getElementById('topic-select').value;
-                        selectedDifficulty = document.getElementById('difficulty-select').value;
-                        conversationHistory = [];
-                        timeRemaining = selectedDuration * 60; // Set timer based on selection
-                        document.getElementById('timer-display').textContent = `${selectedDuration}:00`;
+        function selectDuration(mins, price, el) {
+            selectedDuration = mins;
+            selectedPrice = price;
+            // Update UI
+            document.querySelectorAll('.duration-option').forEach(d => d.classList.remove('active'));
+            el.classList.add('active');
+            // Update button
+            const btn = document.getElementById('btn-start');
+            if (price === 0) {
+                btn.innerHTML = `<i class="fas fa-play"></i> Start Free Trial`;
+            } else {
+                btn.innerHTML = `<i class="fas fa-lock"></i> Pay ₹${price} & Start Interview`;
+            }
+        }
 
-                        try {
-                            const data = await callInterviewAPI('start');
+        function initiatePayment() {
+            userName = document.getElementById('user-name').value.trim();
+            userEmail = document.getElementById('user-email').value.trim();
 
-                            // Switch to chat screen
-                            document.getElementById('setup-screen').style.display = 'none';
-                            document.getElementById('chat-screen').style.display = 'flex';
-                            document.getElementById('timer').classList.add('active');
-                            document.getElementById('btn-end').classList.add('active');
+            if (!userName || !userEmail || !userEmail.includes('@')) {
+                alert('Please enter your Name and a valid Email Address to receive the report.');
+                return;
+            }
 
-                            // Add AI's first message
-                            conversationHistory.push({ role: 'assistant', content: data.reply });
-                            addMessage('ai', data.reply);
+            // FREE TRIAL BYPASS
+            if (selectedPrice === 0) {
+                paymentId = 'FREE_TRIAL_' + Date.now();
+                startInterview();
+                return;
+            }
 
-                            // Start timer
-                            interviewActive = true;
-                            startTimer();
+            const options = {
+                "key": RAZORPAY_KEY_ID,
+                "amount": selectedPrice * 100, // Amount in paise
+                "currency": "INR",
+                "name": "QuantMentor AI Interview",
+                "description": `${selectedDuration} Min Mock Interview Session`,
+                "image": "assets/images/logo.png",
+                "handler": function (response) {
+                    paymentId = response.razorpay_payment_id;
+                    startInterview();
+                },
+                "prefill": {
+                    "name": userName,
+                    "email": userEmail
+                },
+                "theme": {
+                    "color": "#14b8a6"
+                }
+            };
+            const rzp1 = new Razorpay(options);
+            rzp1.on('payment.failed', function (response) {
+                alert("Payment Failed: " + response.error.description);
+            });
+            rzp1.open();
+        }
 
-                            // Focus input
-                            document.getElementById('user-input').focus();
+        // ── API Call ──
+        async function callInterviewAPI(action, extraData = {}) {
+            const response = await fetch('/api/interview', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action,
+                    messages: conversationHistory,
+                    topic: selectedTopic,
+                    difficulty: selectedDifficulty,
+                    ...extraData
+                })
+            });
 
-                        } catch (err) {
-                            alert('Failed to start interview: ' + err.message);
-                            btn.disabled = false;
-                            btn.innerHTML = '<i class="fas fa-play"></i> Start Interview';
-                        }
-                    }
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'API request failed');
+            }
 
-                    // ── Send Message ──
-                    async function sendMessage() {
-                        const input = document.getElementById('user-input');
-                        const text = input.value.trim();
-                        if (!text || !interviewActive) return;
+            return response.json();
+        }
 
-                        // Stop mic while processing
-                        if (autoVoiceMode) {
-                            recognition.stop();
-                            clearTimeout(silenceTimer);
-                            document.getElementById('mic-btn').classList.remove('listening');
-                            document.getElementById('mic-btn').style.color = ''; // Reset color
-                        }
+        // ── Start Interview ──
+        async function startInterview() {
+            const btn = document.getElementById('btn-start');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Setting up interview...';
 
-                        // Add user message
-                        addMessage('user', text);
-                        conversationHistory.push({ role: 'user', content: text });
-                        input.value = '';
-                        input.style.height = 'auto';
+            selectedTopic = document.getElementById('topic-select').value;
+            selectedDifficulty = document.getElementById('difficulty-select').value;
+            conversationHistory = [];
+            timeRemaining = selectedDuration * 60; // Set timer based on selection
+            document.getElementById('timer-display').textContent = `${selectedDuration}:00`;
 
-                        // Show typing indicator
-                        const sendBtn = document.getElementById('btn-send');
-                        sendBtn.disabled = true;
-                        document.getElementById('typing').style.display = 'block';
-                        scrollToBottom();
+            try {
+                const data = await callInterviewAPI('start');
 
-                        try {
-                            const data = await callInterviewAPI('respond');
-                            document.getElementById('typing').style.display = 'none';
+                // Switch to chat screen
+                document.getElementById('setup-screen').style.display = 'none';
+                document.getElementById('chat-screen').style.display = 'flex';
+                document.getElementById('timer').classList.add('active');
+                document.getElementById('btn-end').classList.add('active');
 
-                            conversationHistory.push({ role: 'assistant', content: data.reply });
-                            addMessage('ai', data.reply);
+                // Add AI's first message
+                conversationHistory.push({ role: 'assistant', content: data.reply });
+                addMessage('ai', data.reply);
 
-                        } catch (err) {
-                            document.getElementById('typing').style.display = 'none';
-                            addMessage('ai', '⚠️ Sorry, I encountered an error. Please try again or rephrase your answer.');
-                            console.error('API error:', err);
-                        }
+                // Start timer
+                interviewActive = true;
+                startTimer();
 
-                        sendBtn.disabled = false;
-                        document.getElementById('user-input').focus();
-                    }
+                // Focus input
+                document.getElementById('user-input').focus();
 
-                    // ── End Interview ──
-                    async function endInterview() {
-                        if (!interviewActive) return;
-                        if (!confirm('End the interview and get your scorecard?')) return;
+            } catch (err) {
+                alert('Failed to start interview: ' + err.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-play"></i> Start Interview';
+            }
+        }
 
-                        interviewActive = false;
-                        clearInterval(timerInterval);
+        // ── Send Message ──
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const text = input.value.trim();
+            if (!text || !interviewActive) return;
 
-                        document.getElementById('user-input').disabled = true;
-                        document.getElementById('btn-send').disabled = true;
-                        document.getElementById('btn-end').classList.remove('active');
+            // Stop mic while processing
+            if (autoVoiceMode) {
+                recognition.stop();
+                clearTimeout(silenceTimer);
+                document.getElementById('mic-btn').classList.remove('listening');
+                document.getElementById('mic-btn').style.color = ''; // Reset color
+            }
 
-                        // Show sending status
-                        document.getElementById('typing').style.display = 'block';
-                        addMessage('ai', '📝 Analyzing performance and generating report...');
-                        scrollToBottom();
+            // Add user message
+            addMessage('user', text);
+            conversationHistory.push({ role: 'user', content: text });
+            input.value = '';
+            input.style.height = 'auto';
 
-                        try {
-                            // Call API to generate report and email it
-                            const data = await callInterviewAPI('evaluate', {
-                                email: userEmail,
-                                name: userName
-                            });
+            // Show typing indicator
+            const sendBtn = document.getElementById('btn-send');
+            sendBtn.disabled = true;
+            document.getElementById('typing').style.display = 'block';
+            scrollToBottom();
 
-                            document.getElementById('typing').style.display = 'none';
+            try {
+                const data = await callInterviewAPI('respond');
+                document.getElementById('typing').style.display = 'none';
 
-                            // Show completion message
-                            addMessage('ai', `✅ **Interview Complete!**\n\nYour detailed performance scorecard has been sent to **${userEmail}**.\n\nCheck your inbox (and spam folder) in a few minutes.`);
+                conversationHistory.push({ role: 'assistant', content: data.reply });
+                addMessage('ai', data.reply);
 
-                        } catch (err) {
-                            document.getElementById('typing').style.display = 'none';
-                            addMessage('ai', '⚠️ Error generating report: ' + err.message);
-                        }
-                    }
+            } catch (err) {
+                document.getElementById('typing').style.display = 'none';
+                addMessage('ai', '⚠️ Sorry, I encountered an error. Please try again or rephrase your answer.');
+                console.error('API error:', err);
+            }
 
-                    // ── Restart ──
-                    function restartInterview() {
-                        conversationHistory = [];
-                        timeRemaining = 45 * 60;
-                        interviewActive = false;
-                        clearInterval(timerInterval);
+            sendBtn.disabled = false;
+            document.getElementById('user-input').focus();
+        }
 
-                        document.getElementById('chat-messages').innerHTML = '';
-                        document.getElementById('scorecard-overlay').classList.remove('active');
-                        document.getElementById('chat-screen').style.display = 'none';
-                        document.getElementById('setup-screen').style.display = 'flex';
-                        document.getElementById('timer').classList.remove('active', 'warning', 'danger');
-                        document.getElementById('timer-display').textContent = '45:00';
-                        document.getElementById('btn-end').classList.remove('active');
-                        document.getElementById('user-input').disabled = false;
-                        document.getElementById('btn-send').disabled = false;
+        // ── End Interview ──
+        async function endInterview() {
+            if (!interviewActive) return;
+            if (!confirm('End the interview and get your scorecard?')) return;
 
-                        const btn = document.getElementById('btn-start');
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-play"></i> Start Interview';
-                    }
+            interviewActive = false;
+            clearInterval(timerInterval);
 
-                    // ── Timer ──
-                    function startTimer() {
-                        timerInterval = setInterval(() => {
-                            if (timeRemaining <= 0) {
-                                clearInterval(timerInterval);
-                                endInterview();
-                                return;
-                            }
-                            timeRemaining--;
-                            const mins = Math.floor(timeRemaining / 60);
-                            const secs = timeRemaining % 60;
-                            document.getElementById('timer-display').textContent =
-                                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            document.getElementById('user-input').disabled = true;
+            document.getElementById('btn-send').disabled = true;
+            document.getElementById('btn-end').classList.remove('active');
 
-                            const timerEl = document.getElementById('timer');
-                            timerEl.classList.remove('warning', 'danger');
-                            if (timeRemaining <= 120) timerEl.classList.add('danger');
-                            else if (timeRemaining <= 300) timerEl.classList.add('warning');
-                        }, 1000);
-                    }
+            // Show sending status
+            document.getElementById('typing').style.display = 'block';
+            addMessage('ai', '📝 Analyzing performance and generating report...');
+            scrollToBottom();
 
-                    // ── UI Helpers ──
-                    function addMessage(role, content) {
-                        const messagesEl = document.getElementById('chat-messages');
-                        const div = document.createElement('div');
-                        div.className = `message ${role}`;
+            try {
+                // Call API to generate report and email it
+                const data = await callInterviewAPI('evaluate', {
+                    email: userEmail,
+                    name: userName
+                });
 
-                        const avatar = role === 'ai' ? '<i class="fas fa-brain"></i>' : '<i class="fas fa-user"></i>';
-                        div.innerHTML = `
+                document.getElementById('typing').style.display = 'none';
+
+                // Show completion message
+                addMessage('ai', `✅ **Interview Complete!**\n\nYour detailed performance scorecard has been sent to **${userEmail}**.\n\nCheck your inbox (and spam folder) in a few minutes.`);
+
+            } catch (err) {
+                document.getElementById('typing').style.display = 'none';
+                addMessage('ai', '⚠️ Error generating report: ' + err.message);
+            }
+        }
+
+        // ── Restart ──
+        function restartInterview() {
+            conversationHistory = [];
+            timeRemaining = 45 * 60;
+            interviewActive = false;
+            clearInterval(timerInterval);
+
+            document.getElementById('chat-messages').innerHTML = '';
+            document.getElementById('scorecard-overlay').classList.remove('active');
+            document.getElementById('chat-screen').style.display = 'none';
+            document.getElementById('setup-screen').style.display = 'flex';
+            document.getElementById('timer').classList.remove('active', 'warning', 'danger');
+            document.getElementById('timer-display').textContent = '45:00';
+            document.getElementById('btn-end').classList.remove('active');
+            document.getElementById('user-input').disabled = false;
+            document.getElementById('btn-send').disabled = false;
+
+            const btn = document.getElementById('btn-start');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-play"></i> Start Interview';
+        }
+
+        // ── Timer ──
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    endInterview();
+                    return;
+                }
+                timeRemaining--;
+                const mins = Math.floor(timeRemaining / 60);
+                const secs = timeRemaining % 60;
+                document.getElementById('timer-display').textContent =
+                    `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+                const timerEl = document.getElementById('timer');
+                timerEl.classList.remove('warning', 'danger');
+                if (timeRemaining <= 120) timerEl.classList.add('danger');
+                else if (timeRemaining <= 300) timerEl.classList.add('warning');
+            }, 1000);
+        }
+
+        // ── UI Helpers ──
+        function addMessage(role, content) {
+            const messagesEl = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+
+            const avatar = role === 'ai' ? '<i class="fas fa-brain"></i>' : '<i class="fas fa-user"></i>';
+            div.innerHTML = `
                 <div class="avatar">${avatar}</div>
                 <div class="bubble">
                     ${marked.parse(content)} 
                     ${role === 'ai' ? `<button class="speak-btn" onclick="speakText(this.parentElement.innerText.replace('🔊',''))">🔊</button>` : ''}
                 </div>
             `;
-                        messagesEl.appendChild(div);
-                        scrollToBottom();
+            messagesEl.appendChild(div);
+            scrollToBottom();
 
-                        // Auto-speak AI response if in voice mode
-                        if (role === 'ai' && autoVoiceMode) {
-                            // Remove emojis/markdown for cleaner speech
-                            const textToSpeak = content.replace(/[\u{1F600}-\u{1F6FF}]/gu, '').replace(/\*/g, '');
-                            speakText(textToSpeak);
-                        }
-                    }
+            // Auto-speak AI response if in voice mode
+            if (role === 'ai' && autoVoiceMode) {
+                // Remove emojis/markdown for cleaner speech
+                const textToSpeak = content.replace(/[\u{1F600}-\u{1F6FF}]/gu, '').replace(/\*/g, '');
+                speakText(textToSpeak);
+            }
+        }
 
-                    function scrollToBottom() {
-                        const el = document.getElementById('chat-messages');
-                        setTimeout(() => el.scrollTop = el.scrollHeight, 50);
-                    }
+        function scrollToBottom() {
+            const el = document.getElementById('chat-messages');
+            setTimeout(() => el.scrollTop = el.scrollHeight, 50);
+        }
 
-                    function handleKeyDown(e) {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            sendMessage();
-                        }
-                    }
+        function handleKeyDown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
 
-                    function autoResize(el) {
-                        el.style.height = 'auto';
-                        el.style.height = Math.min(el.scrollHeight, 140) + 'px';
-                    }
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+        }
 
 
     </script>
