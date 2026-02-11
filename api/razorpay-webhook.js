@@ -45,12 +45,18 @@ export default async function handler(req, res) {
             const paymentId = payment.id;
             const amount = payment.amount / 100; // Convert from paise to rupees
             const currency = payment.currency;
-            const customerEmail = payment.email;
+            const customerEmail = payment.email || payment.notes?.customer_email || payment.notes?.email;
             const customerName = payment.notes?.customer_name || 'Customer';
             const productName = payment.notes?.product_name;
             const productType = payment.notes?.type || 'product'; // 'product' or 'session'
 
-            console.log('Payment captured:', { paymentId, amount, customerEmail, productName, productType });
+            console.log('Payment captured event details:', {
+                id: paymentId,
+                email: customerEmail,
+                product: productName,
+                type: productType,
+                notes_email: payment.notes?.customer_email
+            });
 
             if (productType === 'product' && productName) {
                 // Handle product purchase
@@ -134,6 +140,7 @@ async function handleProductPurchase(data) {
 
     // Check if already processed (prevent duplicate emails)
     try {
+        console.log(`Checking for existing purchase: ${paymentId}`);
         const existingResponse = await fetch(
             `${SUPABASE_URL}/rest/v1/purchases?payment_id=eq.${paymentId}&select=id`,
             {
@@ -147,7 +154,7 @@ async function handleProductPurchase(data) {
         if (existingResponse.ok) {
             const existing = await existingResponse.json();
             if (existing && existing.length > 0) {
-                console.log('Payment already processed:', paymentId);
+                console.log('Payment already processed, skipping email/logging:', paymentId);
                 return; // Already processed
             }
         }
@@ -198,7 +205,8 @@ async function handleProductPurchase(data) {
         `;
 
         try {
-            await fetch('https://api.brevo.com/v3/smtp/email', {
+            console.log(`Attempting to send customer email to: ${customerEmail}`);
+            const emailRes = await fetch('https://api.brevo.com/v3/smtp/email', {
                 method: 'POST',
                 headers: {
                     'accept': 'application/json',
@@ -212,7 +220,12 @@ async function handleProductPurchase(data) {
                     htmlContent: customerHtml
                 })
             });
-            console.log('Customer email sent via webhook');
+            if (emailRes.ok) {
+                console.log('✅ Customer email SENT successfully');
+            } else {
+                const errData = await emailRes.json();
+                console.error('❌ Brevo customer email ERROR:', errData);
+            }
         } catch (err) {
             console.error('Error sending customer email:', err);
         }
