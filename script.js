@@ -1519,9 +1519,50 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
 
             if (customerEmail && customerEmail.includes('@')) {
                 // Log purchase to Supabase for statistics
+                if (window.supabaseClient) {
+                    try {
+                        console.log('📊 Logging purchase to database:', {
+                            customerEmail,
+                            customerName,
+                            productName,
+                            loggedAmount,
+                            currencyPaid: currency,
+                            amountPaid: amount,
+                            paymentId
+                        });
+
+                        await window.supabaseClient
+                            .from('purchases')
+                            .insert({
+                                customer_email: customerEmail,
+                                product_name: productName,
+                                amount: Math.round(loggedAmount), // Store as Integer INR
+                                payment_id: paymentId
+                            });
+                        console.log('✅ Purchase logged successfully');
+                    } catch (err) {
+                        console.error('❌ Failed to log purchase:', err);
+                    }
+                }
+
                 if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
-                    // ℹ️ Emails and Database logging are now handled by the Razorpay Webhook (api/razorpay-webhook.js)
-                    // This prevents duplicate notifications to both customer and admin.
+                    // Send email to customer via Brevo
+                    sendProductEmail(customerEmail, productName, paymentId, downloadLink, customerName);
+
+                    // Send Admin Notification
+                    const adminSubject = `💰 New Product Sale: ${productName}`;
+                    const adminBody = `
+                        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #22c55e; border-radius: 8px;">
+                            <h2 style="color: #16a34a;">💰 New Sale!</h2>
+                            <p><strong>Product:</strong> ${productName}</p>
+                            <p><strong>Amount:</strong> ₹${Math.round(loggedAmount)}</p>
+                            <p><strong>Customer Name:</strong> ${customerName}</p>
+                            <p><strong>Customer Email:</strong> ${customerEmail}</p>
+                            <p><strong>Payment ID:</strong> ${paymentId}</p>
+                        </div>
+                    `;
+                    const adminText = `New Sale!\nProduct: ${productName}\nAmount: ₹${Math.round(loggedAmount)}\nName: ${customerName}\nEmail: ${customerEmail}\nID: ${paymentId}`;
+                    sendAdminNotification(adminSubject, adminBody, adminText);
 
                     alert('🎉 Payment Successful!\n\nPayment ID: ' + paymentId + '\n\nDownload link sent to: ' + customerEmail + '\n\n📩 IMPORTANT: Please check your Spam/Junk folder if you don\'t see the email in your Inbox.\n\nClick OK to also open it now.');
                     window.open(downloadLink, '_blank');
