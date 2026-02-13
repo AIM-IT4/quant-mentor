@@ -1,11 +1,17 @@
--- Create the Purchases Table to track product sales
+-- Add missing columns to purchases table
+ALTER TABLE purchases ADD COLUMN IF NOT EXISTS source TEXT;
+ALTER TABLE purchases ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'INR';
+
+-- Re-verify the table structure
 CREATE TABLE IF NOT EXISTS purchases (
   id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
   customer_email TEXT NOT NULL,
   product_name TEXT NOT NULL,
   amount NUMERIC NOT NULL DEFAULT 0,
+  currency TEXT DEFAULT 'INR',
   payment_id TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+  source TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata') NOT NULL
 );
 
 -- Enable Row Level Security

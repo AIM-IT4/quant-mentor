@@ -1537,7 +1537,9 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
                                 customer_email: customerEmail,
                                 product_name: productName,
                                 amount: Math.round(loggedAmount), // Store as Integer INR
-                                payment_id: paymentId
+                                currency: currency || 'INR',
+                                payment_id: paymentId,
+                                source: 'frontend'
                             });
                         console.log('✅ Purchase logged successfully');
                     } catch (err) {

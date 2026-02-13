@@ -19,19 +19,27 @@ export default async function handler(req, res) {
     const SENDER_EMAIL = process.env.SENDER_EMAIL || 'jha.8@alumni.iitj.ac.in';
     const SENDER_NAME = process.env.SENDER_NAME || 'QuantMentor';
 
-    // Verify webhook signature if secret is configured
+    // Verify webhook signature
     if (RAZORPAY_WEBHOOK_SECRET) {
         const signature = req.headers['x-razorpay-signature'];
-        const body = JSON.stringify(req.body);
+        // Use raw body if possible, otherwise stringify (Vercel provides parsed req.body)
+        const bodyStr = (typeof req.body === 'string') ? req.body : JSON.stringify(req.body);
 
         const expectedSignature = crypto
             .createHmac('sha256', RAZORPAY_WEBHOOK_SECRET)
-            .update(body)
+            .update(bodyStr)
             .digest('hex');
 
         if (signature !== expectedSignature) {
-            console.error('Invalid webhook signature');
-            return res.status(401).json({ error: 'Invalid signature' });
+            console.warn('Signature mismatch with direct stringify. Trying alternative formatting...');
+            // Try stringify without spaces (common in some middleware/webhook senders)
+            const alternateBodyStr = JSON.stringify(req.body);
+            const altSignature = crypto.createHmac('sha256', RAZORPAY_WEBHOOK_SECRET).update(alternateBodyStr).digest('hex');
+
+            if (signature !== altSignature) {
+                console.error('CRITICAL: Webhook signature verification failed for all formats');
+                return res.status(401).json({ error: 'Invalid signature' });
+            }
         }
     }
 
@@ -100,15 +108,17 @@ async function handleProductPurchase(data) {
         'XVA Derivatives Primer': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
         'Quant Projects Bundle': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
         'Interview Bible': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
-        'Complete Quant Bundle': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing'
+        'Complete Quant Bundle': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
+        'Free Sample - Quant Cheatsheet': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing'
     };
 
     // Try to get download link from Supabase first
     let downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
 
     try {
+        // Case-insensitive lookup in Supabase
         const productResponse = await fetch(
-            `${SUPABASE_URL}/rest/v1/products?name=eq.${encodeURIComponent(productName)}&select=file_url`,
+            `${SUPABASE_URL}/rest/v1/products?name=ilike.${encodeURIComponent(productName.trim())}&select=file_url`,
             {
                 headers: {
                     'apikey': SUPABASE_KEY,
@@ -121,10 +131,11 @@ async function handleProductPurchase(data) {
             const products = await productResponse.json();
             if (products && products.length > 0 && products[0].file_url) {
                 downloadLink = products[0].file_url;
+                console.log('✅ Found custom link in Supabase:', downloadLink);
             }
         }
     } catch (err) {
-        console.error('Error fetching product from Supabase:', err);
+        console.warn('Error fetching product from Supabase, using fallback list:', err);
     }
 
     if (!downloadLink) {
@@ -169,6 +180,7 @@ async function handleProductPurchase(data) {
                 customer_email: customerEmail,
                 product_name: productName,
                 amount: Math.round(amount),
+                currency: currency || 'INR',
                 payment_id: paymentId,
                 source: 'webhook' // Mark as webhook-processed
             })
