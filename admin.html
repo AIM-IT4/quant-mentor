@@ -1154,6 +1154,17 @@ Brief Q&A"></textarea>
                                     // For new products, file is required; for edits, file is optional
                                     if (!productId && !file) throw new Error('Please select a resource file');
 
+                                    // If updating, fetch old product metadata to cleanup old files if they are replaced
+                                    let oldProduct = null;
+                                    if (productId && (file || coverFileToUpload)) {
+                                        const { data } = await window.supabaseAdminClient
+                                            .from('products')
+                                            .select('file_url, cover_image_url')
+                                            .eq('id', productId)
+                                            .single();
+                                        oldProduct = data;
+                                    }
+
                                     let fileUrl = null;
                                     let coverUrl = null;
 
@@ -1243,6 +1254,20 @@ Brief Q&A"></textarea>
                                     }
 
                                     if (dbError) throw dbError;
+
+                                    // Cleanup orphaned files from storage if they were replaced during update
+                                    if (oldProduct) {
+                                        if (fileUrl && oldProduct.file_url) {
+                                            const oldName = oldProduct.file_url.split('/').pop();
+                                            await window.supabaseAdminClient.storage.from('resources').remove([oldName]);
+                                            console.log('🧹 Cleaned up old resource file:', oldName);
+                                        }
+                                        if (coverUrl && oldProduct.cover_image_url) {
+                                            const oldName = oldProduct.cover_image_url.split('/').pop();
+                                            await window.supabaseAdminClient.storage.from('product-covers').remove([oldName]);
+                                            console.log('🧹 Cleaned up old cover image:', oldName);
+                                        }
+                                    }
 
                                     // 4. Save Selected Reviews to product_reviews table
                                     if (savedProductId) {
@@ -1534,29 +1559,51 @@ Brief Q&A"></textarea>
                             // Initialize reviews checkboxes on page load
                             loadReviewsCheckboxes();
 
-                            // Delete Product
-                            async function deleteProduct(id) {
-                                console.log('🗑️ Attempting to delete product:', id);
-                                if (!confirm('⚠️ Are you sure you want to delete this product?')) return;
+                             // Delete Product
+                             async function deleteProduct(id) {
+                                 console.log('🗑️ Attempting to delete product:', id);
+                                 if (!confirm('⚠️ Are you sure you want to delete this product and its associated files from storage?')) return;
 
-                                try {
-                                    const { data, error } = await window.supabaseAdminClient
-                                        .from('products')
-                                        .delete()
-                                        .eq('id', id)
-                                        .select();
+                                 try {
+                                     // 1. Fetch product first to get file URLs for cleanup
+                                     const { data: product } = await window.supabaseAdminClient
+                                         .from('products')
+                                         .select('file_url, cover_image_url')
+                                         .eq('id', id)
+                                         .single();
 
-                                    console.log('🗑️ Delete result:', { data, error });
+                                     // 2. Delete from database
+                                     const { data, error } = await window.supabaseAdminClient
+                                         .from('products')
+                                         .delete()
+                                         .eq('id', id)
+                                         .select();
 
-                                    if (error) throw error;
+                                     console.log('🗑️ Database delete result:', { data, error });
 
-                                    alert('✅ Product deleted successfully!');
-                                    await loadProducts();
-                                } catch (error) {
-                                    console.error('❌ Delete error:', error);
-                                    alert('❌ Error deleting product: ' + error.message);
-                                }
-                            }
+                                     if (error) throw error;
+
+                                     // 3. Delete files from storage if they exist
+                                     if (product) {
+                                         if (product.file_url) {
+                                             const fileName = product.file_url.split('/').pop();
+                                             await window.supabaseAdminClient.storage.from('resources').remove([fileName]);
+                                             console.log('🧹 Deleted resource file from storage:', fileName);
+                                         }
+                                         if (product.cover_image_url) {
+                                             const fileName = product.cover_image_url.split('/').pop();
+                                             await window.supabaseAdminClient.storage.from('product-covers').remove([fileName]);
+                                             console.log('🧹 Deleted cover image from storage:', fileName);
+                                         }
+                                     }
+
+                                     alert('✅ Product and associated files deleted successfully!');
+                                     await loadProducts();
+                                 } catch (error) {
+                                     console.error('❌ Delete error:', error);
+                                     alert('❌ Error deleting product: ' + error.message);
+                                 }
+                             }
 
 
 
