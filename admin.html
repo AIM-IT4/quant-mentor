@@ -870,6 +870,39 @@ Brief Q&A"></textarea>
             </div>
         </div>
 
+        <!-- Manage Blocked Dates Section -->
+        <div class="card" id="blockedDatesSection" style="margin-top: 30px;">
+            <div class="card-header" style="margin-bottom: 20px;">
+                <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-ban" style="color: #ef4444;"></i> Manage Blocked Dates
+                </h2>
+                <p style="color: var(--text-muted); font-size: 0.9em; margin: 5px 0 0 0;">Disable all bookings for
+                    specific date ranges (e.g., holidays, personal leave).</p>
+            </div>
+
+            <div
+                style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <h3 style="margin-top: 0; font-size: 1rem;">Add New Blocked Range</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: end;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>Start Date</label>
+                        <input type="date" id="blockStartDate">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>End Date</label>
+                        <input type="date" id="blockEndDate">
+                    </div>
+                    <button onclick="addBlockedDate()" style="height: 42px;">
+                        <i class="fas fa-plus"></i> Add Block
+                    </button>
+                </div>
+            </div>
+
+            <div id="blockedDatesList" style="margin-top: 20px;">
+                <p style="color: var(--text-muted); text-align: center;">Loading blocked dates...</p>
+            </div>
+        </div>
+
         <!-- Testimonials Management Section -->
         <div class="card" id="testimonialsSection" style="margin-top: 30px; display: none;">
             <div class="card-header"
@@ -986,6 +1019,7 @@ Brief Q&A"></textarea>
                                     try { if (typeof loadPendingTestimonials === 'function') loadPendingTestimonials(); } catch (e) { console.error('Testimonials load error', e); }
                                     try { if (typeof loadAvailability === 'function') loadAvailability(); } catch (e) { console.error('Availability load error', e); }
                                     try { if (typeof loadBookings === 'function') loadBookings(); } catch (e) { console.error('Bookings load error', e); }
+                                    try { if (typeof loadBlockedDates === 'function') loadBlockedDates(); } catch (e) { console.error('Blocked dates load error', e); }
                                     try { if (typeof initDashboard === 'function') initDashboard(); } catch (e) { console.error('Dashboard init error', e); }
                                     try { if (typeof initDashboard === 'function') initDashboard(); } catch (e) { console.error('Dashboard init error', e); }
                                 } else {
@@ -1559,51 +1593,51 @@ Brief Q&A"></textarea>
                             // Initialize reviews checkboxes on page load
                             loadReviewsCheckboxes();
 
-                             // Delete Product
-                             async function deleteProduct(id) {
-                                 console.log('🗑️ Attempting to delete product:', id);
-                                 if (!confirm('⚠️ Are you sure you want to delete this product and its associated files from storage?')) return;
+                            // Delete Product
+                            async function deleteProduct(id) {
+                                console.log('🗑️ Attempting to delete product:', id);
+                                if (!confirm('⚠️ Are you sure you want to delete this product and its associated files from storage?')) return;
 
-                                 try {
-                                     // 1. Fetch product first to get file URLs for cleanup
-                                     const { data: product } = await window.supabaseAdminClient
-                                         .from('products')
-                                         .select('file_url, cover_image_url')
-                                         .eq('id', id)
-                                         .single();
+                                try {
+                                    // 1. Fetch product first to get file URLs for cleanup
+                                    const { data: product } = await window.supabaseAdminClient
+                                        .from('products')
+                                        .select('file_url, cover_image_url')
+                                        .eq('id', id)
+                                        .single();
 
-                                     // 2. Delete from database
-                                     const { data, error } = await window.supabaseAdminClient
-                                         .from('products')
-                                         .delete()
-                                         .eq('id', id)
-                                         .select();
+                                    // 2. Delete from database
+                                    const { data, error } = await window.supabaseAdminClient
+                                        .from('products')
+                                        .delete()
+                                        .eq('id', id)
+                                        .select();
 
-                                     console.log('🗑️ Database delete result:', { data, error });
+                                    console.log('🗑️ Database delete result:', { data, error });
 
-                                     if (error) throw error;
+                                    if (error) throw error;
 
-                                     // 3. Delete files from storage if they exist
-                                     if (product) {
-                                         if (product.file_url) {
-                                             const fileName = product.file_url.split('/').pop();
-                                             await window.supabaseAdminClient.storage.from('resources').remove([fileName]);
-                                             console.log('🧹 Deleted resource file from storage:', fileName);
-                                         }
-                                         if (product.cover_image_url) {
-                                             const fileName = product.cover_image_url.split('/').pop();
-                                             await window.supabaseAdminClient.storage.from('product-covers').remove([fileName]);
-                                             console.log('🧹 Deleted cover image from storage:', fileName);
-                                         }
-                                     }
+                                    // 3. Delete files from storage if they exist
+                                    if (product) {
+                                        if (product.file_url) {
+                                            const fileName = product.file_url.split('/').pop();
+                                            await window.supabaseAdminClient.storage.from('resources').remove([fileName]);
+                                            console.log('🧹 Deleted resource file from storage:', fileName);
+                                        }
+                                        if (product.cover_image_url) {
+                                            const fileName = product.cover_image_url.split('/').pop();
+                                            await window.supabaseAdminClient.storage.from('product-covers').remove([fileName]);
+                                            console.log('🧹 Deleted cover image from storage:', fileName);
+                                        }
+                                    }
 
-                                     alert('✅ Product and associated files deleted successfully!');
-                                     await loadProducts();
-                                 } catch (error) {
-                                     console.error('❌ Delete error:', error);
-                                     alert('❌ Error deleting product: ' + error.message);
-                                 }
-                             }
+                                    alert('✅ Product and associated files deleted successfully!');
+                                    await loadProducts();
+                                } catch (error) {
+                                    console.error('❌ Delete error:', error);
+                                    alert('❌ Error deleting product: ' + error.message);
+                                }
+                            }
 
 
 
@@ -2885,9 +2919,109 @@ QuantMentor
                             }
                         }
 
+                        // ================================
+                        // Blocked Dates Management
+                        // ================================
+                        async function loadBlockedDates() {
+                            const container = document.getElementById('blockedDatesList');
+                            if (!window.supabaseAdminClient) return;
+
+                            try {
+                                const { data, error } = await window.supabaseAdminClient
+                                    .from('blocked_date_ranges')
+                                    .select('*')
+                                    .order('start_date', { ascending: true });
+
+                                if (error) throw error;
+
+                                if (!data || data.length === 0) {
+                                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No blocked dates currently set.</p>';
+                                    return;
+                                }
+
+                                container.innerHTML = `
+                                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                                        <thead>
+                                            <tr style="border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 0.85em;">
+                                                <th style="padding: 10px; text-align: left;">Start Date</th>
+                                                <th style="padding: 10px; text-align: left;">End Date</th>
+                                                <th style="padding: 10px; text-align: right;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${data.map(range => `
+                                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                    <td style="padding: 10px;">${range.start_date}</td>
+                                                    <td style="padding: 10px;">${range.end_date}</td>
+                                                    <td style="padding: 10px; text-align: right;">
+                                                        <button onclick="deleteBlockedDate('${range.id}')" style="background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 4px 8px; font-size: 0.8em;">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                `;
+                            } catch (err) {
+                                console.error('Error loading blocked dates:', err);
+                                container.innerHTML = `<p style="color: #ef4444; text-align: center;">Error: ${err.message}</p>`;
+                            }
+                        }
+
+                        async function addBlockedDate() {
+                            const start = document.getElementById('blockStartDate').value;
+                            const end = document.getElementById('blockEndDate').value;
+
+                            if (!start || !end) {
+                                alert('Please select both start and end dates.');
+                                return;
+                            }
+
+                            if (new Date(start) > new Date(end)) {
+                                alert('Start date cannot be after end date.');
+                                return;
+                            }
+
+                            try {
+                                const { error } = await window.supabaseAdminClient
+                                    .from('blocked_date_ranges')
+                                    .insert([{ start_date: start, end_date: end }]);
+
+                                if (error) throw error;
+
+                                alert('✅ Date range blocked successfully!');
+                                document.getElementById('blockStartDate').value = '';
+                                document.getElementById('blockEndDate').value = '';
+                                loadBlockedDates();
+                            } catch (err) {
+                                alert('❌ Error: ' + err.message);
+                            }
+                        }
+
+                        async function deleteBlockedDate(id) {
+                            if (!confirm('Are you sure you want to remove this block?')) return;
+
+                            try {
+                                const { error } = await window.supabaseAdminClient
+                                    .from('blocked_date_ranges')
+                                    .delete()
+                                    .eq('id', id);
+
+                                if (error) throw error;
+
+                                loadBlockedDates();
+                            } catch (err) {
+                                alert('❌ Error: ' + err.message);
+                            }
+                        }
+
                         // Export functions globally
                         window.loadAvailability = loadAvailability;
                         window.saveAvailability = saveAvailability;
+                        window.loadBlockedDates = loadBlockedDates;
+                        window.addBlockedDate = addBlockedDate;
+                        window.deleteBlockedDate = deleteBlockedDate;
                         window.loadPendingTestimonials = loadPendingTestimonials;
                         window.approveTestimonial = approveTestimonial;
                         window.rejectTestimonial = rejectTestimonial;

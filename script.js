@@ -1906,6 +1906,23 @@ if (bookingForm) {
                         });
                         console.log('📅 Existing bookings for ' + dateValue + ' (DB raw -> formatted):', bookingsData, existingBookings);
                     }
+
+                    // --- NEW: Check for Blocked Date Ranges ---
+                    const { data: blockedData, error: blockedError } = await window.supabaseClient
+                        .from('blocked_date_ranges')
+                        .select('id')
+                        .lte('start_date', dateValue)
+                        .gte('end_date', dateValue);
+
+                    if (blockedError) {
+                        console.error('Error checking blocked dates:', blockedError);
+                    } else if (blockedData && blockedData.length > 0) {
+                        console.log('🚫 This date is blocked:', dateValue);
+                        timeSelect.innerHTML = '<option value="" disabled>Mentorship Unavailable Today</option>';
+                        timeSelect.disabled = false;
+                        return;
+                    }
+                    // ------------------------------------------
                 }
 
                 // Fallback only if no record exists for this day at all
