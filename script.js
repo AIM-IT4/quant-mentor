@@ -1429,7 +1429,7 @@ async function fetchProductLinks() {
     }
 }
 
-function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountForLogging = null, userDetails = null) {
+async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountForLogging = null, userDetails = null) {
     console.log('🚀 initRazorpayCheckout called:', { productName, amount, currency, inrAmountForLogging, userDetails });
 
     // Handle FREE products (0 value) - skip payment, go directly to download
@@ -1484,6 +1484,35 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
     // Smallest currency sub-unit multiplier (100 for INR/USD/GBP, 1 for JPY)
     const multiplier = (currency.toUpperCase() === 'JPY') ? 1 : 100;
 
+    // 🔥 INSTANT CAPTURE: Create server-side order with payment_capture: 1
+    let orderId = null;
+    try {
+        const orderNotes = {
+            type: 'product',
+            product_name: productName,
+            customer_name: userDetails ? userDetails.name : '',
+            customer_email: userDetails ? userDetails.email : '',
+            customer_phone: userDetails ? userDetails.phone : '',
+            inr_amount: String(inrAmountForLogging || amount)
+        };
+        console.log('📦 Creating Razorpay order for instant capture...');
+        const orderRes = await fetch('/api/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount, currency, notes: orderNotes })
+        });
+        if (orderRes.ok) {
+            const orderData = await orderRes.json();
+            orderId = orderData.order_id;
+            console.log('✅ Order created for instant capture:', orderId);
+        } else {
+            const errText = await orderRes.text();
+            console.warn('⚠️ Order creation failed, proceeding without order_id:', errText);
+        }
+    } catch (orderErr) {
+        console.warn('⚠️ Could not create order (network error), proceeding without order_id:', orderErr);
+    }
+
     var options = {
         "key": RAZORPAY_KEY_ID,
         "amount": Math.round(amount * multiplier), // Convert to subunits (paise/cents)
@@ -1505,7 +1534,7 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
         },
         "handler": async function (response) {
             console.log('Payment success:', response);
-            // ✅ Payment successful!
+            // ✅ Payment successful! (Instant capture via order_id means payment is already captured)
             const paymentId = response.razorpay_payment_id;
             const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
             const customerEmail = (userDetails && userDetails.email) ? userDetails.email : prompt('Enter your email to receive the download link:');
@@ -1547,6 +1576,12 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
             }
         }
     };
+
+    // Attach order_id if we successfully created a server-side order (instant capture)
+    if (orderId) {
+        options.order_id = orderId;
+        console.log('✅ Attached order_id for instant capture:', orderId);
+    }
 
     try {
         console.log('Initializing Razorpay with options:', { ...options, key: '***' });
@@ -2114,7 +2149,7 @@ if (bookingForm) {
  * Initialize Razorpay for session booking payment
  */
 // Initialize Razorpay for session booking payment
-function initSessionPayment(description, amount, customerEmail, currency = 'INR', inrAmountForLogging = null, bookingData = null) {
+async function initSessionPayment(description, amount, customerEmail, currency = 'INR', inrAmountForLogging = null, bookingData = null) {
     // Handle FREE sessions (0 value)
     if (amount <= 0) {
         handleSessionPaymentSuccess({ razorpay_payment_id: 'FREE_SESSION_' + Date.now() });
@@ -2128,6 +2163,39 @@ function initSessionPayment(description, amount, customerEmail, currency = 'INR'
 
     // Smallest currency sub-unit multiplier (100 for INR/USD/GBP, 1 for JPY)
     const multiplier = (currency.toUpperCase() === 'JPY') ? 1 : 100;
+
+    // 🔥 INSTANT CAPTURE: Create server-side order with payment_capture: 1
+    let orderId = null;
+    try {
+        const orderNotes = {
+            type: 'session',
+            customer_name: bookingData ? bookingData.name : '',
+            customer_email: customerEmail,
+            session_name: bookingData ? bookingData.sessionType : '',
+            session_date: bookingData ? bookingData.date : '',
+            session_time: bookingData ? bookingData.time : '',
+            session_duration: bookingData ? String(bookingData.duration) : '',
+            session_price: String(inrAmountForLogging || amount),
+            customer_phone: bookingData ? bookingData.phone : '',
+            customer_message: bookingData ? bookingData.message : ''
+        };
+        console.log('📦 Creating Razorpay order for session instant capture...');
+        const orderRes = await fetch('/api/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount, currency, notes: orderNotes })
+        });
+        if (orderRes.ok) {
+            const orderData = await orderRes.json();
+            orderId = orderData.order_id;
+            console.log('✅ Session order created for instant capture:', orderId);
+        } else {
+            const errText = await orderRes.text();
+            console.warn('⚠️ Session order creation failed, proceeding without order_id:', errText);
+        }
+    } catch (orderErr) {
+        console.warn('⚠️ Could not create session order (network error), proceeding without order_id:', orderErr);
+    }
 
     var options = {
         "key": RAZORPAY_KEY_ID,
@@ -2157,6 +2225,12 @@ function initSessionPayment(description, amount, customerEmail, currency = 'INR'
             "color": "#6366f1"
         }
     };
+
+    // Attach order_id if we successfully created a server-side order (instant capture)
+    if (orderId) {
+        options.order_id = orderId;
+        console.log('✅ Attached order_id for session instant capture:', orderId);
+    }
 
     var rzp = new Razorpay(options);
 
