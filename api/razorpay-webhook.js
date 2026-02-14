@@ -4,6 +4,22 @@
 
 import crypto from 'crypto';
 
+// Disable Vercel body parsing so we can read the raw stream for signature verification
+export const config = {
+    api: {
+        bodyParser: false,
+    },
+};
+
+// Helper function to read the raw body from the request stream
+async function getRawBody(readable) {
+    const chunks = [];
+    for await (const chunk of readable) {
+        chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+    }
+    return Buffer.concat(chunks);
+}
+
 export default async function handler(req, res) {
     // Only accept POST requests
     if (req.method !== 'POST') {
@@ -19,34 +35,43 @@ export default async function handler(req, res) {
     const SENDER_EMAIL = process.env.SENDER_EMAIL || 'jha.8@alumni.iitj.ac.in';
     const SENDER_NAME = process.env.SENDER_NAME || 'QuantMentor';
 
-    // Verify webhook signature
+    // 1. Capture Raw Body for Signature Verification
+    let rawBody;
+    try {
+        rawBody = await getRawBody(req);
+    } catch (err) {
+        console.error('Error reading raw body:', err);
+        return res.status(500).json({ error: 'Could not read request body' });
+    }
+
+    // 2. Verify Webhook Signature
     if (RAZORPAY_WEBHOOK_SECRET) {
         const signature = req.headers['x-razorpay-signature'];
-        // Use raw body if possible, otherwise stringify (Vercel provides parsed req.body)
-        const bodyStr = (typeof req.body === 'string') ? req.body : JSON.stringify(req.body);
 
         const expectedSignature = crypto
             .createHmac('sha256', RAZORPAY_WEBHOOK_SECRET)
-            .update(bodyStr)
+            .update(rawBody)
             .digest('hex');
 
         if (signature !== expectedSignature) {
-            console.warn('Signature mismatch with direct stringify. Trying alternative formatting...');
-            // Try stringify without spaces (common in some middleware/webhook senders)
-            const alternateBodyStr = JSON.stringify(req.body);
-            const altSignature = crypto.createHmac('sha256', RAZORPAY_WEBHOOK_SECRET).update(alternateBodyStr).digest('hex');
-
-            if (signature !== altSignature) {
-                console.error('CRITICAL: Webhook signature verification failed for all formats');
-                console.log('Received signature:', signature);
-                console.log('Expected signature (direct):', expectedSignature);
-                console.log('Expected signature (alt):', altSignature);
-                return res.status(401).json({ error: 'Invalid signature' });
-            }
+            console.error('CRITICAL: Webhook signature verification failed');
+            console.log('Received signature:', signature);
+            console.log('Expected signature (raw_match):', expectedSignature);
+            console.log('Raw body preview (50 chars):', rawBody.toString('utf8').substring(0, 50));
+            return res.status(401).json({ error: 'Invalid signature' });
         }
+        console.log('✅ Signature verified successfully');
     }
 
-    const event = req.body;
+    // 3. Parse JSON body for logic
+    let event;
+    try {
+        event = JSON.parse(rawBody.toString('utf8'));
+    } catch (err) {
+        console.error('Error parsing JSON body:', err);
+        return res.status(400).json({ error: 'Invalid JSON payload' });
+    }
+
     console.log('Razorpay webhook received:', event.event);
 
     try {
