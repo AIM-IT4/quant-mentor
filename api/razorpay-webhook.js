@@ -55,6 +55,7 @@ export default async function handler(req, res) {
             const currency = payment.currency;
             const customerEmail = payment.email;
             const customerName = payment.notes?.customer_name || 'Customer';
+            const customerPhone = payment.notes?.customer_phone || '';
             const productName = payment.notes?.product_name;
             const productType = payment.notes?.type || 'product'; // 'product' or 'session'
 
@@ -68,6 +69,7 @@ export default async function handler(req, res) {
                     currency,
                     customerEmail,
                     customerName,
+                    customerPhone,
                     productName,
                     SUPABASE_URL,
                     SUPABASE_KEY,
@@ -108,26 +110,26 @@ export default async function handler(req, res) {
 // Handle product purchase - send email and log to Supabase
 async function handleProductPurchase(data) {
     const {
-        paymentId, amount, currency, customerEmail, customerName, productName,
+        paymentId, amount, currency, customerEmail, customerName, customerPhone, productName,
         SUPABASE_URL, SUPABASE_KEY, BREVO_API_KEY, ADMIN_EMAIL, SENDER_EMAIL, SENDER_NAME
     } = data;
 
-    // Product download links (should match your Supabase products table)
+    console.log(`📦 Processing product purchase: ${productName} for ${customerEmail}`);
+
+    // Product download links (fallback list)
     const PRODUCT_DOWNLOAD_LINKS = {
         'Python for Quants': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
         'C++ for Quants': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
         'XVA Derivatives Primer': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
         'Quant Projects Bundle': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
         'Interview Bible': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
-        'Complete Quant Bundle': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
-        'Free Sample - Quant Cheatsheet': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing'
+        'Complete Quant Bundle': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing'
     };
 
-    // Try to get download link from Supabase first
     let downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
 
+    // Try to get download link from Supabase
     try {
-        // Case-insensitive lookup in Supabase
         const productResponse = await fetch(
             `${SUPABASE_URL}/rest/v1/products?name=ilike.${encodeURIComponent(productName.trim())}&select=file_url`,
             {
@@ -151,10 +153,10 @@ async function handleProductPurchase(data) {
 
     if (!downloadLink) {
         console.error('No download link found for product:', productName);
-        downloadLink = '#'; // Fallback, admin will need to send manually
+        downloadLink = '#';
     }
 
-    // Check if already processed (prevent duplicate emails)
+    // Check if already processed
     try {
         const existingResponse = await fetch(
             `${SUPABASE_URL}/rest/v1/purchases?payment_id=eq.${paymentId}&select=id`,
@@ -170,7 +172,7 @@ async function handleProductPurchase(data) {
             const existing = await existingResponse.json();
             if (existing && existing.length > 0) {
                 console.log('Payment already processed:', paymentId);
-                return; // Already processed
+                return;
             }
         }
     } catch (err) {
@@ -193,7 +195,7 @@ async function handleProductPurchase(data) {
                 amount: Math.round(amount),
                 currency: currency || 'INR',
                 payment_id: paymentId,
-                source: 'webhook' // Mark as webhook-processed
+                source: 'webhook'
             })
         });
         console.log('Purchase logged to Supabase');
@@ -245,13 +247,14 @@ async function handleProductPurchase(data) {
     if (BREVO_API_KEY) {
         const adminHtml = `
             <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #22c55e; border-radius: 8px;">
-                <h2 style="color: #16a34a;">💰 New Sale (Webhook)!</h2>
-                <p><strong>Product:</strong> ${productName}</p>
+                <h2 style="color: #16a34a;">💰 New Sale: ${productName}</h2>
+                <p><strong>Customer:</strong> ${customerName}</p>
+                <p><strong>Email:</strong> ${customerEmail}</p>
+                <p><strong>Phone:</strong> ${customerPhone || 'Not provided'}</p>
+                <hr>
                 <p><strong>Amount:</strong> ${currency} ${amount}</p>
-                <p><strong>Customer Name:</strong> ${customerName}</p>
-                <p><strong>Customer Email:</strong> ${customerEmail}</p>
                 <p><strong>Payment ID:</strong> ${paymentId}</p>
-                <p style="color: #6b7280; font-size: 12px;">Processed via Razorpay Webhook</p>
+                <p><strong>Source:</strong> Webhook Fulfillment</p>
             </div>
         `;
 
@@ -270,13 +273,11 @@ async function handleProductPurchase(data) {
                     htmlContent: adminHtml
                 })
             });
-            console.log('Admin notification sent');
+            console.log('Admin notification sent via webhook');
         } catch (err) {
-            console.error('Error sending admin email:', err);
+            console.error('Error sending admin notification:', err);
         }
     }
-
-    console.log('Product purchase processed successfully via webhook');
 }
 
 // Handle session booking - send email and log to Supabase
@@ -301,11 +302,11 @@ async function handleSessionBooking(data) {
     // 1. Check if already processed (prevent duplicate bookings)
     try {
         const existingResponse = await fetch(
-            `${SUPABASE_URL}/rest/v1/bookings?payment_id=eq.${paymentId}&select=id`,
+            `${SUPABASE_URL} /rest/v1 / bookings ? payment_id = eq.${paymentId}& select=id`,
             {
                 headers: {
                     'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                    'Authorization': `Bearer ${SUPABASE_KEY} `
                 }
             }
         );

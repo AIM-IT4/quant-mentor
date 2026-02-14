@@ -1495,6 +1495,7 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
             "product_name": productName,
             "customer_name": userDetails ? userDetails.name : "",
             "customer_email": userDetails ? userDetails.email : "",
+            "customer_phone": userDetails ? userDetails.phone : "",
             "inr_amount": inrAmountForLogging || amount
         },
         "prefill": {
@@ -1506,76 +1507,35 @@ function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountFo
             console.log('Payment success:', response);
             // ✅ Payment successful!
             const paymentId = response.razorpay_payment_id;
-
-            // Determine amount to log (INR preference for database stats)
-            // If inrAmountForLogging is passed, use it. Otherwise use the amount paid (assuming INR).
-            const loggedAmount = inrAmountForLogging !== null ? inrAmountForLogging : ((currency === 'INR') ? amount : 0);
-
             const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
-
-            // Get customer Name and Email from prefill or prompt
-            const customerName = (userDetails && userDetails.name) ? userDetails.name : (prompt('Enter your Name for the receipt:') || 'Customer');
             const customerEmail = (userDetails && userDetails.email) ? userDetails.email : prompt('Enter your email to receive the download link:');
 
-            if (customerEmail && customerEmail.includes('@')) {
-                // Log purchase to Supabase for statistics
-                if (window.supabaseClient) {
-                    try {
-                        console.log('📊 Logging purchase to database:', {
-                            customerEmail,
-                            customerName,
-                            productName,
-                            loggedAmount,
-                            currencyPaid: currency,
-                            amountPaid: amount,
-                            paymentId
-                        });
+            /* FULFILLMENT: Now handled by server-side webhook for reliability.
+            // Log purchase to Supabase for statistics
+            if (window.supabaseClient) {
+                try {
+                    const loggedAmount = inrAmountForLogging !== null ? inrAmountForLogging : ((currency === 'INR') ? amount : 0);
+                    await window.supabaseClient.from('purchases').insert({
+                        customer_email: customerEmail,
+                        product_name: productName,
+                        amount: Math.round(loggedAmount),
+                        currency: currency || 'INR',
+                        payment_id: paymentId,
+                        source: 'frontend_legacy'
+                    });
+                } catch (err) { console.error('❌ Failed to log purchase:', err); }
+            }
 
-                        await window.supabaseClient
-                            .from('purchases')
-                            .insert({
-                                customer_email: customerEmail,
-                                product_name: productName,
-                                amount: Math.round(loggedAmount), // Store as Integer INR
-                                currency: currency || 'INR',
-                                payment_id: paymentId,
-                                source: 'frontend'
-                            });
-                        console.log('✅ Purchase logged successfully');
-                    } catch (err) {
-                        console.error('❌ Failed to log purchase:', err);
-                    }
-                }
+            if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
+                sendProductEmail(customerEmail, productName, paymentId, downloadLink, userDetails ? userDetails.name : 'Customer');
+            }
+            */
 
-                if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
-                    // Send email to customer via Brevo
-                    sendProductEmail(customerEmail, productName, paymentId, downloadLink, customerName);
-
-                    // Send Admin Notification
-                    const adminSubject = `💰 New Product Sale: ${productName}`;
-                    const adminBody = `
-                        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #22c55e; border-radius: 8px;">
-                            <h2 style="color: #16a34a;">💰 New Sale!</h2>
-                            <p><strong>Product:</strong> ${productName}</p>
-                            <p><strong>Amount:</strong> ₹${Math.round(loggedAmount)}</p>
-                            <p><strong>Customer Name:</strong> ${customerName}</p>
-                            <p><strong>Customer Email:</strong> ${customerEmail}</p>
-                            <p><strong>Payment ID:</strong> ${paymentId}</p>
-                        </div>
-                    `;
-                    const adminText = `New Sale!\nProduct: ${productName}\nAmount: ₹${Math.round(loggedAmount)}\nName: ${customerName}\nEmail: ${customerEmail}\nID: ${paymentId}`;
-                    sendAdminNotification(adminSubject, adminBody, adminText);
-
-                    alert('🎉 Payment Successful!\n\nPayment ID: ' + paymentId + '\n\nDownload link sent to: ' + customerEmail + '\n\n📩 IMPORTANT: Please check your Spam/Junk folder if you don\'t see the email in your Inbox.\n\nClick OK to also open it now.');
-                    window.open(downloadLink, '_blank');
-                } else {
-                    alert('🎉 Payment Successful!\n\nPayment ID: ' + paymentId + '\n\n⚠️ Download link not configured (but your purchase is recorded). Please contact support.');
-                }
+            if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
+                alert('🎉 Payment Successful!\n\nCheck your email for the download link.\n\n📩 IMPORTANT: Please check your Spam/Junk folder.\n\nClick OK to also open it now.');
+                window.open(downloadLink, '_blank');
             } else {
-                alert('🎉 Payment Successful!\n\nPayment ID: ' + paymentId + '\n\n⚠️ No valid email provided. Please contact support to receive your download.');
-                if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
-                    window.open(downloadLink, '_blank');
-                }
+                alert('🎉 Payment Successful!\n\n⚠️ Download link not configured. Please contact support.');
             }
         },
         "theme": {
