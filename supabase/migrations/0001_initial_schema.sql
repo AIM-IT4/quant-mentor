@@ -1,0 +1,277 @@
+-- 0001_initial_schema.sql
+-- Consolidated schema for QuantMentor Supabase
+-- Created: 2026-02-14
+
+-- ---------------------------------------------------------
+-- 1. EXTENSIONS
+-- ---------------------------------------------------------
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- ---------------------------------------------------------
+-- 2. FUNCTIONS
+-- ---------------------------------------------------------
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- ---------------------------------------------------------
+-- 3. TABLES
+-- ---------------------------------------------------------
+
+-- Products Table
+CREATE TABLE IF NOT EXISTS products (
+  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  description TEXT,
+  price NUMERIC NOT NULL DEFAULT 0,
+  original_price NUMERIC DEFAULT 0,
+  discount_percentage INTEGER DEFAULT 0,
+  coupon_code TEXT,
+  file_url TEXT NOT NULL,
+  cover_image_url TEXT,
+  enable_ppp BOOLEAN DEFAULT false,
+  average_rating NUMERIC(2,1) DEFAULT 5.0,
+  sales_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Bookings Table
+CREATE TABLE IF NOT EXISTS bookings (
+  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  email TEXT NOT NULL,
+  name TEXT NOT NULL,
+  phone TEXT,
+  service_name TEXT NOT NULL,
+  service_price INTEGER NOT NULL DEFAULT 0,
+  service_duration INTEGER NOT NULL DEFAULT 30,
+  booking_date DATE NOT NULL,
+  booking_time TIME NOT NULL,
+  message TEXT,
+  status TEXT DEFAULT 'pending' NOT NULL,
+  requested_date DATE,
+  requested_time TIME,
+  reschedule_reason TEXT,
+  meet_link TEXT,
+  payment_id TEXT,
+  -- Admin Reschedule fields
+  admin_proposed_date DATE,
+  admin_proposed_time TEXT,
+  admin_reschedule_reason TEXT,
+  admin_reschedule_requested_at TIMESTAMPTZ,
+  customer_response TEXT,
+  -- Cancellation/Refund fields
+  cancellation_requested_at TIMESTAMP WITH ZONE,
+  cancellation_reason TEXT,
+  refund_amount INTEGER DEFAULT 0,
+  refund_percentage INTEGER DEFAULT 0,
+  refund_status TEXT DEFAULT 'none' CHECK (refund_status IN ('none', 'pending', 'approved', 'processed', 'rejected')),
+  refund_id TEXT,
+  -- Reminder flags
+  reminder_24h_sent BOOLEAN DEFAULT false,
+  reminder_10m_sent BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  CONSTRAINT bookings_status_check CHECK (status IN (
+    'pending', 'confirmed', 'cancelled', 'completed', 'upcoming',
+    'reschedule_requested', 'cancellation_requested', 'admin_reschedule_pending', 'rescheduled'
+  ))
+);
+
+-- Purchases Table (Logs successful product sales)
+CREATE TABLE IF NOT EXISTS purchases (
+  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  customer_email TEXT NOT NULL,
+  product_name TEXT NOT NULL,
+  amount NUMERIC NOT NULL DEFAULT 0,
+  currency TEXT DEFAULT 'INR',
+  payment_id TEXT,
+  source TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Sessions Table (Dynamic Mentorship Options)
+CREATE TABLE IF NOT EXISTS sessions (
+  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  name TEXT NOT NULL,
+  duration INTEGER NOT NULL DEFAULT 30,
+  price INTEGER NOT NULL DEFAULT 0,
+  description TEXT,
+  features TEXT[],
+  is_popular BOOLEAN DEFAULT FALSE,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Blogs Table
+CREATE TABLE IF NOT EXISTS blogs (
+  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  title TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  excerpt TEXT,
+  content TEXT NOT NULL,
+  cover_image_url TEXT,
+  is_published BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Testimonials Table
+CREATE TABLE IF NOT EXISTS testimonials (
+  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  name TEXT NOT NULL,
+  title TEXT NOT NULL,
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+  review TEXT NOT NULL,
+  product TEXT,
+  is_verified BOOLEAN DEFAULT false,
+  is_published BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Product Reviews Junction Table
+CREATE TABLE IF NOT EXISTS product_reviews (
+  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  product_id uuid REFERENCES products(id) ON DELETE CASCADE,
+  testimonial_id uuid REFERENCES testimonials(id) ON DELETE CASCADE,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  UNIQUE(product_id, testimonial_id)
+);
+
+-- Availability Patterns Table
+CREATE TABLE IF NOT EXISTS availability_patterns (
+  id bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+  day_of_week TEXT NOT NULL UNIQUE,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Blocked Date Ranges Table
+CREATE TABLE IF NOT EXISTS blocked_date_ranges (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    reason TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Migration Tracking Table
+CREATE TABLE IF NOT EXISTS _migrations (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  applied_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ---------------------------------------------------------
+-- 4. ROW LEVEL SECURITY (RLS)
+-- ---------------------------------------------------------
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE purchases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE blogs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE testimonials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE product_reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE availability_patterns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE blocked_date_ranges ENABLE ROW LEVEL SECURITY;
+
+-- ---------------------------------------------------------
+-- 5. POLICIES
+-- ---------------------------------------------------------
+
+-- Products
+CREATE POLICY "Public products are viewable by everyone" ON products FOR SELECT USING (true);
+CREATE POLICY "Enable all for everyone (Admin)" ON products FOR ALL USING (true);
+
+-- Bookings
+CREATE POLICY "Anyone can create bookings" ON bookings FOR INSERT WITH CHECK (true);
+CREATE POLICY "Users can view their own bookings" ON bookings FOR SELECT USING (true);
+CREATE POLICY "Users can update their own bookings" ON bookings FOR UPDATE USING (true);
+
+-- Purchases
+CREATE POLICY "Public can insert purchases" ON purchases FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public can view purchases" ON purchases FOR SELECT USING (true);
+
+-- Sessions
+CREATE POLICY "Public sessions are viewable by everyone" ON sessions FOR SELECT USING (is_active = TRUE);
+CREATE POLICY "Enable all for everyone (Admin)" ON sessions FOR ALL USING (true);
+
+-- Blogs
+CREATE POLICY "Public can view published blogs" ON blogs FOR SELECT USING (is_published = true);
+CREATE POLICY "Enable all for service role" ON blogs FOR ALL USING (true);
+
+-- Testimonials (Latest Logic)
+CREATE POLICY "Public can view all testimonials" ON testimonials FOR SELECT USING (true);
+CREATE POLICY "Public can insert testimonials" ON testimonials FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow all updates" ON testimonials FOR UPDATE USING (true);
+CREATE POLICY "Allow all deletes" ON testimonials FOR DELETE USING (true);
+
+-- Product Reviews
+CREATE POLICY "Public can view product reviews" ON product_reviews FOR SELECT USING (true);
+CREATE POLICY "Enable all for product reviews" ON product_reviews FOR ALL USING (true);
+
+-- Availability
+CREATE POLICY "Public Availability Read" ON availability_patterns FOR SELECT USING (true);
+CREATE POLICY "Public Availability Write" ON availability_patterns FOR ALL USING (true);
+
+-- Blocked Dates
+CREATE POLICY "Allow public read blocked dates" ON blocked_date_ranges FOR SELECT USING (true);
+CREATE POLICY "Allow admin full access blocked dates" ON blocked_date_ranges FOR ALL USING (true);
+
+-- ---------------------------------------------------------
+-- 6. INDEXES
+-- ---------------------------------------------------------
+CREATE INDEX IF NOT EXISTS idx_bookings_email ON bookings(email);
+CREATE INDEX IF NOT EXISTS idx_bookings_date ON bookings(booking_date);
+CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
+CREATE INDEX IF NOT EXISTS idx_purchases_email ON purchases(customer_email);
+CREATE INDEX IF NOT EXISTS idx_blogs_slug ON blogs(slug);
+CREATE INDEX IF NOT EXISTS idx_product_reviews_product_id ON product_reviews(product_id);
+
+-- ---------------------------------------------------------
+-- 7. TRIGGERS
+-- ---------------------------------------------------------
+CREATE TRIGGER update_bookings_updated_at BEFORE UPDATE ON bookings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_blogs_updated_at BEFORE UPDATE ON blogs FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ---------------------------------------------------------
+-- 8. STORAGE (Resources & Covers)
+-- ---------------------------------------------------------
+-- Note: Buckets creation usually requires superuser or handled via API, 
+-- but providing the policy logic here.
+
+CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING ( bucket_id IN ('resources', 'product-covers') );
+CREATE POLICY "Public Upload" ON storage.objects FOR INSERT WITH CHECK ( bucket_id IN ('resources', 'product-covers') );
+CREATE POLICY "Enable delete" ON storage.objects FOR DELETE USING ( bucket_id IN ('resources', 'product-covers') );
+CREATE POLICY "Enable update" ON storage.objects FOR UPDATE USING ( bucket_id IN ('resources', 'product-covers') );
+
+-- ---------------------------------------------------------
+-- 9. DEFAULT DATA
+-- ---------------------------------------------------------
+
+-- Availability
+INSERT INTO availability_patterns (day_of_week, start_time, end_time, is_active) 
+VALUES 
+('Monday', '10:00', '18:00', true),
+('Tuesday', '10:00', '18:00', true),
+('Wednesday', '10:00', '18:00', true),
+('Thursday', '10:00', '18:00', true),
+('Friday', '10:00', '18:00', true),
+('Saturday', '10:00', '14:00', true),
+('Sunday', '00:00', '00:00', false)
+ON CONFLICT (day_of_week) DO NOTHING;
+
+-- Sessions
+INSERT INTO sessions (name, duration, price, description, features, is_popular) 
+VALUES
+  ('Free Test Session', 15, 0, 'Get a taste of quant mentorship with a quick introductory session.', ARRAY['15-minute intro call', 'Discuss your goals', 'Brief Q&A', 'Free of charge'], FALSE),
+  ('Quick Consultation', 30, 499, 'Focused session for specific questions or quick guidance.', ARRAY['30 minutes one-on-one', 'Priority support', 'Topic-specific advice', 'Follow-up email'], FALSE),
+  ('Deep Dive Session', 60, 999, 'Comprehensive mentorship covering multiple topics in depth.', ARRAY['60 minutes deep dive', 'Most Popular', 'Multiple topics', 'Action plan', 'Resources shared'], TRUE),
+  ('Interview Prep', 90, 1499, 'Intensive preparation for quant interviews with mock sessions.', ARRAY['90 minutes intensive', 'Mock interview scenarios', 'Technical deep dive', 'Behavioral prep', 'Follow-up resources'], FALSE)
+ON CONFLICT DO NOTHING;
