@@ -38,6 +38,9 @@ export default async function handler(req, res) {
 
             if (signature !== altSignature) {
                 console.error('CRITICAL: Webhook signature verification failed for all formats');
+                console.log('Received signature:', signature);
+                console.log('Expected signature (direct):', expectedSignature);
+                console.log('Expected signature (alt):', altSignature);
                 return res.status(401).json({ error: 'Invalid signature' });
             }
         }
@@ -223,7 +226,7 @@ async function handleProductPurchase(data) {
         `;
 
         try {
-            await fetch('https://api.brevo.com/v3/smtp/email', {
+            const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
                 method: 'POST',
                 headers: {
                     'accept': 'application/json',
@@ -237,7 +240,13 @@ async function handleProductPurchase(data) {
                     htmlContent: customerHtml
                 })
             });
-            console.log('Customer email sent via webhook');
+
+            if (emailResponse.ok) {
+                console.log(`✅ Customer purchase email sent to ${customerEmail}`);
+            } else {
+                const errorData = await emailResponse.text();
+                console.error(`❌ Brevo Error (Product Email): ${emailResponse.status} - ${errorData}`);
+            }
         } catch (err) {
             console.error('Error sending customer email:', err);
         }
@@ -259,7 +268,7 @@ async function handleProductPurchase(data) {
         `;
 
         try {
-            await fetch('https://api.brevo.com/v3/smtp/email', {
+            const adminEmailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
                 method: 'POST',
                 headers: {
                     'accept': 'application/json',
@@ -273,7 +282,13 @@ async function handleProductPurchase(data) {
                     htmlContent: adminHtml
                 })
             });
-            console.log('Admin notification sent via webhook');
+
+            if (adminEmailResponse.ok) {
+                console.log('✅ Admin notification sent via webhook');
+            } else {
+                const errorData = await adminEmailResponse.text();
+                console.error(`❌ Brevo Error (Admin Product): ${adminEmailResponse.status} - ${errorData}`);
+            }
         } catch (err) {
             console.error('Error sending admin notification:', err);
         }
@@ -302,11 +317,11 @@ async function handleSessionBooking(data) {
     // 1. Check if already processed (prevent duplicate bookings)
     try {
         const existingResponse = await fetch(
-            `${SUPABASE_URL} /rest/v1 / bookings ? payment_id = eq.${paymentId}& select=id`,
+            `${SUPABASE_URL}/rest/v1/bookings?payment_id=eq.${paymentId}&select=id`,
             {
                 headers: {
                     'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY} `
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
                 }
             }
         );
@@ -382,7 +397,7 @@ async function handleSessionBooking(data) {
         `;
 
         try {
-            await fetch('https://api.brevo.com/v3/smtp/email', {
+            const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
                 method: 'POST',
                 headers: {
                     'accept': 'application/json',
@@ -396,7 +411,13 @@ async function handleSessionBooking(data) {
                     htmlContent: customerHtml
                 })
             });
-            console.log('✅ Customer booking email sent via webhook');
+
+            if (emailResponse.ok) {
+                console.log(`✅ Customer booking email sent to ${customerEmail}`);
+            } else {
+                const errorData = await emailResponse.text();
+                console.error(`❌ Brevo Error (Booking Email): ${emailResponse.status} - ${errorData}`);
+            }
         } catch (err) {
             console.error('Error sending customer booking email:', err);
         }
@@ -423,7 +444,7 @@ async function handleSessionBooking(data) {
         `;
 
         try {
-            await fetch('https://api.brevo.com/v3/smtp/email', {
+            const adminEmailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
                 method: 'POST',
                 headers: {
                     'accept': 'application/json',
@@ -437,7 +458,13 @@ async function handleSessionBooking(data) {
                     htmlContent: adminHtml
                 })
             });
-            console.log('✅ Admin booking notification sent');
+
+            if (adminEmailResponse.ok) {
+                console.log('✅ Admin booking notification sent');
+            } else {
+                const errorData = await adminEmailResponse.text();
+                console.error(`❌ Brevo Error (Admin Booking): ${adminEmailResponse.status} - ${errorData}`);
+            }
         } catch (err) {
             console.error('Error sending admin booking notification:', err);
         }
