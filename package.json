@@ -11,5 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "@supabase/supabase-js": "^2.95.3"
+  },
+  "engines": {
+    "node": "20.x"
   }
 }
