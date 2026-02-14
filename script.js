@@ -2128,10 +2128,8 @@ if (bookingForm) {
             localStorage.setItem('pendingBooking', JSON.stringify(window.pendingBooking));
         } catch (e) { console.warn('Could not persist booking to localStorage:', e); }
 
-        console.log('Opening Razorpay for session:', sessionDescription, 'Price:', payAmount, payCurrency);
-
         // Open Razorpay for session payment
-        initSessionPayment(sessionDescription, payAmount, email, payCurrency, logAmountInr);
+        initSessionPayment(sessionDescription, payAmount, email, payCurrency, logAmountInr, window.pendingBooking);
     });
 }
 
@@ -2139,7 +2137,7 @@ if (bookingForm) {
  * Initialize Razorpay for session booking payment
  */
 // Initialize Razorpay for session booking payment
-function initSessionPayment(description, amount, customerEmail, currency = 'INR', inrAmountForLogging = null) {
+function initSessionPayment(description, amount, customerEmail, currency = 'INR', inrAmountForLogging = null, bookingData = null) {
     // Handle FREE sessions (0 value)
     if (amount <= 0) {
         handleSessionPaymentSuccess({ razorpay_payment_id: 'FREE_SESSION_' + Date.now() });
@@ -2165,6 +2163,18 @@ function initSessionPayment(description, amount, customerEmail, currency = 'INR'
         },
         "prefill": {
             "email": customerEmail,
+        },
+        "notes": {
+            "type": "session",
+            "customer_name": bookingData ? bookingData.name : "",
+            "customer_email": customerEmail,
+            "session_name": bookingData ? bookingData.sessionType : "",
+            "session_date": bookingData ? bookingData.date : "",
+            "session_time": bookingData ? bookingData.time : "",
+            "session_duration": bookingData ? bookingData.duration : "",
+            "session_price": inrAmountForLogging || amount,
+            "customer_phone": bookingData ? bookingData.phone : "",
+            "customer_message": bookingData ? bookingData.message : ""
         },
         "theme": {
             "color": "#6366f1"

@@ -77,9 +77,20 @@ export default async function handler(req, res) {
                     SENDER_NAME
                 });
             } else if (productType === 'session') {
-                // Session bookings are handled separately with more data
-                // The client-side still handles this, webhook is backup
-                console.log('Session booking payment - client handles primary flow');
+                // Handle session booking (Server-side fulfillment for reliability)
+                await handleSessionBooking({
+                    paymentId,
+                    amount,
+                    currency,
+                    customerEmail,
+                    notes: payment.notes,
+                    SUPABASE_URL,
+                    SUPABASE_KEY,
+                    BREVO_API_KEY,
+                    ADMIN_EMAIL,
+                    SENDER_EMAIL,
+                    SENDER_NAME
+                });
             }
 
             return res.status(200).json({ status: 'success', paymentId });
@@ -266,4 +277,168 @@ async function handleProductPurchase(data) {
     }
 
     console.log('Product purchase processed successfully via webhook');
+}
+
+// Handle session booking - send email and log to Supabase
+async function handleSessionBooking(data) {
+    const {
+        paymentId, amount, currency, customerEmail, notes,
+        SUPABASE_URL, SUPABASE_KEY, BREVO_API_KEY, ADMIN_EMAIL, SENDER_EMAIL, SENDER_NAME
+    } = data;
+
+    const customerName = notes.customer_name || 'Customer';
+    const sessionName = notes.session_name || 'Consultation Session';
+    const sessionDate = notes.session_date || 'TBD';
+    const sessionTime = notes.session_time || 'TBD';
+    const sessionDuration = notes.session_duration || '60';
+    const sessionPrice = notes.session_price || amount;
+    const customerPhone = notes.customer_phone || '';
+    const customerMessage = notes.customer_message || '';
+    const meetLink = "https://meet.google.com/hfp-npyq-qho";
+
+    console.log('Processing session booking via webhook:', { paymentId, customerEmail, sessionName });
+
+    // 1. Check if already processed (prevent duplicate bookings)
+    try {
+        const existingResponse = await fetch(
+            `${SUPABASE_URL}/rest/v1/bookings?payment_id=eq.${paymentId}&select=id`,
+            {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            }
+        );
+
+        if (existingResponse.ok) {
+            const existing = await existingResponse.json();
+            if (existing && existing.length > 0) {
+                console.log('Booking already processed:', paymentId);
+                return; // Already processed
+            }
+        }
+    } catch (err) {
+        console.error('Error checking existing booking:', err);
+    }
+
+    // 2. Log to Supabase bookings table
+    try {
+        const insertResponse = await fetch(`${SUPABASE_URL}/rest/v1/bookings`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+                email: customerEmail,
+                name: customerName,
+                phone: customerPhone,
+                service_name: sessionName,
+                service_price: Math.round(sessionPrice),
+                service_duration: parseInt(sessionDuration),
+                booking_date: sessionDate,
+                booking_time: sessionTime,
+                message: customerMessage,
+                status: 'upcoming',
+                payment_id: paymentId,
+                meet_link: meetLink,
+                source: 'webhook' // Mark for debugging
+            })
+        });
+
+        if (!insertResponse.ok) {
+            const errorText = await insertResponse.text();
+            console.error('Supabase booking insert failed:', errorText);
+        } else {
+            console.log('✅ Booking logged to Supabase');
+        }
+    } catch (err) {
+        console.error('Error logging booking to Supabase:', err);
+    }
+
+    // 3. Send confirmation email to customer via Brevo
+    if (BREVO_API_KEY && customerEmail) {
+        const customerHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #2563eb;">🎉 Your session has been booked!</h2>
+                <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                <p>Hi <strong>${customerName}</strong>,</p>
+                <p>Your session is confirmed. Here are the details:</p>
+                <p><strong>📋 Session:</strong> ${sessionName} (${sessionDuration} mins)</p>
+                <p><strong>📅 Date:</strong> ${sessionDate}</p>
+                <p><strong>⏰ Time:</strong> ${sessionTime}</p>
+                <p><strong>💰 Amount Paid:</strong> ₹${sessionPrice}</p>
+                <p><strong>🆔 Payment ID:</strong> ${paymentId}</p>
+                <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
+                <p><strong>🔗 JOIN YOUR SESSION HERE:</strong></p>
+                <a href="${meetLink}" style="display: inline-block; background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0;">Join Meeting</a>
+                <p style="margin-top: 20px;"><strong>🔄 Need to Reschedule?</strong></p>
+                <p>You can view and manage your bookings on our website.</p>
+                <p style="margin-top: 20px; color: #6b7280;">Best regards,<br>${SENDER_NAME}</p>
+            </div>
+        `;
+
+        try {
+            await fetch('https://api.brevo.com/v3/smtp/email', {
+                method: 'POST',
+                headers: {
+                    'accept': 'application/json',
+                    'api-key': BREVO_API_KEY,
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sender: { name: SENDER_NAME, email: SENDER_EMAIL },
+                    to: [{ email: customerEmail, name: customerName }],
+                    subject: `Booking Confirmed: ${sessionName}`,
+                    htmlContent: customerHtml
+                })
+            });
+            console.log('✅ Customer booking email sent via webhook');
+        } catch (err) {
+            console.error('Error sending customer booking email:', err);
+        }
+    }
+
+    // 4. Send admin notification email
+    if (BREVO_API_KEY) {
+        const adminHtml = `
+            <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #4f46e5; border-radius: 8px;">
+                <h2 style="color: #4f46e5;">🆕 New Session Booking (Webhook)</h2>
+                <p><strong>Customer:</strong> ${customerName}</p>
+                <p><strong>Email:</strong> ${customerEmail}</p>
+                <p><strong>Phone:</strong> ${customerPhone}</p>
+                <hr>
+                <p><strong>Session:</strong> ${sessionName}</p>
+                <p><strong>Price:</strong> ₹${sessionPrice}</p>
+                <p><strong>Date:</strong> ${sessionDate} at ${sessionTime}</p>
+                <p><strong>Payment ID:</strong> ${paymentId}</p>
+                <p><strong>Message:</strong> ${customerMessage}</p>
+                <hr>
+                <p><strong>🔗 Meeting Link:</strong> <a href="${meetLink}">${meetLink}</a></p>
+                <p style="color: #6b7280; font-size: 12px; margin-top: 15px;">Processed via Server-side Webhook (Reliable Flow)</p>
+            </div>
+        `;
+
+        try {
+            await fetch('https://api.brevo.com/v3/smtp/email', {
+                method: 'POST',
+                headers: {
+                    'accept': 'application/json',
+                    'api-key': BREVO_API_KEY,
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sender: { name: SENDER_NAME, email: SENDER_EMAIL },
+                    to: [{ email: ADMIN_EMAIL }],
+                    subject: `🆕 New Booking: ${customerName} - ${sessionName}`,
+                    htmlContent: adminHtml
+                })
+            });
+            console.log('✅ Admin booking notification sent');
+        } catch (err) {
+            console.error('Error sending admin booking notification:', err);
+        }
+    }
 }

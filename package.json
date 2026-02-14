@@ -9,5 +9,7 @@
   "keywords": [],
   "author": "Amit Kumar Jha",
   "license": "ISC",
-  "dependencies": {}
+  "dependencies": {
+    "@supabase/supabase-js": "^2.95.3"
+  }
 }
