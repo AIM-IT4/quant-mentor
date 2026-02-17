@@ -445,50 +445,160 @@
             <a href="index.html" style="color: var(--primary); text-decoration: none;">View Site →</a>
         </header>
 
-        <!-- Dashboard Section -->
-        <section id="dashboard" style="margin-bottom: 60px;">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <i class="fas fa-indian-rupee-sign icon"></i>
-                    <span class="label">Total Revenue</span>
-                    <span class="value" id="totalRevenue">₹0</span>
-                    <span class="trend trend-up"><i class="fas fa-chart-line"></i> Lifetime</span>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-calendar-check icon"></i>
-                    <span class="label">Total Bookings</span>
-                    <span class="value" id="totalBookings">0</span>
-                    <span class="trend trend-up"><i class="fas fa-users"></i> Lifetime</span>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-download icon"></i>
-                    <span class="label">Product Sales</span>
-                    <span class="value" id="totalSales">0</span>
-                    <span class="trend trend-up"><i class="fas fa-shopping-cart"></i> Lifetime</span>
+        <!-- DASHBOARD SECTION -->
+        <section id="dashboardSection" class="content-section active" style="margin-bottom: 60px;">
+            <div class="section-header"
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-chart-line" style="color: #6366f1;"></i> Performance Overview
+                </h2>
+                <div class="date-filter">
+                    <select id="revenueRange" onchange="updateDashboardCharts()"
+                        style="background: var(--surface); border: 1px solid var(--border); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer;">
+                        <option value="7">Last 7 Days</option>
+                        <option value="30" selected>Last 30 Days</option>
+                        <option value="90">Last 3 Months</option>
+                        <option value="365">Last Year</option>
+                    </select>
                 </div>
             </div>
 
-            <div class="charts-grid">
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <span class="chart-title">Revenue & Sales Growth</span>
-                        <select id="revenueRange" onchange="updateDashboardCharts()"
-                            style="width: auto; padding: 4px 12px; font-size: 0.8rem; height: auto;">
-                            <option value="7">Last 7 Days</option>
-                            <option value="30" selected>Last 30 Days</option>
-                            <option value="90">Last 90 Days</option>
-                        </select>
+            <!-- Key Metrics Grid -->
+            <div class="dashboard-grid"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <!-- Revenue Card -->
+                <div class="stat-card"
+                    style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; overflow: hidden;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                        <div>
+                            <p style="color: var(--text-muted); font-size: 0.9em; margin: 0;">Total Revenue</p>
+                            <h3 id="totalRevenue" style="font-size: 1.8em; margin: 5px 0; color: white;">₹0</h3>
+                        </div>
+                        <div style="background: rgba(99, 102, 241, 0.1); padding: 10px; border-radius: 8px;">
+                            <i class="fas fa-rupee-sign" style="color: #6366f1; font-size: 1.2em;"></i>
+                        </div>
                     </div>
+                    <div id="revenueGrowth" style="font-size: 0.85em;">
+                        <span style="color: var(--text-muted);">Loading trends...</span>
+                    </div>
+                </div>
+
+                <!-- Bookings Card -->
+                <div class="stat-card"
+                    style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                        <div>
+                            <p style="color: var(--text-muted); font-size: 0.9em; margin: 0;">Active Bookings</p>
+                            <h3 id="activeBookings" style="font-size: 1.8em; margin: 5px 0; color: white;">0</h3>
+                        </div>
+                        <div style="background: rgba(168, 85, 247, 0.1); padding: 10px; border-radius: 8px;">
+                            <i class="fas fa-calendar-check" style="color: #a855f7; font-size: 1.2em;"></i>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.85em; color: var(--text-muted);">
+                        <span id="completedBookingsCount">0</span> completed sessions
+                    </div>
+                </div>
+
+                <!-- Sales Volume Card -->
+                <div class="stat-card"
+                    style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                        <div>
+                            <p style="color: var(--text-muted); font-size: 0.9em; margin: 0;">Resource Sales</p>
+                            <h3 id="totalSales" style="font-size: 1.8em; margin: 5px 0; color: white;">0</h3>
+                        </div>
+                        <div style="background: rgba(34, 197, 94, 0.1); padding: 10px; border-radius: 8px;">
+                            <i class="fas fa-download" style="color: #22c55e; font-size: 1.2em;"></i>
+                        </div>
+                    </div>
+                    <div id="salesGrowth" style="font-size: 0.85em;">
+                        <span style="color: var(--text-muted);">Lifetime sales</span>
+                    </div>
+                </div>
+
+                <!-- AOV Card -->
+                <div class="stat-card"
+                    style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                        <div>
+                            <p style="color: var(--text-muted); font-size: 0.9em; margin: 0;">Avg. Order Value</p>
+                            <h3 id="avgOrderValue" style="font-size: 1.8em; margin: 5px 0; color: white;">₹0</h3>
+                        </div>
+                        <div style="background: rgba(245, 158, 11, 0.1); padding: 10px; border-radius: 8px;">
+                            <i class="fas fa-chart-pie" style="color: #f59e0b; font-size: 1.2em;"></i>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.85em; color: var(--text-muted);">
+                        Based on bookings & sales
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-container"
+                style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px;">
+                <div class="chart-wrapper"
+                    style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); height: 350px;">
+                    <h4 style="margin: 0 0 20px 0; color: var(--text-secondary);">Revenue Trends</h4>
                     <div style="position: relative; height: calc(100% - 40px);">
                         <canvas id="revenueChart"></canvas>
                     </div>
                 </div>
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <span class="chart-title">Service Distribution</span>
-                    </div>
+                <div class="chart-wrapper"
+                    style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); height: 350px;">
+                    <h4 style="margin: 0 0 20px 0; color: var(--text-secondary);">Sales Distribution</h4>
                     <div style="position: relative; height: calc(100% - 40px);">
                         <canvas id="distributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insights Row -->
+            <div class="insights-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Top Products -->
+                <div
+                    style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+                    <h4
+                        style="margin: 0 0 20px 0; color: var(--text-secondary); display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-trophy" style="color: #f59e0b;"></i> Top Performing Products
+                    </h4>
+                    <div class="table-container" style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr
+                                    style="border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 0.85em; text-align: left;">
+                                    <th style="padding: 10px;">Product</th>
+                                    <th style="padding: 10px; text-align: center;">Sales</th>
+                                    <th style="padding: 10px; text-align: right;">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topProductsList">
+                                <tr>
+                                    <td colspan="3"
+                                        style="text-align: center; padding: 20px; color: var(--text-muted);">Loading...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Feed -->
+                <div
+                    style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+                    <h4
+                        style="margin: 0 0 20px 0; color: var(--text-secondary); display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-history" style="color: #6366f1;"></i> Recent Activity
+                    </h4>
+                    <div id="recentActivityFeed"
+                        style="display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto;">
+                        <div style="text-align: center; padding: 20px; color: var(--text-muted);">Loading activity...
+                        </div>
                     </div>
                 </div>
             </div>
