@@ -2203,6 +2203,7 @@ async function initSessionPayment(description, amount, customerEmail, currency =
         "currency": currency,
         "name": BUSINESS_NAME,
         "description": description,
+        "payment_capture": true, // ✅ Force Auto-Capture
         "handler": function (response) {
             handleSessionPaymentSuccess(response);
         },
