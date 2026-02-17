@@ -617,7 +617,17 @@
                     <input type="file" id="productFile" accept=".pdf,.zip,.rar,.py,.cpp,.h,.js,.ipynb,.txt,.md">
                     <small style="color: var(--text-muted); display: block; margin-top: 5px;">
                         Accepted: PDF documents, ZIP archives, Python scripts (.py), C++ files (.cpp, .h),
+                        Accepted: PDF documents, ZIP archives, Python scripts (.py), C++ files (.cpp, .h),
                         Jupyter notebooks (.ipynb), JavaScript, Text files, Markdown
+                    </small>
+                </div>
+
+                <div class="form-group" style="background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(99, 102, 241, 0.3);">
+                    <label style="color: #a5b4fc; font-weight: 600;"><i class="fas fa-link"></i> OR Use External File Link (Recommended for Large Files)</label>
+                    <input type="url" id="productExternalUrl" placeholder="e.g. https://drive.google.com/file/d/...">
+                    <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                        Paste a direct download link from Google Drive, Dropbox, GitHub, etc. This saves Supabase storage bandwidth.
+                        <br><strong>Note:</strong> If provided, this link takes precedence over uploaded files.
                     </small>
                 </div>
 
@@ -1183,14 +1193,17 @@ Brief Q&A"></textarea>
                                     console.log('Update Payload:', { name, price, desc, id: productId }); // Debug Log
                                     const file = document.getElementById('productFile').files[0];
                                     const coverFileInput = document.getElementById('productCover').files[0];
+                                    const externalUrl = document.getElementById('productExternalUrl').value.trim(); // New Field
                                     const coverFileToUpload = croppedCoverBlob || coverFileInput;
 
-                                    // For new products, file is required; for edits, file is optional
-                                    if (!productId && !file) throw new Error('Please select a resource file');
+                                    // Validations: requires either a file upload OR an external URL for new products
+                                    if (!productId && !file && !externalUrl) {
+                                        throw new Error('Please select a resource file OR provide an external link');
+                                    }
 
                                     // If updating, fetch old product metadata to cleanup old files if they are replaced
                                     let oldProduct = null;
-                                    if (productId && (file || coverFileToUpload)) {
+                                    if (productId && (file || coverFileToUpload || externalUrl)) {
                                         const { data } = await window.supabaseAdminClient
                                             .from('products')
                                             .select('file_url, cover_image_url')
@@ -1199,11 +1212,11 @@ Brief Q&A"></textarea>
                                         oldProduct = data;
                                     }
 
-                                    let fileUrl = null;
+                                    let fileUrl = externalUrl || null; // Priorities External URL
                                     let coverUrl = null;
 
-                                    // 1. Upload Resource File (if selected)
-                                    if (file) {
+                                    // 1. Upload Resource File (only if no external URL)
+                                    if (file && !externalUrl) {
                                         const fileExt = file.name.split('.').pop();
                                         const fileName = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_res_${Date.now()}.${fileExt}`;
 
@@ -1369,13 +1382,18 @@ Brief Q&A"></textarea>
                                     const coverImg = p.cover_image_url ?
                                         `<img src="${p.cover_image_url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 15px;" alt="Cover">` :
                                         `<div style="width: 50px; height: 50px; background: var(--border); border-radius: 4px; margin-right: 15px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-image" style="color: var(--text-muted);"></i></div>`;
+                                    
+                                    const isExternal = p.file_url && !p.file_url.includes('supabase');
+                                    const storageBadge = isExternal 
+                                        ? '<span style="background: rgba(99, 102, 241, 0.2); color: #818cf8; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px;" title="Hosted Externally (No Egress Cost)"><i class="fas fa-external-link-alt"></i> External</span>'
+                                        : '<span style="background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px;" title="Hosted on Supabase (Costs Egress)"><i class="fas fa-database"></i> Supabase</span>';
 
                                     return `
                 <div class="product-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border);">
                     <div style="display: flex; align-items: center;">
                         ${coverImg}
                         <div>
-                            <strong>${p.name}</strong> ${p.price === 0 ? '<span style="background: #22c55e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px;">FREE RESOURCE</span>' : ''} ${hasPPP}<br>
+                            <strong>${p.name}</strong> ${p.price === 0 ? '<span style="background: #22c55e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px;">FREE RESOURCE</span>' : ''} ${hasPPP} ${storageBadge}<br>
                             <span style="color: var(--text-muted); font-size: 0.9em;">
                                 ${originalPrice > price ?
                                             `<span style="text-decoration: line-through; color: #ef4444; margin-right: 5px;">₹${originalPrice}</span>` : ''}
@@ -1432,6 +1450,14 @@ Brief Q&A"></textarea>
                                 document.getElementById('productPPP').checked = data.enable_ppp || false;
                                 document.getElementById('productDiscount').value = data.discount_percentage || 0;
                                 document.getElementById('productCouponCode').value = data.coupon_code || '';
+                                
+                                // Populate External URL if detected
+                                const extUrlInput = document.getElementById('productExternalUrl');
+                                if (data.file_url && !data.file_url.includes('supabase.co')) {
+                                    extUrlInput.value = data.file_url;
+                                } else {
+                                    extUrlInput.value = '';
+                                }
 
                                 // Handle Free Resource Checkbox
                                 const freeCheck = document.getElementById('productFree');
@@ -1473,6 +1499,7 @@ Brief Q&A"></textarea>
                                 document.getElementById('productPPP').checked = false;
                                 document.getElementById('productDiscount').value = '';
                                 document.getElementById('productCouponCode').value = '';
+                                document.getElementById('productExternalUrl').value = ''; // Reset external URL
 
                                 const freeCheck = document.getElementById('productFree');
                                 if (freeCheck) {
