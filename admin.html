@@ -604,6 +604,58 @@
             </div>
         </section>
 
+        <!-- Client Management & Exports Section -->
+        <section id="clientSection" class="content-section" style="margin-bottom: 60px;">
+            <div class="card">
+                <div class="card-header"
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                    <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-users" style="color: #10b981;"></i> Client Management
+                    </h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="downloadBookings()" class="btn btn-secondary"
+                            style="padding: 8px 16px; font-size: 0.9em;">
+                            <i class="fas fa-file-csv"></i> Export Bookings
+                        </button>
+                        <button onclick="downloadPurchases()" class="btn btn-secondary"
+                            style="padding: 8px 16px; font-size: 0.9em;">
+                            <i class="fas fa-file-csv"></i> Export Purchases
+                        </button>
+                        <button onclick="downloadClients()" class="btn btn-primary"
+                            style="padding: 8px 16px; font-size: 0.9em; background: linear-gradient(135deg, #10b981, #059669);">
+                            <i class="fas fa-file-download"></i> Export Client List
+                        </button>
+                    </div>
+                </div>
+
+                <p style="color: var(--text-muted); margin-bottom: 20px;">
+                    Aggregated list of all unique clients from Bookings and Purchases.
+                </p>
+
+                <div class="table-container" style="overflow-x: auto; max-height: 500px; overflow-y: auto;">
+                    <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr
+                                style="border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface);">
+                                <th style="text-align: left; padding: 12px; color: var(--text-muted);">Client</th>
+                                <th style="text-align: center; padding: 12px; color: var(--text-muted);">Type</th>
+                                <th style="text-align: center; padding: 12px; color: var(--text-muted);">Orders</th>
+                                <th style="text-align: right; padding: 12px; color: var(--text-muted);">Total Spend</th>
+                                <th style="text-align: center; padding: 12px; color: var(--text-muted);">Last Active
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientListBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                                    Loading clients...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
         <div class="card">
             <h2 style="margin-top: 0;">Add/Edit Product</h2>
 
@@ -2471,7 +2523,8 @@ QuantMentor
                                 updateDashboardStats(),
                                 updateDashboardCharts(),
                                 loadTopProducts(),
-                                loadRecentActivity()
+                                loadRecentActivity(),
+                                loadClients()
                             ]);
                         }
 
