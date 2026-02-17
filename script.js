@@ -2593,6 +2593,11 @@ window.openBlogModal = async function (id) {
             document.getElementById('blogModalMeta').textContent = new Date(data.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
             document.getElementById('blogModalContent').innerHTML = data.content;
 
+            // Trigger MathJax to render equations in the new content
+            if (window.MathJax) {
+                window.MathJax.typesetPromise([document.getElementById('blogModalContent')]).catch((err) => console.log('MathJax error:', err));
+            }
+
             const cover = document.getElementById('blogModalCover');
             if (data.cover_image_url) {
                 cover.style.display = 'block';
