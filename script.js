@@ -1519,6 +1519,7 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
         "currency": currency,
         "name": BUSINESS_NAME,
         "description": productName,
+        "payment_capture": true, // ✅ Force Auto-Capture
         "notes": {
             "type": "product",
             "product_name": productName,
