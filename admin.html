@@ -622,11 +622,14 @@
                     </small>
                 </div>
 
-                <div class="form-group" style="background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(99, 102, 241, 0.3);">
-                    <label style="color: #a5b4fc; font-weight: 600;"><i class="fas fa-link"></i> OR Use External File Link (Recommended for Large Files)</label>
+                <div class="form-group"
+                    style="background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(99, 102, 241, 0.3);">
+                    <label style="color: #a5b4fc; font-weight: 600;"><i class="fas fa-link"></i> OR Use External File
+                        Link (Recommended for Large Files)</label>
                     <input type="url" id="productExternalUrl" placeholder="e.g. https://drive.google.com/file/d/...">
                     <small style="color: var(--text-muted); display: block; margin-top: 5px;">
-                        Paste a direct download link from Google Drive, Dropbox, GitHub, etc. This saves Supabase storage bandwidth.
+                        Paste a direct download link from Google Drive, Dropbox, GitHub, etc. This saves Supabase
+                        storage bandwidth.
                         <br><strong>Note:</strong> If provided, this link takes precedence over uploaded files.
                     </small>
                 </div>
@@ -1382,9 +1385,9 @@ Brief Q&A"></textarea>
                                     const coverImg = p.cover_image_url ?
                                         `<img src="${p.cover_image_url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 15px;" alt="Cover">` :
                                         `<div style="width: 50px; height: 50px; background: var(--border); border-radius: 4px; margin-right: 15px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-image" style="color: var(--text-muted);"></i></div>`;
-                                    
+
                                     const isExternal = p.file_url && !p.file_url.includes('supabase');
-                                    const storageBadge = isExternal 
+                                    const storageBadge = isExternal
                                         ? '<span style="background: rgba(99, 102, 241, 0.2); color: #818cf8; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px;" title="Hosted Externally (No Egress Cost)"><i class="fas fa-external-link-alt"></i> External</span>'
                                         : '<span style="background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 5px;" title="Hosted on Supabase (Costs Egress)"><i class="fas fa-database"></i> Supabase</span>';
 
@@ -1450,7 +1453,7 @@ Brief Q&A"></textarea>
                                 document.getElementById('productPPP').checked = data.enable_ppp || false;
                                 document.getElementById('productDiscount').value = data.discount_percentage || 0;
                                 document.getElementById('productCouponCode').value = data.coupon_code || '';
-                                
+
                                 // Populate External URL if detected
                                 const extUrlInput = document.getElementById('productExternalUrl');
                                 if (data.file_url && !data.file_url.includes('supabase.co')) {
@@ -2351,44 +2354,238 @@ QuantMentor
 
                         async function initDashboard() {
                             console.log('📊 Initializing Dashboard...');
-                            document.getElementById('adminContainer').style.display = 'block'; // Ensure container is visible
-                            await updateDashboardStats();
-                            await updateDashboardCharts();
+                            document.getElementById('adminContainer').style.display = 'block';
+
+                            // Load components in parallel
+                            await Promise.all([
+                                updateDashboardStats(),
+                                updateDashboardCharts(),
+                                loadTopProducts(),
+                                loadRecentActivity()
+                            ]);
                         }
 
                         async function updateDashboardStats() {
                             try {
-                                // 1. Fetch Bookings Stats (Confirmed + Completed)
-                                const { data: bookingsData } = await window.supabaseAdminClient
+                                const now = new Date();
+                                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+                                const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+                                const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0).toISOString();
+
+                                // 1. Active Bookings (Upcoming + Confirmed)
+                                const { count: activeBookingsCount } = await window.supabaseAdminClient
                                     .from('bookings')
-                                    .select('service_price, status')
+                                    .select('*', { count: 'exact', head: true })
+                                    .in('status', ['confirmed', 'upcoming']);
+
+                                // 2. Completed Bookings (Total)
+                                const { count: completedBookingsCount } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .select('*', { count: 'exact', head: true })
+                                    .eq('status', 'completed');
+
+                                // 3. Total Sales Count
+                                const { count: totalSalesCount } = await window.supabaseAdminClient
+                                    .from('purchases')
+                                    .select('*', { count: 'exact', head: true });
+
+                                // 4. Financials (This Month vs Last Month)
+                                // We need to fetch amounts to calculate sums, but we can limit fields
+                                const { data: currentMonthBookings } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .select('service_price')
+                                    .gte('created_at', startOfMonth)
                                     .in('status', ['confirmed', 'completed', 'upcoming']);
 
-                                // 2. Fetch Purchases Stats
-                                const { data: purchasesData } = await window.supabaseAdminClient
+                                const { data: currentMonthPurchases } = await window.supabaseAdminClient
+                                    .from('purchases')
+                                    .select('amount')
+                                    .gte('created_at', startOfMonth);
+
+                                const { data: lastMonthBookings } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .select('service_price')
+                                    .gte('created_at', startOfLastMonth)
+                                    .lte('created_at', endOfLastMonth)
+                                    .in('status', ['confirmed', 'completed', 'upcoming']);
+
+                                const { data: lastMonthPurchases } = await window.supabaseAdminClient
+                                    .from('purchases')
+                                    .select('amount')
+                                    .gte('created_at', startOfLastMonth)
+                                    .lte('created_at', endOfLastMonth);
+
+                                // 5. Total Lifetime Revenue (Estimated from simplified query or pre-calculated in DB - here we do a fetch all for amounts only as it's lighter than full rows)
+                                // Optimization: If history is huge, this should be a stored procedure. For <10k rows, fetching just 'amount' is fine (~50KB).
+                                const { data: allBookingsRev } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .select('service_price')
+                                    .in('status', ['confirmed', 'completed', 'upcoming']);
+
+                                const { data: allPurchasesRev } = await window.supabaseAdminClient
                                     .from('purchases')
                                     .select('amount');
 
-                                const totalBookingsRevenue = (bookingsData || []).reduce((sum, b) => sum + (b.service_price || 0), 0);
-                                const totalPurchasesRevenue = (purchasesData || []).reduce((sum, p) => sum + (p.amount || 0), 0);
+                                // Calculations
+                                const calcRevenue = (bookings, purchases) => {
+                                    const bRev = (bookings || []).reduce((sum, b) => sum + (b.service_price || 0), 0);
+                                    const pRev = (purchases || []).reduce((sum, p) => sum + (p.amount || 0), 0);
+                                    return bRev + pRev;
+                                };
 
-                                console.log('💰 Revenue Debug:', {
-                                    bookingsCount: bookingsData?.length,
-                                    purchasesCount: purchasesData?.length,
-                                    totalBookingsRevenue,
-                                    totalPurchasesRevenue,
-                                    firstPurchase: purchasesData?.[0],
-                                    allPurchases: purchasesData
-                                });
+                                const currentRevenue = calcRevenue(currentMonthBookings, currentMonthPurchases);
+                                const lastRevenue = calcRevenue(lastMonthBookings, lastMonthPurchases);
+                                const totalLifetimeRevenue = calcRevenue(allBookingsRev, allPurchasesRev);
 
-                                // Round to avoid fractional paise display issues
-                                const totalRevenue = Math.round(totalBookingsRevenue + totalPurchasesRevenue);
-                                document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toLocaleString()}`;
-                                document.getElementById('totalBookings').textContent = (bookingsData || []).length;
-                                document.getElementById('totalSales').textContent = (purchasesData || []).length;
+                                // Growth %
+                                let growthHtml = '<span style="color: var(--text-muted);">No data yet</span>';
+                                if (lastRevenue > 0) {
+                                    const growth = ((currentRevenue - lastRevenue) / lastRevenue) * 100;
+                                    const isPositive = growth >= 0;
+                                    const color = isPositive ? '#22c55e' : '#ef4444';
+                                    const icon = isPositive ? '↗' : '↘';
+                                    growthHtml = `<span style="color: ${color}; font-weight: 500;">${icon} ${Math.abs(growth).toFixed(1)}%</span> <span style="color: var(--text-muted);">vs last month</span>`;
+                                } else if (currentRevenue > 0) {
+                                    growthHtml = `<span style="color: #22c55e; font-weight: 500;">↗ 100%</span> <span style="color: var(--text-muted);">new growth</span>`;
+                                }
+
+                                // AOV (Average Order Value)
+                                const totaltransactions = (allBookingsRev?.length || 0) + (allPurchasesRev?.length || 0);
+                                const aov = totaltransactions > 0 ? Math.round(totalLifetimeRevenue / totaltransactions) : 0;
+
+                                // Update DOM
+                                document.getElementById('totalRevenue').textContent = `₹${Math.round(totalLifetimeRevenue).toLocaleString()}`;
+                                document.getElementById('revenueGrowth').innerHTML = growthHtml;
+
+                                document.getElementById('activeBookings').textContent = activeBookingsCount || 0;
+                                document.getElementById('completedBookingsCount').textContent = completedBookingsCount || 0;
+
+                                document.getElementById('totalSales').textContent = totalSalesCount || 0;
+                                // Sales growth logic similar to revenue if needed, for now simplified
+
+                                document.getElementById('avgOrderValue').textContent = `₹${aov.toLocaleString()}`;
+
                             } catch (err) {
                                 console.error('❌ Failed to load stats:', err);
                             }
+                        }
+
+                        async function loadTopProducts() {
+                            try {
+                                const { data, error } = await window.supabaseAdminClient
+                                    .from('purchases')
+                                    .select('product_name, amount');
+
+                                if (error) throw error;
+
+                                // Group by Product
+                                const productStats = {};
+                                data.forEach(p => {
+                                    const name = p.product_name || 'Unknown Product';
+                                    if (!productStats[name]) productStats[name] = { count: 0, revenue: 0 };
+                                    productStats[name].count++;
+                                    productStats[name].revenue += (p.amount || 0);
+                                });
+
+                                // Convert to Array & Sort
+                                const sortedProducts = Object.entries(productStats)
+                                    .map(([name, stats]) => ({ name, ...stats }))
+                                    .sort((a, b) => b.revenue - a.revenue)
+                                    .slice(0, 5); // Start with top 5
+
+                                const list = document.getElementById('topProductsList');
+                                if (sortedProducts.length === 0) {
+                                    list.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--text-muted);">No sales data yet.</td></tr>';
+                                    return;
+                                }
+
+                                list.innerHTML = sortedProducts.map(p => `
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                        <td style="padding: 12px; font-weight: 500;">${p.name}</td>
+                                        <td style="padding: 12px; text-align: center;">${p.count}</td>
+                                        <td style="padding: 12px; text-align: right; color: #22c55e;">₹${p.revenue.toLocaleString()}</td>
+                                    </tr>
+                                `).join('');
+
+                            } catch (error) {
+                                console.error('Error loading top products:', error);
+                            }
+                        }
+
+                        async function loadRecentActivity() {
+                            try {
+                                // Fetch latest 5 bookings and 5 purchases to mix
+                                const { data: bookings } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .select('id, name, service_name, booking_date, created_at, service_price')
+                                    .order('created_at', { ascending: false })
+                                    .limit(5);
+
+                                const { data: purchases } = await window.supabaseAdminClient
+                                    .from('purchases')
+                                    .select('id, product_name, amount, created_at, customer_email') // Assuming customer_email exists
+                                    .order('created_at', { ascending: false })
+                                    .limit(5);
+
+                                // Combine and Sort
+                                const activity = [
+                                    ...(bookings || []).map(b => ({ type: 'booking', ...b, date: new Date(b.created_at) })),
+                                    ...(purchases || []).map(p => ({ type: 'purchase', ...p, date: new Date(p.created_at) }))
+                                ].sort((a, b) => b.date - a.date).slice(0, 10);
+
+                                const feed = document.getElementById('recentActivityFeed');
+                                if (activity.length === 0) {
+                                    feed.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">No recent activity.</div>';
+                                    return;
+                                }
+
+                                feed.innerHTML = activity.map(item => {
+                                    const timeAgo = getTimeAgo(item.date);
+                                    if (item.type === 'booking') {
+                                        return `
+                                            <div style="display: flex; gap: 15px; align-items: center; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                <div style="background: rgba(168, 85, 247, 0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #a855f7;">
+                                                    <i class="fas fa-calendar-alt"></i>
+                                                </div>
+                                                <div style="flex: 1;">
+                                                    <div style="font-size: 0.95em;"><strong>${escapeHtml(item.name)}</strong> booked <strong>${escapeHtml(item.service_name || 'Session')}</strong></div>
+                                                    <div style="font-size: 0.85em; color: var(--text-muted);">${timeAgo} • ₹${item.service_price}</div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    } else {
+                                        return `
+                                             <div style="display: flex; gap: 15px; align-items: center; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                <div style="background: rgba(34, 197, 94, 0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #22c55e;">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                </div>
+                                                <div style="flex: 1;">
+                                                    <div style="font-size: 0.95em;">New purchase of <strong>${escapeHtml(item.product_name)}</strong></div>
+                                                    <div style="font-size: 0.85em; color: var(--text-muted);">${timeAgo} • ₹${item.amount}</div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }
+                                }).join('');
+
+                            } catch (error) {
+                                console.error('Error loading activity:', error);
+                            }
+                        }
+
+                        function getTimeAgo(date) {
+                            const seconds = Math.floor((new Date() - date) / 1000);
+                            let interval = seconds / 31536000;
+                            if (interval > 1) return Math.floor(interval) + "y ago";
+                            interval = seconds / 2592000;
+                            if (interval > 1) return Math.floor(interval) + "mo ago";
+                            interval = seconds / 86400;
+                            if (interval > 1) return Math.floor(interval) + "d ago";
+                            interval = seconds / 3600;
+                            if (interval > 1) return Math.floor(interval) + "h ago";
+                            interval = seconds / 60;
+                            if (interval > 1) return Math.floor(interval) + "m ago";
+                            return Math.floor(seconds) + "s ago";
                         }
 
                         async function updateDashboardCharts() {
@@ -2397,113 +2594,137 @@ QuantMentor
                             cutoffDate.setDate(cutoffDate.getDate() - range);
 
                             try {
-                                // Fetch daily data for the range
-                                // FIX: Use created_at for ALL revenue types to show "Sales/Bookings made" in the selected timeframe.
-                                // This ensures that if a user books today for next week, the revenue shows up TODAY (when the sale occurred).
-                                const { data: bookings, error: bookingsError } = await window.supabaseAdminClient
+                                // Fetch daily data limited to range
+                                const { data: bookings } = await window.supabaseAdminClient
                                     .from('bookings')
-                                    .select('service_price, created_at, service_name') // Fetch created_at
-                                    .gte('created_at', cutoffDate.toISOString()) // Filter by created_at
+                                    .select('service_price, created_at, service_name')
+                                    .gte('created_at', cutoffDate.toISOString())
                                     .in('status', ['confirmed', 'completed', 'pending', 'upcoming']);
 
-                                if (bookingsError) console.error('Error fetching chart bookings:', bookingsError);
-
-                                const { data: purchases, error: purchasesError } = await window.supabaseAdminClient
+                                const { data: purchases } = await window.supabaseAdminClient
                                     .from('purchases')
                                     .select('amount, created_at, product_name')
                                     .gte('created_at', cutoffDate.toISOString());
 
-                                if (purchasesError) console.error('Error fetching chart purchases:', purchasesError);
-
-                                console.log('📈 Chart Data Source:', {
-                                    bookingsCount: bookings?.length,
-                                    purchasesCount: purchases?.length,
-                                    cutoff: cutoffDate.toISOString().split('T')[0]
-                                });
-
-                                // Prepare data for Line Chart (Revenue over time)
+                                // Daily Data Aggregation key: YYYY-MM-DD
                                 const dailyData = {};
+                                const distribution = {};
+
+                                // Initialize all dates in range with 0
                                 for (let i = 0; i <= range; i++) {
                                     const d = new Date();
                                     d.setDate(d.getDate() - i);
-                                    // Use local YYYY-MM-DD to match booking_date format
-                                    const dateKey = d.toLocaleDateString('en-CA'); // YYYY-MM-DD format
-                                    dailyData[dateKey] = 0;
+                                    dailyData[d.toLocaleDateString('en-CA')] = 0;
                                 }
 
-                                (bookings || []).forEach(b => {
-                                    const bDate = new Date(b.created_at); // Use created_at
-                                    const dateKey = bDate.toLocaleDateString('en-CA');
-                                    // If the date falls within our generated range keys, add it
-                                    if (dailyData[dateKey] !== undefined) {
-                                        dailyData[dateKey] += (b.service_price || 0);
-                                    }
-                                });
+                                const aggregate = (items, amountField, nameField) => {
+                                    (items || []).forEach(item => {
+                                        // Revenue Line
+                                        const d = new Date(item.created_at);
+                                        const k = d.toLocaleDateString('en-CA');
+                                        if (dailyData[k] !== undefined) dailyData[k] += (item[amountField] || 0);
 
-                                (purchases || []).forEach(p => {
-                                    // Purchases are timestampz, convert to YYYY-MM-DD local
-                                    const pDate = new Date(p.created_at);
-                                    const dateKey = pDate.toLocaleDateString('en-CA');
-                                    if (dailyData[dateKey] !== undefined) dailyData[dateKey] += (p.amount || 0);
-                                });
+                                        // Distribution Pie
+                                        const name = item[nameField] || 'Other';
+                                        distribution[name] = (distribution[name] || 0) + 1;
+                                    });
+                                };
+
+                                aggregate(bookings, 'service_price', 'service_name');
+                                aggregate(purchases, 'amount', 'product_name');
 
                                 const labels = Object.keys(dailyData).sort();
-                                const values = labels.map(l => Math.round(dailyData[l])); // Round chart values
+                                const values = labels.map(l => Math.round(dailyData[l]));
 
-                                console.log('📊 Chart Visualization Data:', { labels, values, dailyData });
-
-                                // Destroy old chart if exists
+                                // --- CHART 1: REVENUE ---
                                 if (revenueChart) revenueChart.destroy();
-
                                 const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+
+                                // Create gradient
+                                let gradient = ctxRevenue.createLinearGradient(0, 0, 0, 400);
+                                gradient.addColorStop(0, 'rgba(99, 102, 241, 0.5)');
+                                gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
                                 revenueChart = new Chart(ctxRevenue, {
                                     type: 'line',
                                     data: {
                                         labels: labels.map(l => {
                                             const [y, m, d] = l.split('-');
-                                            return `${d}/${m}`; // DD/MM
+                                            return `${d}/${m}`;
                                         }),
                                         datasets: [{
-                                            label: 'Daily Revenue (₹)',
+                                            label: 'Revenue (₹)',
                                             data: values,
                                             borderColor: '#6366f1',
-                                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                                            fill: true,
-                                            tension: 0.4
+                                            backgroundColor: gradient,
+                                            borderWidth: 2,
+                                            tension: 0.4,
+                                            pointRadius: 0,
+                                            pointHoverRadius: 6,
+                                            fill: true
                                         }]
                                     },
                                     options: {
                                         responsive: true,
                                         maintainAspectRatio: false,
-                                        plugins: { legend: { display: false } },
+                                        plugins: {
+                                            legend: { display: false },
+                                            tooltip: {
+                                                mode: 'index',
+                                                intersect: false,
+                                                backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                                                titleColor: '#e2e8f0',
+                                                bodyColor: '#e2e8f0',
+                                                borderColor: 'rgba(255,255,255,0.1)',
+                                                borderWidth: 1
+                                            }
+                                        },
+                                        interaction: {
+                                            mode: 'nearest',
+                                            axis: 'x',
+                                            intersect: false
+                                        },
                                         scales: {
-                                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-                                            x: { grid: { display: false } }
+                                            y: {
+                                                beginAtZero: true,
+                                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                                ticks: { color: '#94a3b8' }
+                                            },
+                                            x: {
+                                                grid: { display: false },
+                                                ticks: { color: '#94a3b8' }
+                                            }
                                         }
                                     }
                                 });
 
-                                // Distribution Chart (Pie)
-                                const distribution = {};
-                                (bookings || []).forEach(b => {
-                                    const name = b.service_name || 'Mentorship';
-                                    distribution[name] = (distribution[name] || 0) + 1;
-                                });
-                                (purchases || []).forEach(p => {
-                                    const name = p.product_name || 'Resources';
-                                    distribution[name] = (distribution[name] || 0) + 1;
-                                });
-
+                                // --- CHART 2: DISTRIBUTION ---
                                 if (distributionChart) distributionChart.destroy();
                                 const ctxDist = document.getElementById('distributionChart').getContext('2d');
+
+                                // Organize Distribution Data (Top 5 + Others)
+                                const sortedDist = Object.entries(distribution).sort((a, b) => b[1] - a[1]);
+                                let distLabels = [], distValues = [];
+
+                                if (sortedDist.length > 5) {
+                                    distLabels = sortedDist.slice(0, 4).map(x => x[0]);
+                                    distValues = sortedDist.slice(0, 4).map(x => x[1]);
+                                    const otherSum = sortedDist.slice(4).reduce((sum, x) => sum + x[1], 0);
+                                    distLabels.push('Others');
+                                    distValues.push(otherSum);
+                                } else {
+                                    distLabels = sortedDist.map(x => x[0]);
+                                    distValues = sortedDist.map(x => x[1]);
+                                }
+
                                 distributionChart = new Chart(ctxDist, {
                                     type: 'doughnut',
                                     data: {
-                                        labels: Object.keys(distribution),
+                                        labels: distLabels,
                                         datasets: [{
-                                            data: Object.values(distribution),
+                                            data: distValues,
                                             backgroundColor: [
-                                                '#6366f1', '#a855f7', '#ec4899', '#f43f5e', '#ef4444', '#f59e0b'
+                                                '#6366f1', '#a855f7', '#ec4899', '#f59e0b', '#10b981', '#64748b'
                                             ],
                                             borderWidth: 0
                                         }]
@@ -2512,7 +2733,13 @@ QuantMentor
                                         responsive: true,
                                         maintainAspectRatio: false,
                                         plugins: {
-                                            legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 12 } }
+                                            legend: {
+                                                position: 'right',
+                                                labels: { color: '#94a3b8', boxWidth: 12, padding: 10, font: { size: 11 } }
+                                            }
+                                        },
+                                        layout: {
+                                            padding: { left: 0, right: 0, top: 0, bottom: 0 }
                                         }
                                     }
                                 });
