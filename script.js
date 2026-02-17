@@ -2005,6 +2005,16 @@ if (bookingForm) {
                         hour12: true
                     });
 
+                    // --- NEW: Block Lunch Break (12:00 PM - 1:30 PM IST) ---
+                    const slotHour = currentSlot.getHours();
+                    const slotMinute = currentSlot.getMinutes();
+                    if (slotHour === 12 || (slotHour === 13 && slotMinute < 30)) {
+                        // Skip 12:00, 12:30, 13:00. Resume at 13:30.
+                        currentSlot.setMinutes(currentSlot.getMinutes() + 30);
+                        continue;
+                    }
+                    // -------------------------------------------------------
+
                     // Format timezone name (e.g., IST, GMT, EST)
                     const tzName = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short', timeZone: userTimeZone }).formatToParts(currentSlot).find(p => p.type === 'timeZoneName')?.value || '';
 
