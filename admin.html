@@ -3972,6 +3972,190 @@ QuantMentor
                         setTimeout(checkAndSendReminders, 5000); // 5s delay on start
                         setInterval(checkAndSendReminders, 60 * 1000); // Every 60 seconds
 
+                        // ====================================================
+                        // CLIENT MANAGEMENT & EXPORTS
+                        // ====================================================
+
+                        async function loadClients() {
+                            const list = document.getElementById('clientListBody');
+                            if (!list) return;
+
+                            try {
+                                // Fetch all bookings and purchases
+                                const { data: bookings } = await window.supabaseAdminClient
+                                    .from('bookings')
+                                    .select('email, name, service_price, created_at, status');
+
+                                const { data: purchases } = await window.supabaseAdminClient
+                                    .from('purchases')
+                                    .select('customer_email, amount, created_at');
+
+                                const clients = {};
+
+                                // Process Bookings
+                                (bookings || []).forEach(b => {
+                                    const email = b.email ? b.email.toLowerCase().trim() : 'unknown';
+                                    if (email === 'unknown') return;
+
+                                    if (!clients[email]) clients[email] = {
+                                        email,
+                                        name: b.name || 'Unknown',
+                                        type: 'Student',
+                                        orders: 0,
+                                        spend: 0,
+                                        lastActive: new Date(0)
+                                    };
+
+                                    clients[email].orders++;
+                                    // Only count confirmed/completed spend
+                                    if (['confirmed', 'completed'].includes(b.status)) {
+                                        clients[email].spend += (b.service_price || 0);
+                                    }
+
+                                    const date = new Date(b.created_at);
+                                    if (date > clients[email].lastActive) clients[email].lastActive = date;
+                                });
+
+                                // Process Purchases (Merge)
+                                (purchases || []).forEach(p => {
+                                    const email = p.customer_email ? p.customer_email.toLowerCase().trim() : 'unknown';
+                                    if (email === 'unknown') return;
+
+                                    if (!clients[email]) {
+                                        clients[email] = {
+                                            email,
+                                            name: 'Buyer', // Purchases might not have names
+                                            type: 'Buyer',
+                                            orders: 0,
+                                            spend: 0,
+                                            lastActive: new Date(0)
+                                        };
+                                    } else {
+                                        clients[email].type = 'Both'; // Existing client bought something
+                                    }
+
+                                    clients[email].orders++;
+                                    clients[email].spend += (p.amount || 0);
+
+                                    const date = new Date(p.created_at);
+                                    if (date > clients[email].lastActive) clients[email].lastActive = date;
+                                });
+
+                                // Convert to Array, Sort by Spend
+                                const clientArray = Object.values(clients).sort((a, b) => b.spend - a.spend);
+
+                                if (clientArray.length === 0) {
+                                    list.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No clients found.</td></tr>';
+                                    return;
+                                }
+
+                                list.innerHTML = clientArray.slice(0, 50).map(c => `
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                        <td style="padding: 12px;">
+                                            <div style="font-weight: 500;">${c.name}</div>
+                                            <div style="font-size: 0.85em; color: var(--text-muted);">${c.email}</div>
+                                        </td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            <span style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 12px; font-size: 0.8em;">
+                                                ${c.type}
+                                            </span>
+                                        </td>
+                                        <td style="padding: 12px; text-align: center;">${c.orders}</td>
+                                        <td style="padding: 12px; text-align: right; font-weight: 600;">₹${c.spend.toLocaleString()}</td>
+                                        <td style="padding: 12px; text-align: center; color: var(--text-muted); font-size: 0.9em;">
+                                            ${c.lastActive.toLocaleDateString()}
+                                        </td>
+                                    </tr>
+                                `).join('');
+
+                                // Store for export
+                                window.allClientsData = clientArray;
+
+                            } catch (e) {
+                                console.error('Error loading clients:', e);
+                                list.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">Error: ${e.message}</td></tr>`;
+                            }
+                        }
+
+                        // Export Helper
+                        function exportToCSV(data, filename) {
+                            if (!data || !data.length) {
+                                alert('No data to export');
+                                return;
+                            }
+
+                            const separator = ',';
+                            const keys = Object.keys(data[0]);
+                            const csvContent =
+                                keys.join(separator) +
+                                '\\n' +
+                                data.map(row => {
+                                    return keys.map(k => {
+                                        let cell = row[k] === null || row[k] === undefined ? '' : row[k];
+                                        cell = cell instanceof Date ? cell.toISOString() : cell.toString();
+                                        cell = cell.replace(/"/g, '""');
+                                        if (cell.search(/("|,|\\n)/g) >= 0) {
+                                            cell = `"${cell}"`;
+                                        }
+                                        return cell;
+                                    }).join(separator);
+                                }).join('\\n');
+
+                            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                            const link = document.createElement('a');
+                            if (link.download !== undefined) {
+                                const url = URL.createObjectURL(blob);
+                                link.setAttribute('href', url);
+                                link.setAttribute('download', filename);
+                                link.style.visibility = 'hidden';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }
+                        }
+
+                        async function downloadClients() {
+                            if (!window.allClientsData) {
+                                await loadClients();
+                            }
+                            // Format for CSV
+                            const data = window.allClientsData.map(c => ({
+                                Name: c.name,
+                                Email: c.email,
+                                Type: c.type,
+                                TotalOrders: c.orders,
+                                TotalSpend: c.spend,
+                                LastActive: c.lastActive.toISOString()
+                            }));
+                            exportToCSV(data, `clients_export_${new Date().toISOString().slice(0, 10)}.csv`);
+                        }
+
+                        async function downloadBookings() {
+                            const { data, error } = await window.supabaseAdminClient
+                                .from('bookings')
+                                .select('*')
+                                .order('created_at', { ascending: false });
+
+                            if (error) { alert('Error fetching bookings'); return; }
+                            exportToCSV(data, `bookings_export_${new Date().toISOString().slice(0, 10)}.csv`);
+                        }
+
+                        async function downloadPurchases() {
+                            const { data, error } = await window.supabaseAdminClient
+                                .from('purchases')
+                                .select('*')
+                                .order('created_at', { ascending: false });
+
+                            if (error) { alert('Error fetching purchases'); return; }
+                            exportToCSV(data, `purchases_export_${new Date().toISOString().slice(0, 10)}.csv`);
+                        }
+
+                        // Make global
+                        window.loadClients = loadClients;
+                        window.downloadClients = downloadClients;
+                        window.downloadBookings = downloadBookings;
+                        window.downloadPurchases = downloadPurchases;
+
                     </script>
 </body>
 
