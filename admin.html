@@ -42,7 +42,13 @@
         (function () {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'light') {
-                document.body.classList.add('light-mode');
+                const applyLightMode = () => {
+                    if (document.body) document.body.classList.add('light-mode');
+                };
+                applyLightMode();
+                if (!document.body) {
+                    document.addEventListener('DOMContentLoaded', applyLightMode, { once: true });
+                }
             }
         })();
     </script>
@@ -104,6 +110,7 @@
             }
         }
     </script>
+    <style>
     :root {
     /* Backgrounds - Pure Black Foundation */
     --bg-primary: #000000;
@@ -166,6 +173,11 @@
 
     /* Shadows */
     --shadow-glow: 0 0 20px rgba(0, 0, 0, 0.1);
+
+    /* Legacy variables for compatibility */
+    --surface: var(--bg-card);
+    --text: var(--text-primary);
+    --border: var(--border-subtle);
     }
 
     body.light-mode h1 {
@@ -203,6 +215,7 @@
     /* Sidebar Styles */
     .admin-sidebar {
     width: var(--sidebar-width);
+    box-sizing: border-box;
     background: var(--bg-secondary);
     border-right: 1px solid var(--border-subtle);
     position: fixed;
@@ -294,7 +307,7 @@
     flex: 1;
     margin-left: var(--sidebar-width);
     padding: 40px;
-    width: calc(100% - var(--sidebar-width));
+    box-sizing: border-box;
     }
 
     @media (max-width: 900px) {
@@ -876,7 +889,7 @@
                         </h2>
                         <div class="date-filter">
                             <select id="revenueRange" onchange="updateDashboardStats(); updateDashboardCharts();"
-                                style="background: var(--surface); border: 1px solid var(--border); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer;">
+                                style="background: var(--surface); border: 1px solid var(--border); color: var(--text-primary); padding: 8px 16px; border-radius: 8px; cursor: pointer;">
                                 <option value="7">Last 7 Days</option>
                                 <option value="30" selected>Last 30 Days</option>
                                 <option value="90">Last 3 Months</option>
@@ -895,7 +908,7 @@
                                 style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
                                 <div>
                                     <p style="color: var(--text-muted); font-size: 0.9em; margin: 0;">Total Revenue</p>
-                                    <h3 id="totalRevenue" style="font-size: 1.8em; margin: 5px 0; color: white;">₹0</h3>
+                                    <h3 id="totalRevenue" style="font-size: 1.8em; margin: 5px 0; color: var(--text-primary);">₹0</h3>
                                 </div>
                                 <div style="background: rgba(99, 102, 241, 0.1); padding: 10px; border-radius: 8px;">
                                     <i class="fas fa-rupee-sign" style="color: #6366f1; font-size: 1.2em;"></i>
@@ -914,7 +927,7 @@
                                 <div>
                                     <p style="color: var(--text-muted); font-size: 0.9em; margin: 0;">Active Bookings
                                     </p>
-                                    <h3 id="activeBookings" style="font-size: 1.8em; margin: 5px 0; color: white;">0
+                                    <h3 id="activeBookings" style="font-size: 1.8em; margin: 5px 0; color: var(--text-primary);">0
                                     </h3>
                                 </div>
                                 <div style="background: rgba(168, 85, 247, 0.1); padding: 10px; border-radius: 8px;">
@@ -933,7 +946,7 @@
                                 style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
                                 <div>
                                     <p style="color: var(--text-muted); font-size: 0.9em; margin: 0;">Resource Sales</p>
-                                    <h3 id="totalSales" style="font-size: 1.8em; margin: 5px 0; color: white;">0</h3>
+                                    <h3 id="totalSales" style="font-size: 1.8em; margin: 5px 0; color: var(--text-primary);">0</h3>
                                 </div>
                                 <div style="background: rgba(34, 197, 94, 0.1); padding: 10px; border-radius: 8px;">
                                     <i class="fas fa-download" style="color: #22c55e; font-size: 1.2em;"></i>
@@ -952,7 +965,7 @@
                                 <div>
                                     <p style="color: var(--text-muted); font-size: 0.9em; margin: 0;">Avg. Order Value
                                     </p>
-                                    <h3 id="avgOrderValue" style="font-size: 1.8em; margin: 5px 0; color: white;">₹0
+                                    <h3 id="avgOrderValue" style="font-size: 1.8em; margin: 5px 0; color: var(--text-primary);">₹0
                                     </h3>
                                 </div>
                                 <div style="background: rgba(245, 158, 11, 0.1); padding: 10px; border-radius: 8px;">

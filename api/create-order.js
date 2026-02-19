@@ -3,6 +3,12 @@
 // Body: { amount (major units), currency, notes }
 // Returns: { order_id, amount, currency }
 
+const ZERO_DECIMAL_CURRENCIES = new Set(['JPY', 'KRW', 'VND']);
+
+function getSubunitMultiplier(currencyCode = 'INR') {
+    return ZERO_DECIMAL_CURRENCIES.has(String(currencyCode).toUpperCase()) ? 1 : 100;
+}
+
 export default async function handler(req, res) {
     // CORS headers for frontend calls
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -33,7 +39,7 @@ export default async function handler(req, res) {
         }
 
         // Convert amount to smallest currency unit (paise/cents)
-        const multiplier = currency.toUpperCase() === 'JPY' ? 1 : 100;
+        const multiplier = getSubunitMultiplier(currency);
         const amountInSubunits = Math.round(amount * multiplier);
 
         // Create order via Razorpay Orders API
