@@ -96,26 +96,52 @@
     </script>
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #a855f7;
-            --background: #0a0a0f;
-            --surface: #13131f;
-            --text: #e2e8f0;
-            --text-muted: #94a3b8;
-            --border: rgba(255, 255, 255, 0.1);
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
+            /* Backgrounds - Pure Black Foundation */
+            --bg-primary: #000000;
+            --bg-secondary: #050505;
+            --bg-tertiary: #0a0a0a;
+            --bg-card: #111111;
+            --bg-glass: rgba(255, 255, 255, 0.03);
+
+            /* Text Colors */
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.4);
+
+            /* Accents */
+            --accent-primary: #f43f5e;
+            --accent-secondary: #3b82f6;
+            --accent-gradient: linear-gradient(135deg, #f43f5e 0%, #3b82f6 100%);
+
+            /* Borders */
+            --border-subtle: rgba(255, 255, 255, 0.05);
+            --border-light: rgba(255, 255, 255, 0.1);
+            --border-rim: rgba(255, 255, 255, 0.15);
+
+            /* Radius */
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-pill: 100px;
+
+            /* Shadows */
+            --shadow-glow: 0 0 40px rgba(244, 63, 94, 0.1);
+
+            /* Legacy variables for compatibility */
+            --primary: var(--accent-primary);
+            --secondary: var(--accent-secondary);
+            --surface: var(--bg-card);
+            --text: var(--text-primary);
+            --border: var(--border-subtle);
         }
 
         body {
             font-family: 'Space Grotesk', sans-serif;
-            background-color: var(--background);
-            color: var(--text);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
             margin: 0;
             padding: 0;
             min-height: 100vh;
+            letter-spacing: -0.01em;
         }
 
         .container {
@@ -133,13 +159,15 @@
         }
 
         .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 30px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 40px;
             margin-bottom: 30px;
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
         .card::before {
@@ -168,42 +196,56 @@
         textarea,
         select {
             width: 100%;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border);
-            border-radius: 8px;
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
             color: white;
             font-family: inherit;
             box-sizing: border-box;
+            transition: all 0.3s ease;
         }
 
         input:focus,
         textarea:focus {
             outline: none;
-            border-color: var(--primary);
+            border-color: var(--accent-primary);
+            background: var(--bg-card);
         }
 
         button {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: #ffffff;
             border: none;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
+            color: #000000;
+            padding: 14px 32px;
+            border-radius: var(--radius-pill);
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             width: 100%;
+            font-size: 0.9375rem;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        button:hover:not(:disabled) {
+            transform: scale(1.02);
+            background: #f8fafc;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.15);
+        }
+
+        button.btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border: 1px solid var(--border-light);
+        }
+
+        button.btn-secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         button:disabled {
-            opacity: 0.7;
+            opacity: 0.4;
             cursor: not-allowed;
-            transform: none;
         }
 
         /* Dashboard Styles */
@@ -215,14 +257,20 @@
         }
 
         .stat-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
             padding: 24px;
             display: flex;
             flex-direction: column;
             gap: 8px;
             position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--border-light);
         }
 
         .stat-card .icon {
@@ -230,26 +278,22 @@
             top: 20px;
             right: 20px;
             font-size: 1.5rem;
-            opacity: 0.2;
+            opacity: 0.1;
+            color: var(--accent-primary);
         }
 
         .stat-card .label {
             color: var(--text-muted);
-            font-size: 0.9rem;
-            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
         }
 
         .stat-card .value {
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 700;
-            color: white;
-        }
-
-        .stat-card .trend {
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            color: var(--text-primary);
         }
 
         .trend-up {
@@ -274,14 +318,15 @@
         }
 
         .chart-container {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 24px;
             position: relative;
             height: 350px;
             width: 100%;
             overflow: hidden;
+            backdrop-filter: blur(8px);
         }
 
         .chart-header {
@@ -305,6 +350,39 @@
 
         .product-list {
             margin-top: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+        }
+
+        th {
+            text-align: left;
+            padding: 16px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-primary);
         }
 
         .product-item {
@@ -337,11 +415,11 @@
 
         /* Reschedule Request Styles */
         .reschedule-item {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            margin-bottom: 20px;
         }
 
         .reschedule-item:last-child {
@@ -363,9 +441,10 @@
         }
 
         .date-box {
-            background: rgba(0, 0, 0, 0.3);
+            background: var(--bg-secondary);
             padding: 12px;
             border-radius: 8px;
+            border: 1px solid var(--border-subtle);
         }
 
         .date-box.current {

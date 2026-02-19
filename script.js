@@ -1167,7 +1167,7 @@ async function updateServicesSection(sessions) {
                 </ul>
             </div>
             <div class="service-footer">
-                <a href="#contact" class="btn btn-service" data-service="${session.name}">
+                <a href="#contact" class="btn btn-product btn-full btn-service" data-service="${session.name}">
                     ${session.price === 0 ? '🆓 Book Free Session' : 'Book Session'}
                 </a>
             </div>

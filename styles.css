@@ -80,53 +80,49 @@
 body.light-mode {
     /* Colors - Light Theme */
     --bg-primary: #f8fafc;
-    /* Slate-50 */
     --bg-secondary: #ffffff;
-    /* White */
     --bg-tertiary: #f1f5f9;
-    /* Slate-100 */
     --bg-card: rgba(255, 255, 255, 0.9);
     --bg-glass: rgba(0, 0, 0, 0.05);
 
     /* Text Colors */
     --text-primary: #0f172a;
-    /* Slate-900 */
     --text-secondary: #475569;
-    /* Slate-600 */
     --text-muted: #64748b;
-    /* Slate-500 */
 
     /* Borders */
     --border-subtle: rgba(0, 0, 0, 0.08);
     --border-light: rgba(0, 0, 0, 0.12);
+    --border-rim: rgba(0, 0, 0, 0.15);
 
     /* Shadows */
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
     --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
-    --shadow-glow: 0 0 20px rgba(45, 212, 191, 0.15);
-    /* Subtler glow */
+    --shadow-glow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .hero-headline,
+body.light-mode .section-headline {
+    color: var(--text-primary);
+}
+
+body.light-mode .btn-primary,
+body.light-mode .btn-product {
+    background: var(--text-primary);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .btn-primary:hover,
+body.light-mode .btn-product:hover {
+    background: #000000;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 body.light-mode .navbar {
-    background-color: rgba(255, 255, 255, 0.9);
-    border-bottom: 1px solid var(--border-light);
-}
-
-body.light-mode .glass-card,
-body.light-mode .modal-content {
-    background: #ffffff;
-    box-shadow: var(--shadow-lg);
-}
-
-body.light-mode .hero-badge {
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
-    border: 1px solid var(--border-light);
-}
-
-body.light-mode .gradient-orb {
-    opacity: 0.15;
+    background: rgba(255, 255, 255, 0.8);
+    border-bottom: 1px solid var(--border-rim);
 }
 
 /* Product Page Specifics in Light Mode */
@@ -231,7 +227,7 @@ h6 {
     font-weight: 700;
     line-height: 1.1;
     letter-spacing: -0.02em;
-    color: #ffffff;
+    color: inherit;
     margin-bottom: 24px;
 }
 
@@ -240,7 +236,8 @@ h6 {
     font-weight: 700;
     line-height: 1.15;
     letter-spacing: -0.02em;
-    color: #ffffff;
+    color: inherit;
+    /* Allow cascading theme color */
     margin-bottom: 24px;
 }
 
@@ -249,7 +246,9 @@ h6 {
     font-weight: 400;
     line-height: 1.6;
     color: var(--text-secondary);
-    max-width: 520px;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
 }
 
 .section-label {
@@ -776,8 +775,8 @@ h6 {
 
 .services-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 32px;
 }
 
 .service-card,
@@ -793,6 +792,8 @@ h6 {
     overflow: hidden;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
 }
 
 .service-card:hover,
@@ -837,7 +838,8 @@ h6 {
 }
 
 .service-header {
-    margin-bottom: 16px;
+    margin-bottom: 24px;
+    padding: 32px 32px 0;
 }
 
 .service-header h3 {
@@ -857,8 +859,13 @@ h6 {
     line-height: 1.6;
 }
 
+.service-content {
+    padding: 0 32px;
+    flex-grow: 1;
+}
+
 .service-features {
-    margin-bottom: 24px;
+    margin-bottom: 0;
 }
 
 .service-features li {
@@ -879,8 +886,8 @@ h6 {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-top: 20px;
-    border-top: 1px solid var(--border-subtle);
+    padding: 20px 32px 32px;
+    margin-top: auto;
 }
 
 .service-price {
@@ -940,8 +947,8 @@ h6 {
 
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 32px;
 }
 
 .product-card {
