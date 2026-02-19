@@ -812,9 +812,8 @@ h6 {
 
 .popular-badge {
     position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 16px;
+    right: 32px;
     padding: 6px 16px;
     background: var(--accent-gradient);
     border-radius: 100px;
@@ -822,6 +821,7 @@ h6 {
     font-weight: 600;
     color: white;
     white-space: nowrap;
+    z-index: 10;
 }
 
 .service-icon {

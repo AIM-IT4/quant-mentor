@@ -134,6 +134,43 @@
             --border: var(--border-subtle);
         }
 
+        body.light-mode {
+            /* Colors - Light Theme */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --bg-glass: rgba(0, 0, 0, 0.05);
+
+            /* Text Colors */
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+
+            /* Borders */
+            --border-subtle: rgba(0, 0, 0, 0.08);
+            --border-light: rgba(0, 0, 0, 0.12);
+            --border-rim: rgba(0, 0, 0, 0.15);
+
+            /* Shadows */
+            --shadow-glow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode h1 {
+            color: var(--text-primary);
+            background: none;
+            -webkit-text-fill-color: initial;
+        }
+
+        body.light-mode button:not(.btn-secondary) {
+            background: var(--text-primary);
+            color: #ffffff;
+        }
+
+        body.light-mode button:not(.btn-secondary):hover {
+            background: #000000;
+        }
+
         body {
             font-family: 'Space Grotesk', sans-serif;
             background-color: var(--bg-primary);
@@ -144,8 +181,36 @@
             letter-spacing: -0.01em;
         }
 
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .theme-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+            font-size: 1.1rem;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(15deg);
+        }
+
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 40px 20px;
         }
@@ -521,12 +586,18 @@
     </div>
 
     <div class="container" id="adminContainer" style="display: none;">
-        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+        <header class="header-flex">
             <div>
                 <h1>QuantMentor Admin</h1>
                 <p style="color: var(--text-muted); margin: 0;">Business Performance Dashboard</p>
             </div>
-            <a href="index.html" style="color: var(--primary); text-decoration: none;">View Site →</a>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="index.html" style="color: var(--accent-primary); text-decoration: none; font-weight: 500;">View
+                    Site →</a>
+            </div>
         </header>
 
         <!-- DASHBOARD SECTION -->
@@ -1331,6 +1402,30 @@ Brief Q&A"></textarea>
                         // Initialize when DOM is loaded
                         document.addEventListener('DOMContentLoaded', async function () {
                             console.log('Admin page DOM loaded');
+
+                            // Theme Toggle Logic
+                            const themeToggle = document.getElementById('themeToggle');
+                            const body = document.body;
+                            const icon = themeToggle.querySelector('i');
+
+                            // Check for saved theme
+                            const savedTheme = localStorage.getItem('theme') || 'dark';
+                            if (savedTheme === 'light') {
+                                body.classList.add('light-mode');
+                                icon.classList.replace('fa-moon', 'fa-sun');
+                            }
+
+                            themeToggle.addEventListener('click', () => {
+                                body.classList.toggle('light-mode');
+                                const isLight = body.classList.contains('light-mode');
+                                localStorage.setItem('theme', isLight ? 'light' : 'dark');
+
+                                if (isLight) {
+                                    icon.classList.replace('fa-moon', 'fa-sun');
+                                } else {
+                                    icon.classList.replace('fa-sun', 'fa-moon');
+                                }
+                            });
 
                             // Initialize Quill
                             try {
