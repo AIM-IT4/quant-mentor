@@ -955,39 +955,41 @@
             }
         }
 
-        // Populate Voice Select
+        // ── Edge TTS Neural Voice List (FREE, Natural Sounding) ──
+        // Microsoft's neural voices - sound human, not robotic
+        const EDGE_TTS_VOICES = [
+            { id: 'en-US-GuyNeural', name: '🎙️ Guy (Male, US) - Natural', gender: 'Male' },
+            { id: 'en-US-JennyNeural', name: '🎙️ Jenny (Female, US) - Natural', gender: 'Female' },
+            { id: 'en-US-AriaNeural', name: '🎙️ Aria (Female, US) - Warm', gender: 'Female' },
+            { id: 'en-US-DavisNeural', name: '🎙️ Davis (Male, US) - Professional', gender: 'Male' },
+            { id: 'en-GB-RyanNeural', name: '🎙️ Ryan (Male, UK) - British', gender: 'Male' },
+            { id: 'en-GB-SoniaNeural', name: '🎙️ Sonia (Female, UK) - British', gender: 'Female' },
+            { id: 'en-AU-WilliamNeural', name: '🎙️ William (Male, AU) - Australian', gender: 'Male' },
+            { id: 'en-IN-NeerjaNeural', name: '🎙️ Neerja (Female, IN) - Indian', gender: 'Female' }
+        ];
+
         function populateVoiceList() {
-            const voices = synth.getVoices();
-            console.log("Loaded Voices:", voices.length);
             const voiceSelect = document.getElementById('voice-select');
-            voiceSelect.innerHTML = ''; // Start fresh
+            voiceSelect.innerHTML = '';
 
-            // Filter for English voices to keep it clean
-            const englishVoices = voices.filter(v => v.lang.startsWith('en'));
-
-            englishVoices.forEach((voice) => {
+            EDGE_TTS_VOICES.forEach(voice => {
                 const option = document.createElement('option');
-                option.textContent = `${voice.name} (${voice.lang})`;
-                option.setAttribute('data-name', voice.name);
+                option.value = voice.id;
+                option.textContent = voice.name;
                 voiceSelect.appendChild(option);
             });
 
-            // Try to select a good default if not Auto
-            // const defaultVoice = englishVoices.find(v => v.name.includes("Google US")) || englishVoices[0];
-            // if(defaultVoice) voiceSelect.value = defaultVoice.name; 
-        }
+            // Default to Guy Neural (most natural male voice)
+            voiceSelect.value = 'en-US-GuyNeural';
+            console.log('✅ Edge TTS voices loaded:', EDGE_TTS_VOICES.length);        }
 
-        if (speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = populateVoiceList;
-        }
-        // Init immediately if available
+        // Load voices on page load
         populateVoiceList();
 
+        // Edge TTS uses voice-select value directly, no need for this function
+        // Kept for compatibility but returns null (Edge TTS reads from select directly)
         function getSelectedVoice() {
-            const voiceSelect = document.getElementById('voice-select');
-            if (voiceSelect.selectedIndex < 0) return null;
-            const selectedName = voiceSelect.options[voiceSelect.selectedIndex].getAttribute('data-name');
-            return synth.getVoices().find(v => v.name === selectedName);
+            return null;
         }
 
         // Helper to split text into chunks for API stability
@@ -1022,35 +1024,136 @@
             });
         }
 
-        function speakText(text) {
+        // ── Edge TTS (Microsoft Neural Voices - FREE & Natural) ──
+        // Uses Microsoft Edge's free TTS API - no API key needed, unlimited usage
+        // Voices: GuyNeural, JennyNeural, AriaNeural, DavisNeural, etc.
+        
+        async function speakText(text) {
             isSpeaking = true;
-            console.log('Speaking (Local Only)...');
+            console.log('🔊 Speaking with Edge TTS...');
 
+            // Stop any current audio
             if (synth.speaking) { synth.cancel(); }
             if (currentPuterAudio) { currentPuterAudio.pause(); currentPuterAudio = null; }
 
-            const chunks = splitTextIntoChunks(text);
-            let index = 0;
-            const voiceToUse = getSelectedVoice() || synth.getVoices().find(v => v.lang.startsWith('en'));
+            // Clean text for speech (remove markdown, emojis)
+            const cleanText = text
+                .replace(/\*\*/g, '')
+                .replace(/\*/g, '')
+                .replace(/#[#]?/g, '')
+                .replace(/[\u{1F600}-\u{1F6FF}]/gu, '')
+                .replace(/\n/g, '.')
+                .trim();
 
-            function playNextChunk() {
-                if (index >= chunks.length) {
-                    isSpeaking = false;
-                    isAIProcessing = false;
-                    if (autoVoiceMode && interviewActive) {
-                        try { recognition.start(); document.getElementById('mic-btn').classList.add('listening'); } catch (e) { }
-                    }
-                    return;
+            if (!cleanText) {
+                isSpeaking = false;
+                isAIProcessing = false;
+                return;
+            }
+
+            try {
+                // Get selected voice from dropdown
+                const voiceSelect = document.getElementById('voice-select');
+                let selectedVoice = 'en-US-GuyNeural'; // Default natural male voice
+                
+                if (voiceSelect && voiceSelect.value) {
+                    selectedVoice = voiceSelect.value;
                 }
 
-                const utterance = new SpeechSynthesisUtterance(chunks[index]);
-                if (voiceToUse) utterance.voice = voiceToUse;
-                utterance.rate = 1.0;
-                utterance.onend = () => { index++; playNextChunk(); };
-                utterance.onerror = () => { index++; playNextChunk(); };
-                synth.speak(utterance);
+                // Use Edge TTS API (free, no auth required)
+                const edgeTtsUrl = `https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4&ConnectionId=${Date.now()}`;
+                
+                const ssml = `
+                    <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
+                        <voice name="${selectedVoice}">
+                            <mstts:express-as style="friendly" styledegree="2">
+                                ${cleanText}
+                            </mstts:express-as>
+                        </voice>
+                    </speak>
+                `.trim();
+
+                const response = await fetch(edgeTtsUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/ssml+xml',
+                        'X-Microsoft-OutputFormat': 'audio-24khz-96kbitrate-mono-mp3',
+                        'User-Agent': 'Mozilla/5.0'
+                    },
+                    body: ssml
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Edge TTS API error: ${response.status}`);
+                }
+
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                currentPuterAudio = audio;
+
+                audio.onended = () => {
+                    isSpeaking = false;
+                    isAIProcessing = false;
+                    URL.revokeObjectURL(audioUrl);
+                    // Auto-restart mic if in voice mode
+                    if (autoVoiceMode && interviewActive && recognition) {
+                        try {
+                            recognition.start();
+                            document.getElementById('mic-btn').classList.add('listening');
+                        } catch (e) { console.log('Mic restart:', e); }
+                    }
+                };
+
+                audio.onerror = (e) => {
+                    console.error('Audio playback error:', e);
+                    isSpeaking = false;
+                    isAIProcessing = false;
+                    // Fallback to browser TTS
+                    useBrowserFallback(cleanText);
+                };
+
+                await audio.play();
+
+            } catch (err) {
+                console.error('Edge TTS failed, using fallback:', err);
+                // Fallback to browser TTS
+                useBrowserFallback(cleanText);
             }
-            playNextChunk();
+        }
+
+        // ── Browser TTS Fallback (if Edge TTS fails) ──
+        function useBrowserFallback(text) {
+            console.log('🔊 Using browser TTS fallback...');
+            if (synth.speaking) { synth.cancel(); }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            const voices = synth.getVoices();
+            
+            // Select best available voice
+            const bestVoice = voices.find(v => 
+                v.name.includes('Google US') || 
+                v.name.includes('Natural') ||
+                v.name.includes('Premium') ||
+                v.lang === 'en-US'
+            ) || voices[0];
+
+            if (bestVoice) utterance.voice = bestVoice;
+            utterance.rate = 0.95; // Slightly slower for clarity
+            utterance.pitch = 1.0;
+
+            utterance.onend = () => {
+                isSpeaking = false;
+                isAIProcessing = false;
+                if (autoVoiceMode && interviewActive && recognition) {
+                    try {
+                        recognition.start();
+                        document.getElementById('mic-btn').classList.add('listening');
+                    } catch (e) { }
+                }
+            };
+
+            synth.speak(utterance);
         }
 
         function createStatusElement() {
