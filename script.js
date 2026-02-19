@@ -1557,8 +1557,8 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
             const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
             const customerEmail = (userDetails && userDetails.email) ? userDetails.email : prompt('Enter your email to receive the download link:');
 
-            /* FULFILLMENT: Now handled by server-side webhook for reliability.
-            // Log purchase to Supabase for statistics
+            // ✅ FULFILLMENT: Log purchase + Send email with Drive link
+            // Log purchase to Supabase for statistics (metadata only, not files)
             if (window.supabaseClient) {
                 try {
                     const loggedAmount = inrAmountForLogging !== null ? inrAmountForLogging : ((currency === 'INR') ? amount : 0);
@@ -1568,15 +1568,20 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
                         amount: Math.round(loggedAmount),
                         currency: currency || 'INR',
                         payment_id: paymentId,
-                        source: 'frontend_legacy'
+                        source: 'frontend_legacy',
+                        download_link: downloadLink
                     });
-                } catch (err) { console.error('❌ Failed to log purchase:', err); }
+                    console.log('✅ Purchase logged to Supabase:', { customerEmail, productName, paymentId });
+                } catch (err) { 
+                    console.error('❌ Failed to log purchase:', err); 
+                    // Continue - don't block user experience
+                }
             }
 
-            if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
-                sendProductEmail(customerEmail, productName, paymentId, downloadLink, userDetails ? userDetails.name : 'Customer');
+            // Send email with download link (CRITICAL - must happen before alert)
+            if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE' && customerEmail) {
+                await sendProductEmail(customerEmail, productName, paymentId, downloadLink, userDetails ? userDetails.name : 'Customer');
             }
-            */
 
             if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
                 alert('🎉 Payment Successful!\n\nCheck your email for the download link.\n\n📩 IMPORTANT: Please check your Spam/Junk folder.\n\nClick OK to also open it now.');
@@ -1805,6 +1810,17 @@ if (modalPayBtn) {
                 const udEmail = document.getElementById('main-ud-email').value.trim();
                 const udPhone = document.getElementById('main-ud-phone').value.trim();
 
+                // Email validation regex
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!udName || !udEmail) {
+                    alert('❌ Please fill in required fields');
+                    return;
+                }
+                if (!emailRegex.test(udEmail)) {
+                    alert('❌ Please enter a valid email address');
+                    return;
+                }
+
                 if (udName && udEmail) {
                     mainUserModal.style.display = 'none';
                     document.getElementById('productModal').classList.remove('active');
@@ -1850,6 +1866,30 @@ function generateUniqueMeetLink(customerName, bookingDate) {
 
 // Session types (loaded dynamically from Supabase)
 let SESSION_TYPES = {};
+
+// Check if a date falls within any blocked date range
+async function isDateBlocked(dateString) {
+    if (!window.supabaseClient) return false;
+    
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('blocked_date_ranges')
+            .select('start_date, end_date');
+        
+        if (error || !data || data.length === 0) return false;
+        
+        const checkDate = new Date(dateString + 'T00:00:00'); // Normalize to start of day
+        
+        return data.some(block => {
+            const start = new Date(block.start_date + 'T00:00:00');
+            const end = new Date(block.end_date + 'T23:59:59');
+            return checkDate >= start && checkDate <= end;
+        });
+    } catch (err) {
+        console.error('Error checking blocked dates:', err);
+        return false;
+    }
+}
 
 // Initialize booking form
 const bookingForm = document.getElementById('bookingForm');
@@ -2160,6 +2200,7 @@ if (bookingForm) {
             sessionType: sessionInfo.name,
             duration: sessionInfo.duration,
             price: Math.round(logAmountInr), // Store INR price in DB
+            pay_currency: payCurrency, // Store actual payment currency for email display
             date: formattedDate,
             time,
             message
@@ -2315,7 +2356,7 @@ async function handleSessionPaymentSuccess(response) {
                 <p><strong>📋 Session:</strong> ${booking.sessionType} (${booking.duration} mins)</p>
                 <p><strong>📅 Date:</strong> ${booking.date}</p>
                 <p><strong>⏰ Time:</strong> ${booking.time}</p>
-                <p><strong>💰 Amount Paid:</strong> ₹${booking.price}</p>
+                <p><strong>💰 Amount Paid:</strong> ${booking.pay_currency === 'INR' ? '₹' : '$'}${booking.pay_currency === 'INR' ? booking.price : Math.round(booking.price * 0.012)}</p>
                 <p><strong>🆔 Payment ID:</strong> ${paymentId}</p>
                 <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
                 <p><strong>🔗 JOIN YOUR SESSION HERE:</strong></p>
@@ -2334,7 +2375,7 @@ Hi ${booking.name},
 Session: ${booking.sessionType} (${booking.duration} mins)
 Date: ${booking.date}
 Time: ${booking.time}
-Amount Paid: ₹${booking.price}
+Amount Paid: ${booking.pay_currency === 'INR' ? '₹' + booking.price : '$' + Math.round(booking.price * 0.012)}
 Payment ID: ${paymentId}
 
 JOIN YOUR SESSION HERE:
@@ -2406,7 +2447,7 @@ ${BUSINESS_NAME}`;
 New Booking Details:
 ━━━━━━━━━━━━━━━━━━━━
 📋 Session: ${booking.sessionType} (${booking.duration} mins)
-💰 Amount Paid: ₹${booking.price}
+💰 Amount Paid: ${booking.pay_currency === 'INR' ? '₹' + booking.price : '$' + Math.round(booking.price * 0.012)}
 🆔 Payment ID: ${paymentId}
 
 👤 Customer Details:
