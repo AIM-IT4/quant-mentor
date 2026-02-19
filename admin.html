@@ -223,7 +223,6 @@
             flex-direction: column;
             gap: 8px;
             position: relative;
-            overflow: hidden;
         }
 
         .stat-card .icon {
@@ -2566,7 +2565,7 @@ QuantMentor
 
                         async function initDashboard() {
                             console.log('📊 Initializing Dashboard...');
-                            console.log('✅ Admin Fixes Applied: Service Key + Client-Side Ghost Filter (v1.6 - Fixed Error)');
+                            console.log('✅ Admin Fixes Applied: Service Key + Client-Side Ghost Filter + Tooltip Fix (v1.7)');
                             document.getElementById('adminContainer').style.display = 'block';
 
                             // Load components in parallel
@@ -2706,8 +2705,8 @@ QuantMentor
                                 const breakdownHtml = Object.entries(lifetimeBreakdown)
                                     .filter(([_, amt]) => amt > 0)
                                     .sort((a, b) => normalizeToINR(b[1], b[0]) - normalizeToINR(a[1], a[0]))
-                                    .map(([c, amt]) => formatCurrency(amt, c))
-                                    .join(' + ');
+                                    .map(([c, amt]) => `<div style="display: flex; justify-content: space-between; gap: 20px;"><span>${c}:</span> <span>${formatCurrency(amt, c)}</span></div>`)
+                                    .join('');
 
                                 // Structure: Big Total + Info Icon with Tooltip
                                 const finalHtml = `
@@ -2723,13 +2722,14 @@ QuantMentor
                                                 transform: translateX(-50%); 
                                                 background: #1e293b; 
                                                 border: 1px solid rgba(255,255,255,0.1); 
-                                                padding: 8px 12px; 
-                                                border-radius: 6px; 
-                                                white-space: nowrap; 
-                                                z-index: 10; 
-                                                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5); 
+                                                padding: 10px 14px; 
+                                                border-radius: 8px; 
+                                                z-index: 100; 
+                                                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); 
                                                 font-size: 0.85rem; 
-                                                color: #e2e8f0;
+                                                color: #f1f5f9;
+                                                min-width: 160px;
+                                                line-height: 1.6;
                                             ">
                                                 ${breakdownHtml}
                                                 <div style="position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #1e293b transparent transparent transparent;"></div>
