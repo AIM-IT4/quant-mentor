@@ -452,7 +452,7 @@
                     <i class="fas fa-chart-line" style="color: #6366f1;"></i> Performance Overview
                 </h2>
                 <div class="date-filter">
-                    <select id="revenueRange" onchange="updateDashboardCharts()"
+                    <select id="revenueRange" onchange="updateDashboardStats(); updateDashboardCharts();"
                         style="background: var(--surface); border: 1px solid var(--border); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer;">
                         <option value="7">Last 7 Days</option>
                         <option value="30" selected>Last 30 Days</option>
@@ -2532,11 +2532,14 @@ QuantMentor
 
                         // Helper for Currency Conversion (Approximate Rates)
                         const EXCHANGE_RATES = {
-                            'USD': 87,
-                            'EUR': 95,
+                            'USD': 83,
+                            'EUR': 90,
                             'GBP': 110,
-                            'BRL': 15,
-                            'INR': 1
+                            'BRL': 16,
+                            'INR': 1,
+                            'CHF': 94,
+                            'CAD': 61,
+                            'NGN': 0.05
                         };
 
                         function normalizeToINR(amount, currency) {
@@ -2563,9 +2566,26 @@ QuantMentor
                         let revenueChart = null;
                         let distributionChart = null;
 
+                        // Helper for dynamic date ranges
+                        function getDynamicDateRanges(days) {
+                            const now = new Date();
+                            const currentStart = new Date();
+                            currentStart.setDate(now.getDate() - parseInt(days));
+
+                            const previousStart = new Date();
+                            previousStart.setDate(currentStart.getDate() - parseInt(days));
+
+                            return {
+                                startOfPeriod: currentStart.toISOString(),
+                                endOfPeriod: now.toISOString(),
+                                startOfPrevious: previousStart.toISOString(),
+                                endOfPrevious: currentStart.toISOString()
+                            };
+                        }
+
                         async function initDashboard() {
                             console.log('📊 Initializing Dashboard...');
-                            console.log('✅ Admin Fixes Applied: Service Key + Client-Side Ghost Filter + Tooltip Fix (v1.8 - Final)');
+                            console.log('✅ Admin Fixes Applied: Service Key + Client-Side Ghost Filter + Tooltip Fix + Dynamic Timeframes (v1.9)');
                             document.getElementById('adminContainer').style.display = 'block';
 
                             // Load components in parallel
@@ -2582,10 +2602,8 @@ QuantMentor
                             // Helper to identify/remove "Ghost" transactions (incorrectly logged high values)
                             const isGhost = (p) => (p.amount === 449 || p.amount === 719) && p.currency === 'GBP';
                             try {
-                                const now = new Date();
-                                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-                                const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
-                                const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0).toISOString();
+                                const days = document.getElementById('revenueRange')?.value || '30';
+                                const { startOfPeriod, endOfPeriod, startOfPrevious, endOfPrevious } = getDynamicDateRanges(days);
 
                                 // 1. Active Bookings (Upcoming + Confirmed)
                                 const { count: activeBookingsCount } = await window.supabaseAdminClient
@@ -2604,33 +2622,34 @@ QuantMentor
                                     .from('purchases')
                                     .select('*', { count: 'exact', head: true });
 
-                                // 4. Financials (This Month vs Last Month)
-                                // We need to fetch amounts to calculate sums, but we can limit fields
-                                const { data: currentMonthBookings } = await window.supabaseAdminClient
+                                // 4. Financials (Current Period vs Previous Period)
+                                const { data: currentPeriodBookings } = await window.supabaseAdminClient
                                     .from('bookings')
                                     .select('service_price')
-                                    .gte('created_at', startOfMonth)
+                                    .gte('created_at', startOfPeriod)
+                                    .lte('created_at', endOfPeriod)
                                     .in('status', ['confirmed', 'completed', 'upcoming']);
 
-                                let { data: currentMonthPurchases } = await window.supabaseAdminClient
+                                let { data: currentPeriodPurchases } = await window.supabaseAdminClient
                                     .from('purchases')
                                     .select('amount, currency')
-                                    .gte('created_at', startOfMonth);
-                                currentMonthPurchases = (currentMonthPurchases || []).filter(p => !isGhost(p));
+                                    .gte('created_at', startOfPeriod)
+                                    .lte('created_at', endOfPeriod);
+                                currentPeriodPurchases = (currentPeriodPurchases || []).filter(p => !isGhost(p));
 
-                                const { data: lastMonthBookings } = await window.supabaseAdminClient
+                                const { data: previousPeriodBookings } = await window.supabaseAdminClient
                                     .from('bookings')
                                     .select('service_price')
-                                    .gte('created_at', startOfLastMonth)
-                                    .lte('created_at', endOfLastMonth)
+                                    .gte('created_at', startOfPrevious)
+                                    .lte('created_at', endOfPrevious)
                                     .in('status', ['confirmed', 'completed', 'upcoming']);
 
-                                let { data: lastMonthPurchases } = await window.supabaseAdminClient
+                                let { data: previousPeriodPurchases } = await window.supabaseAdminClient
                                     .from('purchases')
                                     .select('amount, currency')
-                                    .gte('created_at', startOfLastMonth)
-                                    .lte('created_at', endOfLastMonth);
-                                lastMonthPurchases = (lastMonthPurchases || []).filter(p => !isGhost(p));
+                                    .gte('created_at', startOfPrevious)
+                                    .lte('created_at', endOfPrevious);
+                                previousPeriodPurchases = (previousPeriodPurchases || []).filter(p => !isGhost(p));
 
 
                                 // 5. Total Lifetime Revenue
@@ -2673,8 +2692,8 @@ QuantMentor
                                     return Object.entries(breakdown).reduce((sum, [c, amt]) => sum + normalizeToINR(amt, c), 0);
                                 };
 
-                                const currentBreakdown = calcRevenueBreakdown(currentMonthBookings, currentMonthPurchases);
-                                const lastBreakdown = calcRevenueBreakdown(lastMonthBookings, lastMonthPurchases);
+                                const currentBreakdown = calcRevenueBreakdown(currentPeriodBookings, currentPeriodPurchases);
+                                const lastBreakdown = calcRevenueBreakdown(previousPeriodBookings, previousPeriodPurchases);
                                 const lifetimeBreakdown = calcRevenueBreakdown(allBookingsRev, allPurchasesRev);
 
                                 const currentRevenueNorm = getNormalizedTotal(currentBreakdown);
