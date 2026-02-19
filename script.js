@@ -544,21 +544,13 @@ async function getUserCountry() {
     };
 
     try {
-        // Primary: ipapi.co
-        const data = await fetchWithTimeout('https://ipapi.co/json/');
+        // Primary: ipwho.is (better CORS compatibility in browsers)
+        const data = await fetchWithTimeout('https://ipwho.is/');
+        if (data.success === false) throw new Error(data.message || 'ipwho.is lookup failed');
         userCountryCode = data.country_code;
     } catch (e) {
-        console.warn('⚠️ Primary IP service (ipapi.co) failed:', e);
-        try {
-            // Fallback: ipwho.is (No API key required, good CORS)
-            console.log('🔄 Trying fallback IP service (ipwho.is)...');
-            const data = await fetchWithTimeout('https://ipwho.is/');
-            if (data.success === false) throw new Error(data.message);
-            userCountryCode = data.country_code;
-        } catch (e2) {
-            console.warn('❌ All IP services failed, defaulting to India (IN):', e2);
-            userCountryCode = 'IN';
-        }
+        console.warn('⚠️ Country lookup failed, defaulting to India (IN):', e);
+        userCountryCode = 'IN';
     }
 
     console.log('🌍 User country detected:', userCountryCode);
@@ -620,6 +612,13 @@ const CURRENCY_MAP = {
 let exchangeRatesCache = null;
 let exchangeRatesTimestamp = null;
 const RATES_CACHE_DURATION = 3600000; // 1 hour in milliseconds
+
+// Currencies with no fractional subunits for payment gateways
+const ZERO_DECIMAL_CURRENCIES = new Set(['JPY', 'KRW', 'VND']);
+
+function getSubunitMultiplier(currencyCode = 'INR') {
+    return ZERO_DECIMAL_CURRENCIES.has(String(currencyCode).toUpperCase()) ? 1 : 100;
+}
 
 // Fetch real-time exchange rates from API
 async function fetchExchangeRates() {
@@ -1472,7 +1471,7 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
     }
 
     // Smallest currency sub-unit multiplier (100 for INR/USD/GBP, 1 for JPY)
-    const multiplier = (currency.toUpperCase() === 'JPY') ? 1 : 100;
+    const multiplier = getSubunitMultiplier(currency);
 
     // 🔥 INSTANT CAPTURE: Create server-side order with payment_capture: 1
     let orderId = null;
@@ -1799,7 +1798,8 @@ if (modalPayBtn) {
         }
     });
 } else {
-    console.error('❌ Pay button (modalPayBtn) not found in DOM');
+    // This script is shared across pages; not all pages include the product modal.
+    console.info('ℹ️ modalPayBtn not present on this page; product modal payment handler skipped.');
 }
 
 // ================================
@@ -2163,7 +2163,7 @@ async function initSessionPayment(description, amount, customerEmail, currency =
     }
 
     // Smallest currency sub-unit multiplier (100 for INR/USD/GBP, 1 for JPY)
-    const multiplier = (currency.toUpperCase() === 'JPY') ? 1 : 100;
+    const multiplier = getSubunitMultiplier(currency);
 
     // 🔥 INSTANT CAPTURE: Create server-side order with payment_capture: 1
     let orderId = null;
