@@ -529,35 +529,47 @@ setTimeout(function () {
 // Fetched country cache
 let userCountryCode = null;
 
-// Try to get user country (simple caching)
+// Try to get user country using timezone (works without external APIs)
 async function getUserCountry() {
     if (userCountryCode) return userCountryCode;
 
-    // Helper to fetch with timeout
-    const fetchWithTimeout = async (url, timeout = 3000) => {
-        const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), timeout);
-        const response = await fetch(url, { signal: controller.signal });
-        clearTimeout(id);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.json();
+    // Use browser timezone to detect country
+    const timezoneToCountry = {
+        'Asia/Kolkata': 'IN',
+        'Asia/Dubai': 'AE',
+        'Asia/Singapore': 'SG',
+        'Asia/Hong_Kong': 'HK',
+        'Asia/Tokyo': 'JP',
+        'Asia/Seoul': 'KR',
+        'Asia/Shanghai': 'CN',
+        'Europe/London': 'GB',
+        'Europe/Paris': 'FR',
+        'Europe/Berlin': 'DE',
+        'Europe/Amsterdam': 'NL',
+        'Europe/Brussels': 'BE',
+        'Europe/Vienna': 'AT',
+        'Europe/Rome': 'IT',
+        'Europe/Madrid': 'ES',
+        'Europe/Lisbon': 'PT',
+        'Europe/Athens': 'GR',
+        'Europe/Dublin': 'IE',
+        'Europe/Helsinki': 'FI',
+        'America/New_York': 'US',
+        'America/Los_Angeles': 'US',
+        'America/Chicago': 'US',
+        'America/Toronto': 'CA',
+        'America/Vancouver': 'CA',
+        'America/Sao_Paulo': 'BR',
+        'America/Mexico_City': 'MX',
+        'Australia/Sydney': 'AU',
+        'Australia/Melbourne': 'AU',
+        'Pacific/Auckland': 'NZ',
     };
 
     try {
-        // Try multiple IP services
-        try {
-            // Primary: ipapi.co
-            const data1 = await fetchWithTimeout('https://ipapi.co/json/', 5000);
-            userCountryCode = data1.country_code;
-        } catch (e1) {
-            // Fallback: ipwho.is (with HTTPS)
-            console.log('🔄 Trying fallback IP service (ipwho.is)...');
-            const data2 = await fetchWithTimeout('https://ipwho.is/', 5000);
-            if (data2.success === false) throw new Error(data2.message || 'ipwho.is lookup failed');
-            userCountryCode = data2.country_code;
-        }
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        userCountryCode = timezoneToCountry[timezone] || 'IN';
     } catch (e) {
-        console.warn('⚠️ Country lookup failed, defaulting to India (IN):', e);
         userCountryCode = 'IN';
     }
 
