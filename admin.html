@@ -2566,7 +2566,7 @@ QuantMentor
 
                         async function initDashboard() {
                             console.log('📊 Initializing Dashboard...');
-                            console.log('✅ Admin Fixes Applied: Service Key + Deduped Data (v1.4 - Emergency Cleanup)');
+                            console.log('✅ Admin Fixes Applied: Service Key + Client-Side Ghost Filter (v1.5 - Final)');
                             document.getElementById('adminContainer').style.display = 'block';
 
                             // Load components in parallel
@@ -2611,10 +2611,11 @@ QuantMentor
                                     .gte('created_at', startOfMonth)
                                     .in('status', ['confirmed', 'completed', 'upcoming']);
 
-                                const { data: currentMonthPurchases } = await window.supabaseAdminClient
+                                let { data: currentMonthPurchases } = await window.supabaseAdminClient
                                     .from('purchases')
                                     .select('amount, currency')
                                     .gte('created_at', startOfMonth);
+                                currentMonthPurchases = (currentMonthPurchases || []).filter(p => !isGhost(p));
 
                                 const { data: lastMonthBookings } = await window.supabaseAdminClient
                                     .from('bookings')
@@ -2623,11 +2624,15 @@ QuantMentor
                                     .lte('created_at', endOfLastMonth)
                                     .in('status', ['confirmed', 'completed', 'upcoming']);
 
-                                const { data: lastMonthPurchases } = await window.supabaseAdminClient
+                                let { data: lastMonthPurchases } = await window.supabaseAdminClient
                                     .from('purchases')
                                     .select('amount, currency')
                                     .gte('created_at', startOfLastMonth)
                                     .lte('created_at', endOfLastMonth);
+                                lastMonthPurchases = (lastMonthPurchases || []).filter(p => !isGhost(p));
+
+                                // Helper to identify/remove "Ghost" transactions (incorrectly logged high values)
+                                const isGhost = (p) => (p.amount === 449 || p.amount === 719) && p.currency === 'GBP';
 
                                 // 5. Total Lifetime Revenue
                                 const { data: allBookingsRev } = await window.supabaseAdminClient
@@ -2635,9 +2640,12 @@ QuantMentor
                                     .select('service_price')
                                     .in('status', ['confirmed', 'completed', 'upcoming']);
 
-                                const { data: allPurchasesRev } = await window.supabaseAdminClient
+                                let { data: allPurchasesRev } = await window.supabaseAdminClient
                                     .from('purchases')
                                     .select('amount, currency');
+
+                                // Apply Emergency Filter
+                                allPurchasesRev = (allPurchasesRev || []).filter(p => !isGhost(p));
 
                                 // Calculations with Currency Breakdown
                                 const calcRevenueBreakdown = (bookings, purchases) => {
