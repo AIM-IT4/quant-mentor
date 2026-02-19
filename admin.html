@@ -2528,9 +2528,15 @@ QuantMentor
 
                         function formatCurrency(amount, currency = 'INR') {
                             const code = (currency || 'INR').toUpperCase();
-                            const symbol = code === 'USD' ? '$' : (code === 'EUR' ? '€' : (code === 'GBP' ? '£' : '₹'));
-                            // If currency is not INR, show original + approx INR
-                            return `${symbol}${amount.toLocaleString()}`;
+                            try {
+                                return new Intl.NumberFormat('en-IN', {
+                                    style: 'currency',
+                                    currency: code,
+                                    maximumFractionDigits: 0
+                                }).format(amount);
+                            } catch (e) {
+                                return `${code} ${amount.toLocaleString()}`;
+                            }
                         }
 
                         // --- DASHBOARD LOGIC ---
@@ -2662,15 +2668,56 @@ QuantMentor
                                 const totaltransactions = (allBookingsRev?.length || 0) + (allPurchasesRev?.length || 0);
                                 const aov = totaltransactions > 0 ? Math.round(totalLifetimeRevenueNorm / totaltransactions) : 0;
 
-                                // Update DOM with Breakdown
+                                // Update DOM with Breakdown - PROFESSIONAL VIEW
+                                // 1. Primary Display: Normalized Total (Big Number)
+                                const primaryTotal = `₹${Math.round(totalLifetimeRevenueNorm).toLocaleString()}`;
+
+                                // 2. Secondary Display: Breakdown (Tooltip / Small Text)
                                 const breakdownHtml = Object.entries(lifetimeBreakdown)
                                     .filter(([_, amt]) => amt > 0)
-                                    .sort((a, b) => normalizeToINR(b[1], b[0]) - normalizeToINR(a[1], a[0])) // Sort by value desc
-                                    .map(([c, amt]) => `<span style="white-space: nowrap;">${formatCurrency(amt, c)}</span>`)
-                                    .join('<span style="color: var(--text-muted); margin: 0 8px;">+</span>');
+                                    .sort((a, b) => normalizeToINR(b[1], b[0]) - normalizeToINR(a[1], a[0]))
+                                    .map(([c, amt]) => formatCurrency(amt, c))
+                                    .join(' + ');
 
-                                document.getElementById('totalRevenue').innerHTML = breakdownHtml || '₹0';
+                                // Structure: Big Total + Info Icon with Tooltip
+                                const finalHtml = `
+                                    <div style="display: flex; align-items: baseline; gap: 8px;">
+                                        <span>${primaryTotal}</span>
+                                        <div class="tooltip-container" style="position: relative; cursor: help;">
+                                            <i class="fas fa-info-circle" style="font-size: 0.6em; color: var(--text-muted);"></i>
+                                            <div class="tooltip-content" style="
+                                                visibility: hidden; 
+                                                position: absolute; 
+                                                bottom: 100%; 
+                                                left: 50%; 
+                                                transform: translateX(-50%); 
+                                                background: #1e293b; 
+                                                border: 1px solid rgba(255,255,255,0.1); 
+                                                padding: 8px 12px; 
+                                                border-radius: 6px; 
+                                                white-space: nowrap; 
+                                                z-index: 10; 
+                                                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5); 
+                                                font-size: 0.85rem; 
+                                                color: #e2e8f0;
+                                            ">
+                                                ${breakdownHtml}
+                                                <div style="position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #1e293b transparent transparent transparent;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.75em; color: var(--text-muted); margin-top: 4px;">Approx. total conversion</div>
+                                `;
+
+                                document.getElementById('totalRevenue').innerHTML = finalHtml;
                                 document.getElementById('revenueGrowth').innerHTML = growthHtml;
+
+                                // Add hover logic for tooltip (inline style is tricky for hover state, so we use JS listener or CSS class if possible)
+                                // We'll add a simple script to toggle visibility on hover for any .tooltip-container
+                                document.querySelectorAll('.tooltip-container').forEach(el => {
+                                    el.onmouseenter = () => el.querySelector('.tooltip-content').style.visibility = 'visible';
+                                    el.onmouseleave = () => el.querySelector('.tooltip-content').style.visibility = 'hidden';
+                                });
 
                                 document.getElementById('activeBookings').textContent = activeBookingsCount || 0;
                                 document.getElementById('completedBookingsCount').textContent = completedBookingsCount || 0;
