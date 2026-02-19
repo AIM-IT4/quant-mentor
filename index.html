@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- Restore Point: 2026-02-19 -->
 <html lang="en">
 
 <head>
@@ -7,783 +6,280 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
         content="Expert Quant Mentorship & Mathematics - Master Stochastic Calculus, Python, C++, XVA Models, and Interview Prep with industry guidance.">
-    <meta name="keywords"
-        content="quant, quantitative finance, mathematics, stochastic calculus, algo trading, mentorship, Python, C++, XVA, derivatives, interview prep">
-    <title>QuantMentor | Expert Quant Mentorship, Math & Digital Resources</title>
+    <title>QuantMentor | Expert Quant Mentorship</title>
 
-    <!-- Favicon and App Icons -->
     <link rel="icon" type="image/png" href="assets/images/logo.png">
-    <link rel="apple-touch-icon" href="assets/images/logo.png">
-    <link rel="shortcut icon" href="assets/images/logo.png">
-
-    <!-- Open Graph / Social Media Meta Tags -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://quantmentor.vercel.app/">
-    <meta property="og:title" content="QuantMentor | Expert Quant Mentorship & Digital Resources">
-    <meta property="og:description"
-        content="1-on-1 mentorship from industry expert. Master quantitative finance, derivatives pricing, XVA models, and crack quant interviews.">
-    <meta property="og:image" content="assets/images/logo.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-
-    <!-- Twitter Card Meta Tags -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://quantmentor.vercel.app/">
-    <meta property="twitter:title" content="QuantMentor | Expert Quant Mentorship">
-    <meta property="twitter:description"
-        content="1-on-1 mentorship from industry expert. Master quantitative finance and crack quant interviews.">
-    <meta property="twitter:image" content="assets/images/logo.png">
-
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet">
-
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- MathJax for LaTeX Support -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="v3-styles.css">
+
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
-    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="#" class="logo">
-                <img src="assets/images/logo.png" alt="QuantMentor" class="logo-img"
+    <nav class="v3-nav">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="#" class="logo" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
+                <img src="assets/images/logo.png" alt="QuantMentor" style="width: 28px; height: 28px;"
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
                 <span class="logo-icon" style="display:none;">📊</span>
-                <span class="logo-text">QuantMentor</span>
+                <span
+                    style="color: #fff; font-weight: 800; letter-spacing: -0.04em; font-size: 1.25rem;">QuantMentor</span>
             </a>
-            <ul class="nav-links">
-                <li><a href="#services">Sessions</a></li>
-                <li><a href="#products">Products</a></li>
-                <li><a href="#testimonials">Reviews</a></li>
-                <li><a href="interview.html"><i class="fas fa-brain"></i> AI Interview</a></li>
-                <li><a href="code-playground.html"><i class="fas fa-code"></i> Playground</a></li>
-                <li><a href="#contact" class="nav-cta">Book Now</a></li>
+            <ul style="display: flex; gap: 32px; list-style: none; align-items: center;">
+                <li><a href="#services"
+                        style="color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 500;">Sessions</a>
+                </li>
+                <li><a href="#products"
+                        style="color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 500;">Resources</a>
+                </li>
+                <li><a href="interview.html"
+                        style="color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 500;">AI
+                        Interview</a></li>
+                <li><a href="#contact" class="btn-pill btn-pill-small">Book Now</a></li>
             </ul>
-            <div class="nav-actions">
-                <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
-                    <i class="fas fa-moon"></i>
-                    <i class="fas fa-sun"></i>
-                </button>
-                <button class="mobile-menu-btn" id="mobileMenuBtn">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
         </div>
     </nav>
 
-    <!-- Main Content Wrapper for SEO -->
     <main>
         <!-- Hero Section -->
-        <section class="hero" id="hero">
-            <div class="hero-bg-effects">
-                <div class="gradient-orb orb-1"></div>
-                <div class="gradient-orb orb-2"></div>
-                <div class="grid-overlay"></div>
-            </div>
-            <div class="hero-container">
-                <div class="hero-content">
-                    <div class="hero-badge">
-                        <span class="badge-dot"></span>
-                        Available for 1-on-1 Sessions
-                    </div>
-                    <h1 class="hero-title">
-                        Expert <span class="gradient-text">Quant Mentorship</span> for Aspiring Professionals
-                    </h1>
-                    <p class="hero-subtitle">
-                        Get personalized guidance on quantitative finance, derivatives pricing, XVA modeling,
-                        Python & C++ for quants, and ace your quant interviews with battle-tested strategies.
-                    </p>
-                    <div class="hero-stats">
-                        <div class="stat-item">
-                            <span class="stat-value" id="stat-students">50+</span>
-                            <span class="stat-label">Students Mentored</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="stat-experience">5+</span>
-                            <span class="stat-label">Years Experience</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="stat-products">15+</span>
-                            <span class="stat-label">Digital Products</span>
-                        </div>
-                    </div>
-                    <div class="hero-cta">
-                        <a href="#services" class="btn btn-primary">
-                            <i class="fas fa-calendar-alt"></i>
-                            Book a Session
-                        </a>
-                        <a href="#products" class="btn btn-secondary">
-                            <i class="fas fa-shopping-bag"></i>
-                            View Products
-                        </a>
-                    </div>
+        <section
+            style="min-height: 90vh; display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 100px;">
+            <div class="container" data-v3-reveal>
+                <div
+                    style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); padding: 6px 16px; border-radius: 99px; border: 1px solid var(--border-rim); margin-bottom: 24px;">
+                    <span
+                        style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block;"></span>
+                    <span
+                        style="font-size: 0.75rem; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Available
+                        for Q1 2026 Sessions</span>
                 </div>
-                <div class="hero-visual">
-                    <div class="profile-card">
-                        <div class="profile-glow"></div>
-                        <div class="profile-image">
-                            <img src="assets/images/me_img.png" alt="Amit Kumar Jha"
-                                onerror="this.src='assets/images/profile-placeholder.svg'; this.onerror=null;">
-                            <div class="profile-placeholder" style="display:none;">
-                                <i class="fas fa-user-tie"></i>
-                            </div>
-                        </div>
-                        <h3 class="profile-name">Amit Kumar Jha</h3>
-                        <p class="profile-title">Quant Developer | Model Risk Quant | Mentor</p>
-                        <div class="profile-tags">
-                            <span class="tag">XVA</span>
-                            <span class="tag">Derivatives</span>
-                            <span class="tag">Python</span>
-                            <span class="tag">C++</span>
-                            <span class="tag">Mathematics</span>
-                        </div>
-                        <div class="social-links">
-                            <a href="https://www.linkedin.com/in/akjha002/" target="_blank" class="social-link"
-                                title="LinkedIn" aria-label="Connect on LinkedIn">
-                                <i class="fab fa-linkedin-in"></i>
-                            </a>
-                            <a href="https://github.com/AIM-IT4" target="_blank" class="social-link" title="GitHub"
-                                aria-label="View GitHub Profile">
-                                <i class="fab fa-github"></i>
-                            </a>
-                            <a href="https://x.com/Akjha2023" target="_blank" class="social-link" title="X (Twitter)"
-                                aria-label="Follow on X (Twitter)">
-                                <i class="fab fa-twitter"></i>
-                            </a>
-                        </div>
-                    </div>
+                <h1 class="hero-headline">
+                    Master the Math.<br>Direct From the Desk.
+                </h1>
+                <p class="subheadline" style="margin: 0 auto 48px auto;">
+                    Personalized quant mentorship and premium resources to help you bridge the gap between academic
+                    theory and trading desk reality.
+                </p>
+                <div style="display: flex; gap: 24px; justify-content: center;">
+                    <a href="#services" class="btn-pill">Book a Session</a>
+                    <a href="#products" class="btn-pill"
+                        style="background: transparent; color: #fff; border: 1px solid var(--border-rim);">Explore
+                        Resources</a>
                 </div>
             </div>
         </section>
 
         <!-- Services Section -->
-        <section class="services" id="services">
-            <div class="section-container">
-                <div class="section-header">
-                    <span class="section-tag">Services</span>
-                    <h2 class="section-title">1-on-1 <span class="gradient-text">Mentorship Sessions</span></h2>
-                    <p class="section-subtitle">Personalized guidance tailored to your career goals in quantitative
-                        finance
+        <section id="services" class="feature-section">
+            <div class="container feature-grid" data-v3-reveal>
+                <div style="flex: 1;">
+                    <span class="section-label">Mentorship</span>
+                    <h2 class="section-headline">1-on-1<br>Expert Guidance.</h2>
+                    <p class="subheadline">
+                        Practical, practitioner-led sessions designed to build your intuition for model risk, pricing,
+                        and derivatives.
                     </p>
+                    <a href="#contact" class="btn-pill"
+                        style="background: transparent; color: #fff; border: 1px solid var(--border-rim);">View All
+                        Sessions</a>
                 </div>
-
-                <div class="services-grid">
-                    <p style="text-align:center; color:var(--text-muted); grid-column:1/-1;">Loading available
-                        sessions...
-                    </p>
+                <div class="services-grid" id="servicesGrid" style="flex: 1.2; display: grid; gap: 24px;">
+                    <!-- JS will inject here -->
+                    <div class="loading-spinner" style="color: var(--text-muted); text-align: center; padding: 40px;">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- Products Section -->
-        <section class="products" id="products">
-            <div class="section-container">
-                <div class="section-header">
-                    <span class="section-tag">Resources</span>
-                    <h2 class="section-title">Premium <span class="gradient-text">Digital Products</span></h2>
-                    <p class="section-subtitle">Curated study materials, coding scripts, and interview guides from years
-                        of
-                        experience</p>
-                </div>
-
-                <div class="products-filter">
-                    <button class="filter-btn active" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter="notes">Notes & PDFs</button>
-                    <button class="filter-btn" data-filter="code">Code & Scripts</button>
-                    <button class="filter-btn" data-filter="bundle">Bundles</button>
-                </div>
-
-                <div class="products-grid">
-                    <p style="text-align:center; color:var(--text-muted); grid-column:1/-1;">Loading products...</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Free Resources Section -->
-        <section class="products" id="resources" style="background: var(--bg-card); padding: 80px 0;">
-            <div class="section-container">
-                <div class="section-header">
-                    <span class="section-tag">Free content</span>
-                    <h2 class="section-title">Free <span class="gradient-text">Resources</span></h2>
-                    <p class="section-subtitle">High-quality guides and tools to kickstart your quant journey.</p>
-                </div>
-                <div class="products-grid" id="resources-grid">
-                    <p style="text-align:center; color:var(--text-muted); grid-column:1/-1;">Loading free resources...
+        <section id="products" class="feature-section" style="background: var(--bg-surface);">
+            <div class="container feature-grid reverse" data-v3-reveal>
+                <div style="flex: 1;">
+                    <span class="section-label">Resources</span>
+                    <h2 class="section-headline">Premium<br>Digital Assets.</h2>
+                    <p class="subheadline">
+                        Curated collection of XVA models, stochastic calculus notes, and interview simulations.
                     </p>
+                    <a href="product.html" class="btn-pill"
+                        style="background: transparent; color: #fff; border: 1px solid var(--border-rim);">Go to
+                        Shop</a>
+                </div>
+                <div class="products-grid" id="productsGrid" style="flex: 1.2; display: grid; gap: 24px;">
+                    <!-- JS will inject here -->
                 </div>
             </div>
         </section>
 
         <!-- Testimonials Section -->
-        <section class="testimonials" id="testimonials">
-            <div class="section-container">
-                <div class="section-header">
-                    <span class="section-tag">Testimonials</span>
-                    <h2 class="section-title">What <span class="gradient-text">Aspirants Say</span></h2>
-                    <p class="section-subtitle">Real feedback from mentees who've accelerated their quant careers</p>
+        <section id="testimonials" class="feature-section">
+            <div class="container" data-v3-reveal>
+                <div style="text-align: center; margin-bottom: 80px;">
+                    <span class="section-label">Success Stories</span>
+                    <h2 class="section-headline">Trusted by<br>Aspiring Quants.</h2>
                 </div>
-
-                <div class="testimonials-grid" id="approved-testimonials-grid">
-                    <!-- Static testimonials will be shown, dynamic ones loaded via JS -->
-
-                    <!-- Testimonial 1 -->
-                    <div class="testimonial-card">
-                        <div class="testimonial-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="testimonial-text">
-                            "Amit is a powerhouse of knowledge. More importantly, he is thorough and precise with his
-                            guidance. I reached out for advice on breaking into derivative pricing and left with an
-                            articulated plan. He tells you what happens in the industry—that helped me chalk out a
-                            practical
-                            plan."
-                        </p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div class="author-info">
-                                <span class="author-name">Verified Mentee</span>
-                                <span class="author-role">Aspiring Quant Developer</span>
-                            </div>
-                        </div>
-                        <div class="verified-badge">
-                            <i class="fas fa-check-circle"></i> Verified Session • Dec 2025
-                        </div>
-                    </div>
-
-                    <!-- Testimonial 2 -->
-                    <div class="testimonial-card">
-                        <div class="testimonial-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="testimonial-text">
-                            "I completed my Financial Engineering at WorldQuant University. What Amit does exceptionally
-                            well is bridge the gap between theory and practice. He distills front-desk experience into
-                            material focusing not just on what models are, but why they exist, how they behave, and
-                            where
-                            they fail."
-                        </p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <i class="fas fa-user-graduate"></i>
-                            </div>
-                            <div class="author-info">
-                                <span class="author-name">Anubhab De</span>
-                                <span class="author-role">Financial Engineering Graduate</span>
-                            </div>
-                        </div>
-                        <div class="verified-badge">
-                            <i class="fas fa-check-circle"></i> Verified Purchase • Dec 2025
-                        </div>
-                    </div>
-
-                    <!-- Testimonial 3 -->
-                    <div class="testimonial-card">
-                        <div class="testimonial-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="testimonial-text">
-                            "Your Quant Project Pack is the bridge between academic theory and trading desk reality. The
-                            'Resume Bullets' and 'Interview Questions' for every project make this not just a code
-                            repository, but a complete career toolkit."
-                        </p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div class="author-info">
-                                <span class="author-name">Harshvardhan Singh</span>
-                                <span class="author-role">Quantitative Analyst</span>
-                            </div>
-                        </div>
-                        <div class="verified-badge">
-                            <i class="fas fa-check-circle"></i> Verified Purchase • Dec 2025
-                        </div>
-                    </div>
-
-                    <!-- Testimonial 4 -->
-                    <div class="testimonial-card">
-                        <div class="testimonial-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="testimonial-text">
-                            "Amit clarified all my doubts efficiently and gave me clear direction on how to move forward
-                            toward my goals. His guidance was practical, focused, and extremely helpful."
-                        </p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div class="author-info">
-                                <span class="author-name">Verified Mentee</span>
-                                <span class="author-role">Career Transition</span>
-                            </div>
-                        </div>
-                        <div class="verified-badge">
-                            <i class="fas fa-check-circle"></i> Verified Session • Jan 2026
-                        </div>
-                    </div>
-
-                    <!-- Testimonial 5 -->
-                    <div class="testimonial-card">
-                        <div class="testimonial-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="testimonial-text">
-                            "This content focuses on practical failure modes—correlation collapse, calibration
-                            instability,
-                            numerical blow-ups—insights that come from practitioner experience, not textbooks. For
-                            quants
-                            who want to develop correct intuition and interview-ready reasoning."
-                        </p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <i class="fas fa-user-tie"></i>
-                            </div>
-                            <div class="author-info">
-                                <span class="author-name">Anubhab De</span>
-                                <span class="author-role">Quant Practitioner</span>
-                            </div>
-                        </div>
-                        <div class="verified-badge">
-                            <i class="fas fa-check-circle"></i> Verified Purchase • Jan 2026
-                        </div>
-                    </div>
-                </div>
-
-                <div style="text-align: center; margin-top: 50px;">
-                    <a href="testimonials.html" class="btn btn-secondary">
-                        <i class="fas fa-comments"></i> View All 25+ Reviews
-                    </a>
-                </div>
-
-                <!-- Review Form Section -->
-                <div class="review-section" id="review-form">
-                    <div class="section-container">
-                        <div class="section-header">
-                            <span class="section-tag">Feedback</span>
-                            <h2 class="section-title">Share Your <span class="gradient-text">Experience</span></h2>
-                            <p class="section-subtitle">Had a session or purchased a product? We'd love to hear from
-                                you!
-                            </p>
-                        </div>
-
-                        <div class="review-form-wrapper">
-                            <form class="review-form" id="reviewForm">
-                                <h3>Write a Review</h3>
-                                <p>Your feedback helps others make informed decisions.</p>
-
-                                <div class="form-group">
-                                    <label for="reviewName">Your Name *</label>
-                                    <input type="text" id="reviewName" name="name" required placeholder="John Doe">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="reviewTitle">Review Title *</label>
-                                    <input type="text" id="reviewTitle" name="title" required
-                                        placeholder="Summarize your experience">
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Rating *</label>
-                                    <div class="star-rating-input">
-                                        <input type="radio" id="star5" name="rating" value="5" required><label
-                                            for="star5" title="Excellent"><i class="fas fa-star"></i></label>
-                                        <input type="radio" id="star4" name="rating" value="4"><label for="star4"
-                                            title="Good"><i class="fas fa-star"></i></label>
-                                        <input type="radio" id="star3" name="rating" value="3"><label for="star3"
-                                            title="Average"><i class="fas fa-star"></i></label>
-                                        <input type="radio" id="star2" name="rating" value="2"><label for="star2"
-                                            title="Poor"><i class="fas fa-star"></i></label>
-                                        <input type="radio" id="star1" name="rating" value="1"><label for="star1"
-                                            title="Very Poor"><i class="fas fa-star"></i></label>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="reviewText">Your Review *</label>
-                                    <textarea id="reviewText" name="review" rows="5" required
-                                        placeholder="Share your experience working with Amit..."></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="reviewProduct">What did you use? (Optional)</label>
-                                    <select id="reviewProduct" name="product">
-                                        <option value="">Select a product or service...</option>
-                                        <option value="consultation">Quick Consultation (30 min)</option>
-                                        <option value="mentorship">Mentorship Session (1 hour)</option>
-                                        <option value="deep-dive">Deep Dive Session (2 hours)</option>
-                                        <option value="resume-review">Resume Review</option>
-                                        <option value="career-counseling">Career Counseling</option>
-                                        <option value="quant-pack">Quant Project Pack</option>
-                                        <option value="interview-prep">Interview Preparation Kit</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-paper-plane"></i> Submit Review
-                                </button>
-                            </form>
-
-                            <div class="review-success-message" id="reviewSuccess">
-                                <i class="fas fa-check-circle"></i>
-                                <h4>Thank You for Your Review!</h4>
-                                <p>Your feedback has been submitted successfully and will be published after moderation.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="testimonials-grid" id="approved-testimonials-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px;">
+                    <!-- JS will inject here -->
                 </div>
             </div>
         </section>
 
         <!-- Blog Section -->
-        <section class="blog" id="blog" style="padding: 80px 0;">
-            <div class="section-container">
-                <div class="section-header">
-                    <span class="section-tag">Insights</span>
-                    <h2 class="section-title">Latest <span class="gradient-text">Articles</span></h2>
-                    <p class="section-subtitle">Deep dives into quantitative finance, algorithms, and market
-                        microstructure.
-                    </p>
+        <section id="blog" class="feature-section" style="background: var(--bg-surface);">
+            <div class="container" data-v3-reveal>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 64px;">
+                    <div>
+                        <span class="section-label">Insights</span>
+                        <h2 class="section-headline">Latest Articles.</h2>
+                    </div>
+                    <a href="blog.html"
+                        style="color: #fff; text-decoration: none; font-weight: 500; font-size: 0.875rem;">View all
+                        posts <i class="fas fa-arrow-right" style="font-size: 0.8em; margin-left: 4px;"></i></a>
                 </div>
                 <div class="products-grid" id="blog-grid"
-                    style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
-                    <p style="text-align:center; color:var(--text-muted); grid-column:1/-1;">Loading articles...</p>
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 32px;">
+                    <!-- JS will inject here -->
                 </div>
             </div>
         </section>
 
-        <!-- Blog Modal -->
-        <div class="modal" id="blogModal">
-            <div class="modal-overlay"></div>
-            <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
-                <button class="modal-close" id="blogModalClose"><i class="fas fa-times"></i></button>
-                <div class="modal-header">
-                    <h3 id="blogModalTitle" style="font-size: 1.5em; margin: 0;">Article Title</h3>
-                    <p id="blogModalMeta" style="color:var(--text-muted); font-size:0.9em; margin-top:5px;"></p>
-                </div>
-                <div class="modal-body">
-                    <div id="blogModalCover"
-                        style="margin-bottom:20px; border-radius:8px; overflow:hidden; display:none;">
-                        <img src="" style="width:100%; height:auto; display:block;">
-                    </div>
-                    <div id="blogModalContent" style="line-height:1.6; color:var(--text-muted);"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Contact/Booking Section -->
-        <section class="contact" id="contact">
-            <div class="section-container">
-                <div class="contact-wrapper">
-                    <div class="contact-info">
-                        <span class="section-tag">Get Started</span>
-                        <h2 class="section-title">Ready to <span class="gradient-text">Level Up?</span></h2>
-                        <p class="contact-description">
-                            Book a session or reach out with any questions. I typically respond within 24 hours.
-                        </p>
-
-                        <div class="contact-methods">
-                            <div class="contact-method">
-                                <div class="method-icon">
-                                    <i class="fas fa-envelope"></i>
-                                </div>
-                                <div class="method-details">
-                                    <span class="method-label">Email</span>
-                                    <a href="mailto:jha.8@alumni.iitj.ac.in">jha.8@alumni.iitj.ac.in</a>
-                                </div>
-                            </div>
-                            <div class="contact-method">
-                                <div class="method-icon">
-                                    <i class="fab fa-linkedin-in"></i>
-                                </div>
-                                <div class="method-details">
-                                    <span class="method-label">LinkedIn</span>
-                                    <a href="https://www.linkedin.com/in/akjha002/" target="_blank">Connect on
-                                        LinkedIn</a>
-                                </div>
-                            </div>
-                            <div class="contact-method">
-                                <div class="method-icon">
-                                    <i class="fab fa-twitter"></i>
-                                </div>
-                                <div class="method-details">
-                                    <span class="method-label">X (Twitter)</span>
-                                    <a href="https://x.com/Akjha2023" target="_blank">Follow @Akjha2023</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="contact-form-wrapper">
-                        <form class="contact-form" id="bookingForm">
-                            <h3>Book a Session</h3>
-                            <div class="form-group">
-                                <label for="bookingName">Full Name *</label>
-                                <input type="text" id="bookingName" name="name" required placeholder="Your name">
-                            </div>
-                            <div class="form-group">
-                                <label for="bookingEmail">Email Address *</label>
-                                <input type="email" id="bookingEmail" name="email" required
-                                    placeholder="you@example.com">
-                            </div>
-                            <div class="form-group">
-                                <label for="bookingPhone">Phone Number</label>
-                                <input type="tel" id="bookingPhone" name="phone" placeholder="+91 98765 43210">
-                            </div>
-                            <div class="form-group">
-                                <label for="bookingService">Select Session *</label>
-                                <select id="bookingService" name="service" required>
-                                    <option value="">Choose a session type</option>
-                                    <option value="free|0|15" style="color: #22c55e;">🆓 Free Test Session (15 min) -
-                                        FREE
-                                    </option>
-                                    <option value="quick|499|30">Quick Consultation (30 min) - ₹499</option>
-                                    <option value="deep|999|60">Deep Dive Session (60 min) - ₹999</option>
-                                    <option value="interview|1499|90">Interview Prep (90 min) - ₹1,499</option>
-                                </select>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="bookingDate">Preferred Date *</label>
-                                    <input type="date" id="bookingDate" name="date" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="bookingTime">Preferred Time *</label>
-                                    <select id="bookingTime" name="time" required>
-                                        <option value="">Select time slot</option>
-                                        <option value="10:00 AM">10:00 AM</option>
-                                        <option value="11:00 AM">11:00 AM</option>
-                                        <option value="12:00 PM">12:00 PM</option>
-                                        <option value="2:00 PM">2:00 PM</option>
-                                        <option value="3:00 PM">3:00 PM</option>
-                                        <option value="4:00 PM">4:00 PM</option>
-                                        <option value="5:00 PM">5:00 PM</option>
-                                        <option value="6:00 PM">6:00 PM</option>
-                                        <option value="7:00 PM">7:00 PM</option>
-                                        <option value="8:00 PM">8:00 PM</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="bookingMessage">What do you want to discuss?</label>
-                                <textarea id="bookingMessage" name="message" rows="3"
-                                    placeholder="Tell me about your goals, topics you want to cover..."></textarea>
-                            </div>
-                            <div class="booking-price" id="bookingPrice" style="display: none;">
-                                <span>Session Fee:</span>
-                                <strong id="priceDisplay">₹0</strong>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-full" id="bookingSubmitBtn">
-                                <i class="fas fa-credit-card"></i>
-                                Pay & Book Session
-                            </button>
-                            <p class="form-note">
-                                <i class="fas fa-video"></i> Google Meet link will be shared after payment confirmation
-                            </p>
-                        </form>
-                    </div>
+        <!-- Contact Section -->
+        <section id="contact" class="feature-section">
+            <div class="container" data-v3-reveal style="max-width: 800px; text-align: center;">
+                <span class="section-label">Contact</span>
+                <h2 class="section-headline">Ready to start?</h2>
+                <p class="subheadline" style="margin: 24px auto 48px auto;">
+                    Schedule a session or reach out for custom corporate training requests. I typically respond within
+                    24 hours.
+                </p>
+                <div style="display: flex; gap: 20px; justify-content: center;">
+                    <a href="mailto:jha.8@alumni.iitj.ac.in" class="btn-pill">Send an Email</a>
+                    <a href="https://www.linkedin.com/in/akjha002/" target="_blank" class="btn-pill"
+                        style="background: transparent; color: #fff; border: 1px solid var(--border-rim);">LinkedIn</a>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-main">
-                <div class="footer-brand">
-                    <a href="#" class="logo">
-                        <img src="assets/images/logo.png" alt="QuantMentor" class="logo-img"
-                            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-                        <span class="logo-icon" style="display:none;">📊</span>
-                        <span class="logo-text">QuantMentor</span>
+    <footer style="background: #000; border-top: 1px solid var(--border-light); padding: 80px 0 40px;">
+        <div class="container">
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; padding-bottom: 64px;">
+                <div style="max-width: 320px;">
+                    <a href="#" class="logo"
+                        style="display: flex; align-items: center; gap: 12px; text-decoration: none; margin-bottom: 24px;">
+                        <img src="assets/images/logo.png" alt="QuantMentor" style="width: 24px; height: 24px;">
+                        <span style="color: #fff; font-weight: 800; font-size: 1.125rem;">QuantMentor</span>
                     </a>
-                    <p class="footer-tagline">Expert quant mentorship for the next generation of traders and risk
-                        professionals.</p>
+                    <p style="color: var(--text-muted); font-size: 0.875rem;">Expert practitioner-led mentorship for the
+                        next generation of quantitative professionals.</p>
                 </div>
-                <div class="footer-links">
-                    <div class="footer-column">
-                        <h4>Quick Links</h4>
-                        <ul>
-                            <li><a href="#services">Sessions</a></li>
-                            <li><a href="#products">Products</a></li>
-                            <li><a href="my-bookings.html">My Bookings</a></li>
-                            <li><a href="#contact">Contact</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-column">
-                        <h4>Resources</h4>
-                        <ul>
-                            <li><a href="resources.html">Free Resources</a></li>
-                            <li><a href="blog.html">Blog & Articles</a></li>
-                            <li><a href="faq.html">FAQs</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-column">
-                        <h4>Legal</h4>
-                        <ul>
-                            <li><a href="privacy.html">Privacy Policy</a></li>
-                            <li><a href="terms.html">Terms of Service</a></li>
-                            <li><a href="refund.html">Refund Policy</a></li>
-                        </ul>
+                <div>
+                    <span
+                        style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); display: block; margin-bottom: 24px;">Links</span>
+                    <ul style="list-style: none; display: grid; gap: 12px;">
+                        <li><a href="#services"
+                                style="color: var(--text-tertiary); text-decoration: none; font-size: 0.875rem;">Sessions</a>
+                        </li>
+                        <li><a href="#products"
+                                style="color: var(--text-tertiary); text-decoration: none; font-size: 0.875rem;">Resources</a>
+                        </li>
+                        <li><a href="interview.html"
+                                style="color: var(--text-tertiary); text-decoration: none; font-size: 0.875rem;">AI
+                                Interview</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <span
+                        style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); display: block; margin-bottom: 24px;">Resources</span>
+                    <ul style="list-style: none; display: grid; gap: 12px;">
+                        <li><a href="faq.html"
+                                style="color: var(--text-tertiary); text-decoration: none; font-size: 0.875rem;">FAQs</a>
+                        </li>
+                        <li><a href="privacy.html"
+                                style="color: var(--text-tertiary); text-decoration: none; font-size: 0.875rem;">Privacy</a>
+                        </li>
+                        <li><a href="terms.html"
+                                style="color: var(--text-tertiary); text-decoration: none; font-size: 0.875rem;">Terms</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <span
+                        style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); display: block; margin-bottom: 24px;">Connect</span>
+                    <div style="display: flex; gap: 20px;">
+                        <a href="https://linkedin.com" style="color: var(--text-tertiary); font-size: 1.25rem;"><i
+                                class="fab fa-linkedin"></i></a>
+                        <a href="https://github.com" style="color: var(--text-tertiary); font-size: 1.25rem;"><i
+                                class="fab fa-github"></i></a>
                     </div>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 QuantMentor. All rights reserved.</p>
-                <div class="footer-social">
-                    <a href="https://www.linkedin.com/in/akjha002/" target="_blank" title="LinkedIn"
-                        aria-label="LinkedIn">
-                        <i class="fab fa-linkedin-in"></i>
-                    </a>
-                    <a href="https://github.com/AIM-IT4" target="_blank" title="GitHub" aria-label="GitHub">
-                        <i class="fab fa-github"></i>
-                    </a>
-                    <a href="https://x.com/Akjha2023" target="_blank" title="X (Twitter)" aria-label="X (Twitter)">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a href="#" title="YouTube" aria-label="YouTube">
-                        <i class="fab fa-youtube"></i>
-                    </a>
+            <div
+                style="padding-top: 24px; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center;">
+                <p style="color: var(--text-muted); font-size: 0.75rem;">&copy; 2026 QuantMentor. All rights reserved.
+                </p>
+                <div style="display: flex; gap: 24px; font-size: 0.75rem; color: var(--text-muted);">
+                    <i class="fas fa-lock"></i> Secure Payments
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Product Modal -->
-    <div class="modal" id="productModal">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-            <button class="modal-close" id="modalClose">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="modal-header">
-                <h3 id="modalTitle">Product Name</h3>
+    <!-- Modals for dynamic interaction -->
+    <div id="productModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeProductModal()"></div>
+        <div class="modal-content"
+            style="background: var(--bg-surface); border: 1px solid var(--border-light); border-radius: 24px; padding: 40px; max-width: 600px;">
+            <button class="modal-close" onclick="closeProductModal()"><i class="fas fa-times"></i></button>
+            <h3 id="modalTitle" class="section-headline" style="font-size: 1.5rem; margin-bottom: 16px;">Product Name
+            </h3>
+            <div id="modalDescription" style="color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6;">
             </div>
-            <div class="modal-body">
-                <div id="modalDescription" class="modal-description-text">Product description goes here.</div>
-                <div class="modal-price" id="modalPrice">₹499</div>
-                <div id="pppInfo" style="margin-top:8px; font-size:0.9em; color:var(--text-muted); display:none;">
-                    <i class="fas fa-globe"></i> <span id="pppText"></span>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <div class="coupon-row" style="margin-bottom: 12px;">
-                    <input id="couponInput" placeholder="Have a coupon code?" />
-                    <button id="applyCouponBtn" class="btn btn-secondary" type="button">Apply</button>
-                </div>
-                <!-- Inline Feedback Area -->
-                <div id="modalCouponFeedback" style="margin-bottom: 12px;"></div>
-
-                <p class="modal-note">
-                    <i class="fas fa-lock"></i>
-                    Secure payment via Razorpay. Instant download after payment.
-                </p>
-                <a href="#" class="btn btn-primary btn-full" id="modalPayBtn">
-                    <i class="fas fa-credit-card"></i>
-                    Pay Now
-                </a>
-            </div>
+            <div id="modalPrice" style="font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 32px;">₹0</div>
+            <button id="modalPayBtn" class="btn-pill btn-full">Purchase Now</button>
         </div>
     </div>
 
-    <!-- User Details Modal (Main Page) -->
-    <div id="user-details-modal"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center; backdrop-filter:blur(5px);">
-        <div
-            style="background: var(--bg-card); padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; border: 1px solid var(--border-light); box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
-            <h3 style="margin-bottom: 20px; font-size: 1.5rem; text-align: center; color: var(--text-primary);">Enter
-                Your Details</h3>
-            <p style="color:var(--text-muted); text-align:center; margin-bottom: 24px;">Please provide via secure form
-                so we can send your resource via email.</p>
-
-            <form id="main-user-details-form" style="display: flex; flex-direction: column; gap: 16px;">
-                <div>
-                    <label style="display:block; color:var(--text-muted); margin-bottom:8px; font-size:0.9rem;">Full
-                        Name *</label>
-                    <input type="text" id="main-ud-name" required placeholder="John Doe"
-                        style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
-                </div>
-                <div>
-                    <label style="display:block; color:var(--text-muted); margin-bottom:8px; font-size:0.9rem;">Email
-                        Address *</label>
-                    <input type="email" id="main-ud-email" required placeholder="john@example.com"
-                        style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
-                </div>
-                <div>
-                    <label style="display:block; color:var(--text-muted); margin-bottom:8px; font-size:0.9rem;">Phone
-                        Number (Optional)</label>
-                    <input type="tel" id="main-ud-phone" placeholder="+91 9876543210"
-                        style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
-                </div>
-
-                <button type="submit" class="btn btn-primary"
-                    style="width:100%; padding:14px; margin-top:10px; font-size:1.1rem;">
-                    Proceed to Payment <i class="fas fa-arrow-right" style="margin-left:8px;"></i>
-                </button>
-                <button type="button" id="main-ud-close"
-                    style="background:none; border:none; color:var(--text-muted); padding:10px; cursor:pointer;">Cancel</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Supabase SDK -->
+    <!-- SDKs & Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- Razorpay Checkout Script (Secure - loaded from Razorpay CDN) -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
-    <!-- Config file (contains API keys - not tracked by git, auto-generated on Vercel) -->
-    <script>
-        // Load config.js if it exists, otherwise gracefully fallback
-        (function () {
-            const script = document.createElement('script');
-            script.src = 'config.js';
-            script.onload = function () {
-                console.log('✅ Configuration loaded successfully');
-            };
-            script.onerror = function () {
-                console.log('ℹ️ Local configuration (config.js) not found or build-time injection failed. Using environment variables if available.');
-            };
-            document.head.appendChild(script);
-        })();
-    </script>
-
     <script src="script.js"></script>
+    <script>
+        function closeProductModal() {
+            document.getElementById('productModal').style.display = 'none';
+        }
+
+        // Scroll Reveal
+        const observerOptions = { threshold: 0.1 };
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('[data-v3-reveal]').forEach(el => revealObserver.observe(el));
+
+        // Nav Effect
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.v3-nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+    </script>
 </body>
 
 </html>
