@@ -297,6 +297,12 @@
             color: white;
         }
 
+        /* Tooltip hover effect */
+        .tooltip-container:hover .tooltip-content {
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
         .product-list {
             margin-top: 40px;
         }
@@ -2593,7 +2599,7 @@ QuantMentor
 
                         async function initDashboard() {
                             console.log('📊 Initializing Dashboard...');
-                            console.log('✅ Admin Fixes Applied: Professional v2.1 - Deduplication & Correct Aggregation');
+                            console.log('✅ Admin Fixes Applied: Professional v2.2 - Fully Dynamic Timeframes');
                             document.getElementById('adminContainer').style.display = 'block';
 
                             // Load components in parallel
@@ -2634,7 +2640,7 @@ QuantMentor
                                 // 4. Financials (Current Period vs Previous Period)
                                 const { data: currentPeriodBookings } = await window.supabaseAdminClient
                                     .from('bookings')
-                                    .select('service_price')
+                                    .select('service_price, status')
                                     .gte('created_at', startOfPeriod)
                                     .lte('created_at', endOfPeriod)
                                     .in('status', ['confirmed', 'completed', 'upcoming']);
@@ -2647,7 +2653,7 @@ QuantMentor
 
                                 const { data: previousPeriodBookings } = await window.supabaseAdminClient
                                     .from('bookings')
-                                    .select('service_price')
+                                    .select('service_price, status')
                                     .gte('created_at', startOfPrevious)
                                     .lte('created_at', endOfPrevious)
                                     .in('status', ['confirmed', 'completed', 'upcoming']);
@@ -2726,22 +2732,23 @@ QuantMentor
                                 }
 
                                 // AOV (Average Order Value) - Keep Normalized for AOV as it's an average
-                                const totaltransactions = (allBookingsRev?.length || 0) + (allPurchasesRev?.length || 0);
-                                const aov = totaltransactions > 0 ? Math.round(totalLifetimeRevenueNorm / totaltransactions) : 0;
+                                const totaltransactions = (currentPeriodBookings?.length || 0) + (cleanCurrentPurchases.length || 0);
+                                const aov = totaltransactions > 0 ? Math.round(currentTotalNorm / totaltransactions) : 0;
 
                                 // Update DOM with Breakdown - PROFESSIONAL VIEW
-                                // 1. Primary Display: Normalized Total (Big Number)
-                                const primaryTotal = `₹${Math.round(totalLifetimeRevenueNorm).toLocaleString()}`;
+                                // 1. Primary Display: Normalized Period Total (Big Number)
+                                const primaryTotal = `₹${Math.round(currentTotalNorm).toLocaleString()}`;
 
                                 // 2. Secondary Display: Breakdown (Tooltip / Small Text)
                                 let rawBreakdown = [];
-                                if (lifetimeBreakdown._raw) {
-                                    rawBreakdown = Object.entries(lifetimeBreakdown._raw)
+                                if (periodBreakdown._raw) {
+                                    rawBreakdown = Object.entries(periodBreakdown._raw)
                                         .sort((a, b) => b[1] - a[1])
                                         .map(([c, amt]) => `<div style="display: flex; justify-content: space-between; gap: 20px;"><span>${c}:</span> <span>${formatCurrency(amt, c)}</span></div>`);
                                 }
 
-                                const breakdownHtml = rawBreakdown.length > 0 ? rawBreakdown.join('') : '<div style="color: var(--text-muted);">All in INR</div>';
+                                let breakdownHtml = rawBreakdown.length > 0 ? rawBreakdown.join('') : '<div style="color: var(--text-muted);">All period revenue in INR</div>';
+                                breakdownHtml += `<div style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px; font-weight: bold;">Lifetime Total: ₹${Math.round(totalLifetimeRevenueNorm).toLocaleString()}</div>`;
 
                                 // Structure: Big Total + Info Icon with Tooltip
                                 const finalHtml = `
@@ -2777,18 +2784,20 @@ QuantMentor
                                 document.getElementById('totalRevenue').innerHTML = finalHtml;
                                 document.getElementById('revenueGrowth').innerHTML = growthHtml;
 
-                                // Add hover logic for tooltip (inline style is tricky for hover state, so we use JS listener or CSS class if possible)
-                                // We'll add a simple script to toggle visibility on hover for any .tooltip-container
-                                document.querySelectorAll('.tooltip-container').forEach(el => {
-                                    el.onmouseenter = () => el.querySelector('.tooltip-content').style.visibility = 'visible';
-                                    el.onmouseleave = () => el.querySelector('.tooltip-content').style.visibility = 'hidden';
-                                });
-
+                                // Other cards
                                 document.getElementById('activeBookings').textContent = activeBookingsCount || 0;
-                                document.getElementById('completedBookingsCount').textContent = completedBookingsCount || 0;
+                                document.getElementById('completedBookingsCount').textContent = currentCompletedBookings;
 
-                                document.getElementById('totalSales').textContent = totalSalesCount || 0;
-                                // Sales growth logic similar to revenue if needed, for now simplified
+                                document.getElementById('totalSales').textContent = currentSalesCount;
+
+                                // Sales Growth %
+                                let salesGrowthHtml = '<span style="color: var(--text-muted);">Period sales</span>';
+                                if (previousSalesCount > 0) {
+                                    const sGrowth = ((currentSalesCount - previousSalesCount) / previousSalesCount) * 100;
+                                    const sIsPos = sGrowth >= 0;
+                                    salesGrowthHtml = `<span style="color: ${sIsPos ? '#22c55e' : '#ef4444'}; font-weight: 500;">${sIsPos ? '↗' : '↘'} ${Math.abs(sGrowth).toFixed(0)}%</span> <span style="color: var(--text-muted);">vs prior ${days}d</span>`;
+                                }
+                                document.getElementById('salesGrowth').innerHTML = salesGrowthHtml;
 
                                 document.getElementById('avgOrderValue').textContent = `₹${aov.toLocaleString()}`;
 
