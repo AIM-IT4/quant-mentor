@@ -529,48 +529,46 @@ setTimeout(function () {
 // Fetched country cache
 let userCountryCode = null;
 
-// Try to get user country using timezone (works without external APIs)
+// Try to get user country (simple caching)
 async function getUserCountry() {
     if (userCountryCode) return userCountryCode;
 
-    // Use browser timezone to detect country
-    const timezoneToCountry = {
-        'Asia/Kolkata': 'IN',
-        'Asia/Dubai': 'AE',
-        'Asia/Singapore': 'SG',
-        'Asia/Hong_Kong': 'HK',
-        'Asia/Tokyo': 'JP',
-        'Asia/Seoul': 'KR',
-        'Asia/Shanghai': 'CN',
-        'Europe/London': 'GB',
-        'Europe/Paris': 'FR',
-        'Europe/Berlin': 'DE',
-        'Europe/Amsterdam': 'NL',
-        'Europe/Brussels': 'BE',
-        'Europe/Vienna': 'AT',
-        'Europe/Rome': 'IT',
-        'Europe/Madrid': 'ES',
-        'Europe/Lisbon': 'PT',
-        'Europe/Athens': 'GR',
-        'Europe/Dublin': 'IE',
-        'Europe/Helsinki': 'FI',
-        'America/New_York': 'US',
-        'America/Los_Angeles': 'US',
-        'America/Chicago': 'US',
-        'America/Toronto': 'CA',
-        'America/Vancouver': 'CA',
-        'America/Sao_Paulo': 'BR',
-        'America/Mexico_City': 'MX',
-        'Australia/Sydney': 'AU',
-        'Australia/Melbourne': 'AU',
-        'Pacific/Auckland': 'NZ',
+    // Helper to fetch with timeout
+    const fetchWithTimeout = async (url, timeout = 5000) => {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeout);
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(id);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
     };
 
     try {
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        userCountryCode = timezoneToCountry[timezone] || 'IN';
+        // Try ipwho.is with explicit IP parameter (works better)
+        console.log('🔄 Trying IP service (ipwho.is)...');
+        const ipResponse = await fetch('https://ipwho.is/?Fields=country_code,country');
+        if (!ipResponse.ok) throw new Error(`HTTP ${ipResponse.status}`);
+        const data = await ipResponse.json();
+        
+        if (!data.success) {
+            throw new Error(data.message || 'IP lookup failed');
+        }
+        userCountryCode = data.country_code;
     } catch (e) {
-        userCountryCode = 'IN';
+        // Fallback: try browser timezone
+        console.warn('⚠️ IP lookup failed, trying timezone fallback:', e);
+        const timezoneToCountry = {
+            'Asia/Kolkata': 'IN', 'Asia/Dubai': 'AE', 'Asia/Singapore': 'SG',
+            'Europe/London': 'GB', 'Europe/Paris': 'FR', 'Europe/Berlin': 'DE',
+            'America/New_York': 'US', 'America/Los_Angeles': 'US', 'America/Chicago': 'US',
+            'Australia/Sydney': 'AU', 'Asia/Tokyo': 'JP', 'Asia/Seoul': 'KR',
+        };
+        try {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            userCountryCode = timezoneToCountry[tz] || 'IN';
+        } catch {
+            userCountryCode = 'IN';
+        }
     }
 
     console.log('🌍 User country detected:', userCountryCode);
