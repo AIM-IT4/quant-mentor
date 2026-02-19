@@ -7,58 +7,71 @@
    CSS Custom Properties (Variables)
    -------------------------------- */
 :root {
-    /* Colors - Dark Theme */
-    --bg-primary: #0d1117;
-    --bg-secondary: #161b22;
-    --bg-tertiary: #21262d;
-    --bg-card: rgba(26, 26, 37, 0.8);
-    --bg-glass: rgba(255, 255, 255, 0.05);
+    /* Backgrounds - Pure Black Foundation */
+    --bg-primary: #000000;
+    --bg-secondary: #050505;
+    --bg-tertiary: #0a0a0a;
+    --bg-card: #111111;
+    --bg-nav: rgba(0, 0, 0, 0.7);
+    --bg-glass: rgba(255, 255, 255, 0.03);
 
     /* Text Colors */
     --text-primary: #ffffff;
-    --text-secondary: #a0a0b0;
-    --text-muted: #6a6a7a;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-tertiary: rgba(255, 255, 255, 0.5);
+    --text-muted: rgba(255, 255, 255, 0.4);
 
-    /* Accent Colors */
-    --accent-primary: #2dd4bf;
-    --accent-secondary: #14b8a6;
-    --accent-tertiary: #0d9488;
-    --accent-gradient: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 40%, #f59e0b 100%);
+    /* Accents - Cinematic Multi-Accent System */
+    --accent-primary: #f43f5e;
+    /* Rose - Primary feature */
+    --accent-secondary: #3b82f6;
+    /* Blue - Secondary feature */
+    --accent-tertiary: #f59e0b;
+    /* Amber - Warm highlights */
+    --accent-gradient: linear-gradient(135deg, #f43f5e 0%, #3b82f6 50%, #f59e0b 100%);
 
     /* Status Colors */
     --success: #22c55e;
     --warning: #f59e0b;
     --error: #ef4444;
 
-    /* Borders */
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-light: rgba(255, 255, 255, 0.12);
+    /* Borders & Rims */
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-light: rgba(255, 255, 255, 0.08);
+    --border-rim: rgba(255, 255, 255, 0.12);
 
-    /* Shadows */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
-    --shadow-glow: 0 0 40px rgba(45, 212, 191, 0.25);
+    /* Shadows & Glows */
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.6);
+    --shadow-lg: 0 16px 64px rgba(0, 0, 0, 0.8);
+    --shadow-glow: 0 0 50px rgba(255, 255, 255, 0.1);
 
     /* Typography */
-    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 
+    /* Type Scale */
+    --h1-size: clamp(2.5rem, 6vw, 4.5rem);
+    --h2-size: clamp(2rem, 5vw, 3.5rem);
+    --h3-size: 1.5rem;
+    --body-size: 1rem;
+    --small-size: 0.875rem;
+
     /* Spacing */
-    --section-padding: 100px 0;
+    --section-padding: 140px 0;
     --container-width: 1200px;
     --container-padding: 0 24px;
 
     /* Border Radius */
+    --radius-pill: 9999px;
     --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 20px;
-    --radius-xl: 28px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
 
     /* Transitions */
-    --transition-fast: 0.15s ease;
-    --transition-normal: 0.3s ease;
-    --transition-slow: 0.5s ease;
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.8s cubic-bezier(0.2, 1, 0.3, 1);
 }
 
 /* --------------------------------
@@ -137,6 +150,16 @@ body.light-mode .product-price-tag {
 
 /* Consolidated Mobile Theme Overrides moved to bottom for priority */
 
+section {
+    padding: var(--section-padding);
+}
+
+.section-container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: var(--container-padding);
+}
+
 /* --------------------------------
    Reset & Base Styles
    -------------------------------- */
@@ -198,20 +221,44 @@ h4,
 h5,
 h6 {
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
     color: var(--text-primary);
 }
 
-h1 {
-    font-size: clamp(2.5rem, 5vw, 4rem);
+.hero-headline {
+    font-size: var(--h1-size);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    margin-bottom: 24px;
 }
 
-h2 {
-    font-size: clamp(2rem, 4vw, 3rem);
+.section-headline {
+    font-size: var(--h2-size);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    margin-bottom: 24px;
 }
 
-h3 {
-    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+.subheadline {
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-width: 520px;
+}
+
+.section-label {
+    display: inline-block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
 }
 
 .gradient-text {
@@ -224,11 +271,7 @@ h3 {
 /* --------------------------------
    Layout Utilities
    -------------------------------- */
-.section-container {
-    max-width: var(--container-width);
-    margin: 0 auto;
-    padding: var(--container-padding);
-}
+/* .section-container is now defined above for consistency */
 
 .section-header {
     text-align: center;
@@ -268,38 +311,41 @@ h3 {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    padding: 14px 28px;
+    gap: 12px;
+    padding: 14px 32px;
     font-weight: 600;
-    font-size: 0.95rem;
-    border-radius: var(--radius-md);
+    font-size: 0.9375rem;
+    border-radius: var(--radius-pill);
     border: none;
     cursor: pointer;
     transition: all var(--transition-normal);
+    text-decoration: none;
     white-space: nowrap;
 }
 
 .btn-primary {
-    background: var(--accent-gradient);
-    color: white;
-    box-shadow: 0 4px 20px rgba(45, 212, 191, 0.35);
+    background: #ffffff;
+    color: #000000;
+    box-shadow: 0 0 50px rgba(255, 255, 255, 0.15);
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 30px rgba(45, 212, 191, 0.45);
+    transform: scale(1.05);
+    background: #f8fafc;
+    box-shadow: 0 0 60px rgba(255, 255, 255, 0.25);
 }
 
 .btn-secondary {
-    background: var(--bg-glass);
-    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
     border: 1px solid var(--border-light);
     backdrop-filter: blur(10px);
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: var(--accent-primary);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
 }
 
 .btn-service {
@@ -316,15 +362,15 @@ h3 {
 }
 
 .btn-product {
-    background: var(--accent-primary);
-    color: white;
     padding: 10px 20px;
-    font-size: 0.9rem;
+    background: #ffffff;
+    color: #000000;
+    font-size: 0.875rem;
 }
 
 .btn-product:hover {
-    background: var(--accent-secondary);
-    transform: translateY(-2px);
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
 }
 
 .btn-full {
@@ -341,13 +387,20 @@ h3 {
     left: 0;
     right: 0;
     z-index: 1000;
-    padding: 12px 0;
-    /* Reduced padding for sleeker look */
-    background: rgba(10, 10, 15, 0.85);
-    /* Slightly less transparency for better contrast */
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border-subtle);
+    padding: 20px 0;
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0);
+    -webkit-backdrop-filter: blur(0);
+    border-bottom: 1px solid transparent;
     transition: all var(--transition-normal);
+}
+
+.navbar.scrolled {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-rim);
+    padding: 12px 0;
 }
 
 .nav-container {
@@ -401,14 +454,18 @@ h3 {
 }
 
 .nav-cta {
-    padding: 10px 20px;
-    background: var(--accent-gradient);
-    border-radius: var(--radius-md);
-    color: white !important;
+    padding: 8px 16px !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-radius: var(--radius-pill) !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
 }
 
 .nav-cta:hover {
-    box-shadow: var(--shadow-glow);
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
 }
 
 .mobile-menu-btn {
@@ -424,12 +481,14 @@ h3 {
    Hero Section
    -------------------------------- */
 .hero {
-    min-height: 100vh;
+    position: relative;
+    padding: 160px 0 100px;
+    background: var(--bg-primary);
+    overflow: hidden;
     display: flex;
     align-items: center;
-    padding: 120px 0 80px;
-    position: relative;
-    overflow: hidden;
+    justify-content: center;
+    min-height: 90vh;
 }
 
 .hero-bg-effects {
@@ -440,26 +499,25 @@ h3 {
 
 .gradient-orb {
     position: absolute;
+    width: 600px;
+    height: 600px;
     border-radius: 50%;
     filter: blur(100px);
-    opacity: 0.5;
+    opacity: 0.2;
+    z-index: 1;
 }
 
 .orb-1 {
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(45, 212, 191, 0.35), transparent 70%);
-    top: -200px;
-    right: -200px;
+    top: -100px;
+    right: -100px;
+    background: radial-gradient(circle, var(--accent-primary), transparent 70%);
     animation: float 8s ease-in-out infinite;
 }
 
 .orb-2 {
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(245, 158, 11, 0.25), transparent 70%);
     bottom: -100px;
     left: -100px;
+    background: radial-gradient(circle, var(--accent-secondary), transparent 70%);
     animation: float 10s ease-in-out infinite reverse;
 }
 
@@ -479,10 +537,12 @@ h3 {
     position: absolute;
     inset: 0;
     background-image:
-        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-    background-size: 60px 60px;
-    opacity: 0.5;
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    mask-image: radial-gradient(circle at center, black, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at center, black, transparent 80%);
+    opacity: 0.3;
 }
 
 .hero-container {
@@ -720,19 +780,28 @@ h3 {
     gap: 24px;
 }
 
-.service-card {
-    position: relative;
-    padding: 32px;
+.service-card,
+.product-card,
+.testimonial-card,
+.glass-card,
+.modal-content {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
-.service-card:hover {
-    border-color: var(--accent-primary);
+.service-card:hover,
+.product-card:hover,
+.testimonial-card:hover,
+.glass-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
     transform: translateY(-8px);
-    box-shadow: var(--shadow-glow);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .service-card.popular {

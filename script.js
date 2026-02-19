@@ -80,6 +80,17 @@ async function sendAdminNotification(subject, htmlContent, textContent) {
 document.addEventListener('DOMContentLoaded', function () {
     console.log('🚀 DOM loaded, initializing all components...');
 
+    const navbar = document.querySelector('.navbar');
+    if (navbar) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    }
+
     // --------------------------------
     // Theme Toggle Logic
     // --------------------------------
@@ -192,26 +203,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // --------------------------------
-    // Navbar Background on Scroll
-    // --------------------------------
-    const navbar = document.querySelector('.navbar');
-
-    window.addEventListener('scroll', function () {
-        if (!navbar) return; // FIX: Prevent error on pages without navbar (e.g. admin)
-
-        if (window.scrollY > 50) {
-            navbar.style.background = 'var(--bg-card)';
-            navbar.style.backdropFilter = 'blur(10px)';
-            navbar.style.borderBottom = '1px solid var(--border-light)';
-            navbar.style.boxShadow = 'var(--shadow-md)';
-        } else {
-            navbar.style.background = 'transparent';
-            navbar.style.backdropFilter = 'none';
-            navbar.style.borderBottom = 'none';
-            navbar.style.boxShadow = 'none';
-        }
-    });
+    // Navbar Background Scroll Listener replaced by class-based toggle at top of file
 
     // --------------------------------
     // Product Filtering
