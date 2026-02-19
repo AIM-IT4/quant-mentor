@@ -38,6 +38,15 @@
         })();
     </script>
     <script>
+        // --- Theme Initial Check (Prevent Flashing) ---
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+            }
+        })();
+    </script>
+    <script>
         // BREVO EMAIL CONFIGURATION (replaces EmailJS)
         const BREVO_API_KEY_BASE = 'xkeysib-your-api-key-here';
         const BREVO_SENDER_EMAIL_BASE = 'jha.8@alumni.iitj.ac.in';
@@ -728,6 +737,36 @@
     /* Overlay blur fallback for light mode login */
     body.light-mode #loginOverlay {
     background: rgba(255, 255, 255, 0.95);
+    }
+
+    /* Forced Login Styles to prevent visibility issues */
+    #loginBtn {
+    background: #ffffff;
+    color: #000000;
+    border: 1px solid transparent;
+    margin-top: 10px;
+    }
+
+    body.light-mode #loginBtn {
+    background: #0f172a; /* Dark background */
+    color: #ffffff; /* White text */
+    border: 1px solid transparent;
+    }
+
+    #adminPassword {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-subtle);
+    }
+
+    body.light-mode #adminPassword {
+    background: #ffffff;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+    }
+
+    body.light-mode #adminPassword::placeholder {
+    color: #64748b;
     }
 
     /* Section Visibility Logic */
