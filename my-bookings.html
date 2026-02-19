@@ -12,6 +12,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // --- Theme Initial Check (Prevent Flashing) ---
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                const applyLightMode = () => {
+                    if (document.body) document.body.classList.add('light-mode');
+                };
+                applyLightMode();
+                if (!document.body) {
+                    document.addEventListener('DOMContentLoaded', applyLightMode, { once: true });
+                }
+            }
+        })();
+    </script>
+
+    <script>
         // Load config.js if it exists, otherwise gracefully fallback
         (function () {
             const script = document.createElement('script');
@@ -27,18 +43,66 @@
     </script>
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #a855f7;
-            --background: #0a0a0f;
-            --surface: #13131f;
-            --text: #e2e8f0;
-            --text-muted: #94a3b8;
-            --border: rgba(255, 255, 255, 0.1);
+            /* Backgrounds - Pure Black Foundation */
+            --bg-primary: #000000;
+            --bg-secondary: #050505;
+            --bg-tertiary: #0a0a0a;
+            --bg-card: #111111;
+            --bg-glass: rgba(255, 255, 255, 0.03);
+
+            /* Text Colors */
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.4);
+
+            /* Accents */
+            --accent-primary: #f43f5e;
+            --accent-secondary: #3b82f6;
+            --accent-gradient: linear-gradient(135deg, #f43f5e 0%, #3b82f6 100%);
+
+            /* Status */
             --success: #22c55e;
             --warning: #f59e0b;
             --error: #ef4444;
+
+            /* Borders */
+            --border-subtle: rgba(255, 255, 255, 0.05);
+            --border-light: rgba(255, 255, 255, 0.1);
+            --border-rim: rgba(255, 255, 255, 0.15);
+
+            /* Radius */
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-pill: 100px;
+
+            /* Legacy Mapper */
+            --primary: var(--accent-primary);
+            --secondary: var(--accent-secondary);
+            --surface: var(--bg-card);
+            --background: var(--bg-primary);
+            --text: var(--text-primary);
+            --border: var(--border-subtle);
         }
+
+        body.light-mode {
+            /* Colors - Light Theme */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --bg-glass: rgba(0, 0, 0, 0.05);
+
+            /* Text Colors */
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+
+            /* Borders */
+            --border-subtle: rgba(0, 0, 0, 0.08);
+            --border-light: rgba(0, 0, 0, 0.12);
+            --border-rim: rgba(0, 0, 0, 0.15);
+        }
+
 
         body {
             font-family: 'Space Grotesk', sans-serif;
@@ -56,18 +120,35 @@
         }
 
         .booking-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
+            background: var(--bg-card);
+            border: 1px solid var(--border-rim);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            margin-bottom: 24px;
+            transition: all var(--transition-normal);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .booking-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+            opacity: 0.3;
         }
 
         .booking-card:hover {
-            border-color: var(--primary);
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
+            transform: translateY(-5px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
+
 
         .booking-header {
             display: flex;
@@ -100,8 +181,8 @@
         }
 
         .status-reschedule_requested {
-            background: rgba(168, 85, 247, 0.1);
-            color: #a855f7;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-secondary);
         }
 
         .status-cancellation_requested {
@@ -110,16 +191,17 @@
         }
 
         .status-cancelled {
-            background: rgba(148, 163, 184, 0.1);
+            background: var(--bg-glass);
             color: var(--text-muted);
             text-decoration: line-through;
         }
 
         .status-admin_reschedule_pending {
-            background: rgba(168, 85, 247, 0.1);
-            color: #a855f7;
-            border: 1px dashed #a855f7;
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px dashed var(--warning);
         }
+
 
         .booking-details {
             display: grid;
@@ -149,28 +231,42 @@
         }
 
         .btn {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 12px;
+            padding: 14px 32px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            border-radius: var(--radius-pill);
+            border: none;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            white-space: nowrap;
+            background: #ffffff;
+            color: #000000;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        .btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            background: #f8fafc;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.15);
         }
 
         .btn-secondary {
-            background: transparent;
-            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border: 1px solid var(--border-light);
+            backdrop-filter: blur(10px);
         }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
 
         .form-group {
             margin-bottom: 20px;
@@ -196,12 +292,15 @@
         }
 
         .search-box {
-            background: var(--surface);
-            padding: 30px;
-            border-radius: 12px;
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: var(--radius-lg);
             margin-bottom: 40px;
             text-align: center;
+            border: 1px solid var(--border-rim);
+            backdrop-filter: blur(20px);
         }
+
 
         .no-bookings {
             text-align: center;
@@ -265,13 +364,20 @@
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="index.html" class="logo" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
-                <img src="assets/images/quantmentor-logo-icon-QM-1024.png" alt="QuantMentor Logo" style="height: 32px; width: auto;">
-                <span style="font-weight: 700; font-size: 1.2rem; background: linear-gradient(135deg, white 0%, #a5b4fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">QuantMentor</span>
+    <nav class="navbar"
+        style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 20px 0; background: var(--bg-nav, rgba(0, 0, 0, 0.7)); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-rim);">
+
+        <div class="nav-container"
+            style="max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between;">
+            <a href="index.html" class="logo"
+                style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                <img src="assets/images/quantmentor-logo-icon-QM-1024.png" alt="QuantMentor Logo"
+                    style="height: 32px; width: auto;">
+                <span
+                    style="font-weight: 700; font-size: 1.2rem; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">QuantMentor</span>
+
             </a>
-            <a href="index.html" style="color: var(--text-secondary);">← Back to Home</a>
+            <a href="index.html" style="color: var(--text-secondary); font-weight: 500;">← Back to Home</a>
         </div>
     </nav>
 
@@ -370,7 +476,7 @@
                 return;
             }
 
-            container.innerHTML = '<p style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 2em; color: var(--primary);"></i><br><br>Loading your bookings...</p>';
+            container.innerHTML = '<p style="text-align: center; padding: 60px;"><i class="fas fa-spinner fa-spin" style="font-size: 2.5em; color: var(--accent-primary); filter: drop-shadow(0 0 10px rgba(244, 63, 94, 0.4));"></i><br><br><span style="color: var(--text-secondary); font-weight: 500;">Loading your bookings...</span></p>';
 
             try {
                 // Query the actual bookings table from Supabase
@@ -438,9 +544,10 @@
                         </div>
                         <div class="detail-item">
                             <i class="fas fa-tag"></i>
-                            <span>₹${booking.service_price || booking.price}</span>
+                            <span style="color: var(--accent-primary); font-weight: 600;">₹${booking.service_price || booking.price}</span>
                         </div>
                     </div>
+
 
                     ${(booking.status === 'upcoming' || booking.status === 'confirmed') ? `
                         <div class="meet-link">
@@ -453,25 +560,28 @@
                     ` : ''}
 
                     ${booking.status === 'admin_reschedule_pending' ? `
-                        <div style="background: rgba(168, 85, 247, 0.1); border: 1px dashed #a855f7; padding: 20px; border-radius: 8px; margin-top: 15px;">
-                            <i class="fas fa-calendar-alt" style="color: #a855f7; font-size: 1.2em;"></i>
-                            <strong style="color: #a855f7; font-size: 1.1em; margin-left: 8px;">Admin Reschedule Request</strong>
+                        <div style="background: var(--bg-glass); border: 1px dashed var(--warning); padding: 25px; border-radius: var(--radius-md); margin-top: 20px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                                <i class="fas fa-calendar-alt" style="color: var(--warning); font-size: 1.2em;"></i>
+                                <strong style="color: var(--warning); font-size: 1.1em;">Reschedule Proposed by Admin</strong>
+                            </div>
                             
-                            <div style="margin-top: 15px; display: grid; gap: 10px;">
-                                <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 6px;">
-                                    <small style="color: var(--text-muted);">Current Schedule:</small><br>
-                                    <span>${formatDate(booking.booking_date)} at ${booking.booking_time}</span>
+                            <div style="margin-top: 15px; display: grid; gap: 12px;">
+                                <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                                    <small style="color: var(--text-muted); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px;">Current Schedule</small><br>
+                                    <span style="font-weight: 500;">${formatDate(booking.booking_date)} at ${booking.booking_time}</span>
                                 </div>
-                                <div style="background: rgba(168, 85, 247, 0.15); padding: 12px; border-radius: 6px; border-left: 3px solid #a855f7;">
-                                    <small style="color: #a855f7;">Proposed New Schedule:</small><br>
-                                    <strong style="color: white;">${formatDate(booking.admin_proposed_date)} at ${booking.admin_proposed_time}</strong>
+                                <div style="background: rgba(245, 158, 11, 0.1); padding: 12px; border-radius: 8px; border: 1px solid var(--warning);">
+                                    <small style="color: var(--warning); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px;">Proposed New Schedule</small><br>
+                                    <strong style="color: var(--text-primary); font-size: 1.05rem;">${formatDate(booking.admin_proposed_date)} at ${booking.admin_proposed_time}</strong>
                                 </div>
                                 ${booking.admin_reschedule_reason ? `
-                                    <div style="color: var(--text-muted); font-size: 0.9em;">
-                                        <i class="fas fa-info-circle"></i> Reason: ${booking.admin_reschedule_reason}
+                                    <div style="color: var(--text-secondary); font-size: 0.9em; padding: 10px; background: var(--bg-tertiary); border-radius: 6px;">
+                                        <i class="fas fa-info-circle"></i> <strong>Reason:</strong> ${booking.admin_reschedule_reason}
                                     </div>
                                 ` : ''}
                             </div>
+
 
                             <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
                                 <button onclick="acceptAdminReschedule('${booking.id}')" class="btn" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
