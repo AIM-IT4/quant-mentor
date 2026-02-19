@@ -789,13 +789,16 @@
 <body>
 
     <!-- Login Overlay -->
-    <div id="loginOverlay">
-        <div class="card" style="width: 300px; text-align: center;">
-            <h2>Admin Access</h2>
+    <div id="loginOverlay" style="background: rgba(10, 10, 15, 0.98) !important;">
+        <div class="card"
+            style="width: 300px; text-align: center; background: #111111 !important; border: 1px solid #333 !important; color: white !important;">
+            <h2 style="color: white !important; margin-bottom: 20px;">Admin Access</h2>
             <div class="form-group">
-                <input type="password" id="adminPassword" placeholder="Enter Password">
+                <input type="password" id="adminPassword" placeholder="Enter Password"
+                    style="background: #222 !important; color: white !important; border: 1px solid #444 !important; outline: none; padding: 12px; border-radius: 8px; width: 100%;">
             </div>
-            <button id="loginBtn" onclick="checkPassword()">Login</button>
+            <button id="loginBtn" onclick="checkPassword()"
+                style="background: white !important; color: black !important; border: none !important; margin-top: 10px; width: 100%; padding: 12px; border-radius: 100px; font-weight: 700; cursor: pointer;">Login</button>
         </div>
     </div>
 
