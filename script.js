@@ -550,7 +550,7 @@ async function getUserCountry() {
             { url: 'https://ipapi.co/json/', parse: (d) => d.country_code },
             { url: 'https://ipwho.is/', parse: (d) => d.success ? d.country_code : null },
         ];
-        
+
         for (const svc of services) {
             try {
                 console.log('🔄 Trying IP service:', svc.url);
@@ -564,7 +564,7 @@ async function getUserCountry() {
                 console.warn('⚠️ Failed:', svc.url, e.message);
             }
         }
-        
+
         if (!userCountryCode) throw new Error('All IP services failed');
     } catch (e) {
         // Fallback: try browser timezone
@@ -1572,8 +1572,8 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
                         download_link: downloadLink
                     });
                     console.log('✅ Purchase logged to Supabase:', { customerEmail, productName, paymentId });
-                } catch (err) { 
-                    console.error('❌ Failed to log purchase:', err); 
+                } catch (err) {
+                    console.error('❌ Failed to log purchase:', err);
                     // Continue - don't block user experience
                 }
             }
@@ -1703,7 +1703,42 @@ ${BUSINESS_NAME}`;
     } else {
         console.log('⚠️ Brevo API key not configured. Skipping customer email.');
     }
-    // Admin is already notified via sendAdminNotification in initRazorpayCheckout handler
+
+    // ===== ADMIN NOTIFICATION (NEW) =====
+    try {
+        const adminEmailBody = `
+New Product Purchase:
+━━━━━━━━━━━━━━━━━━━━
+📦 Product: ${productName}
+🆔 Payment ID: ${paymentId}
+
+👤 Customer Details:
+   Name: ${customerName}
+   Email: ${customerEmail}
+
+📥 Download Link Provided:
+   ${downloadLink}
+━━━━━━━━━━━━━━━━━━━━
+        `.trim();
+
+        const adminHtml = `
+            <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+                <h2 style="color: #4f46e5;">💰 New Product Sale</h2>
+                <p><strong>Product:</strong> ${productName}</p>
+                <p><strong>Customer:</strong> ${customerName} (${customerEmail})</p>
+                <p><strong>Payment ID:</strong> ${paymentId}</p>
+                <hr style="border: 1px solid #eee; margin: 20px 0;">
+                <p><strong>📥 Download Link Delivered:</strong></p>
+                <a href="${downloadLink}" style="display: inline-block; background: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Verify Download Resource</a>
+                <p style="margin-top: 15px; color: #6b7280; font-size: 0.9em;">${downloadLink}</p>
+            </div>
+        `;
+
+        await sendAdminNotification(`Sale: ${productName} - ${customerName}`, adminHtml, adminEmailBody);
+        console.log('✅ Admin notified of product purchase.');
+    } catch (adminErr) {
+        console.error('⚠️ Admin notification failed:', adminErr);
+    }
 }
 
 // Connect to product modal - MOVED INSIDE MAIN DOMContentLoaded
@@ -1870,16 +1905,16 @@ let SESSION_TYPES = {};
 // Check if a date falls within any blocked date range
 async function isDateBlocked(dateString) {
     if (!window.supabaseClient) return false;
-    
+
     try {
         const { data, error } = await window.supabaseClient
             .from('blocked_date_ranges')
             .select('start_date, end_date');
-        
+
         if (error || !data || data.length === 0) return false;
-        
+
         const checkDate = new Date(dateString + 'T00:00:00'); // Normalize to start of day
-        
+
         return data.some(block => {
             const start = new Date(block.start_date + 'T00:00:00');
             const end = new Date(block.end_date + 'T23:59:59');
