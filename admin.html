@@ -2593,7 +2593,7 @@ QuantMentor
 
                         async function initDashboard() {
                             console.log('📊 Initializing Dashboard...');
-                            console.log('✅ Admin Fixes Applied: Professional v2.0 - Growth Logic + Currency Correction');
+                            console.log('✅ Admin Fixes Applied: Professional v2.1 - Deduplication & Correct Aggregation');
                             document.getElementById('adminContainer').style.display = 'block';
 
                             // Load components in parallel
@@ -2641,10 +2641,9 @@ QuantMentor
 
                                 let { data: currentPeriodPurchases } = await window.supabaseAdminClient
                                     .from('purchases')
-                                    .select('amount, currency')
+                                    .select('amount, currency, payment_id')
                                     .gte('created_at', startOfPeriod)
                                     .lte('created_at', endOfPeriod);
-                                currentPeriodPurchases = (currentPeriodPurchases || []).filter(p => !isGhost(p));
 
                                 const { data: previousPeriodBookings } = await window.supabaseAdminClient
                                     .from('bookings')
@@ -2655,10 +2654,9 @@ QuantMentor
 
                                 let { data: previousPeriodPurchases } = await window.supabaseAdminClient
                                     .from('purchases')
-                                    .select('amount, currency')
+                                    .select('amount, currency, payment_id')
                                     .gte('created_at', startOfPrevious)
                                     .lte('created_at', endOfPrevious);
-                                previousPeriodPurchases = (previousPeriodPurchases || []).filter(p => !isGhost(p));
 
 
                                 // 5. Total Lifetime Revenue
@@ -2669,55 +2667,61 @@ QuantMentor
 
                                 let { data: allPurchasesRev } = await window.supabaseAdminClient
                                     .from('purchases')
-                                    .select('amount, currency');
+                                    .select('amount, currency, payment_id');
 
-                                // Apply Emergency Filter
-                                allPurchasesRev = (allPurchasesRev || []).filter(p => !isGhost(p));
+                                // Deduplicate purchases by Payment ID to prevent ghost/duplicate counts
+                                const deduplicatePurchases = (list) => {
+                                    if (!list) return [];
+                                    const map = new Map();
+                                    // Sort by amount desc so we keep the "real" price if duplicates exist
+                                    [...list].sort((a, b) => (b.amount || 0) - (a.amount || 0)).forEach(p => {
+                                        if (p.payment_id && !map.has(p.payment_id)) map.set(p.payment_id, p);
+                                        else if (!p.payment_id) map.set(Math.random(), p); // Keep untracked ones
+                                    });
+                                    return Array.from(map.values());
+                                };
+
+                                const cleanCurrentPurchases = deduplicatePurchases(currentPeriodPurchases);
+                                const cleanPreviousPurchases = deduplicatePurchases(previousPeriodPurchases);
+                                const cleanLifetimePurchases = deduplicatePurchases(allPurchasesRev);
 
                                 // Calculations with Currency Breakdown
                                 const calcRevenueBreakdown = (bookings, purchases) => {
-                                    const totals = {};
-
-                                    // Bookings assumed INR
-                                    if (bookings) {
-                                        bookings.forEach(b => {
-                                            totals['INR'] = (totals['INR'] || 0) + (b.service_price || 0);
-                                        });
-                                    }
-
-                                    // Purchases
+                                    const totals = { INR: 0, _raw: {} };
+                                    if (bookings) bookings.forEach(b => totals.INR += (b.service_price || 0));
                                     if (purchases) {
                                         purchases.forEach(p => {
+                                            const normalizedAmt = normalizeToINR(p.amount, p.currency);
+                                            totals.INR += normalizedAmt;
+
+                                            // For tooltip display of raw amounts
                                             const c = (p.currency || 'INR').toUpperCase();
-                                            totals[c] = (totals[c] || 0) + (p.amount || 0);
+                                            if (c !== 'INR') {
+                                                totals._raw[c] = (totals._raw[c] || 0) + (p.amount || 0);
+                                            }
                                         });
                                     }
-
                                     return totals;
                                 };
 
-                                // Helper to get normalized sum for growth calc
-                                const getNormalizedTotal = (breakdown) => {
-                                    return Object.entries(breakdown).reduce((sum, [c, amt]) => sum + normalizeToINR(amt, c), 0);
-                                };
+                                const currentTotalNorm = (currentPeriodBookings?.reduce((s, b) => s + (b.service_price || 0), 0) || 0) +
+                                    cleanCurrentPurchases.reduce((s, p) => s + normalizeToINR(p.amount, p.currency), 0);
 
-                                const currentBreakdown = calcRevenueBreakdown(currentPeriodBookings, currentPeriodPurchases);
-                                const lastBreakdown = calcRevenueBreakdown(previousPeriodBookings, previousPeriodPurchases);
-                                const lifetimeBreakdown = calcRevenueBreakdown(allBookingsRev, allPurchasesRev);
+                                const previousTotalNorm = (previousPeriodBookings?.reduce((s, b) => s + (b.service_price || 0), 0) || 0) +
+                                    cleanPreviousPurchases.reduce((s, p) => s + normalizeToINR(p.amount, p.currency), 0);
 
-                                const currentRevenueNorm = getNormalizedTotal(currentBreakdown);
-                                const lastRevenueNorm = getNormalizedTotal(lastBreakdown);
-                                const totalLifetimeRevenueNorm = getNormalizedTotal(lifetimeBreakdown); // For AOV only
+                                const lifetimeBreakdown = calcRevenueBreakdown(allBookingsRev, cleanLifetimePurchases);
+                                const totalLifetimeRevenueNorm = lifetimeBreakdown.INR;
 
                                 // Growth % (Using Normalized Values)
                                 let growthHtml = '<span style="color: var(--text-muted);">No comparison data</span>';
-                                if (lastRevenueNorm > 0) {
-                                    const growth = ((currentRevenueNorm - lastRevenueNorm) / lastRevenueNorm) * 100;
+                                if (previousTotalNorm > 0) {
+                                    const growth = ((currentTotalNorm - previousTotalNorm) / previousTotalNorm) * 100;
                                     const isPositive = growth >= 0;
                                     const color = isPositive ? '#22c55e' : '#ef4444';
                                     const icon = isPositive ? '↗' : '↘';
                                     growthHtml = `<span style="color: ${color}; font-weight: 500;">${icon} ${Math.abs(growth).toFixed(1)}%</span> <span style="color: var(--text-muted);">vs prior ${days}d</span>`;
-                                } else if (currentRevenueNorm > 0) {
+                                } else if (currentTotalNorm > 0) {
                                     growthHtml = `<span style="color: #22c55e; font-weight: 500;">↗ 100%</span> <span style="color: var(--text-muted);">new growth</span>`;
                                 }
 
@@ -2730,11 +2734,14 @@ QuantMentor
                                 const primaryTotal = `₹${Math.round(totalLifetimeRevenueNorm).toLocaleString()}`;
 
                                 // 2. Secondary Display: Breakdown (Tooltip / Small Text)
-                                const breakdownHtml = Object.entries(lifetimeBreakdown)
-                                    .filter(([_, amt]) => amt > 0)
-                                    .sort((a, b) => normalizeToINR(b[1], b[0]) - normalizeToINR(a[1], a[0]))
-                                    .map(([c, amt]) => `<div style="display: flex; justify-content: space-between; gap: 20px;"><span>${c}:</span> <span>${formatCurrency(amt, c)}</span></div>`)
-                                    .join('');
+                                let rawBreakdown = [];
+                                if (lifetimeBreakdown._raw) {
+                                    rawBreakdown = Object.entries(lifetimeBreakdown._raw)
+                                        .sort((a, b) => b[1] - a[1])
+                                        .map(([c, amt]) => `<div style="display: flex; justify-content: space-between; gap: 20px;"><span>${c}:</span> <span>${formatCurrency(amt, c)}</span></div>`);
+                                }
+
+                                const breakdownHtml = rawBreakdown.length > 0 ? rawBreakdown.join('') : '<div style="color: var(--text-muted);">All in INR</div>';
 
                                 // Structure: Big Total + Info Icon with Tooltip
                                 const finalHtml = `
