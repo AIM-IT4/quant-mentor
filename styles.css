@@ -334,19 +334,22 @@ h3 {
 /* --------------------------------
    Navbar
    -------------------------------- */
-/* Navbar - Professional Look */
+/* Navbar - Premium Glass Look */
 .navbar {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
-    padding: 12px 0;
-    /* Reduced padding for sleeker look */
-    background: rgba(10, 10, 15, 0.85);
-    /* Slightly less transparency for better contrast */
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border-subtle);
+    padding: 16px 0;
+    background: rgba(10, 10, 15, 0.7);
+    /* Slightly more transparent */
+    backdrop-filter: blur(20px);
+    /* Increased blur for "smoothness" */
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    /* Clean rim-light */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     transition: all var(--transition-normal);
 }
 
@@ -497,13 +500,16 @@ h3 {
     z-index: 1;
 }
 
+/* Hero Badge - Glass Style */
 .hero-badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
-    background: rgba(34, 197, 94, 0.15);
-    border: 1px solid rgba(34, 197, 94, 0.3);
+    background: rgba(34, 197, 94, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(34, 197, 94, 0.2);
     border-radius: 100px;
     color: var(--success);
     font-size: 0.85rem;
@@ -579,7 +585,7 @@ h3 {
     flex-wrap: wrap;
 }
 
-/* Profile Card */
+/* Profile Card - Premium Glass */
 .hero-visual {
     display: flex;
     justify-content: center;
@@ -588,12 +594,17 @@ h3 {
 .profile-card {
     position: relative;
     padding: 40px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.03);
+    /* Subtle fill */
+    backdrop-filter: blur(25px);
+    /* Strong blur */
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    /* Clean rim */
     border-radius: var(--radius-xl);
     text-align: center;
-    backdrop-filter: blur(20px);
     overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
 }
 
 .profile-glow {
@@ -604,9 +615,8 @@ h3 {
     height: 200%;
     background: conic-gradient(from 180deg, transparent, var(--accent-primary), transparent 30%);
     animation: rotate 4s linear infinite;
-    opacity: 0.1;
+    opacity: 0.05;
     pointer-events: none;
-    /* Fix: Prevent glow from blocking clicks */
 }
 
 @keyframes rotate {
@@ -720,19 +730,23 @@ h3 {
     gap: 24px;
 }
 
-.service-card {
-    position: relative;
-    padding: 32px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+/* Glass Card - Standard System */
+.service-card,
+.glass-card,
+.modal-content {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--radius-lg);
     transition: all var(--transition-normal);
 }
 
-.service-card:hover {
+.service-card:hover,
+.glass-card:hover {
     border-color: var(--accent-primary);
     transform: translateY(-8px);
-    box-shadow: var(--shadow-glow);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(45, 212, 191, 0.1);
 }
 
 .service-card.popular {
