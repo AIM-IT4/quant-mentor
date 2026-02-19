@@ -544,8 +544,8 @@ async function getUserCountry() {
     };
 
     try {
-        // Primary: ip-api.com (free, reliable)
-        const data = await fetchWithTimeout('http://ip-api.com/json/', 5000);
+        // Primary: ip-api.com (free, reliable, HTTPS)
+        const data = await fetchWithTimeout('https://ip-api.com/json/', 5000);
         if (data.status === 'fail') throw new Error(data.message || 'ip-api.com lookup failed');
         userCountryCode = data.countryCode;
     } catch (e) {
