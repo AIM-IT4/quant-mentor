@@ -544,16 +544,28 @@ async function getUserCountry() {
     };
 
     try {
-        // Try ipwho.is with explicit IP parameter (works better)
-        console.log('🔄 Trying IP service (ipwho.is)...');
-        const ipResponse = await fetch('https://ipwho.is/?Fields=country_code,country');
-        if (!ipResponse.ok) throw new Error(`HTTP ${ipResponse.status}`);
-        const data = await ipResponse.json();
+        // Try multiple IP services
+        const services = [
+            { url: 'https://ipinfo.io/json', parse: (d) => d.country },
+            { url: 'https://ipapi.co/json/', parse: (d) => d.country_code },
+            { url: 'https://ipwho.is/', parse: (d) => d.success ? d.country_code : null },
+        ];
         
-        if (!data.success) {
-            throw new Error(data.message || 'IP lookup failed');
+        for (const svc of services) {
+            try {
+                console.log('🔄 Trying IP service:', svc.url);
+                const resp = await fetchWithTimeout(svc.url, 5000);
+                const code = svc.parse(resp);
+                if (code) {
+                    userCountryCode = code;
+                    break;
+                }
+            } catch (e) {
+                console.warn('⚠️ Failed:', svc.url, e.message);
+            }
         }
-        userCountryCode = data.country_code;
+        
+        if (!userCountryCode) throw new Error('All IP services failed');
     } catch (e) {
         // Fallback: try browser timezone
         console.warn('⚠️ IP lookup failed, trying timezone fallback:', e);
