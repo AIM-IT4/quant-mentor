@@ -2699,8 +2699,6 @@ QuantMentor
                                         purchases.forEach(p => {
                                             const normalizedAmt = normalizeToINR(p.amount, p.currency);
                                             totals.INR += normalizedAmt;
-
-                                            // For tooltip display of raw amounts
                                             const c = (p.currency || 'INR').toUpperCase();
                                             if (c !== 'INR') {
                                                 totals._raw[c] = (totals._raw[c] || 0) + (p.amount || 0);
@@ -2710,14 +2708,22 @@ QuantMentor
                                     return totals;
                                 };
 
+
+                                // Period Metrics
                                 const currentTotalNorm = (currentPeriodBookings?.reduce((s, b) => s + (b.service_price || 0), 0) || 0) +
                                     cleanCurrentPurchases.reduce((s, p) => s + normalizeToINR(p.amount, p.currency), 0);
 
                                 const previousTotalNorm = (previousPeriodBookings?.reduce((s, b) => s + (b.service_price || 0), 0) || 0) +
                                     cleanPreviousPurchases.reduce((s, p) => s + normalizeToINR(p.amount, p.currency), 0);
 
+                                const currentSalesCount = cleanCurrentPurchases.length;
+                                const previousSalesCount = cleanPreviousPurchases.length;
+                                const currentCompletedBookings = (currentPeriodBookings?.filter(b => b.status === 'completed').length || 0);
+
+                                // Lifetime & Period Breakdowns
                                 const lifetimeBreakdown = calcRevenueBreakdown(allBookingsRev, cleanLifetimePurchases);
                                 const totalLifetimeRevenueNorm = lifetimeBreakdown.INR;
+                                const periodBreakdown = calcRevenueBreakdown(currentPeriodBookings, cleanCurrentPurchases);
 
                                 // Growth % (Using Normalized Values)
                                 let growthHtml = '<span style="color: var(--text-muted);">No comparison data</span>';
@@ -2736,10 +2742,7 @@ QuantMentor
                                 const aov = totaltransactions > 0 ? Math.round(currentTotalNorm / totaltransactions) : 0;
 
                                 // Update DOM with Breakdown - PROFESSIONAL VIEW
-                                // 1. Primary Display: Normalized Period Total (Big Number)
                                 const primaryTotal = `₹${Math.round(currentTotalNorm).toLocaleString()}`;
-
-                                // 2. Secondary Display: Breakdown (Tooltip / Small Text)
                                 let rawBreakdown = [];
                                 if (periodBreakdown._raw) {
                                     rawBreakdown = Object.entries(periodBreakdown._raw)
@@ -2750,7 +2753,6 @@ QuantMentor
                                 let breakdownHtml = rawBreakdown.length > 0 ? rawBreakdown.join('') : '<div style="color: var(--text-muted);">All period revenue in INR</div>';
                                 breakdownHtml += `<div style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px; font-weight: bold;">Lifetime Total: ₹${Math.round(totalLifetimeRevenueNorm).toLocaleString()}</div>`;
 
-                                // Structure: Big Total + Info Icon with Tooltip
                                 const finalHtml = `
                                     <div style="display: flex; align-items: baseline; gap: 8px;">
                                         <span>${primaryTotal}</span>
@@ -2783,14 +2785,10 @@ QuantMentor
 
                                 document.getElementById('totalRevenue').innerHTML = finalHtml;
                                 document.getElementById('revenueGrowth').innerHTML = growthHtml;
-
-                                // Other cards
                                 document.getElementById('activeBookings').textContent = activeBookingsCount || 0;
                                 document.getElementById('completedBookingsCount').textContent = currentCompletedBookings;
-
                                 document.getElementById('totalSales').textContent = currentSalesCount;
 
-                                // Sales Growth %
                                 let salesGrowthHtml = '<span style="color: var(--text-muted);">Period sales</span>';
                                 if (previousSalesCount > 0) {
                                     const sGrowth = ((currentSalesCount - previousSalesCount) / previousSalesCount) * 100;
@@ -2798,7 +2796,6 @@ QuantMentor
                                     salesGrowthHtml = `<span style="color: ${sIsPos ? '#22c55e' : '#ef4444'}; font-weight: 500;">${sIsPos ? '↗' : '↘'} ${Math.abs(sGrowth).toFixed(0)}%</span> <span style="color: var(--text-muted);">vs prior ${days}d</span>`;
                                 }
                                 document.getElementById('salesGrowth').innerHTML = salesGrowthHtml;
-
                                 document.getElementById('avgOrderValue').textContent = `₹${aov.toLocaleString()}`;
 
                             } catch (err) {
