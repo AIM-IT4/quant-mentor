@@ -2663,8 +2663,20 @@ window.openBlogModal = async function (id) {
             document.getElementById('blogModalContent').innerHTML = data.content;
 
             // Trigger MathJax to render equations in the new content
+            // Wait for content to be fully inserted, then typeset
             if (window.MathJax) {
-                window.MathJax.typesetPromise([document.getElementById('blogModalContent')]).catch((err) => console.log('MathJax error:', err));
+                window.MathJax.typesetPromise([document.getElementById('blogModalContent')])
+                    .then(() => console.log('✅ MathJax rendering complete'))
+                    .catch((err) => console.error('❌ MathJax error:', err));
+            } else {
+                // MathJax not loaded yet, wait and retry
+                setTimeout(() => {
+                    if (window.MathJax) {
+                        window.MathJax.typesetPromise([document.getElementById('blogModalContent')])
+                            .then(() => console.log('✅ MathJax rendering complete (delayed)'))
+                            .catch((err) => console.error('❌ MathJax error:', err));
+                    }
+                }, 100);
             }
 
             const cover = document.getElementById('blogModalCover');
