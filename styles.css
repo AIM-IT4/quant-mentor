@@ -144,6 +144,29 @@ body.light-mode .product-price-tag {
     color: var(--text-primary);
 }
 
+/* Light Mode Input & Button Fixes */
+body.light-mode .btn-secondary {
+    background: rgba(0, 0, 0, 0.05);
+    color: #000000;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .btn-secondary:hover {
+    background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+body.light-mode #couponInput {
+    background: #ffffff;
+    color: var(--text-primary);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode #couponInput::placeholder {
+    color: var(--text-muted);
+}
+
 /* Consolidated Mobile Theme Overrides moved to bottom for priority */
 
 section {
@@ -1446,6 +1469,29 @@ h6 {
     border: 1px solid rgba(45, 212, 191, 0.25);
     border-radius: var(--radius-sm);
     margin-bottom: 20px;
+}
+
+/* Coupon Input Styling */
+#couponInput {
+    flex: 1;
+    padding: 12px 16px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-pill);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: all var(--transition-fast);
+}
+
+#couponInput:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.coupon-row {
+    display: flex;
+    gap: 10px;
 }
 
 .booking-price span {
