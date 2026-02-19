@@ -2566,7 +2566,7 @@ QuantMentor
 
                         async function initDashboard() {
                             console.log('📊 Initializing Dashboard...');
-                            console.log('✅ Admin Fixes Applied: Service Key + Client-Side Ghost Filter (v1.5 - Final)');
+                            console.log('✅ Admin Fixes Applied: Service Key + Client-Side Ghost Filter (v1.6 - Fixed Error)');
                             document.getElementById('adminContainer').style.display = 'block';
 
                             // Load components in parallel
@@ -2580,6 +2580,8 @@ QuantMentor
                         }
 
                         async function updateDashboardStats() {
+                            // Helper to identify/remove "Ghost" transactions (incorrectly logged high values)
+                            const isGhost = (p) => (p.amount === 449 || p.amount === 719) && p.currency === 'GBP';
                             try {
                                 const now = new Date();
                                 const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
@@ -2631,8 +2633,6 @@ QuantMentor
                                     .lte('created_at', endOfLastMonth);
                                 lastMonthPurchases = (lastMonthPurchases || []).filter(p => !isGhost(p));
 
-                                // Helper to identify/remove "Ghost" transactions (incorrectly logged high values)
-                                const isGhost = (p) => (p.amount === 449 || p.amount === 719) && p.currency === 'GBP';
 
                                 // 5. Total Lifetime Revenue
                                 const { data: allBookingsRev } = await window.supabaseAdminClient
