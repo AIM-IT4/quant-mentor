@@ -2510,6 +2510,29 @@ QuantMentor
                             });
                         }
 
+                        // Helper for Currency Conversion (Approximate Rates)
+                        const EXCHANGE_RATES = {
+                            'USD': 87,
+                            'EUR': 95,
+                            'GBP': 110,
+                            'BRL': 15,
+                            'INR': 1
+                        };
+
+                        function normalizeToINR(amount, currency) {
+                            if (!amount) return 0;
+                            const code = (currency || 'INR').toUpperCase();
+                            const rate = EXCHANGE_RATES[code] || 1; // Default to 1 if unknown (assume INR)
+                            return amount * rate;
+                        }
+
+                        function formatCurrency(amount, currency = 'INR') {
+                            const code = (currency || 'INR').toUpperCase();
+                            const symbol = code === 'USD' ? '$' : (code === 'EUR' ? '€' : (code === 'GBP' ? '£' : '₹'));
+                            // If currency is not INR, show original + approx INR
+                            return `${symbol}${amount.toLocaleString()}`;
+                        }
+
                         // --- DASHBOARD LOGIC ---
                         let revenueChart = null;
                         let distributionChart = null;
@@ -2562,7 +2585,7 @@ QuantMentor
 
                                 const { data: currentMonthPurchases } = await window.supabaseAdminClient
                                     .from('purchases')
-                                    .select('amount')
+                                    .select('amount, currency')
                                     .gte('created_at', startOfMonth);
 
                                 const { data: lastMonthBookings } = await window.supabaseAdminClient
@@ -2574,12 +2597,11 @@ QuantMentor
 
                                 const { data: lastMonthPurchases } = await window.supabaseAdminClient
                                     .from('purchases')
-                                    .select('amount')
+                                    .select('amount, currency')
                                     .gte('created_at', startOfLastMonth)
                                     .lte('created_at', endOfLastMonth);
 
-                                // 5. Total Lifetime Revenue (Estimated from simplified query or pre-calculated in DB - here we do a fetch all for amounts only as it's lighter than full rows)
-                                // Optimization: If history is huge, this should be a stored procedure. For <10k rows, fetching just 'amount' is fine (~50KB).
+                                // 5. Total Lifetime Revenue
                                 const { data: allBookingsRev } = await window.supabaseAdminClient
                                     .from('bookings')
                                     .select('service_price')
@@ -2587,12 +2609,17 @@ QuantMentor
 
                                 const { data: allPurchasesRev } = await window.supabaseAdminClient
                                     .from('purchases')
-                                    .select('amount');
+                                    .select('amount, currency');
 
-                                // Calculations
+                                // Calculations with Currency Normalization
                                 const calcRevenue = (bookings, purchases) => {
                                     const bRev = (bookings || []).reduce((sum, b) => sum + (b.service_price || 0), 0);
-                                    const pRev = (purchases || []).reduce((sum, p) => sum + (p.amount || 0), 0);
+                                    // Bookings assumed INR
+
+                                    const pRev = (purchases || []).reduce((sum, p) => {
+                                        return sum + normalizeToINR(p.amount, p.currency);
+                                    }, 0);
+
                                     return bRev + pRev;
                                 };
 
@@ -2637,7 +2664,7 @@ QuantMentor
                             try {
                                 const { data, error } = await window.supabaseAdminClient
                                     .from('purchases')
-                                    .select('product_name, amount');
+                                    .select('product_name, amount, currency');
 
                                 if (error) throw error;
 
@@ -2647,7 +2674,7 @@ QuantMentor
                                     const name = p.product_name || 'Unknown Product';
                                     if (!productStats[name]) productStats[name] = { count: 0, revenue: 0 };
                                     productStats[name].count++;
-                                    productStats[name].revenue += (p.amount || 0);
+                                    productStats[name].revenue += normalizeToINR(p.amount, p.currency);
                                 });
 
                                 // Convert to Array & Sort
@@ -2682,13 +2709,14 @@ QuantMentor
                                     .from('bookings')
                                     .select('id, name, service_name, booking_date, created_at, service_price')
                                     .order('created_at', { ascending: false })
-                                    .limit(5);
+                                    .order('created_at', { ascending: false })
+                                    .limit(20); // Increased limit to ensure mixing works better
 
                                 const { data: purchases } = await window.supabaseAdminClient
                                     .from('purchases')
-                                    .select('id, product_name, amount, created_at, customer_email') // Assuming customer_email exists
+                                    .select('id, product_name, amount, currency, created_at, customer_email')
                                     .order('created_at', { ascending: false })
-                                    .limit(5);
+                                    .limit(20);
 
                                 // Combine and Sort
                                 const activity = [
@@ -2717,14 +2745,15 @@ QuantMentor
                                             </div>
                                         `;
                                     } else {
+                                        const displayAmount = formatCurrency(item.amount, item.currency);
                                         return `
-                                             <div style="display: flex; gap: 15px; align-items: center; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                             <div style="display: flex; gap: 15px; align-items: center; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);" title="${item.date.toLocaleString()}">
                                                 <div style="background: rgba(34, 197, 94, 0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #22c55e;">
                                                     <i class="fas fa-shopping-cart"></i>
                                                 </div>
                                                 <div style="flex: 1;">
                                                     <div style="font-size: 0.95em;">New purchase of <strong>${escapeHtml(item.product_name)}</strong></div>
-                                                    <div style="font-size: 0.85em; color: var(--text-muted);">${timeAgo} • ₹${item.amount}</div>
+                                                    <div style="font-size: 0.85em; color: var(--text-muted);">${timeAgo} • ${displayAmount}</div>
                                                 </div>
                                             </div>
                                         `;
@@ -2748,6 +2777,8 @@ QuantMentor
                             if (interval > 1) return Math.floor(interval) + "h ago";
                             interval = seconds / 60;
                             if (interval > 1) return Math.floor(interval) + "m ago";
+                            if (interval > 1) return Math.floor(interval) + "m ago";
+                            if (seconds < 5) return "Just now";
                             return Math.floor(seconds) + "s ago";
                         }
 
@@ -2766,7 +2797,7 @@ QuantMentor
 
                                 const { data: purchases } = await window.supabaseAdminClient
                                     .from('purchases')
-                                    .select('amount, created_at, product_name')
+                                    .select('amount, currency, created_at, product_name')
                                     .gte('created_at', cutoffDate.toISOString());
 
                                 // Daily Data Aggregation key: YYYY-MM-DD
@@ -2785,7 +2816,13 @@ QuantMentor
                                         // Revenue Line
                                         const d = new Date(item.created_at);
                                         const k = d.toLocaleDateString('en-CA');
-                                        if (dailyData[k] !== undefined) dailyData[k] += (item[amountField] || 0);
+
+                                        // Calculate normalized amount
+                                        let val = 0;
+                                        if (amountField === 'service_price') val = item[amountField] || 0; // Bookings (INR)
+                                        else val = normalizeToINR(item[amountField], item.currency); // Purchases (Mixed)
+
+                                        if (dailyData[k] !== undefined) dailyData[k] += val;
 
                                         // Distribution Pie
                                         const name = item[nameField] || 'Other';
