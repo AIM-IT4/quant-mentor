@@ -1024,9 +1024,9 @@
             });
         }
 
-        // ── Edge TTS via Proxy (FREE, Natural Neural Voices) ──
-        // Uses a CORS proxy to access Edge TTS API
-        // Voices: en-US-GuyNeural, en-US-JennyNeural, etc.
+        // ── Puter.js TTS (FREE, Better Quality) ──
+        // Puter has better voices than browser default
+        // Already loaded: <script src="https://js.puter.com/v2/"></script>
         
         async function speakText(text) {
             isSpeaking = true;
@@ -1058,74 +1058,41 @@
             const voiceSelect = document.getElementById('voice-select');
             const selectedVoice = (voiceSelect && voiceSelect.value) ? voiceSelect.value : 'en-US-GuyNeural';
 
-            try {
-                // Use Edge TTS via CORS proxy
-                const proxyUrl = 'https://corsproxy.io/?';
-                const edgeUrl = 'https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1';
-                const params = new URLSearchParams({
-                    TrusedClientToken: '6A5AA1D4EAFF4E9FB37E23D68491D6F4',
-                    ConnectionId: Date.now().toString()
-                });
-
-                const ssml = `<?xml version="1.0" encoding="utf-8"?>
-<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
-    <voice name="${selectedVoice}">
-        <mstts:express-as style="friendly" styledegree="2">
-            ${cleanText}
-        </mstts:express-as>
-    </voice>
-</speak>`;
-
-                const response = await fetch(proxyUrl + encodeURIComponent(edgeUrl + '?' + params.toString()), {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/ssml+xml',
-                        'X-Microsoft-OutputFormat': 'audio-24khz-96kbitrate-mono-mp3',
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                    },
-                    body: ssml,
-                    timeout: 15000
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Edge TTS error: ${response.status}`);
+            // Use Puter.js TTS if available (better quality)
+            if (typeof puter !== 'undefined' && puter.ai) {
+                try {
+                    console.log('🔊 Using Puter TTS...');
+                    const audioURL = await puter.ai.txt2speech(cleanText);
+                    const audio = new Audio(audioURL);
+                    currentPuterAudio = audio;
+                    
+                    audio.onended = () => {
+                        isSpeaking = false;
+                        isAIProcessing = false;
+                        if (autoVoiceMode && interviewActive && recognition) {
+                            try {
+                                recognition.start();
+                                document.getElementById('mic-btn').classList.add('listening');
+                            } catch (e) { }
+                        }
+                    };
+                    
+                    audio.onerror = () => {
+                        isSpeaking = false;
+                        isAIProcessing = false;
+                        useBrowserFallback(cleanText);
+                    };
+                    
+                    await audio.play();
+                    console.log('✅ Puter TTS playing...');
+                    return;
+                } catch (err) {
+                    console.warn('Puter TTS failed:', err.message);
                 }
-
-                const audioBlob = await response.blob();
-                if (audioBlob.size < 100) {
-                    throw new Error('Audio blob too small');
-                }
-
-                const audioUrl = URL.createObjectURL(audioBlob);
-                const audio = new Audio(audioUrl);
-                currentPuterAudio = audio;
-
-                audio.onended = () => {
-                    isSpeaking = false;
-                    isAIProcessing = false;
-                    URL.revokeObjectURL(audioUrl);
-                    if (autoVoiceMode && interviewActive && recognition) {
-                        try {
-                            recognition.start();
-                            document.getElementById('mic-btn').classList.add('listening');
-                        } catch (e) { }
-                    }
-                };
-
-                audio.onerror = (e) => {
-                    console.error('Audio error:', e);
-                    isSpeaking = false;
-                    isAIProcessing = false;
-                    useBrowserFallback(cleanText);
-                };
-
-                await audio.play();
-                console.log('✅ Edge TTS playing...');
-
-            } catch (err) {
-                console.warn('Edge TTS failed:', err.message);
-                useBrowserFallback(cleanText);
             }
+            
+            // Fallback: Use browser TTS with best settings
+            useBrowserFallback(cleanText);
         }
 
         // ── Browser TTS Fallback ──
