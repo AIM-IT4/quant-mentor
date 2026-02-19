@@ -1,39 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://quant-mentor.vercel.app/</loc>
-        <lastmod>2026-02-18</lastmod>
+        <loc>https://quantmentor.vercel.app/</loc>
+        <lastmod>2026-02-19</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>https://quant-mentor.vercel.app/blog.html</loc>
-        <lastmod>2026-02-18</lastmod>
+        <loc>https://quantmentor.vercel.app/blog.html</loc>
+        <lastmod>2026-02-19</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://quant-mentor.vercel.app/product.html</loc>
-        <lastmod>2026-02-18</lastmod>
+        <loc>https://quantmentor.vercel.app/product.html</loc>
+        <lastmod>2026-02-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://quant-mentor.vercel.app/testimonials.html</loc>
-        <lastmod>2026-02-18</lastmod>
+        <loc>https://quantmentor.vercel.app/testimonials.html</loc>
+        <lastmod>2026-02-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://quant-mentor.vercel.app/faq.html</loc>
-        <lastmod>2026-02-18</lastmod>
+        <loc>https://quantmentor.vercel.app/faq.html</loc>
+        <lastmod>2026-02-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
-     <url>
-        <loc>https://quant-mentor.vercel.app/interview.html</loc>
-        <lastmod>2026-02-18</lastmod>
+    <url>
+        <loc>https://quantmentor.vercel.app/interview.html</loc>
+        <lastmod>2026-02-19</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://quantmentor.vercel.app/code-playground.html</loc>
+        <lastmod>2026-02-19</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
     </url>
 </urlset>

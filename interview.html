@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Mock Interview | QuantMentor</title>
+    <link rel="canonical" href="https://quantmentor.vercel.app/interview.html">
     <meta name="description"
         content="Practice quant interviews with an AI interviewer — realistic questions, real-time feedback, and performance scorecard.">
     <link rel="icon" type="image/png" href="assets/images/quantmentor-logo-icon-QM-1024.png">
@@ -937,7 +938,7 @@
             autoVoiceMode = false;
         };
 
-        window.toggleMic = function() {
+        window.toggleMic = function () {
             if (!recognition) {
                 alert("Your browser doesn't support speech recognition. Please use Chrome, Edge, or Safari.");
                 return;
@@ -980,7 +981,8 @@
 
             // Default to Guy Neural (most natural male voice)
             voiceSelect.value = 'en-US-GuyNeural';
-            console.log('✅ Edge TTS voices loaded:', EDGE_TTS_VOICES.length);        }
+            console.log('✅ Edge TTS voices loaded:', EDGE_TTS_VOICES.length);
+        }
 
         // Load voices on page load
         populateVoiceList();
@@ -1026,16 +1028,16 @@
         // ── Puter.js TTS (FREE, Better Quality) ──
         // Puter has better voices than browser default
         // Using optimized browser TTS (no external dependencies)
-        
+
         async function speakText(text) {
             isSpeaking = true;
             console.log('🔊 Speaking with Edge TTS...');
 
             // Stop any current audio
             if (synth.speaking) { synth.cancel(); }
-            if (currentPuterAudio) { 
-                currentPuterAudio.pause(); 
-                currentPuterAudio = null; 
+            if (currentPuterAudio) {
+                currentPuterAudio.pause();
+                currentPuterAudio = null;
             }
 
             // Clean text for speech
@@ -1064,7 +1066,7 @@
                     const audioURL = await puter.ai.txt2speech(cleanText);
                     const audio = new Audio(audioURL);
                     currentPuterAudio = audio;
-                    
+
                     audio.onended = () => {
                         isSpeaking = false;
                         isAIProcessing = false;
@@ -1075,13 +1077,13 @@
                             } catch (e) { }
                         }
                     };
-                    
+
                     audio.onerror = () => {
                         isSpeaking = false;
                         isAIProcessing = false;
                         useBrowserFallback(cleanText);
                     };
-                    
+
                     await audio.play();
                     console.log('✅ Puter TTS playing...');
                     return;
@@ -1089,7 +1091,7 @@
                     console.warn('Puter TTS failed:', err.message);
                 }
             }
-            
+
             // Fallback: Use browser TTS with best settings
             useBrowserFallback(cleanText);
         }
@@ -1101,10 +1103,10 @@
 
             const utterance = new SpeechSynthesisUtterance(text);
             const voices = synth.getVoices();
-            
+
             // Try to find best English voice
-            const bestVoice = voices.find(v => 
-                v.name.includes('Google') || 
+            const bestVoice = voices.find(v =>
+                v.name.includes('Google') ||
                 v.name.includes('Natural') ||
                 v.name.includes('Premium') ||
                 v.lang === 'en-US'
@@ -1186,7 +1188,7 @@
             synth.speak(utterance);
         }
 
-        window.stopInterview = function() {
+        window.stopInterview = function () {
             interviewActive = false;
             autoVoiceMode = false;
             clearInterval(timerInterval);
@@ -1219,7 +1221,7 @@
 
         const RAZORPAY_KEY_ID = 'rzp_live_SBbq38M84PSrrG'; // Live Key from script.js
 
-        window.selectDuration = function(mins, price, el) {
+        window.selectDuration = function (mins, price, el) {
             selectedDuration = mins;
             selectedPrice = price;
             // Update UI
@@ -1234,7 +1236,7 @@
             }
         }
 
-        window.initiatePayment = function() {
+        window.initiatePayment = function () {
             userName = document.getElementById('user-name').value.trim();
             userEmail = document.getElementById('user-email').value.trim();
 
@@ -1405,7 +1407,7 @@
         }
 
         // ── End Interview ──
-        window.endInterview = async function() {
+        window.endInterview = async function () {
             if (!interviewActive) return;
             if (!confirm('End the interview and get your scorecard?')) return;
 
@@ -1460,7 +1462,7 @@
         }
 
         // ── Restart ──
-        window.restartInterview = function() {
+        window.restartInterview = function () {
             conversationHistory = [];
             timeRemaining = 45 * 60;
             interviewActive = false;
