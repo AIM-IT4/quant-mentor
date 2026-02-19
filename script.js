@@ -415,27 +415,22 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // --------------------------------
-    // Scroll Animations (Intersection Observer)
+    // Scroll Reveal Animations (v3.5)
     // --------------------------------
-    const animateOnScroll = document.querySelectorAll('.service-card, .product-card, .testimonial-card, .contact-method');
-
-    const observer = new IntersectionObserver((entries) => {
+    window.revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
+                entry.target.classList.add('revealed');
             }
         });
     }, {
-        threshold: 0.1,
+        threshold: 0.15,
         rootMargin: '0px 0px -50px 0px'
     });
 
-    animateOnScroll.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        el.style.transition = 'all 0.6s ease';
-        observer.observe(el);
+    // Target all elements with .reveal-up
+    document.querySelectorAll('.reveal-up').forEach(el => {
+        window.revealObserver.observe(el);
     });
 
     // --------------------------------
@@ -823,7 +818,7 @@ async function loadBlogsFromSupabase() {
             const date = new Date(blog.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
             const card = document.createElement('div');
-            card.className = 'product-card';
+            card.className = 'product-card reveal-up';
             card.style.cursor = 'pointer';
             card.onclick = () => window.openBlogModal(blog.id);
 
@@ -843,6 +838,7 @@ async function loadBlogsFromSupabase() {
                 </div>
             `;
             blogGrid.appendChild(card);
+            if (window.revealObserver) window.revealObserver.observe(card);
         });
 
     } catch (err) {
@@ -911,7 +907,7 @@ async function displaySupabaseProducts(products) {
 
         for (const product of items) {
             const productCard = document.createElement('div');
-            productCard.className = 'product-card';
+            productCard.className = 'product-card reveal-up';
             productCard.dataset.category = 'notes';
 
             // Convert price to local currency (async)
@@ -1142,7 +1138,7 @@ async function updateServicesSection(sessions) {
     for (let index = 0; index < sessions.length; index++) {
         const session = sessions[index];
         const serviceCard = document.createElement('div');
-        serviceCard.className = session.is_popular ? 'service-card popular' : 'service-card';
+        serviceCard.className = session.is_popular ? 'service-card popular reveal-up' : 'service-card reveal-up';
 
         // Generate features HTML
         const featuresHtml = session.features ? session.features.map(feature =>
@@ -1185,6 +1181,7 @@ async function updateServicesSection(sessions) {
 `;
 
         servicesContainer.appendChild(serviceCard);
+        if (window.revealObserver) window.revealObserver.observe(serviceCard);
 
         // Add event listener for the booking button
         const bookBtn = serviceCard.querySelector('.btn-service');
