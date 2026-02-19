@@ -1005,6 +1005,7 @@ async function displaySupabaseProducts(products) {
                 </div>
             `;
             container.appendChild(productCard);
+            if (window.revealObserver) window.revealObserver.observe(productCard);
         }
     }
 }
