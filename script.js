@@ -540,30 +540,57 @@ async function getUserCountry() {
         const response = await fetch(url, { signal: controller.signal });
         clearTimeout(id);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.json();
+        return response;
+    };
+
+    // Browser-only fallback from locale region (e.g., en-US -> US)
+    const detectCountryFromLocale = () => {
+        try {
+            const locale = Intl.DateTimeFormat().resolvedOptions().locale || navigator.language || '';
+            const parts = locale.split(/[-_]/);
+            const region = (parts[1] || '').toUpperCase();
+            if (/^[A-Z]{2}$/.test(region)) return region;
+        } catch (_) { }
+        return null;
     };
 
     try {
-        // Primary: ipapi.co
-        const data = await fetchWithTimeout('https://ipapi.co/json/');
-        userCountryCode = data.country_code;
-    } catch (e) {
-        console.warn('⚠️ Primary IP service (ipapi.co) failed:', e);
+        // Primary: ipwho.is
+        const res = await fetchWithTimeout('https://ipwho.is/');
+        const data = await res.json();
+        if (data.success === false) throw new Error(data.message || 'ipwho.is lookup failed');
+        userCountryCode = (data.country_code || '').toUpperCase();
+    } catch (primaryErr) {
+        // Fallback 1: ipapi country-only endpoint (lighter and often less restricted)
         try {
-            // Fallback: ipwho.is (No API key required, good CORS)
-            console.log('🔄 Trying fallback IP service (ipwho.is)...');
-            const data = await fetchWithTimeout('https://ipwho.is/');
-            if (data.success === false) throw new Error(data.message);
-            userCountryCode = data.country_code;
-        } catch (e2) {
-            console.warn('❌ All IP services failed, defaulting to India (IN):', e2);
-            userCountryCode = 'IN';
+            const res = await fetchWithTimeout('https://ipapi.co/country/');
+            const countryText = (await res.text() || '').trim().toUpperCase();
+            if (!/^[A-Z]{2}$/.test(countryText)) throw new Error('Invalid country code from ipapi');
+            userCountryCode = countryText;
+        } catch (secondaryErr) {
+            // Fallback 2: Browser locale region, then INR default
+            const localeCountry = detectCountryFromLocale();
+            if (localeCountry) {
+                console.info('ℹ️ Country lookup services unavailable; using locale region fallback:', localeCountry);
+                userCountryCode = localeCountry;
+            } else {
+                console.info('ℹ️ Country lookup unavailable (e.g., 403/CORS); defaulting to India (IN).', {
+                    primary: String(primaryErr?.message || primaryErr),
+                    secondary: String(secondaryErr?.message || secondaryErr)
+                });
+                userCountryCode = 'IN';
+            }
         }
+    }
+
+    if (!/^[A-Z]{2}$/.test(userCountryCode || '')) {
+        userCountryCode = 'IN';
     }
 
     console.log('🌍 User country detected:', userCountryCode);
     return userCountryCode;
 }
+
 
 // Currency Configuration - Maps country codes to currency info (rates fetched dynamically)
 const CURRENCY_MAP = {
@@ -620,6 +647,13 @@ const CURRENCY_MAP = {
 let exchangeRatesCache = null;
 let exchangeRatesTimestamp = null;
 const RATES_CACHE_DURATION = 3600000; // 1 hour in milliseconds
+
+// Currencies with no fractional subunits for payment gateways
+const ZERO_DECIMAL_CURRENCIES = new Set(['JPY', 'KRW', 'VND']);
+
+function getSubunitMultiplier(currencyCode = 'INR') {
+    return ZERO_DECIMAL_CURRENCIES.has(String(currencyCode).toUpperCase()) ? 1 : 100;
+}
 
 // Fetch real-time exchange rates from API
 async function fetchExchangeRates() {
@@ -1472,7 +1506,7 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
     }
 
     // Smallest currency sub-unit multiplier (100 for INR/USD/GBP, 1 for JPY)
-    const multiplier = (currency.toUpperCase() === 'JPY') ? 1 : 100;
+    const multiplier = getSubunitMultiplier(currency);
 
     // 🔥 INSTANT CAPTURE: Create server-side order with payment_capture: 1
     let orderId = null;
@@ -1799,7 +1833,8 @@ if (modalPayBtn) {
         }
     });
 } else {
-    console.error('❌ Pay button (modalPayBtn) not found in DOM');
+    // This script is shared across pages; not all pages include the product modal.
+    console.info('ℹ️ modalPayBtn not present on this page; product modal payment handler skipped.');
 }
 
 // ================================
@@ -2163,7 +2198,7 @@ async function initSessionPayment(description, amount, customerEmail, currency =
     }
 
     // Smallest currency sub-unit multiplier (100 for INR/USD/GBP, 1 for JPY)
-    const multiplier = (currency.toUpperCase() === 'JPY') ? 1 : 100;
+    const multiplier = getSubunitMultiplier(currency);
 
     // 🔥 INSTANT CAPTURE: Create server-side order with payment_capture: 1
     let orderId = null;
