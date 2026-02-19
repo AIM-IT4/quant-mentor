@@ -2611,40 +2611,65 @@ QuantMentor
                                     .from('purchases')
                                     .select('amount, currency');
 
-                                // Calculations with Currency Normalization
-                                const calcRevenue = (bookings, purchases) => {
-                                    const bRev = (bookings || []).reduce((sum, b) => sum + (b.service_price || 0), 0);
+                                // Calculations with Currency Breakdown
+                                const calcRevenueBreakdown = (bookings, purchases) => {
+                                    const totals = {};
+
                                     // Bookings assumed INR
+                                    if (bookings) {
+                                        bookings.forEach(b => {
+                                            totals['INR'] = (totals['INR'] || 0) + (b.service_price || 0);
+                                        });
+                                    }
 
-                                    const pRev = (purchases || []).reduce((sum, p) => {
-                                        return sum + normalizeToINR(p.amount, p.currency);
-                                    }, 0);
+                                    // Purchases
+                                    if (purchases) {
+                                        purchases.forEach(p => {
+                                            const c = (p.currency || 'INR').toUpperCase();
+                                            totals[c] = (totals[c] || 0) + (p.amount || 0);
+                                        });
+                                    }
 
-                                    return bRev + pRev;
+                                    return totals;
                                 };
 
-                                const currentRevenue = calcRevenue(currentMonthBookings, currentMonthPurchases);
-                                const lastRevenue = calcRevenue(lastMonthBookings, lastMonthPurchases);
-                                const totalLifetimeRevenue = calcRevenue(allBookingsRev, allPurchasesRev);
+                                // Helper to get normalized sum for growth calc
+                                const getNormalizedTotal = (breakdown) => {
+                                    return Object.entries(breakdown).reduce((sum, [c, amt]) => sum + normalizeToINR(amt, c), 0);
+                                };
 
-                                // Growth %
+                                const currentBreakdown = calcRevenueBreakdown(currentMonthBookings, currentMonthPurchases);
+                                const lastBreakdown = calcRevenueBreakdown(lastMonthBookings, lastMonthPurchases);
+                                const lifetimeBreakdown = calcRevenueBreakdown(allBookingsRev, allPurchasesRev);
+
+                                const currentRevenueNorm = getNormalizedTotal(currentBreakdown);
+                                const lastRevenueNorm = getNormalizedTotal(lastBreakdown);
+                                const totalLifetimeRevenueNorm = getNormalizedTotal(lifetimeBreakdown); // For AOV only
+
+                                // Growth % (Using Normalized Values)
                                 let growthHtml = '<span style="color: var(--text-muted);">No data yet</span>';
-                                if (lastRevenue > 0) {
-                                    const growth = ((currentRevenue - lastRevenue) / lastRevenue) * 100;
+                                if (lastRevenueNorm > 0) {
+                                    const growth = ((currentRevenueNorm - lastRevenueNorm) / lastRevenueNorm) * 100;
                                     const isPositive = growth >= 0;
                                     const color = isPositive ? '#22c55e' : '#ef4444';
                                     const icon = isPositive ? '↗' : '↘';
                                     growthHtml = `<span style="color: ${color}; font-weight: 500;">${icon} ${Math.abs(growth).toFixed(1)}%</span> <span style="color: var(--text-muted);">vs last month</span>`;
-                                } else if (currentRevenue > 0) {
+                                } else if (currentRevenueNorm > 0) {
                                     growthHtml = `<span style="color: #22c55e; font-weight: 500;">↗ 100%</span> <span style="color: var(--text-muted);">new growth</span>`;
                                 }
 
-                                // AOV (Average Order Value)
+                                // AOV (Average Order Value) - Keep Normalized for AOV as it's an average
                                 const totaltransactions = (allBookingsRev?.length || 0) + (allPurchasesRev?.length || 0);
-                                const aov = totaltransactions > 0 ? Math.round(totalLifetimeRevenue / totaltransactions) : 0;
+                                const aov = totaltransactions > 0 ? Math.round(totalLifetimeRevenueNorm / totaltransactions) : 0;
 
-                                // Update DOM
-                                document.getElementById('totalRevenue').textContent = `₹${Math.round(totalLifetimeRevenue).toLocaleString()}`;
+                                // Update DOM with Breakdown
+                                const breakdownHtml = Object.entries(lifetimeBreakdown)
+                                    .filter(([_, amt]) => amt > 0)
+                                    .sort((a, b) => normalizeToINR(b[1], b[0]) - normalizeToINR(a[1], a[0])) // Sort by value desc
+                                    .map(([c, amt]) => `<span style="white-space: nowrap;">${formatCurrency(amt, c)}</span>`)
+                                    .join('<span style="color: var(--text-muted); margin: 0 8px;">+</span>');
+
+                                document.getElementById('totalRevenue').innerHTML = breakdownHtml || '₹0';
                                 document.getElementById('revenueGrowth').innerHTML = growthHtml;
 
                                 document.getElementById('activeBookings').textContent = activeBookingsCount || 0;
@@ -2672,15 +2697,20 @@ QuantMentor
                                 const productStats = {};
                                 data.forEach(p => {
                                     const name = p.product_name || 'Unknown Product';
-                                    if (!productStats[name]) productStats[name] = { count: 0, revenue: 0 };
+                                    if (!productStats[name]) productStats[name] = { count: 0, revenue: {}, totalNorm: 0 };
+
                                     productStats[name].count++;
-                                    productStats[name].revenue += normalizeToINR(p.amount, p.currency);
+
+                                    // Track multi-currency revenue
+                                    const c = (p.currency || 'INR').toUpperCase();
+                                    productStats[name].revenue[c] = (productStats[name].revenue[c] || 0) + (p.amount || 0);
+                                    productStats[name].totalNorm += normalizeToINR(p.amount, p.currency);
                                 });
 
-                                // Convert to Array & Sort
+                                // Convert to Array & Sort by Normalized Total
                                 const sortedProducts = Object.entries(productStats)
                                     .map(([name, stats]) => ({ name, ...stats }))
-                                    .sort((a, b) => b.revenue - a.revenue)
+                                    .sort((a, b) => b.totalNorm - a.totalNorm)
                                     .slice(0, 5); // Start with top 5
 
                                 const list = document.getElementById('topProductsList');
@@ -2693,7 +2723,9 @@ QuantMentor
                                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                         <td style="padding: 12px; font-weight: 500;">${p.name}</td>
                                         <td style="padding: 12px; text-align: center;">${p.count}</td>
-                                        <td style="padding: 12px; text-align: right; color: #22c55e;">₹${p.revenue.toLocaleString()}</td>
+                                        <td style="padding: 12px; text-align: right; color: #22c55e;">
+                                            ${Object.entries(p.revenue).map(([c, amt]) => formatCurrency(amt, c)).join('<br>')}
+                                        </td>
                                     </tr>
                                 `).join('');
 
@@ -2824,9 +2856,23 @@ QuantMentor
 
                                         if (dailyData[k] !== undefined) dailyData[k] += val;
 
-                                        // Distribution Pie
-                                        const name = item[nameField] || 'Other';
-                                        distribution[name] = (distribution[name] || 0) + 1;
+                                        if (dailyData[k] !== undefined) dailyData[k] += val;
+
+                                        // Distribution Pie -> CHANGE TO CURRENCY DISTRIBUTION based on user feedback
+                                        // "show from region or countries... based on currency"
+                                        let curr = 'INR';
+                                        if (amountField === 'service_price') curr = 'INR';
+                                        else curr = (item.currency || 'INR').toUpperCase();
+
+                                        // Map currency to region/name
+                                        let regionName = curr;
+                                        if (curr === 'USD') regionName = 'USD (Global/US)';
+                                        else if (curr === 'INR') regionName = 'INR (India)';
+                                        else if (curr === 'EUR') regionName = 'EUR (Europe)';
+                                        else if (curr === 'GBP') regionName = 'GBP (UK)';
+                                        else if (curr === 'BRL') regionName = 'BRL (Brazil)';
+
+                                        distribution[regionName] = (distribution[regionName] || 0) + 1;
                                     });
                                 };
 
