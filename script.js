@@ -958,10 +958,8 @@ async function displaySupabaseProducts(products) {
             productCard.dataset.localPrice = JSON.stringify(localPrice);
             productCard.dataset.inrPrice = product.price;
 
-            // Currency badge for non-INR countries
-            const currencyBadge = (!isFree && isLocalCurrency)
-                ? `<span style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; font-weight: 600; margin-left: 8px;">${localPrice.currency.code}</span>`
-                : '';
+            // Currency badge removed - price already shows currency symbol (currency code was redundant)
+            const currencyBadge = '';
 
             // Handle original price display (fix for INR showing when using other currencies)
             let originalPriceDisplay = '';
