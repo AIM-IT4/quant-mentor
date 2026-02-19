@@ -2545,7 +2545,15 @@ QuantMentor
                         function normalizeToINR(amount, currency) {
                             if (!amount) return 0;
                             const code = (currency || 'INR').toUpperCase();
-                            const rate = EXCHANGE_RATES[code] || 1; // Default to 1 if unknown (assume INR)
+
+                            // AUTO-CORRECTION: If currency is NOT INR but amount matches a standard INR price point,
+                            // we treat it as INR. (Professional fix for mislabeled webhook data)
+                            const STANDARD_INR_PRICES = [449, 599, 719, 799, 1198, 1597, 1799, 1999, 7999];
+                            if (code !== 'INR' && STANDARD_INR_PRICES.includes(amount)) {
+                                return amount; // Treat as 1:1 INR
+                            }
+
+                            const rate = EXCHANGE_RATES[code] || 1;
                             return amount * rate;
                         }
 
@@ -2569,10 +2577,10 @@ QuantMentor
                         // Helper for dynamic date ranges
                         function getDynamicDateRanges(days) {
                             const now = new Date();
-                            const currentStart = new Date();
+                            const currentStart = new Date(now);
                             currentStart.setDate(now.getDate() - parseInt(days));
 
-                            const previousStart = new Date();
+                            const previousStart = new Date(currentStart);
                             previousStart.setDate(currentStart.getDate() - parseInt(days));
 
                             return {
@@ -2585,7 +2593,7 @@ QuantMentor
 
                         async function initDashboard() {
                             console.log('📊 Initializing Dashboard...');
-                            console.log('✅ Admin Fixes Applied: Service Key + Client-Side Ghost Filter + Tooltip Fix + Dynamic Timeframes (v1.9)');
+                            console.log('✅ Admin Fixes Applied: Professional v2.0 - Growth Logic + Currency Correction');
                             document.getElementById('adminContainer').style.display = 'block';
 
                             // Load components in parallel
@@ -2600,7 +2608,8 @@ QuantMentor
 
                         async function updateDashboardStats() {
                             // Helper to identify/remove "Ghost" transactions (incorrectly logged high values)
-                            const isGhost = (p) => (p.amount === 449 || p.amount === 719) && p.currency === 'GBP';
+                            // Note: We no longer ignore ghosts, we auto-correct them in normalizeToINR
+                            const isGhost = (p) => false;
                             try {
                                 const days = document.getElementById('revenueRange')?.value || '30';
                                 const { startOfPeriod, endOfPeriod, startOfPrevious, endOfPrevious } = getDynamicDateRanges(days);
@@ -2701,13 +2710,13 @@ QuantMentor
                                 const totalLifetimeRevenueNorm = getNormalizedTotal(lifetimeBreakdown); // For AOV only
 
                                 // Growth % (Using Normalized Values)
-                                let growthHtml = '<span style="color: var(--text-muted);">No data yet</span>';
+                                let growthHtml = '<span style="color: var(--text-muted);">No comparison data</span>';
                                 if (lastRevenueNorm > 0) {
                                     const growth = ((currentRevenueNorm - lastRevenueNorm) / lastRevenueNorm) * 100;
                                     const isPositive = growth >= 0;
                                     const color = isPositive ? '#22c55e' : '#ef4444';
                                     const icon = isPositive ? '↗' : '↘';
-                                    growthHtml = `<span style="color: ${color}; font-weight: 500;">${icon} ${Math.abs(growth).toFixed(1)}%</span> <span style="color: var(--text-muted);">vs last month</span>`;
+                                    growthHtml = `<span style="color: ${color}; font-weight: 500;">${icon} ${Math.abs(growth).toFixed(1)}%</span> <span style="color: var(--text-muted);">vs prior ${days}d</span>`;
                                 } else if (currentRevenueNorm > 0) {
                                     growthHtml = `<span style="color: #22c55e; font-weight: 500;">↗ 100%</span> <span style="color: var(--text-muted);">new growth</span>`;
                                 }
