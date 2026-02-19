@@ -524,6 +524,51 @@
             border-color: var(--border-light);
         }
 
+        /* Tooltip Styles */
+        .tooltip-container {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip-content {
+            visibility: hidden;
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+            border-radius: 10px;
+            z-index: 1000;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+            font-size: 0.85rem;
+            color: #f8fafc;
+            min-width: 220px;
+            line-height: 1.6;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        .tooltip-container:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        .tooltip-content::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1e293b transparent transparent transparent;
+        }
+
+
         .stat-card .icon {
             position: absolute;
             top: 20px;
@@ -3326,32 +3371,16 @@ QuantMentor
                         const finalHtml = `
                                     <div style="display: flex; align-items: baseline; gap: 8px;">
                                         <span>${primaryTotal}</span>
-                                        <div class="tooltip-container" style="position: relative; cursor: help;">
+                                        <div class="tooltip-container">
                                             <i class="fas fa-info-circle" style="font-size: 0.6em; color: var(--text-muted);"></i>
-                                            <div class="tooltip-content" style="
-                                                visibility: hidden; 
-                                                position: absolute; 
-                                                bottom: 100%; 
-                                                left: 50%; 
-                                                transform: translateX(-50%); 
-                                                background: #1e293b; 
-                                                border: 1px solid rgba(255,255,255,0.1); 
-                                                padding: 12px 16px; 
-                                                border-radius: 10px; 
-                                                z-index: 1000; 
-                                                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7); 
-                                                font-size: 0.9rem; 
-                                                color: #f8fafc;
-                                                min-width: 200px;
-                                                line-height: 1.8;
-                                            ">
+                                            <div class="tooltip-content">
                                                 ${breakdownHtml}
-                                                <div style="position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #1e293b transparent transparent transparent;"></div>
                                             </div>
                                         </div>
                                     </div>
                                     <div style="font-size: 0.75em; color: var(--text-muted); margin-top: 4px;">Approx. total conversion</div>
                                 `;
+
 
                         document.getElementById('totalRevenue').innerHTML = finalHtml;
                         document.getElementById('revenueGrowth').innerHTML = growthHtml;
