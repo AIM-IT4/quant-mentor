@@ -544,10 +544,10 @@ async function getUserCountry() {
     };
 
     try {
-        // Primary: ipwho.is (better CORS compatibility in browsers)
-        const data = await fetchWithTimeout('https://ipwho.is/');
-        if (data.success === false) throw new Error(data.message || 'ipwho.is lookup failed');
-        userCountryCode = data.country_code;
+        // Primary: ip-api.com (free, reliable)
+        const data = await fetchWithTimeout('http://ip-api.com/json/', 5000);
+        if (data.status === 'fail') throw new Error(data.message || 'ip-api.com lookup failed');
+        userCountryCode = data.countryCode;
     } catch (e) {
         console.warn('⚠️ Country lookup failed, defaulting to India (IN):', e);
         userCountryCode = 'IN';
