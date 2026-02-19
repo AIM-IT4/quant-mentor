@@ -938,7 +938,7 @@
             autoVoiceMode = false;
         };
 
-        function toggleMic() {
+        window.toggleMic = function() {
             if (!recognition) {
                 alert("Your browser doesn't support speech recognition. Please use Chrome, Edge, or Safari.");
                 return;
@@ -1187,7 +1187,7 @@
             synth.speak(utterance);
         }
 
-        function stopInterview() {
+        window.stopInterview = function() {
             interviewActive = false;
             autoVoiceMode = false;
             clearInterval(timerInterval);
@@ -1220,7 +1220,7 @@
 
         const RAZORPAY_KEY_ID = 'rzp_live_SBbq38M84PSrrG'; // Live Key from script.js
 
-        function selectDuration(mins, price, el) {
+        window.selectDuration = function(mins, price, el) {
             selectedDuration = mins;
             selectedPrice = price;
             // Update UI
@@ -1235,7 +1235,7 @@
             }
         }
 
-        function initiatePayment() {
+        window.initiatePayment = function() {
             userName = document.getElementById('user-name').value.trim();
             userEmail = document.getElementById('user-email').value.trim();
 
@@ -1406,7 +1406,7 @@
         }
 
         // ── End Interview ──
-        async function endInterview() {
+        window.endInterview = async function() {
             if (!interviewActive) return;
             if (!confirm('End the interview and get your scorecard?')) return;
 
@@ -1461,7 +1461,7 @@
         }
 
         // ── Restart ──
-        function restartInterview() {
+        window.restartInterview = function() {
             conversationHistory = [];
             timeRemaining = 45 * 60;
             interviewActive = false;
