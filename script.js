@@ -484,8 +484,8 @@ const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0'; // Using provided public key
 
 // Use global supabase reference (avoid local declaration)
-// Initialize Supabase with delay to ensure SDK is loaded
-setTimeout(function () {
+// Initialize Supabase immediately (SDK loads synchronously before this script)
+function initSupabaseAndLoad() {
     try {
         // Check if Supabase SDK is available
         if (typeof window.supabase !== 'undefined') {
@@ -497,15 +497,17 @@ setTimeout(function () {
                 console.log('✅ Supabase already initialized');
             }
 
-            // Fetch products immediately on load
+            // Pre-fetch country & exchange rates in parallel (non-blocking)
+            const prefetchPromise = Promise.all([
+                getUserCountry().catch(e => console.warn('Country detection deferred:', e)),
+                fetchExchangeRates().catch(e => console.warn('Exchange rates deferred:', e))
+            ]);
+
+            // Fire all data loads in parallel — they will await prefetch internally
             fetchProductLinks();
-            // Also load and display products from Supabase
-            loadProductsFromSupabase();
-            // Load sessions from Supabase
-            loadSessionsFromSupabase();
-            // Load blogs from Supabase
+            loadProductsFromSupabase(prefetchPromise);
+            loadSessionsFromSupabase(prefetchPromise);
             loadBlogs();
-            // Load approved testimonials
             loadApprovedTestimonials();
 
             // Check for direct product link in URL
@@ -516,15 +518,30 @@ setTimeout(function () {
                 // small delay to let products load
                 setTimeout(() => window.openProductModal(productId), 1500);
             }
-        } else {
-            console.error('❌ Supabase SDK not loaded');
-            console.log('⚠️ Continuing without Supabase - using default links');
+            return true; // initialized
         }
+        return false; // SDK not yet available
     } catch (e) {
         console.error('Supabase initialization failed:', e);
         console.log('⚠️ Continuing without Supabase - using default links');
+        return true; // don't retry on error
     }
-}, 500);
+}
+
+// Try immediately, retry briefly if SDK not yet loaded (e.g. slow network)
+if (!initSupabaseAndLoad()) {
+    let retries = 0;
+    const retryInterval = setInterval(() => {
+        retries++;
+        if (initSupabaseAndLoad() || retries >= 60) { // Max 3s (60 * 50ms)
+            clearInterval(retryInterval);
+            if (retries >= 60) {
+                console.error('❌ Supabase SDK not loaded after 3s');
+                console.log('⚠️ Continuing without Supabase - using default links');
+            }
+        }
+    }, 50);
+}
 
 // Fetched country cache
 let userCountryCode = null;
@@ -868,21 +885,26 @@ async function loadBlogsFromSupabase() {
 }
 
 // Load and display products from Supabase
-async function loadProductsFromSupabase() {
+async function loadProductsFromSupabase(prefetchPromise) {
     try {
         if (!window.supabaseClient) {
             console.error('Supabase client not initialized');
             return;
         }
 
-        // Fetch country and exchange rates first
-        await getUserCountry();
-        await fetchExchangeRates(); // Pre-fetch rates for currency conversion
-
-        const { data, error } = await window.supabaseClient
+        // Fire Supabase query immediately (runs in parallel with prefetch)
+        const queryPromise = window.supabaseClient
             .from('products')
             .select('*')
             .order('created_at', { ascending: false });
+
+        // Wait for both the prefetch (country + rates) and the query to finish
+        const [, queryResult] = await Promise.all([
+            prefetchPromise || Promise.all([getUserCountry(), fetchExchangeRates()]),
+            queryPromise
+        ]);
+
+        const { data, error } = queryResult;
 
         if (error) {
             console.error('Error loading products from Supabase:', error);
@@ -1110,22 +1132,27 @@ window.openProductModal = async function (id) {
 };
 
 // Load Sessions from Supabase and Update Services Section
-async function loadSessionsFromSupabase() {
+async function loadSessionsFromSupabase(prefetchPromise) {
     try {
         if (!window.supabaseClient) {
             console.error('Supabase client not initialized');
             return;
         }
 
-        // Fetch country and exchange rates first for currency conversion
-        await getUserCountry();
-        await fetchExchangeRates();
-
-        const { data, error } = await window.supabaseClient
+        // Fire Supabase query immediately (runs in parallel with prefetch)
+        const queryPromise = window.supabaseClient
             .from('sessions')
             .select('*')
             .eq('is_active', true)
             .order('price', { ascending: true });
+
+        // Wait for both the prefetch (country + rates) and the query to finish
+        const [, queryResult] = await Promise.all([
+            prefetchPromise || Promise.all([getUserCountry(), fetchExchangeRates()]),
+            queryPromise
+        ]);
+
+        const { data, error } = queryResult;
 
         if (error) {
             console.error('Error loading sessions from Supabase:', error);

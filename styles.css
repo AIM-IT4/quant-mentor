@@ -2154,3 +2154,98 @@ body.light-mode .theme-toggle .fa-moon {
 .delay-500 {
     transition-delay: 500ms;
 }
+
+/* --------------------------------
+   Skeleton Loading Cards
+   -------------------------------- */
+@keyframes shimmer {
+    0% { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+}
+
+.skeleton-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    min-height: 320px;
+}
+
+.skeleton-card .skeleton-image {
+    height: 180px;
+    background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-glass) 50%, var(--bg-tertiary) 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.5s infinite ease-in-out;
+}
+
+.skeleton-card .skeleton-content {
+    padding: 24px;
+}
+
+.skeleton-card .skeleton-line {
+    height: 14px;
+    border-radius: 7px;
+    background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-glass) 50%, var(--bg-tertiary) 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.5s infinite ease-in-out;
+    margin-bottom: 12px;
+}
+
+.skeleton-card .skeleton-line.short {
+    width: 60%;
+}
+
+.skeleton-card .skeleton-line.medium {
+    width: 80%;
+}
+
+.skeleton-card .skeleton-btn {
+    height: 40px;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-glass) 50%, var(--bg-tertiary) 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.5s infinite ease-in-out;
+    margin-top: 16px;
+}
+
+/* Service skeleton variant */
+.skeleton-service {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 32px 24px;
+    min-height: 280px;
+}
+
+.skeleton-service .skeleton-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-glass) 50%, var(--bg-tertiary) 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.5s infinite ease-in-out;
+    margin-bottom: 16px;
+}
+
+.skeleton-service .skeleton-line {
+    height: 14px;
+    border-radius: 7px;
+    background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-glass) 50%, var(--bg-tertiary) 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.5s infinite ease-in-out;
+    margin-bottom: 10px;
+}
+
+.skeleton-service .skeleton-line.title {
+    height: 20px;
+    width: 70%;
+    margin-bottom: 16px;
+}
+
+.skeleton-service .skeleton-line.short {
+    width: 50%;
+}
+
+.skeleton-service .skeleton-line.medium {
+    width: 85%;
+}
