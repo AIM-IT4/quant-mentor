@@ -1182,83 +1182,49 @@
             }
         }
 
-        // ── Edge TTS Neural Voice List (FREE, Natural Sounding) ──
-        // Microsoft's neural voices - sound human, not robotic
-        const EDGE_TTS_VOICES = [
-            { id: 'en-US-GuyNeural', name: '🎙️ Guy (Male, US) - Natural', gender: 'Male' },
-            { id: 'en-US-JennyNeural', name: '🎙️ Jenny (Female, US) - Natural', gender: 'Female' },
-            { id: 'en-US-AriaNeural', name: '🎙️ Aria (Female, US) - Warm', gender: 'Female' },
-            { id: 'en-US-DavisNeural', name: '🎙️ Davis (Male, US) - Professional', gender: 'Male' },
-            { id: 'en-GB-RyanNeural', name: '🎙️ Ryan (Male, UK) - British', gender: 'Male' },
-            { id: 'en-GB-SoniaNeural', name: '🎙️ Sonia (Female, UK) - British', gender: 'Female' },
-            { id: 'en-AU-WilliamNeural', name: '🎙️ William (Male, AU) - Australian', gender: 'Male' },
-            { id: 'en-IN-NeerjaNeural', name: '🎙️ Neerja (Female, IN) - Indian', gender: 'Female' }
+        // ── Groq Orpheus TTS Voice List (Natural, Human-like) ──
+        const ORPHEUS_VOICES = [
+            { id: 'troy', name: '🎙️ Troy (Male) - Professional', gender: 'Male' },
+            { id: 'austin', name: '🎙️ Austin (Male) - Confident', gender: 'Male' },
+            { id: 'daniel', name: '🎙️ Daniel (Male) - Warm', gender: 'Male' },
+            { id: 'autumn', name: '🎙️ Autumn (Female) - Natural', gender: 'Female' },
+            { id: 'diana', name: '🎙️ Diana (Female) - Professional', gender: 'Female' },
+            { id: 'hannah', name: '🎙️ Hannah (Female) - Friendly', gender: 'Female' }
         ];
 
         function populateVoiceList() {
             const voiceSelect = document.getElementById('voice-select');
             voiceSelect.innerHTML = '';
 
-            EDGE_TTS_VOICES.forEach(voice => {
+            ORPHEUS_VOICES.forEach(voice => {
                 const option = document.createElement('option');
                 option.value = voice.id;
                 option.textContent = voice.name;
                 voiceSelect.appendChild(option);
             });
 
-            // Default to Guy Neural (most natural male voice)
-            voiceSelect.value = 'en-US-GuyNeural';
-            console.log('✅ Edge TTS voices loaded:', EDGE_TTS_VOICES.length);
+            // Default to Troy (professional male voice - best for interviewer)
+            voiceSelect.value = 'troy';
+            console.log('✅ Groq Orpheus voices loaded:', ORPHEUS_VOICES.length);
         }
 
         // Load voices on page load
         populateVoiceList();
 
-        // Edge TTS uses voice-select value directly, no need for this function
-        // Kept for compatibility but returns null (Edge TTS reads from select directly)
         function getSelectedVoice() {
-            return null;
+            const voiceSelect = document.getElementById('voice-select');
+            return (voiceSelect && voiceSelect.value) ? voiceSelect.value : 'troy';
         }
 
-        // Helper to split text into chunks for API stability
-        function splitTextIntoChunks(text) {
-            // Split by punctuation, keeping the punctuation
-            const rawChunks = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
-            const chunks = [];
-            // Ensure no chunk is too long (Limit 150 chars for safe URL)
-            rawChunks.forEach(chunk => {
-                if (chunk.length > 150) {
-                    const words = chunk.split(' ');
-                    let temp = '';
-                    words.forEach(word => {
-                        if ((temp + word).length > 150) { chunks.push(temp.trim()); temp = ''; }
-                        temp += word + ' ';
-                    });
-                    if (temp) chunks.push(temp.trim());
-                } else {
-                    chunks.push(chunk.trim());
-                }
-            });
-            return chunks.filter(c => c.length > 0);
-        }
+        // ── Determine API base URL ──
+        const API_BASE = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
+            ? 'https://quant-mentor.vercel.app'
+            : '';
 
-        async function playUrlAudio(url) {
-            return new Promise((resolve, reject) => {
-                const audio = new Audio(url);
-                currentPuterAudio = audio;
-                audio.onended = resolve;
-                audio.onerror = reject;
-                audio.play().catch(reject);
-            });
-        }
-
-        // ── Puter.js TTS (FREE, Better Quality) ──
-        // Puter has better voices than browser default
-        // Using optimized browser TTS (no external dependencies)
-
+        // ── Groq Orpheus TTS (High-Quality, Natural Voice) ──
         async function speakText(text) {
             isSpeaking = true;
-            console.log('🔊 Speaking with Edge TTS...');
+            console.log('🔊 Speaking with Groq Orpheus TTS...');
 
             // Stop any current audio
             if (synth.speaking) { synth.cancel(); }
@@ -1267,13 +1233,18 @@
                 currentPuterAudio = null;
             }
 
-            // Clean text for speech
+            // Clean text for speech (remove markdown, emojis)
             const cleanText = text
                 .replace(/\*\*/g, '')
                 .replace(/\*/g, '')
                 .replace(/#[#]?/g, '')
                 .replace(/[\u{1F600}-\u{1F6FF}]/gu, '')
+                .replace(/[\u{1F900}-\u{1F9FF}]/gu, '')
+                .replace(/[\u{2600}-\u{26FF}]/gu, '')
+                .replace(/[\u{2700}-\u{27BF}]/gu, '')
+                .replace(/📊|📝|✅|❌|🧠|💡|🔊|🎙️|🎯|⚡|🚀/g, '')
                 .replace(/\n/g, '. ')
+                .replace(/\.\s*\./g, '.')
                 .trim();
 
             if (!cleanText || cleanText.length < 2) {
@@ -1282,48 +1253,61 @@
                 return;
             }
 
-            // Get selected voice
-            const voiceSelect = document.getElementById('voice-select');
-            const selectedVoice = (voiceSelect && voiceSelect.value) ? voiceSelect.value : 'en-US-GuyNeural';
+            const selectedVoice = getSelectedVoice();
 
-            // Use Puter.js TTS if available (better quality)
-            if (typeof puter !== 'undefined' && puter.ai) {
-                try {
-                    console.log('🔊 Using Puter TTS...');
-                    const audioURL = await puter.ai.txt2speech(cleanText);
-                    const audio = new Audio(audioURL);
-                    currentPuterAudio = audio;
+            try {
+                console.log(`🎙️ Calling Groq TTS API (voice: ${selectedVoice})...`);
+                const response = await fetch(`${API_BASE}/api/tts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: cleanText,
+                        voice: selectedVoice
+                    })
+                });
 
-                    audio.onended = () => {
-                        isSpeaking = false;
-                        isAIProcessing = false;
-                        if (autoVoiceMode && interviewActive && recognition) {
-                            try {
-                                recognition.start();
-                                document.getElementById('mic-btn').classList.add('listening');
-                            } catch (e) { }
-                        }
-                    };
-
-                    audio.onerror = () => {
-                        isSpeaking = false;
-                        isAIProcessing = false;
-                        useBrowserFallback(cleanText);
-                    };
-
-                    await audio.play();
-                    console.log('✅ Puter TTS playing...');
-                    return;
-                } catch (err) {
-                    console.warn('Puter TTS failed:', err.message);
+                if (!response.ok) {
+                    throw new Error(`TTS API returned ${response.status}`);
                 }
-            }
 
-            // Fallback: Use browser TTS with best settings
-            useBrowserFallback(cleanText);
+                // Convert response to audio blob and play
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                currentPuterAudio = audio;
+
+                audio.onended = () => {
+                    isSpeaking = false;
+                    isAIProcessing = false;
+                    URL.revokeObjectURL(audioUrl);
+                    currentPuterAudio = null;
+                    // Auto-restart mic if in voice mode
+                    if (autoVoiceMode && interviewActive && recognition) {
+                        try {
+                            recognition.start();
+                            document.getElementById('mic-btn').classList.add('listening');
+                        } catch (e) { }
+                    }
+                };
+
+                audio.onerror = (e) => {
+                    console.warn('Audio playback error, falling back to browser TTS', e);
+                    URL.revokeObjectURL(audioUrl);
+                    currentPuterAudio = null;
+                    useBrowserFallback(cleanText);
+                };
+
+                await audio.play();
+                console.log('✅ Groq Orpheus TTS playing!');
+                return;
+
+            } catch (err) {
+                console.warn('Groq TTS failed, using browser fallback:', err.message);
+                useBrowserFallback(cleanText);
+            }
         }
 
-        // ── Browser TTS Fallback ──
+        // ── Browser TTS Fallback (only if Groq TTS fails) ──
         function useBrowserFallback(text) {
             console.log('🔊 Using browser TTS fallback...');
             if (synth.speaking) { synth.cancel(); }
@@ -1340,7 +1324,7 @@
             ) || voices[0];
 
             if (bestVoice) utterance.voice = bestVoice;
-            utterance.rate = 0.9;
+            utterance.rate = 0.95;
             utterance.pitch = 1.0;
 
             utterance.onend = () => {
@@ -1373,46 +1357,6 @@
                 container.appendChild(div);
                 return div;
             } catch (e) { console.error("Status UI Error", e); return { innerText: '', style: {} }; }
-        }
-
-        function useBrowserFallback(text, callback) {
-            console.log("Using Browser TTS Fallback");
-            const utterance = new SpeechSynthesisUtterance(text);
-            // Try to get selected voice, or find a good default
-            let bestVoice = getSelectedVoice();
-            if (!bestVoice) {
-                const voices = synth.getVoices();
-                bestVoice = voices.find(v => v.name.includes('Desktop Mark')) || // Win
-                    voices.find(v => v.name.includes('David')) || // Win
-                    voices.find(v => v.name.includes('Daniel')) || // Mac
-                    voices.find(v => v.name.includes('Google US English')) || // Chrome
-                    voices.find(v => v.lang === 'en-US' && v.name.includes('Male')) ||
-                    voices[0];
-            }
-
-            if (bestVoice) {
-                utterance.voice = bestVoice;
-                if (bestVoice.name.includes('David') || bestVoice.name.includes('Mark')) utterance.pitch = 1.0;
-                else utterance.pitch = 0.9;
-            }
-            utterance.rate = 1.0;
-
-            utterance.onend = () => {
-                if (callback) callback();
-                else {
-                    isSpeaking = false;
-                    isAIProcessing = false;
-                    if (autoVoiceMode && interviewActive) {
-                        try { recognition.start(); document.getElementById('mic-btn').classList.add('listening'); } catch (e) { }
-                    }
-                }
-            };
-
-            utterance.onerror = () => {
-                if (callback) callback();
-                else { isSpeaking = false; isAIProcessing = false; }
-            };
-            synth.speak(utterance);
         }
 
         window.stopInterview = function () {
