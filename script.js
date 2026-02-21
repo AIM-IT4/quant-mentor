@@ -522,6 +522,11 @@ document.addEventListener('DOMContentLoaded', function () {
         function drawParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            // Detect current theme for particle colors
+            const isLight = document.body.classList.contains('light-mode');
+            const particleColor = isLight ? '15, 23, 42' : '255, 255, 255';     // dark slate or white
+            const lineColor = isLight ? '99, 102, 241' : '244, 63, 94';         // indigo or rose
+
             // Draw connections
             for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
@@ -529,8 +534,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     const dy = particles[i].y - particles[j].y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     if (dist < CONNECTION_DIST) {
-                        const opacity = (1 - dist / CONNECTION_DIST) * 0.15;
-                        ctx.strokeStyle = `rgba(244, 63, 94, ${opacity})`;
+                        const opacity = (1 - dist / CONNECTION_DIST) * (isLight ? 0.2 : 0.15);
+                        ctx.strokeStyle = `rgba(${lineColor}, ${opacity})`;
                         ctx.lineWidth = 0.5;
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
@@ -542,7 +547,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Draw and move particles
             for (const p of particles) {
-                ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+                ctx.fillStyle = `rgba(${particleColor}, ${p.alpha})`;
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
                 ctx.fill();

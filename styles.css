@@ -2436,3 +2436,39 @@ body {
         filter: brightness(1.15);
     }
 }
+
+/* --- Light Mode Overrides for Enhancements --- */
+body.light-mode .product-card:hover,
+body.light-mode .service-card:hover {
+    transform: translateY(-8px) rotateX(2deg) rotateY(-2deg);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12),
+        0 0 30px rgba(99, 102, 241, 0.1);
+}
+
+body.light-mode .btn-primary::after {
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+}
+
+body.light-mode .btn-product::after {
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.35) 0%, transparent 70%);
+}
+
+body.light-mode .scroll-top-btn {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .scroll-top-btn:hover {
+    background: var(--accent-primary);
+    color: #fff;
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+}
+
+body.light-mode .scroll-progress {
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+}
+
+body.light-mode .hero-bg-effects {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(244, 63, 94, 0.03) 100%);
+}
