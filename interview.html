@@ -538,25 +538,27 @@
         }
 
         .message .avatar {
-            width: 34px;
-            height: 34px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.85em;
+            overflow: hidden;
             flex-shrink: 0;
             margin-top: 2px;
+            border: 2px solid var(--border);
+        }
+
+        .message .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .message.ai .avatar {
-            background: linear-gradient(135deg, var(--accent), #0d9488);
-            color: white;
+            border-color: var(--accent);
         }
 
         .message.user .avatar {
-            background: #3b82f6;
-            color: white;
+            border-color: #3b82f6;
             order: 2;
         }
 
@@ -1098,9 +1100,10 @@
         let recognition = null;
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
-            recognition.continuous = false; // Fixed: Use false for better control
+            recognition.continuous = false;
             recognition.lang = 'en-US';
             recognition.interimResults = true;
+            recognition.maxAlternatives = 3; // Better accuracy with multiple candidates
         }
 
         const synth = window.speechSynthesis;
@@ -1224,7 +1227,15 @@
         // ── Groq Orpheus TTS (High-Quality, Natural Voice) ──
         async function speakText(text) {
             isSpeaking = true;
+            isAIProcessing = true;
             console.log('🔊 Speaking with Groq Orpheus TTS...');
+
+            // Safety timeout: reset flags if speech takes too long or silently fails
+            const safetyTimer = setTimeout(() => {
+                console.warn('TTS safety timeout - resetting flags');
+                isSpeaking = false;
+                isAIProcessing = false;
+            }, 30000); // 30 second max
 
             // Stop any current audio
             if (synth.speaking) { synth.cancel(); }
@@ -1277,6 +1288,7 @@
                 currentPuterAudio = audio;
 
                 audio.onended = () => {
+                    clearTimeout(safetyTimer);
                     isSpeaking = false;
                     isAIProcessing = false;
                     URL.revokeObjectURL(audioUrl);
@@ -1303,6 +1315,7 @@
 
             } catch (err) {
                 console.warn('Groq TTS failed, using browser fallback:', err.message);
+                clearTimeout(safetyTimer);
                 useBrowserFallback(cleanText);
             }
         }
@@ -1681,20 +1694,22 @@
             const div = document.createElement('div');
             div.className = `message ${role}`;
 
-            const avatar = role === 'ai' ? '<i class="fas fa-brain"></i>' : '<i class="fas fa-user"></i>';
+            const avatarImg = role === 'ai'
+                ? '<img src="assets/images/interviewer-avatar.png" alt="Interviewer">'
+                : '<img src="assets/images/candidate-avatar.png" alt="You">';
+
             div.innerHTML = `
-                <div class="avatar">${avatar}</div>
+                <div class="avatar">${avatarImg}</div>
                 <div class="bubble">
                     ${marked.parse(content)} 
-                    ${role === 'ai' ? `<button class="speak-btn" onclick="speakText(this.parentElement.innerText.replace('🔊',''))">🔊</button>` : ''}
+                    ${role === 'ai' ? `<button class="speak-btn" onclick="speakText(this.parentElement.innerText.replace('🔊',''))" title="Listen">🔊</button>` : ''}
                 </div>
             `;
             messagesEl.appendChild(div);
             scrollToBottom();
 
-            // Auto-speak AI response if in voice mode
+            // Auto-speak AI response (voice mode auto-speaks, manual still has 🔊 button)
             if (role === 'ai' && autoVoiceMode) {
-                // Remove emojis/markdown for cleaner speech
                 const textToSpeak = content.replace(/[\u{1F600}-\u{1F6FF}]/gu, '').replace(/\*/g, '');
                 speakText(textToSpeak);
             }
