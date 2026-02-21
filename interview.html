@@ -1226,21 +1226,15 @@
 
         // ── Groq Orpheus TTS (High-Quality, Natural Voice) ──
         async function speakText(text) {
+            // Reset all flags fresh for this call
             isSpeaking = true;
             isAIProcessing = true;
-            console.log('🔊 Speaking with Groq Orpheus TTS...');
 
-            // Safety timeout: reset flags if speech takes too long or silently fails
-            const safetyTimer = setTimeout(() => {
-                console.warn('TTS safety timeout - resetting flags');
-                isSpeaking = false;
-                isAIProcessing = false;
-            }, 30000); // 30 second max
-
-            // Stop any current audio
+            // Stop any current audio immediately
             if (synth.speaking) { synth.cancel(); }
             if (currentPuterAudio) {
                 currentPuterAudio.pause();
+                currentPuterAudio.currentTime = 0;
                 currentPuterAudio = null;
             }
 
@@ -1255,7 +1249,7 @@
                 .replace(/[\u{2700}-\u{27BF}]/gu, '')
                 .replace(/📊|📝|✅|❌|🧠|💡|🔊|🎙️|🎯|⚡|🚀/g, '')
                 .replace(/\n/g, '. ')
-                .replace(/\.\s*\./g, '.')
+                .replace(/\.(\s*\.)+/g, '.')
                 .trim();
 
             if (!cleanText || cleanText.length < 2) {
@@ -1265,59 +1259,106 @@
             }
 
             const selectedVoice = getSelectedVoice();
+            console.log(`🎙️ TTS Request: voice=${selectedVoice}, chars=${cleanText.length}`);
 
-            try {
-                console.log(`🎙️ Calling Groq TTS API (voice: ${selectedVoice})...`);
-                const response = await fetch(`${API_BASE}/api/tts`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        text: cleanText,
-                        voice: selectedVoice
-                    })
-                });
+            // Try Groq TTS with retry
+            for (let attempt = 0; attempt < 2; attempt++) {
+                try {
+                    // Use AbortController for fetch timeout
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
 
-                if (!response.ok) {
-                    throw new Error(`TTS API returned ${response.status}`);
-                }
+                    const response = await fetch(`${API_BASE}/api/tts`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            text: cleanText.substring(0, 1500), // Cap at 1500 chars for fast response
+                            voice: selectedVoice
+                        }),
+                        signal: controller.signal
+                    });
 
-                // Convert response to audio blob and play
-                const audioBlob = await response.blob();
-                const audioUrl = URL.createObjectURL(audioBlob);
-                const audio = new Audio(audioUrl);
-                currentPuterAudio = audio;
+                    clearTimeout(timeoutId);
 
-                audio.onended = () => {
-                    clearTimeout(safetyTimer);
-                    isSpeaking = false;
-                    isAIProcessing = false;
-                    URL.revokeObjectURL(audioUrl);
-                    currentPuterAudio = null;
-                    // Auto-restart mic if in voice mode
-                    if (autoVoiceMode && interviewActive && recognition) {
-                        try {
-                            recognition.start();
-                            document.getElementById('mic-btn').classList.add('listening');
-                        } catch (e) { }
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        console.warn(`TTS attempt ${attempt + 1} failed: ${response.status}`, errData);
+                        if (attempt === 0) {
+                            await new Promise(r => setTimeout(r, 1000)); // Wait 1s before retry
+                            continue;
+                        }
+                        throw new Error(`TTS API returned ${response.status}`);
                     }
-                };
 
-                audio.onerror = (e) => {
-                    console.warn('Audio playback error, falling back to browser TTS', e);
-                    URL.revokeObjectURL(audioUrl);
-                    currentPuterAudio = null;
-                    useBrowserFallback(cleanText);
-                };
+                    // Verify we got audio data
+                    const contentType = response.headers.get('Content-Type') || '';
+                    if (!contentType.includes('audio')) {
+                        console.warn(`TTS returned non-audio content: ${contentType}`);
+                        if (attempt === 0) continue;
+                        throw new Error('TTS returned non-audio response');
+                    }
 
-                await audio.play();
-                console.log('✅ Groq Orpheus TTS playing!');
-                return;
+                    // Convert response to audio blob and play
+                    const audioBlob = await response.blob();
+                    console.log(`✅ TTS audio received: ${(audioBlob.size / 1024).toFixed(1)}KB`);
 
-            } catch (err) {
-                console.warn('Groq TTS failed, using browser fallback:', err.message);
-                clearTimeout(safetyTimer);
-                useBrowserFallback(cleanText);
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = new Audio(audioUrl);
+                    currentPuterAudio = audio;
+
+                    // Safety timeout for playback
+                    const playbackTimer = setTimeout(() => {
+                        console.warn('TTS playback timeout - resetting');
+                        isSpeaking = false;
+                        isAIProcessing = false;
+                        if (currentPuterAudio === audio) currentPuterAudio = null;
+                    }, 60000);
+
+                    audio.onended = () => {
+                        clearTimeout(playbackTimer);
+                        isSpeaking = false;
+                        isAIProcessing = false;
+                        URL.revokeObjectURL(audioUrl);
+                        if (currentPuterAudio === audio) currentPuterAudio = null;
+                        // Auto-restart mic if in voice mode
+                        if (autoVoiceMode && interviewActive && recognition) {
+                            try {
+                                recognition.start();
+                                document.getElementById('mic-btn').classList.add('listening');
+                            } catch (e) { }
+                        }
+                    };
+
+                    audio.onerror = (e) => {
+                        clearTimeout(playbackTimer);
+                        console.warn('Audio playback error', e);
+                        URL.revokeObjectURL(audioUrl);
+                        if (currentPuterAudio === audio) currentPuterAudio = null;
+                        isSpeaking = false;
+                        isAIProcessing = false;
+                        // Don't fall back to browser here - just stop
+                    };
+
+                    await audio.play();
+                    console.log('🔊 Groq TTS playing!');
+                    return; // Success — exit the function
+
+                } catch (err) {
+                    if (err.name === 'AbortError') {
+                        console.warn(`TTS attempt ${attempt + 1} timed out`);
+                    } else {
+                        console.warn(`TTS attempt ${attempt + 1} error:`, err.message);
+                    }
+                    if (attempt === 0) {
+                        await new Promise(r => setTimeout(r, 500));
+                        continue; // Retry once
+                    }
+                }
             }
+
+            // All Groq TTS attempts failed — use browser fallback
+            console.warn('All Groq TTS attempts failed, using browser fallback');
+            useBrowserFallback(cleanText);
         }
 
         // ── Browser TTS Fallback (only if Groq TTS fails) ──
