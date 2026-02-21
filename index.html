@@ -115,6 +115,8 @@
 </head>
 
 <body>
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress" id="scrollProgress"></div>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
@@ -149,6 +151,7 @@
         <!-- Hero Section -->
         <section class="hero" id="hero">
             <div class="hero-bg-effects">
+                <canvas id="heroParticles" class="hero-particles"></canvas>
                 <div class="gradient-orb orb-1"></div>
                 <div class="gradient-orb orb-2"></div>
                 <div class="grid-overlay"></div>
@@ -904,6 +907,11 @@
     </script>
 
     <script src="script.js"></script>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top-btn" id="scrollTopBtn" title="Back to top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
 </body>
 
 </html>

@@ -81,6 +81,9 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('🚀 DOM loaded, initializing all components...');
 
     const navbar = document.querySelector('.navbar');
+    const scrollProgress = document.getElementById('scrollProgress');
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+
     if (navbar) {
         window.addEventListener('scroll', () => {
             if (window.scrollY > 20) {
@@ -88,6 +91,30 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 navbar.classList.remove('scrolled');
             }
+
+            // Scroll progress bar
+            if (scrollProgress) {
+                const scrollTop = window.scrollY;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = (scrollTop / docHeight) * 100;
+                scrollProgress.style.width = scrollPercent + '%';
+            }
+
+            // Scroll-to-top button
+            if (scrollTopBtn) {
+                if (window.scrollY > 600) {
+                    scrollTopBtn.classList.add('visible');
+                } else {
+                    scrollTopBtn.classList.remove('visible');
+                }
+            }
+        });
+    }
+
+    // Scroll-to-top click handler
+    if (scrollTopBtn) {
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
@@ -459,6 +486,125 @@ document.addEventListener('DOMContentLoaded', function () {
     // --------------------------------
     console.log('%c QuantMentor ', 'background: linear-gradient(135deg, #6366f1, #a855f7); color: white; font-size: 20px; padding: 10px 20px; border-radius: 8px;');
     console.log('%c Expert Quant Mentorship & Digital Resources ', 'color: #a855f7; font-size: 14px;');
+
+    // ================================
+    // HERO PARTICLE ANIMATION
+    // ================================
+    const canvas = document.getElementById('heroParticles');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const PARTICLE_COUNT = 60;
+        const CONNECTION_DIST = 120;
+        let animId;
+
+        function resizeCanvas() {
+            const hero = document.getElementById('hero');
+            if (!hero) return;
+            canvas.width = hero.offsetWidth;
+            canvas.height = hero.offsetHeight;
+        }
+
+        function createParticles() {
+            particles = [];
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    r: Math.random() * 2 + 1,
+                    alpha: Math.random() * 0.5 + 0.2
+                });
+            }
+        }
+
+        function drawParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw connections
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < CONNECTION_DIST) {
+                        const opacity = (1 - dist / CONNECTION_DIST) * 0.15;
+                        ctx.strokeStyle = `rgba(244, 63, 94, ${opacity})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            // Draw and move particles
+            for (const p of particles) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fill();
+
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+            }
+
+            animId = requestAnimationFrame(drawParticles);
+        }
+
+        resizeCanvas();
+        createParticles();
+        drawParticles();
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            createParticles();
+        });
+    }
+
+    // ================================
+    // SMOOTH NUMBER COUNTER ANIMATION
+    // ================================
+    function animateCounter(el, target, suffix = '+') {
+        const duration = 1500;
+        const startTime = performance.now();
+        const startVal = 0;
+
+        function update(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease-out cubic
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = Math.round(startVal + (target - startVal) * eased);
+            el.textContent = current + suffix;
+            if (progress < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+    }
+
+    // Observe stat values and animate when visible
+    const statElements = document.querySelectorAll('.stat-value');
+    if (statElements.length > 0) {
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !entry.target.dataset.counted) {
+                    entry.target.dataset.counted = 'true';
+                    const text = entry.target.textContent.trim();
+                    const num = parseInt(text.replace(/[^0-9]/g, ''));
+                    const suffix = text.includes('+') ? '+' : '';
+                    if (!isNaN(num) && num > 0) {
+                        animateCounter(entry.target, num, suffix);
+                    }
+                }
+            });
+        }, { threshold: 0.5 });
+
+        statElements.forEach(el => counterObserver.observe(el));
+    }
 
 });
 

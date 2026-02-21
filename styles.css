@@ -2159,8 +2159,13 @@ body.light-mode .theme-toggle .fa-moon {
    Skeleton Loading Cards
    -------------------------------- */
 @keyframes shimmer {
-    0% { background-position: -400px 0; }
-    100% { background-position: 400px 0; }
+    0% {
+        background-position: -400px 0;
+    }
+
+    100% {
+        background-position: 400px 0;
+    }
 }
 
 .skeleton-card {
@@ -2248,4 +2253,186 @@ body.light-mode .theme-toggle .fa-moon {
 
 .skeleton-service .skeleton-line.medium {
     width: 85%;
+}
+
+/* ================================
+   10/10 Design Enhancements
+   ================================ */
+
+/* --- Scroll Progress Bar --- */
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0%;
+    background: var(--accent-gradient);
+    z-index: 9999;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
+}
+
+/* --- Hero Particle Canvas --- */
+.hero-particles {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* --- Page Fade-in --- */
+body {
+    animation: pageFadeIn 0.6s ease-out;
+}
+
+@keyframes pageFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- 3D Card Tilt Hover Effect --- */
+.product-card,
+.service-card {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+.product-card:hover,
+.service-card:hover {
+    transform: translateY(-8px) rotateX(2deg) rotateY(-2deg);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(244, 63, 94, 0.08);
+}
+
+/* --- Button Hover Glow --- */
+.btn-primary {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.btn-primary:hover::after {
+    opacity: 1;
+}
+
+.btn-product {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-product::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.25) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.btn-product:hover::after {
+    opacity: 1;
+}
+
+/* --- Scroll to Top Button --- */
+.scroll-top-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 48px;
+    height: 48px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 50%;
+    color: var(--text-primary);
+    font-size: 1rem;
+    cursor: pointer;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-md);
+}
+
+.scroll-top-btn.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.scroll-top-btn:hover {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: #fff;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(244, 63, 94, 0.3);
+}
+
+/* --- Staggered Card Entry --- */
+.services-grid .service-card:nth-child(1),
+.services-grid .skeleton-service:nth-child(1),
+.products-grid .product-card:nth-child(1) {
+    transition-delay: 0ms;
+}
+
+.services-grid .service-card:nth-child(2),
+.services-grid .skeleton-service:nth-child(2),
+.products-grid .product-card:nth-child(2) {
+    transition-delay: 100ms;
+}
+
+.services-grid .service-card:nth-child(3),
+.services-grid .skeleton-service:nth-child(3),
+.products-grid .product-card:nth-child(3) {
+    transition-delay: 200ms;
+}
+
+.services-grid .service-card:nth-child(4),
+.products-grid .product-card:nth-child(4) {
+    transition-delay: 300ms;
+}
+
+.products-grid .product-card:nth-child(5) {
+    transition-delay: 400ms;
+}
+
+.products-grid .product-card:nth-child(6) {
+    transition-delay: 500ms;
+}
+
+/* --- Stat Value Gradient Glow Pulse --- */
+.stat-value {
+    animation: statGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes statGlow {
+    from {
+        filter: brightness(1);
+    }
+
+    to {
+        filter: brightness(1.15);
+    }
 }
