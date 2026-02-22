@@ -1264,26 +1264,44 @@
             let letterIndex = 0;
 
             segments.forEach(seg => {
-                const wrapper = seg.gradient ? document.createElement('span') : null;
-                if (wrapper) wrapper.className = 'gradient-text';
+                const container = seg.gradient ? document.createElement('span') : headline;
+                if (seg.gradient) container.className = 'gradient-text';
 
-                for (let i = 0; i < seg.text.length; i++) {
-                    const char = seg.text[i];
-                    if (char === ' ') {
+                // Split into words and wrap each word to prevent mid-word breaks
+                const words = seg.text.split(' ');
+                words.forEach((word, wi) => {
+                    if (word === '') {
                         const space = document.createElement('span');
                         space.className = 'letter-space';
-                        (wrapper || headline).appendChild(space);
-                    } else {
+                        container.appendChild(space);
+                        letterIndex++;
+                        return;
+                    }
+
+                    const wordWrap = document.createElement('span');
+                    wordWrap.style.whiteSpace = 'nowrap';
+                    wordWrap.style.display = 'inline-block';
+
+                    for (let i = 0; i < word.length; i++) {
                         const span = document.createElement('span');
                         span.className = 'letter';
-                        span.textContent = char;
+                        span.textContent = word[i];
                         span.style.animationDelay = (letterIndex * 0.035) + 's';
-                        (wrapper || headline).appendChild(span);
+                        wordWrap.appendChild(span);
+                        letterIndex++;
                     }
-                    letterIndex++;
-                }
 
-                if (wrapper) headline.appendChild(wrapper);
+                    container.appendChild(wordWrap);
+
+                    if (wi < words.length - 1) {
+                        const space = document.createElement('span');
+                        space.className = 'letter-space';
+                        container.appendChild(space);
+                        letterIndex++;
+                    }
+                });
+
+                if (seg.gradient) headline.appendChild(container);
             });
         })();
     </script>
