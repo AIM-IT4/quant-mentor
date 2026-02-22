@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- Dynamic Stats & Supabase Init ---
     const STATS_CONFIG = {
         students: { base: 50, id: 'stat-students' },
-        experience: { startYear: 2020, id: 'stat-experience' },
+        experience: { startYear: 2022, id: 'stat-experience' },
         products: { base: 15, id: 'stat-products' }
     };
 
