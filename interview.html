@@ -1572,15 +1572,16 @@
                         console.warn(`TTS attempt ${attempt + 1} error:`, err.message);
                     }
                     if (attempt === 0) {
-                        await new Promise(r => setTimeout(r, 500));
+                        await new Promise(r => setTimeout(r, 2000)); // Wait 2s before retry (rate limit buffer)
                         continue; // Retry once
                     }
                 }
             }
 
-            // All Groq TTS attempts failed — use browser fallback
-            console.warn('All Groq TTS attempts failed, using browser fallback');
-            useBrowserFallback(cleanText);
+            // All Groq TTS attempts failed — stay silent (NEVER fall back to robotic browser voice)
+            console.warn('⚠️ All Groq TTS attempts failed. Staying silent (no robotic fallback).');
+            isSpeaking = false;
+            isAIProcessing = false;
         }
 
         // ── Browser TTS Fallback (only if Groq TTS fails) ──
@@ -1987,8 +1988,8 @@
             messagesEl.appendChild(div);
             scrollToBottom();
 
-            // Auto-speak AI response (voice mode auto-speaks, manual still has 🔊 button)
-            if (role === 'ai' && autoVoiceMode) {
+            // Auto-speak EVERY AI response (interviewer always speaks)
+            if (role === 'ai' && interviewActive) {
                 const textToSpeak = content.replace(/[\u{1F600}-\u{1F6FF}]/gu, '').replace(/\*/g, '');
                 speakText(textToSpeak);
             }
