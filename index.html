@@ -456,8 +456,9 @@
                         <span class="badge-dot"></span>
                         Available for 1-on-1 Sessions
                     </div>
-                    <h1 class="hero-headline">
-                        Expert <span class="gradient-text">Quant Mentorship</span> for Aspiring Professionals
+                    <h1 class="hero-headline" id="heroHeadline"
+                        aria-label="Expert Quant Mentorship for Aspiring Professionals">
+                        <!-- Letters injected by JS for animation -->
                     </h1>
                     <p class="subheadline" style="max-width: 600px; margin-bottom: 40px;">
                         Get personalized guidance on quantitative finance, derivatives pricing, XVA modeling,
@@ -1243,6 +1244,47 @@
                 console.log('ℹ️ Local configuration (config.js) not found or build-time injection failed. Using environment variables if available.');
             };
             document.head.appendChild(script);
+        })();
+    </script>
+
+    <script>
+        // Letter-by-letter hero headline animation
+        (function () {
+            const headline = document.getElementById('heroHeadline');
+            if (!headline) return;
+
+            // Define text segments: [{text, gradient: bool}]
+            const segments = [
+                { text: 'Expert ', gradient: false },
+                { text: 'Quant Mentorship', gradient: true },
+                { text: ' for Aspiring Professionals', gradient: false }
+            ];
+
+            headline.innerHTML = '';
+            let letterIndex = 0;
+
+            segments.forEach(seg => {
+                const wrapper = seg.gradient ? document.createElement('span') : null;
+                if (wrapper) wrapper.className = 'gradient-text';
+
+                for (let i = 0; i < seg.text.length; i++) {
+                    const char = seg.text[i];
+                    if (char === ' ') {
+                        const space = document.createElement('span');
+                        space.className = 'letter-space';
+                        (wrapper || headline).appendChild(space);
+                    } else {
+                        const span = document.createElement('span');
+                        span.className = 'letter';
+                        span.textContent = char;
+                        span.style.animationDelay = (letterIndex * 0.035) + 's';
+                        (wrapper || headline).appendChild(span);
+                    }
+                    letterIndex++;
+                }
+
+                if (wrapper) headline.appendChild(wrapper);
+            });
         })();
     </script>
 
