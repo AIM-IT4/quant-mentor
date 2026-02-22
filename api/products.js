@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     try {
         // Use fetch (same pattern as razorpay-webhook.js and reminders.js)
         const response = await fetch(
-            `${SUPABASE_URL}/rest/v1/products?select=id,name,description,price,category,cover_image_url,created_at&order=created_at.desc`,
+            `${SUPABASE_URL}/rest/v1/products?select=id,name,description,price,cover_image_url,created_at&order=created_at.desc`,
             {
                 headers: {
                     'apikey': SUPABASE_KEY,
@@ -38,7 +38,6 @@ export default async function handler(req, res) {
             description: stripHtml(p.description),
             price: p.price === 0 ? 'Free' : `₹${p.price}`,
             priceINR: p.price,
-            category: p.category || 'notes',
             coverImage: p.cover_image_url || null,
             purchaseUrl: p.price > 0
                 ? 'https://quant-mentor.vercel.app/#products'
