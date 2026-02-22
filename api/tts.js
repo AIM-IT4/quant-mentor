@@ -17,9 +17,8 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Text is required' });
     }
 
-    // Truncate to safe limit — keep responses short for fast TTS
-    // Shorter text = smaller audio file = stays under Vercel payload limit
-    const inputText = text.substring(0, 2000);
+    // Truncate to keep audio small + reduce rate limit pressure
+    const inputText = text.substring(0, 1500);
 
     console.log(`TTS Request: voice=${voice || 'troy'}, text_len=${inputText.length}`);
 
@@ -38,6 +37,17 @@ export default async function handler(req, res) {
             })
         });
 
+        // Handle rate limits — forward Retry-After header to client
+        if (response.status === 429) {
+            const retryAfter = response.headers.get('Retry-After') || response.headers.get('retry-after') || '10';
+            console.warn(`Groq TTS rate limited. Retry-After: ${retryAfter}s`);
+            res.setHeader('Retry-After', retryAfter);
+            return res.status(429).json({
+                error: 'Rate limited',
+                retryAfter: parseInt(retryAfter) || 10
+            });
+        }
+
         if (!response.ok) {
             const errText = await response.text();
             console.error('Groq TTS Error:', response.status, errText);
@@ -49,38 +59,7 @@ export default async function handler(req, res) {
 
         // Stream the audio binary directly to the client
         const audioBuffer = Buffer.from(await response.arrayBuffer());
-
         console.log(`TTS Response: ${audioBuffer.length} bytes`);
-
-        // Check if response is too large (Vercel limit ~4.5MB)
-        if (audioBuffer.length > 4000000) {
-            console.warn('TTS audio too large, truncating text and retrying');
-            // Retry with shorter text
-            const shortText = inputText.substring(0, 800);
-            const retryResponse = await fetch('https://api.groq.com/openai/v1/audio/speech', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${GROQ_API_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: 'canopylabs/orpheus-v1-english',
-                    input: shortText,
-                    voice: voice || 'troy',
-                    response_format: 'wav'
-                })
-            });
-
-            if (!retryResponse.ok) {
-                return res.status(500).json({ error: 'TTS retry failed' });
-            }
-
-            const retryBuffer = Buffer.from(await retryResponse.arrayBuffer());
-            res.setHeader('Content-Type', 'audio/wav');
-            res.setHeader('Content-Length', retryBuffer.length);
-            res.setHeader('Cache-Control', 'no-cache');
-            return res.status(200).send(retryBuffer);
-        }
 
         res.setHeader('Content-Type', 'audio/wav');
         res.setHeader('Content-Length', audioBuffer.length);

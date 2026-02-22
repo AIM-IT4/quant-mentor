@@ -1447,6 +1447,8 @@
             : '';
 
         // ── Groq Orpheus TTS (High-Quality, Natural Voice) ──
+        let lastTTSCallTime = 0; // Track last successful call to pace requests
+
         async function speakText(text) {
             // Reset all flags fresh for this call
             isSpeaking = true;
@@ -1481,46 +1483,68 @@
             }
 
             const selectedVoice = getSelectedVoice();
-            console.log(`🎙️ TTS Request: voice=${selectedVoice}, chars=${cleanText.length}`);
 
-            // Try Groq TTS with retry
-            for (let attempt = 0; attempt < 2; attempt++) {
+            // Rate-limit pacing: ensure minimum 5s gap between API calls
+            const now = Date.now();
+            const timeSinceLastCall = now - lastTTSCallTime;
+            if (timeSinceLastCall < 5000 && lastTTSCallTime > 0) {
+                const waitMs = 5000 - timeSinceLastCall;
+                console.log(`⏳ Pacing TTS request, waiting ${(waitMs / 1000).toFixed(1)}s...`);
+                await new Promise(r => setTimeout(r, waitMs));
+            }
+
+            // Cap at 800 chars to reduce API load and stay under rate limits
+            const ttsText = cleanText.substring(0, 800);
+            console.log(`🎙️ TTS Request: voice=${selectedVoice}, chars=${ttsText.length}`);
+
+            // Try Groq TTS with rate-limit-aware retry (up to 3 attempts)
+            for (let attempt = 0; attempt < 3; attempt++) {
                 try {
-                    // Use AbortController for fetch timeout
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+                    const timeoutId = setTimeout(() => controller.abort(), 20000);
 
                     const response = await fetch(`${API_BASE}/api/tts`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            text: cleanText.substring(0, 1500), // Cap at 1500 chars for fast response
-                            voice: selectedVoice
-                        }),
+                        body: JSON.stringify({ text: ttsText, voice: selectedVoice }),
                         signal: controller.signal
                     });
 
                     clearTimeout(timeoutId);
 
+                    // Handle rate limit with intelligent backoff
+                    if (response.status === 429) {
+                        const errData = await response.json().catch(() => ({}));
+                        const retryAfter = errData.retryAfter || 12; // Default 12s if not specified
+                        console.warn(`⏳ Rate limited (attempt ${attempt + 1}). Waiting ${retryAfter}s...`);
+
+                        if (attempt < 2) {
+                            // Wait the full retry period
+                            await new Promise(r => setTimeout(r, (retryAfter + 1) * 1000));
+                            continue;
+                        }
+                        throw new Error(`Rate limited after ${attempt + 1} attempts`);
+                    }
+
                     if (!response.ok) {
                         const errData = await response.json().catch(() => ({}));
                         console.warn(`TTS attempt ${attempt + 1} failed: ${response.status}`, errData);
-                        if (attempt === 0) {
-                            await new Promise(r => setTimeout(r, 1000)); // Wait 1s before retry
+                        if (attempt < 2) {
+                            await new Promise(r => setTimeout(r, 3000));
                             continue;
                         }
                         throw new Error(`TTS API returned ${response.status}`);
                     }
 
-                    // Verify we got audio data
+                    // Verify audio content
                     const contentType = response.headers.get('Content-Type') || '';
                     if (!contentType.includes('audio')) {
-                        console.warn(`TTS returned non-audio content: ${contentType}`);
-                        if (attempt === 0) continue;
-                        throw new Error('TTS returned non-audio response');
+                        if (attempt < 2) continue;
+                        throw new Error('Non-audio response');
                     }
 
-                    // Convert response to audio blob and play
+                    // Success! Play audio
+                    lastTTSCallTime = Date.now();
                     const audioBlob = await response.blob();
                     console.log(`✅ TTS audio received: ${(audioBlob.size / 1024).toFixed(1)}KB`);
 
@@ -1528,9 +1552,7 @@
                     const audio = new Audio(audioUrl);
                     currentPuterAudio = audio;
 
-                    // Safety timeout for playback
                     const playbackTimer = setTimeout(() => {
-                        console.warn('TTS playback timeout - resetting');
                         isSpeaking = false;
                         isAIProcessing = false;
                         if (currentPuterAudio === audio) currentPuterAudio = null;
@@ -1542,7 +1564,6 @@
                         isAIProcessing = false;
                         URL.revokeObjectURL(audioUrl);
                         if (currentPuterAudio === audio) currentPuterAudio = null;
-                        // Auto-restart mic if in voice mode
                         if (autoVoiceMode && interviewActive && recognition) {
                             try {
                                 recognition.start();
@@ -1553,17 +1574,15 @@
 
                     audio.onerror = (e) => {
                         clearTimeout(playbackTimer);
-                        console.warn('Audio playback error', e);
                         URL.revokeObjectURL(audioUrl);
                         if (currentPuterAudio === audio) currentPuterAudio = null;
                         isSpeaking = false;
                         isAIProcessing = false;
-                        // Don't fall back to browser here - just stop
                     };
 
                     await audio.play();
                     console.log('🔊 Groq TTS playing!');
-                    return; // Success — exit the function
+                    return;
 
                 } catch (err) {
                     if (err.name === 'AbortError') {
@@ -1571,15 +1590,17 @@
                     } else {
                         console.warn(`TTS attempt ${attempt + 1} error:`, err.message);
                     }
-                    if (attempt === 0) {
-                        await new Promise(r => setTimeout(r, 2000)); // Wait 2s before retry (rate limit buffer)
-                        continue; // Retry once
+                    if (attempt < 2) {
+                        const backoff = (attempt + 1) * 5000; // 5s, 10s
+                        console.log(`⏳ Backing off ${backoff / 1000}s before retry...`);
+                        await new Promise(r => setTimeout(r, backoff));
+                        continue;
                     }
                 }
             }
 
-            // All Groq TTS attempts failed — stay silent (NEVER fall back to robotic browser voice)
-            console.warn('⚠️ All Groq TTS attempts failed. Staying silent (no robotic fallback).');
+            // All attempts failed — stay silent
+            console.warn('⚠️ All TTS attempts failed. Staying silent.');
             isSpeaking = false;
             isAIProcessing = false;
         }
