@@ -273,6 +273,19 @@ h6 {
     }
 }
 
+/* Gradient must be applied to individual letters, not the parent wrapper */
+.hero-headline .gradient-text {
+    -webkit-text-fill-color: unset;
+    background: none;
+}
+
+.hero-headline .gradient-text .letter {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
 .section-headline {
     font-size: var(--h2-size);
     font-weight: 700;
