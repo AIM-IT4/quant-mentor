@@ -1446,15 +1446,15 @@
             ? 'https://quant-mentor.vercel.app'
             : '';
 
-        // ── Groq Orpheus TTS (High-Quality, Natural Voice) ──
-        let lastTTSCallTime = 0; // Track last successful call to pace requests
+        // ── TTS Engine (Two-Tier: Groq Orpheus → Premium Browser Voice) ──
+        let groqAvailable = true;  // Set to false when rate-limited
+        let groqCooldownUntil = 0; // Timestamp when Groq becomes available again
 
         async function speakText(text) {
-            // Reset all flags fresh for this call
             isSpeaking = true;
             isAIProcessing = true;
 
-            // Stop any current audio immediately
+            // Stop any current audio
             if (synth.speaking) { synth.cancel(); }
             if (currentPuterAudio) {
                 currentPuterAudio.pause();
@@ -1462,7 +1462,7 @@
                 currentPuterAudio = null;
             }
 
-            // Clean text for speech (remove markdown, emojis)
+            // Clean text for speech
             const cleanText = text
                 .replace(/\*\*/g, '')
                 .replace(/\*/g, '')
@@ -1483,25 +1483,22 @@
             }
 
             const selectedVoice = getSelectedVoice();
+            const ttsText = cleanText.substring(0, 800);
 
-            // Rate-limit pacing: ensure minimum 5s gap between API calls
+            // Check if Groq is available (not rate-limited)
             const now = Date.now();
-            const timeSinceLastCall = now - lastTTSCallTime;
-            if (timeSinceLastCall < 5000 && lastTTSCallTime > 0) {
-                const waitMs = 5000 - timeSinceLastCall;
-                console.log(`⏳ Pacing TTS request, waiting ${(waitMs / 1000).toFixed(1)}s...`);
-                await new Promise(r => setTimeout(r, waitMs));
+            if (groqCooldownUntil > now) {
+                groqAvailable = false;
+            } else {
+                groqAvailable = true;
             }
 
-            // Cap at 800 chars to reduce API load and stay under rate limits
-            const ttsText = cleanText.substring(0, 800);
-            console.log(`🎙️ TTS Request: voice=${selectedVoice}, chars=${ttsText.length}`);
-
-            // Try Groq TTS with rate-limit-aware retry (up to 3 attempts)
-            for (let attempt = 0; attempt < 3; attempt++) {
+            // ── TIER 1: Try Groq Orpheus TTS (single attempt, no long waits) ──
+            if (groqAvailable) {
                 try {
+                    console.log(`🎙️ TTS Request: voice=${selectedVoice}, chars=${ttsText.length}`);
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 20000);
+                    const timeoutId = setTimeout(() => controller.abort(), 12000);
 
                     const response = await fetch(`${API_BASE}/api/tts`, {
                         method: 'POST',
@@ -1512,117 +1509,104 @@
 
                     clearTimeout(timeoutId);
 
-                    // Handle rate limit with intelligent backoff
                     if (response.status === 429) {
-                        const errData = await response.json().catch(() => ({}));
-                        const retryAfter = errData.retryAfter || 12; // Default 12s if not specified
-                        console.warn(`⏳ Rate limited (attempt ${attempt + 1}). Waiting ${retryAfter}s...`);
+                        // Rate limited — mark Groq as unavailable for 60 seconds
+                        console.warn('⏳ Groq rate limited. Switching to premium browser voice.');
+                        groqAvailable = false;
+                        groqCooldownUntil = Date.now() + 60000; // Check again in 60s
+                    } else if (response.ok) {
+                        const contentType = response.headers.get('Content-Type') || '';
+                        if (contentType.includes('audio')) {
+                            const audioBlob = await response.blob();
+                            console.log(`✅ Groq TTS: ${(audioBlob.size / 1024).toFixed(1)}KB`);
 
-                        if (attempt < 2) {
-                            // Wait the full retry period
-                            await new Promise(r => setTimeout(r, (retryAfter + 1) * 1000));
-                            continue;
+                            const audioUrl = URL.createObjectURL(audioBlob);
+                            const audio = new Audio(audioUrl);
+                            currentPuterAudio = audio;
+
+                            const playbackTimer = setTimeout(() => {
+                                isSpeaking = false;
+                                isAIProcessing = false;
+                                if (currentPuterAudio === audio) currentPuterAudio = null;
+                            }, 60000);
+
+                            audio.onended = () => {
+                                clearTimeout(playbackTimer);
+                                isSpeaking = false;
+                                isAIProcessing = false;
+                                URL.revokeObjectURL(audioUrl);
+                                if (currentPuterAudio === audio) currentPuterAudio = null;
+                                if (autoVoiceMode && interviewActive && recognition) {
+                                    try {
+                                        recognition.start();
+                                        document.getElementById('mic-btn').classList.add('listening');
+                                    } catch (e) { }
+                                }
+                            };
+
+                            audio.onerror = () => {
+                                clearTimeout(playbackTimer);
+                                URL.revokeObjectURL(audioUrl);
+                                if (currentPuterAudio === audio) currentPuterAudio = null;
+                                // Fall through to browser TTS
+                                usePremiumBrowserVoice(cleanText, selectedVoice);
+                            };
+
+                            await audio.play();
+                            console.log('🔊 Groq TTS playing!');
+                            return; // Success
                         }
-                        throw new Error(`Rate limited after ${attempt + 1} attempts`);
                     }
-
-                    if (!response.ok) {
-                        const errData = await response.json().catch(() => ({}));
-                        console.warn(`TTS attempt ${attempt + 1} failed: ${response.status}`, errData);
-                        if (attempt < 2) {
-                            await new Promise(r => setTimeout(r, 3000));
-                            continue;
-                        }
-                        throw new Error(`TTS API returned ${response.status}`);
-                    }
-
-                    // Verify audio content
-                    const contentType = response.headers.get('Content-Type') || '';
-                    if (!contentType.includes('audio')) {
-                        if (attempt < 2) continue;
-                        throw new Error('Non-audio response');
-                    }
-
-                    // Success! Play audio
-                    lastTTSCallTime = Date.now();
-                    const audioBlob = await response.blob();
-                    console.log(`✅ TTS audio received: ${(audioBlob.size / 1024).toFixed(1)}KB`);
-
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    const audio = new Audio(audioUrl);
-                    currentPuterAudio = audio;
-
-                    const playbackTimer = setTimeout(() => {
-                        isSpeaking = false;
-                        isAIProcessing = false;
-                        if (currentPuterAudio === audio) currentPuterAudio = null;
-                    }, 60000);
-
-                    audio.onended = () => {
-                        clearTimeout(playbackTimer);
-                        isSpeaking = false;
-                        isAIProcessing = false;
-                        URL.revokeObjectURL(audioUrl);
-                        if (currentPuterAudio === audio) currentPuterAudio = null;
-                        if (autoVoiceMode && interviewActive && recognition) {
-                            try {
-                                recognition.start();
-                                document.getElementById('mic-btn').classList.add('listening');
-                            } catch (e) { }
-                        }
-                    };
-
-                    audio.onerror = (e) => {
-                        clearTimeout(playbackTimer);
-                        URL.revokeObjectURL(audioUrl);
-                        if (currentPuterAudio === audio) currentPuterAudio = null;
-                        isSpeaking = false;
-                        isAIProcessing = false;
-                    };
-
-                    await audio.play();
-                    console.log('🔊 Groq TTS playing!');
-                    return;
-
                 } catch (err) {
-                    if (err.name === 'AbortError') {
-                        console.warn(`TTS attempt ${attempt + 1} timed out`);
-                    } else {
-                        console.warn(`TTS attempt ${attempt + 1} error:`, err.message);
-                    }
-                    if (attempt < 2) {
-                        const backoff = (attempt + 1) * 5000; // 5s, 10s
-                        console.log(`⏳ Backing off ${backoff / 1000}s before retry...`);
-                        await new Promise(r => setTimeout(r, backoff));
-                        continue;
-                    }
+                    console.warn('Groq TTS failed:', err.message);
                 }
             }
 
-            // All attempts failed — stay silent
-            console.warn('⚠️ All TTS attempts failed. Staying silent.');
-            isSpeaking = false;
-            isAIProcessing = false;
+            // ── TIER 2: Premium Browser Voice (instant, no API needed) ──
+            usePremiumBrowserVoice(cleanText, selectedVoice);
         }
 
-        // ── Browser TTS Fallback (only if Groq TTS fails) ──
-        function useBrowserFallback(text) {
-            console.log('🔊 Using browser TTS fallback...');
+        // ── Premium Browser Voice Selection ──
+        function usePremiumBrowserVoice(text, selectedVoice) {
+            console.log('🔊 Using premium browser voice...');
             if (synth.speaking) { synth.cancel(); }
 
             const utterance = new SpeechSynthesisUtterance(text);
             const voices = synth.getVoices();
 
-            // Try to find best English voice
-            const bestVoice = voices.find(v =>
-                v.name.includes('Google') ||
-                v.name.includes('Natural') ||
-                v.name.includes('Premium') ||
-                v.lang === 'en-US'
-            ) || voices[0];
+            // Determine gender from selected Orpheus voice
+            const femaleVoices = ['autumn', 'diana', 'hannah'];
+            const wantFemale = femaleVoices.includes(selectedVoice);
 
-            if (bestVoice) utterance.voice = bestVoice;
-            utterance.rate = 0.95;
+            // Ranked premium voice preferences (best → worst)
+            let premiumVoice = null;
+
+            if (wantFemale) {
+                premiumVoice = voices.find(v => v.name.includes('Google UK English Female')) ||
+                    voices.find(v => v.name.includes('Google US English')) ||
+                    voices.find(v => v.name.includes('Microsoft Zira')) ||
+                    voices.find(v => v.name.includes('Samantha')) ||
+                    voices.find(v => v.name.includes('Female') && v.lang.startsWith('en')) ||
+                    voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) ||
+                    voices.find(v => v.name.includes('Natural') && v.lang.startsWith('en')) ||
+                    voices.find(v => v.lang.startsWith('en'));
+            } else {
+                premiumVoice = voices.find(v => v.name.includes('Google UK English Male')) ||
+                    voices.find(v => v.name.includes('Microsoft Guy Online')) ||
+                    voices.find(v => v.name.includes('Microsoft David')) ||
+                    voices.find(v => v.name.includes('Google US English')) ||
+                    voices.find(v => v.name.includes('Daniel') && v.lang.startsWith('en')) ||
+                    voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) ||
+                    voices.find(v => v.name.includes('Natural') && v.lang.startsWith('en')) ||
+                    voices.find(v => v.lang.startsWith('en'));
+            }
+
+            if (premiumVoice) {
+                utterance.voice = premiumVoice;
+                console.log(`🎤 Selected voice: "${premiumVoice.name}"`);
+            }
+
+            utterance.rate = 0.92;
             utterance.pitch = 1.0;
 
             utterance.onend = () => {
