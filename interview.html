@@ -1407,30 +1407,30 @@
             }
         }
 
-        // ── Groq Orpheus TTS Voice List (Natural, Human-like) ──
-        const ORPHEUS_VOICES = [
-            { id: 'troy', name: '🎙️ Troy (Male) - Professional', gender: 'Male' },
-            { id: 'austin', name: '🎙️ Austin (Male) - Confident', gender: 'Male' },
-            { id: 'daniel', name: '🎙️ Daniel (Male) - Warm', gender: 'Male' },
-            { id: 'autumn', name: '🎙️ Autumn (Female) - Natural', gender: 'Female' },
-            { id: 'diana', name: '🎙️ Diana (Female) - Professional', gender: 'Female' },
-            { id: 'hannah', name: '🎙️ Hannah (Female) - Friendly', gender: 'Female' }
+        // ── Microsoft Edge Neural TTS Voice List ──
+        const EDGE_VOICES = [
+            { id: 'en-US-EricNeural', name: '🎙️ Eric (Male) - Professional', gender: 'Male' },
+            { id: 'en-US-AriaNeural', name: '🎙️ Aria (Female) - Confident', gender: 'Female' },
+            { id: 'en-US-ChristopherNeural', name: '🎙️ Christopher (Male) - Warm', gender: 'Male' },
+            { id: 'en-GB-RyanNeural', name: '🎙️ Ryan (Male) - Natural UK', gender: 'Male' },
+            { id: 'en-GB-SoniaNeural', name: '🎙️ Sonia (Female) - Professional UK', gender: 'Female' },
+            { id: 'en-US-GuyNeural', name: '🎙️ Guy (Male) - Friendly', gender: 'Male' }
         ];
 
         function populateVoiceList() {
             const voiceSelect = document.getElementById('voice-select');
             voiceSelect.innerHTML = '';
 
-            ORPHEUS_VOICES.forEach(voice => {
+            EDGE_VOICES.forEach(voice => {
                 const option = document.createElement('option');
                 option.value = voice.id;
                 option.textContent = voice.name;
                 voiceSelect.appendChild(option);
             });
 
-            // Default to Troy (professional male voice - best for interviewer)
-            voiceSelect.value = 'troy';
-            console.log('✅ Groq Orpheus voices loaded:', ORPHEUS_VOICES.length);
+            // Default to Eric (professional male voice - best for interviewer)
+            voiceSelect.value = 'en-US-EricNeural';
+            console.log('✅ Edge Neural voices loaded:', EDGE_VOICES.length);
         }
 
         // Load voices on page load
@@ -1438,7 +1438,7 @@
 
         function getSelectedVoice() {
             const voiceSelect = document.getElementById('voice-select');
-            return (voiceSelect && voiceSelect.value) ? voiceSelect.value : 'troy';
+            return (voiceSelect && voiceSelect.value) ? voiceSelect.value : 'en-US-EricNeural';
         }
 
         // ── Determine API base URL ──
@@ -1446,9 +1446,9 @@
             ? 'https://quant-mentor.vercel.app'
             : '';
 
-        // ── TTS Engine (Two-Tier: Groq Orpheus → Premium Browser Voice) ──
-        let groqAvailable = true;  // Set to false when rate-limited
-        let groqCooldownUntil = 0; // Timestamp when Groq becomes available again
+        // ── TTS Engine (Two-Tier: Edge Neural TTS → Premium Browser Voice) ──
+        let edgeAvailable = true;  // Fallback flag
+        let edgeCooldownUntil = 0; // Timestamp when Edge becomes available again
 
         async function speakText(text) {
             isSpeaking = true;
@@ -1485,22 +1485,22 @@
             const selectedVoice = getSelectedVoice();
             const ttsText = cleanText.substring(0, 800);
 
-            // Check if Groq is available (not rate-limited)
+            // Check if Edge is available (not rate-limited)
             const now = Date.now();
-            if (groqCooldownUntil > now) {
-                groqAvailable = false;
+            if (edgeCooldownUntil > now) {
+                edgeAvailable = false;
             } else {
-                groqAvailable = true;
+                edgeAvailable = true;
             }
 
-            // ── TIER 1: Try Groq Orpheus TTS (single attempt, no long waits) ──
-            if (groqAvailable) {
+            // ── TIER 1: Try Edge Neural TTS ──
+            if (edgeAvailable) {
                 try {
                     console.log(`🎙️ TTS Request: voice=${selectedVoice}, chars=${ttsText.length}`);
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 12000);
+                    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-                    const response = await fetch(`${API_BASE}/api/tts`, {
+                    const response = await fetch(`${API_BASE}/api/edge_tts`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ text: ttsText, voice: selectedVoice }),
@@ -1510,10 +1510,10 @@
                     clearTimeout(timeoutId);
 
                     if (response.status === 429) {
-                        // Rate limited — mark Groq as unavailable for 60 seconds
-                        console.warn('⏳ Groq rate limited. Switching to premium browser voice.');
-                        groqAvailable = false;
-                        groqCooldownUntil = Date.now() + 60000; // Check again in 60s
+                        // Rate limited — mark Edge as unavailable temporarily
+                        console.warn('⏳ Edge TTS requested backoff. Switching to premium browser voice.');
+                        edgeAvailable = false;
+                        edgeCooldownUntil = Date.now() + 30000; // Check again in 30s
                     } else if (response.ok) {
                         const contentType = response.headers.get('Content-Type') || '';
                         if (contentType.includes('audio')) {
