@@ -1309,21 +1309,21 @@
 
                 // Logic for next tick
                 if (isDeleting) {
-                    charIndex--;
                     if (charIndex === 0) {
                         isDeleting = false;
                         phraseIndex = (phraseIndex + 1) % phrases.length;
                         chars = getChars(phrases[phraseIndex]);
                         setTimeout(tick, pauseStart);
                     } else {
+                        charIndex--;
                         setTimeout(tick, speedDelete);
                     }
                 } else {
-                    charIndex++;
                     if (charIndex === chars.length) {
                         isDeleting = true;
                         setTimeout(tick, pauseEnd);
                     } else {
+                        charIndex++;
                         setTimeout(tick, speedType);
                     }
                 }
