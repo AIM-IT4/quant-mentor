@@ -11,11 +11,7 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     const SUPABASE_URL = process.env.SUPABASE_URL || 'https://dntabmyurlrlnoajdnja.supabase.co';
-    const SUPABASE_KEY = process.env.SUPABASE_KEY;
-
-    if (!SUPABASE_KEY) {
-        return res.status(500).json({ error: 'Missing SUPABASE_KEY environment variable' });
-    }
+    const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
 
     try {
         const products = await supabaseQuery(SUPABASE_URL, SUPABASE_KEY,
