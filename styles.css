@@ -254,36 +254,18 @@ h6 {
     margin-bottom: 24px;
 }
 
-.hero-headline .letter {
+.typewriter-cursor {
     display: inline-block;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: letterReveal 0.4s ease forwards;
+    color: var(--accent-primary, #6c5ce7);
+    font-weight: 300;
+    animation: blink 0.7s step-end infinite;
+    margin-left: 2px;
 }
 
-.hero-headline .letter-space {
-    display: inline-block;
-    width: 0.3em;
-}
-
-@keyframes letterReveal {
-    to {
-        opacity: 1;
-        transform: translateY(0);
+@keyframes blink {
+    50% {
+        opacity: 0;
     }
-}
-
-/* Gradient must be applied to individual letters, not the parent wrapper */
-.hero-headline .gradient-text {
-    -webkit-text-fill-color: unset;
-    background: none;
-}
-
-.hero-headline .gradient-text .letter {
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 .section-headline {

@@ -1248,61 +1248,81 @@
     </script>
 
     <script>
-        // Letter-by-letter hero headline animation
+        // Typewriter streaming effect — letters appear one at a time
         (function () {
             const headline = document.getElementById('heroHeadline');
             if (!headline) return;
 
-            // Define text segments: [{text, gradient: bool}]
             const segments = [
                 { text: 'Expert ', gradient: false },
                 { text: 'Quant Mentorship', gradient: true },
                 { text: ' for Aspiring Professionals', gradient: false }
             ];
 
-            headline.innerHTML = '';
-            let letterIndex = 0;
-
+            // Build all characters with their gradient flag
+            const chars = [];
             segments.forEach(seg => {
-                const container = seg.gradient ? document.createElement('span') : headline;
-                if (seg.gradient) container.className = 'gradient-text';
-
-                // Split into words and wrap each word to prevent mid-word breaks
-                const words = seg.text.split(' ');
-                words.forEach((word, wi) => {
-                    if (word === '') {
-                        const space = document.createElement('span');
-                        space.className = 'letter-space';
-                        container.appendChild(space);
-                        letterIndex++;
-                        return;
-                    }
-
-                    const wordWrap = document.createElement('span');
-                    wordWrap.style.whiteSpace = 'nowrap';
-                    wordWrap.style.display = 'inline-block';
-
-                    for (let i = 0; i < word.length; i++) {
-                        const span = document.createElement('span');
-                        span.className = 'letter';
-                        span.textContent = word[i];
-                        span.style.animationDelay = (letterIndex * 0.035) + 's';
-                        wordWrap.appendChild(span);
-                        letterIndex++;
-                    }
-
-                    container.appendChild(wordWrap);
-
-                    if (wi < words.length - 1) {
-                        const space = document.createElement('span');
-                        space.className = 'letter-space';
-                        container.appendChild(space);
-                        letterIndex++;
-                    }
-                });
-
-                if (seg.gradient) headline.appendChild(container);
+                for (const ch of seg.text) {
+                    chars.push({ ch, gradient: seg.gradient });
+                }
             });
+
+            headline.innerHTML = '';
+            // Create gradient span upfront (will be appended when first gradient char appears)
+            const gradientSpan = document.createElement('span');
+            gradientSpan.className = 'gradient-text';
+            let gradientAdded = false;
+            let afterGradientStarted = false;
+
+            // Blinking cursor
+            const cursor = document.createElement('span');
+            cursor.className = 'typewriter-cursor';
+            cursor.textContent = '|';
+            headline.appendChild(cursor);
+
+            let i = 0;
+            const speed = 50; // ms per letter
+
+            function typeNext() {
+                if (i >= chars.length) {
+                    cursor.remove(); // remove cursor when done
+                    return;
+                }
+
+                const { ch, gradient } = chars[i];
+
+                if (gradient && !gradientAdded) {
+                    // Insert gradient span before cursor
+                    headline.insertBefore(gradientSpan, cursor);
+                    gradientAdded = true;
+                }
+
+                if (gradient) {
+                    gradientSpan.textContent += ch;
+                } else if (gradientAdded && !afterGradientStarted) {
+                    // First char after gradient section — append to headline before cursor
+                    afterGradientStarted = true;
+                    const textNode = document.createTextNode(ch);
+                    headline.insertBefore(textNode, cursor);
+                } else if (afterGradientStarted) {
+                    // Continue appending after gradient
+                    cursor.previousSibling.textContent += ch;
+                } else {
+                    // Before gradient span
+                    if (cursor.previousSibling && cursor.previousSibling.nodeType === 3) {
+                        cursor.previousSibling.textContent += ch;
+                    } else {
+                        const textNode = document.createTextNode(ch);
+                        headline.insertBefore(textNode, cursor);
+                    }
+                }
+
+                i++;
+                setTimeout(typeNext, speed);
+            }
+
+            // Start after a small delay
+            setTimeout(typeNext, 400);
         })();
     </script>
 
