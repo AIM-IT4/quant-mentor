@@ -1,11 +1,9 @@
-import https from 'https';
-
 export default async function handler(req, res) {
     // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    // Cache for 5 minutes, serve stale for 10 min while revalidating
+    // Cache for 5 minutes, serve stale for 10 min
     res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
 
     if (req.method === 'OPTIONS') return res.status(200).end();
@@ -14,11 +12,27 @@ export default async function handler(req, res) {
     const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
 
     try {
-        const products = await supabaseQuery(SUPABASE_URL, SUPABASE_KEY,
-            '/rest/v1/products?select=id,name,description,price,category,cover_image_url,created_at&order=created_at.desc'
+        // Use fetch (same pattern as razorpay-webhook.js and reminders.js)
+        const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/products?select=id,name,description,price,category,cover_image_url,created_at&order=created_at.desc`,
+            {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            }
         );
 
-        // Format for readability (strip HTML, clean up)
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error('Supabase products error:', response.status, errText);
+            return res.status(response.status).json({ error: 'Failed to fetch from Supabase', detail: errText.substring(0, 200) });
+        }
+
+        const products = await response.json();
+
+        // Format for readability (strip HTML, clean up for LLMs and bots)
         const formatted = products.map(p => ({
             name: p.name,
             description: stripHtml(p.description),
@@ -26,7 +40,9 @@ export default async function handler(req, res) {
             priceINR: p.price,
             category: p.category || 'notes',
             coverImage: p.cover_image_url || null,
-            purchaseUrl: p.price > 0 ? 'https://quant-mentor.vercel.app/#products' : 'https://quant-mentor.vercel.app/#resources',
+            purchaseUrl: p.price > 0
+                ? 'https://quant-mentor.vercel.app/#products'
+                : 'https://quant-mentor.vercel.app/#resources',
             createdAt: p.created_at
         }));
 
@@ -44,40 +60,8 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error('Products API Error:', error.message);
-        return res.status(500).json({ error: 'Failed to fetch products' });
+        return res.status(500).json({ error: 'Failed to fetch products', message: error.message });
     }
-}
-
-function supabaseQuery(baseUrl, apiKey, path) {
-    return new Promise((resolve, reject) => {
-        const url = new URL(path, baseUrl);
-        const options = {
-            hostname: url.hostname,
-            path: url.pathname + url.search,
-            method: 'GET',
-            headers: {
-                'apikey': apiKey,
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        };
-
-        const req = https.request(options, (res) => {
-            let data = '';
-            res.on('data', (chunk) => data += chunk);
-            res.on('end', () => {
-                if (res.statusCode >= 200 && res.statusCode < 300) {
-                    try { resolve(JSON.parse(data)); }
-                    catch (e) { reject(new Error('Invalid JSON from Supabase')); }
-                } else {
-                    reject(new Error(`Supabase ${res.statusCode}: ${data.substring(0, 200)}`));
-                }
-            });
-        });
-        req.on('error', reject);
-        req.end();
-    });
 }
 
 function stripHtml(html) {
