@@ -2813,12 +2813,33 @@ function displayApprovedTestimonials(testimonials) {
 
     grid.innerHTML = '';
 
-    if (testimonials.length === 0) {
+    // Calculate Summary Stats
+    const totalTestimonials = testimonials.length;
+    let averageRating = 0;
+    if (totalTestimonials > 0) {
+        const sum = testimonials.reduce((acc, curr) => acc + (curr.rating || 5), 0);
+        averageRating = (sum / totalTestimonials).toFixed(1);
+    }
+
+    // Update Summary UI if elements exist (e.g. on index.html)
+    const avgDisplay = document.getElementById('average-rating-display');
+    const totalDisplay = document.getElementById('total-ratings-display');
+    const countDisplay = document.getElementById('total-testimonials-display');
+
+    if (avgDisplay) avgDisplay.textContent = averageRating > 0 ? averageRating : '5.0';
+    if (totalDisplay) totalDisplay.textContent = totalTestimonials;
+    if (countDisplay) countDisplay.textContent = totalTestimonials;
+
+    if (totalTestimonials === 0) {
         grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:40px;">No reviews yet. Be the first to share your experience!</p>';
         return;
     }
 
-    testimonials.forEach(t => {
+    // If on index.html (or root), limit to 5 reviews. Otherwise, show all.
+    const isHomePage = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/');
+    const reviewsToShow = isHomePage ? testimonials.slice(0, 5) : testimonials;
+
+    reviewsToShow.forEach(t => {
         const stars = '★'.repeat(t.rating) + '☆'.repeat(5 - t.rating);
         const date = new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 
