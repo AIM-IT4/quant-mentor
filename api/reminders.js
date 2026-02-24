@@ -137,53 +137,118 @@ async function sendReminder(booking, type, config) {
     const meetLink = booking.meet_link || 'https://meet.google.com/hfp-npyq-qho';
     const userName = booking.name || 'Learner';
 
+    let displayTime = booking.booking_time || '';
+    if (displayTime && !displayTime.toLowerCase().match(/am|pm/)) {
+        const parts = displayTime.split(':');
+        if (parts.length >= 2) {
+            let hour = parseInt(parts[0], 10);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            hour = hour % 12 || 12;
+            displayTime = `${hour}:${parts[1]} ${ampm}`;
+        }
+    }
+
     let subject, htmlBody;
 
     if (type === '24h') {
         subject = `Reminder: Session Tomorrow - ${booking.service_name}`;
         htmlBody = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #6366f1;">📅 Session Reminder</h2>
-                <p>Hi ${userName},</p>
-                <p>This is a friendly reminder that you have a session scheduled for <strong>tomorrow</strong>.</p>
-                <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                    <p><strong>📋 Session:</strong> ${booking.service_name}</p>
-                    <p><strong>📅 Date:</strong> ${booking.booking_date}</p>
-                    <p><strong>⏰ Time:</strong> ${booking.booking_time} IST</p>
+            <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
+                <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                    </div>
+                    <div style="padding: 30px;">
+                        <div style="margin-bottom: 20px;">
+                            <span style="display: inline-block; background: #e0e7ff; color: #3730a3; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;">Upcoming Session</span>
+                        </div>
+                        <p style="font-size: 16px; margin-bottom: 25px;">Hi <strong>${userName}</strong>, you have a session tomorrow.</p>
+                        
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 10px 0; letter-spacing: 0.5px;">Session Details</p>
+                            <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #1a1a1a; border-bottom: 1px solid #e5e5e5; padding-bottom: 15px;">${booking.service_name}</h3>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; padding: 5px 0;">Date</td>
+                                    <td style="font-size: 14px; font-weight: bold; text-align: right; padding: 5px 0;">${booking.booking_date}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; padding: 5px 0;">Time</td>
+                                    <td style="font-size: 14px; font-weight: bold; text-align: right; padding: 5px 0;">${displayTime} IST</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div style="background-color: #1a1a1a; padding: 25px 20px; text-align: center; color: #888; font-size: 12px;">
+                        <p style="margin: 0 0 10px 0;">Sent by QuantMentor</p>
+                        <p style="margin: 0;">Have an issue? Reply to this email.</p>
+                    </div>
                 </div>
-                <p>See you there! 🚀</p>
-                <p style="color: #6b7280;">Best regards,<br>${SENDER_NAME}</p>
             </div>
         `;
     } else if (type === '10m') {
         subject = `Starting Soon: Your Session in 10 Minutes! ⏰`;
         htmlBody = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #10b981;">⏰ Your Session Starts Soon!</h2>
-                <p>Hi ${userName},</p>
-                <p>Your session starts in about <strong>10 minutes</strong>.</p>
-                <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
-                    <p><strong>📋 Session:</strong> ${booking.service_name}</p>
-                    <p><strong>🔗 Join Here:</strong> <a href="${meetLink}" style="color: #10b981;">${meetLink}</a></p>
+            <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
+                <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                    </div>
+                    <div style="padding: 30px;">
+                        <div style="margin-bottom: 20px;">
+                            <span style="display: inline-block; background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;">⏰ Starts in 10 mins</span>
+                        </div>
+                        <p style="font-size: 16px; margin-bottom: 25px;">Hi <strong>${userName}</strong>, your session starts soon.</p>
+                        
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 10px 0; letter-spacing: 0.5px;">Session Details</p>
+                            <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #1a1a1a; border-bottom: 1px solid #e5e5e5; padding-bottom: 15px;">${booking.service_name}</h3>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; padding: 5px 0;">Date</td>
+                                    <td style="font-size: 14px; font-weight: bold; text-align: right; padding: 5px 0;">${booking.booking_date}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; padding: 5px 0;">Time</td>
+                                    <td style="font-size: 14px; font-weight: bold; text-align: right; padding: 5px 0;">${displayTime} IST</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <center>
+                            <a href="${meetLink}" style="display: inline-block; background: #16a34a; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; border-radius: 6px; font-size: 16px; margin-bottom: 20px;">Join Meeting</a>
+                        </center>
+                    </div>
+                    <div style="background-color: #1a1a1a; padding: 25px 20px; text-align: center; color: #888; font-size: 12px;">
+                        <p style="margin: 0 0 10px 0;">Please be ready with your questions.</p>
+                        <p style="margin: 0;">Sent by QuantMentor</p>
+                    </div>
                 </div>
-                <a href="${meetLink}" style="display: inline-block; background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">Join Meeting Now</a>
-                <p style="margin-top: 20px;">Please be ready with your questions.</p>
-                <p style="color: #6b7280;">Best regards,<br>${SENDER_NAME}</p>
             </div>
         `;
     } else if (type === '5m') {
         subject = `🚨 STARTING NOW: Your Session in 5 Minutes!`;
         htmlBody = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #fef2f2; border: 2px solid #ef4444;">
-                <h2 style="color: #ef4444;">🚨 Your Session Starts in 5 Minutes!</h2>
-                <p>Hi ${userName},</p>
-                <p><strong>Please join the meeting immediately!</strong></p>
-                <div style="background: white; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444;">
-                    <p><strong>📋 Session:</strong> ${booking.service_name}</p>
-                    <p><strong>🔗 Join Here:</strong> <a href="${meetLink}" style="color: #ef4444;">${meetLink}</a></p>
+            <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
+                <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 2px solid #ef4444;">
+                    <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                    </div>
+                    <div style="padding: 30px;">
+                        <div style="margin-bottom: 20px; text-align: center;">
+                            <span style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: bold; text-transform: uppercase;">🚨 STARTING NOW</span>
+                        </div>
+                        <p style="font-size: 18px; margin-bottom: 25px; text-align: center;">Hi <strong>${userName}</strong>, please join the meeting immediately!</p>
+                        
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
+                            <h3 style="margin: 0; font-size: 18px; color: #1a1a1a; text-align: center;">${booking.service_name}</h3>
+                        </div>
+
+                        <center>
+                            <a href="${meetLink}" style="display: inline-block; background: #ef4444; color: #ffffff; font-weight: bold; text-decoration: none; padding: 16px 36px; border-radius: 6px; font-size: 18px; margin-bottom: 10px;">🚀 JOIN NOW</a>
+                        </center>
+                    </div>
                 </div>
-                <a href="${meetLink}" style="display: inline-block; background: #ef4444; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px;">🚀 JOIN NOW</a>
-                <p style="color: #6b7280;">Best regards,<br>${SENDER_NAME}</p>
             </div>
         `;
     }

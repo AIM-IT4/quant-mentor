@@ -234,19 +234,54 @@ async function handleProductPurchase(data) {
     // Send customer email
     if (BREVO_API_KEY && customerEmail) {
         const customerHtml = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #2563eb;">🎉 Thank you for your purchase!</h2>
-                <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
-                <p>Hi <strong>${customerName}</strong>,</p>
-                <p>Thank you for purchasing our resources. Here are your details:</p>
-                <p><strong>📦 Product:</strong> ${productName}</p>
-                <p><strong>💰 Amount:</strong> ${currency} ${amount}</p>
-                <p><strong>🆔 Payment ID:</strong> ${paymentId}</p>
-                <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
-                <p><strong>📥 Download your product:</strong></p>
-                <a href="${downloadLink}" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0;">Download Now</a>
-                <p style="margin-top: 20px; color: #6b7280;">If you have any questions, simply reply to this email.</p>
-                <p style="color: #6b7280;">Best regards,<br>${SENDER_NAME}</p>
+            <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
+                <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                    </div>
+                    <div style="padding: 30px;">
+                        <div style="margin-bottom: 20px;">
+                            <span style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-right: 10px;">New Purchase</span>
+                            <span style="display: inline-block; background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;">Confirmed</span>
+                        </div>
+                        <p style="font-size: 16px; margin-bottom: 25px;">Hi <strong>${customerName}</strong>, thank you for purchasing from QuantMentor.</p>
+                        
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 10px 0; letter-spacing: 0.5px;">Digital Product</p>
+                            <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #1a1a1a; border-bottom: 1px solid #e5e5e5; padding-bottom: 15px;">${productName}</h3>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold;">Amount</td>
+                                    <td style="font-size: 14px; font-weight: bold; text-align: right;">${currency} ${amount}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <center>
+                            <a href="${downloadLink}" style="display: inline-block; background: #e95836; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; border-radius: 6px; font-size: 16px; margin-bottom: 30px;">Download Resource</a>
+                        </center>
+
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 15px 0; letter-spacing: 0.5px;">Purchase Details</p>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                <tr><td style="padding: 5px 0; color: #666; width: 30%;">Name</td><td style="padding: 5px 0; color: #1a1a1a;">${customerName}</td></tr>
+                                <tr><td style="padding: 5px 0; color: #666;">Email</td><td style="padding: 5px 0; color: #1a1a1a;"><a href="mailto:${customerEmail}" style="color: #2563eb; text-decoration: none;">${customerEmail}</a></td></tr>
+                                <tr><td style="padding: 5px 0; color: #666;">Phone</td><td style="padding: 5px 0; color: #1a1a1a;">${customerPhone || 'N/A'}</td></tr>
+                            </table>
+                        </div>
+
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 15px 0; letter-spacing: 0.5px;">Order Details</p>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                <tr><td style="padding: 5px 0; color: #666; width: 30%;">Payment ID</td><td style="padding: 5px 0; color: #1a1a1a;">${paymentId}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div style="background-color: #1a1a1a; padding: 25px 20px; text-align: center; color: #888; font-size: 12px;">
+                        <p style="margin: 0 0 10px 0;">Sent by QuantMentor</p>
+                        <p style="margin: 0;">Have an issue? Reply to this email.</p>
+                    </div>
+                </div>
             </div>
         `;
 
@@ -280,15 +315,39 @@ async function handleProductPurchase(data) {
     // Send admin notification
     if (BREVO_API_KEY) {
         const adminHtml = `
-            <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #22c55e; border-radius: 8px;">
-                <h2 style="color: #16a34a;">💰 New Sale: ${productName}</h2>
-                <p><strong>Customer:</strong> ${customerName}</p>
-                <p><strong>Email:</strong> ${customerEmail}</p>
-                <p><strong>Phone:</strong> ${customerPhone || 'Not provided'}</p>
-                <hr>
-                <p><strong>Amount:</strong> ${currency} ${amount}</p>
-                <p><strong>Payment ID:</strong> ${paymentId}</p>
-                <p><strong>Source:</strong> Webhook Fulfillment</p>
+            <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
+                <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor Admin</span>
+                    </div>
+                    <div style="padding: 30px;">
+                        <div style="margin-bottom: 20px;">
+                            <span style="display: inline-block; background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;">New Sale Received</span>
+                        </div>
+                        <p style="font-size: 16px; margin-bottom: 25px;"><strong>${customerName}</strong> just purchased a digital product.</p>
+                        
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 10px 0; letter-spacing: 0.5px;">Product Sold</p>
+                            <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #1a1a1a; border-bottom: 1px solid #e5e5e5; padding-bottom: 15px;">${productName}</h3>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold;">Amount Received</td>
+                                    <td style="font-size: 14px; font-weight: bold; text-align: right; color: #16a34a;">${currency} ${amount}</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 15px 0; letter-spacing: 0.5px;">Customer Details</p>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                <tr><td style="padding: 5px 0; color: #666; width: 30%;">Name</td><td style="padding: 5px 0; color: #1a1a1a;">${customerName}</td></tr>
+                                <tr><td style="padding: 5px 0; color: #666;">Email</td><td style="padding: 5px 0; color: #1a1a1a;"><a href="mailto:${customerEmail}" style="color: #2563eb; text-decoration: none;">${customerEmail}</a></td></tr>
+                                <tr><td style="padding: 5px 0; color: #666;">Phone</td><td style="padding: 5px 0; color: #1a1a1a;">${customerPhone || 'Not provided'}</td></tr>
+                                <tr><td style="padding: 5px 0; border-top: 1px solid #e5e5e5; margin-top: 5px; color: #666;">Payment ID</td><td style="padding: 5px 0; border-top: 1px solid #e5e5e5; margin-top: 5px; color: #1a1a1a;">${paymentId} (Webhook)</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
 
@@ -336,6 +395,17 @@ async function handleSessionBooking(data) {
     const customerPhone = notes.customer_phone || '';
     const customerMessage = notes.customer_message || '';
     const meetLink = "https://meet.google.com/hfp-npyq-qho";
+
+    let displayTime = sessionTime;
+    if (displayTime !== 'TBD' && !displayTime.toLowerCase().match(/am|pm/)) {
+        const parts = displayTime.split(':');
+        if (parts.length >= 2) {
+            let hour = parseInt(parts[0], 10);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            hour = hour % 12 || 12;
+            displayTime = `${hour}:${parts[1]} ${ampm}`;
+        }
+    }
 
     console.log('Processing session booking via webhook:', { paymentId, customerEmail, sessionName });
 
@@ -402,22 +472,57 @@ async function handleSessionBooking(data) {
     // 3. Send confirmation email to customer via Brevo
     if (BREVO_API_KEY && customerEmail) {
         const customerHtml = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #2563eb;">🎉 Your session has been booked!</h2>
-                <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
-                <p>Hi <strong>${customerName}</strong>,</p>
-                <p>Your session is confirmed. Here are the details:</p>
-                <p><strong>📋 Session:</strong> ${sessionName} (${sessionDuration} mins)</p>
-                <p><strong>📅 Date:</strong> ${sessionDate}</p>
-                <p><strong>⏰ Time:</strong> ${sessionTime}</p>
-                <p><strong>💰 Amount Paid:</strong> ₹${sessionPrice}</p>
-                <p><strong>🆔 Payment ID:</strong> ${paymentId}</p>
-                <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
-                <p><strong>🔗 JOIN YOUR SESSION HERE:</strong></p>
-                <a href="${meetLink}" style="display: inline-block; background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0;">Join Meeting</a>
-                <p style="margin-top: 20px;"><strong>🔄 Need to Reschedule?</strong></p>
-                <p>You can view and manage your bookings on our website.</p>
-                <p style="margin-top: 20px; color: #6b7280;">Best regards,<br>${SENDER_NAME}</p>
+            <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
+                <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                    </div>
+                    <div style="padding: 30px;">
+                        <div style="margin-bottom: 20px;">
+                            <span style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-right: 10px;">New Booking</span>
+                            <span style="display: inline-block; background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;">Confirmed</span>
+                        </div>
+                        <p style="font-size: 16px; margin-bottom: 25px;">Hi <strong>${customerName}</strong>, your session is confirmed.</p>
+                        
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 10px 0; letter-spacing: 0.5px;">Session Details</p>
+                            <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #1a1a1a; border-bottom: 1px solid #e5e5e5; padding-bottom: 15px;">${sessionName}</h3>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; padding: 5px 0;">Date</td>
+                                    <td style="font-size: 14px; font-weight: bold; text-align: right; padding: 5px 0;">${sessionDate}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; padding: 5px 0;">Time</td>
+                                    <td style="font-size: 14px; font-weight: bold; text-align: right; padding: 5px 0;">${displayTime} (${sessionDuration} mins)</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; padding: 5px 0; border-top: 1px solid #e5e5e5; margin-top: 5px;">Amount Paid</td>
+                                    <td style="font-size: 14px; font-weight: bold; text-align: right; padding: 5px 0; border-top: 1px solid #e5e5e5; margin-top: 5px;">₹${sessionPrice}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <center>
+                            <a href="${meetLink}" style="display: inline-block; background: #e95836; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; border-radius: 6px; font-size: 16px; margin-bottom: 30px;">Join Meeting</a>
+                        </center>
+
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 15px 0; letter-spacing: 0.5px;">Need to Reschedule?</p>
+                            <p style="font-size: 14px; margin: 0; color: #1a1a1a;">You can view and manage your bookings on our website.</p>
+                        </div>
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 15px 0; letter-spacing: 0.5px;">Order Details</p>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                <tr><td style="padding: 5px 0; color: #666; width: 30%;">Payment ID</td><td style="padding: 5px 0; color: #1a1a1a;">${paymentId}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div style="background-color: #1a1a1a; padding: 25px 20px; text-align: center; color: #888; font-size: 12px;">
+                        <p style="margin: 0 0 10px 0;">Sent by QuantMentor</p>
+                        <p style="margin: 0;">Have an issue? Reply to this email.</p>
+                    </div>
+                </div>
             </div>
         `;
 
@@ -451,20 +556,49 @@ async function handleSessionBooking(data) {
     // 4. Send admin notification email
     if (BREVO_API_KEY) {
         const adminHtml = `
-            <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #4f46e5; border-radius: 8px;">
-                <h2 style="color: #4f46e5;">🆕 New Session Booking (Webhook)</h2>
-                <p><strong>Customer:</strong> ${customerName}</p>
-                <p><strong>Email:</strong> ${customerEmail}</p>
-                <p><strong>Phone:</strong> ${customerPhone}</p>
-                <hr>
-                <p><strong>Session:</strong> ${sessionName}</p>
-                <p><strong>Price:</strong> ₹${sessionPrice}</p>
-                <p><strong>Date:</strong> ${sessionDate} at ${sessionTime}</p>
-                <p><strong>Payment ID:</strong> ${paymentId}</p>
-                <p><strong>Message:</strong> ${customerMessage}</p>
-                <hr>
-                <p><strong>🔗 Meeting Link:</strong> <a href="${meetLink}">${meetLink}</a></p>
-                <p style="color: #6b7280; font-size: 12px; margin-top: 15px;">Processed via Server-side Webhook (Reliable Flow)</p>
+            <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
+                <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor Admin</span>
+                    </div>
+                    <div style="padding: 30px;">
+                        <div style="margin-bottom: 20px;">
+                            <span style="display: inline-block; background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;">New Booking Received</span>
+                        </div>
+                        <p style="font-size: 16px; margin-bottom: 25px;"><strong>${customerName}</strong> just booked a new session.</p>
+                        
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 10px 0; letter-spacing: 0.5px;">Session Booked</p>
+                            <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #1a1a1a; border-bottom: 1px solid #e5e5e5; padding-bottom: 15px;">${sessionName}</h3>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; padding: 5px 0;">Date & Time</td>
+                                    <td style="font-size: 14px; font-weight: bold; text-align: right; padding: 5px 0;">${sessionDate} at ${displayTime}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; padding: 5px 0;">Amount Received</td>
+                                    <td style="font-size: 14px; font-weight: bold; text-align: right; color: #16a34a; padding: 5px 0;">₹${sessionPrice}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="padding: 15px 0 5px 0;">
+                                        <a href="${meetLink}" style="color: #e95836; font-weight: bold; text-decoration: none; font-size: 14px;">🔗 Join Meeting</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 15px 0; letter-spacing: 0.5px;">Customer Details</p>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                <tr><td style="padding: 5px 0; color: #666; width: 30%;">Name</td><td style="padding: 5px 0; color: #1a1a1a;">${customerName}</td></tr>
+                                <tr><td style="padding: 5px 0; color: #666;">Email</td><td style="padding: 5px 0; color: #1a1a1a;"><a href="mailto:${customerEmail}" style="color: #2563eb; text-decoration: none;">${customerEmail}</a></td></tr>
+                                <tr><td style="padding: 5px 0; color: #666;">Phone</td><td style="padding: 5px 0; color: #1a1a1a;">${customerPhone || 'Not provided'}</td></tr>
+                                <tr><td style="padding: 5px 0; color: #666; vertical-align: top;">Message</td><td style="padding: 5px 0; color: #1a1a1a;">${customerMessage || 'None'}</td></tr>
+                                <tr><td style="padding: 5px 0; border-top: 1px solid #e5e5e5; margin-top: 5px; color: #666;">Payment ID</td><td style="padding: 5px 0; border-top: 1px solid #e5e5e5; margin-top: 5px; color: #1a1a1a;">${paymentId}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
 
