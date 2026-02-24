@@ -79,8 +79,9 @@ export default async function handler(req, res) {
         if (event.event === 'payment.captured') {
             const payment = event.payload.payment.entity;
             const paymentId = payment.id;
-            const amount = payment.amount / 100; // Convert from paise to rupees
             const currency = payment.currency;
+            const zeroDecimalCurrencies = ['JPY', 'KRW', 'VND', 'IDR', 'CLP', 'PYG', 'UGX'];
+            const amount = zeroDecimalCurrencies.includes(currency) ? payment.amount : payment.amount / 100;
             const customerEmail = payment.email;
             const customerName = payment.notes?.customer_name || 'Customer';
             const customerPhone = payment.notes?.customer_phone || '';
