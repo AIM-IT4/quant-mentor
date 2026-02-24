@@ -507,31 +507,31 @@
                 return;
             }
 
-            // Initialize Supabase
-            // Note: We use the same initialization logic as script.js via global config if available
-            // But since we are standalone, let's wait for script.js to init or init ourselves
-
-            // Wait a moment for script.js to initialize Supabase
-            let attempts = 0;
-            const checkSupabase = setInterval(async () => {
-                attempts++;
-                if (window.supabaseClient) {
-                    clearInterval(checkSupabase);
-                    await loadProduct(productId);
-                } else if (attempts > 10) {
-                    // Force init if script.js fails
+            // Initialize Supabase immediately for product page
+            if (window.supabaseClient) {
+                await loadProduct(productId);
+            } else if (window.supabase && typeof window.supabase.createClient === 'function') {
+                const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
+                const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0'; // Hardcoded fallback
+                window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                await loadProduct(productId);
+            } else {
+                // If the SDK script hasn't downloaded yet, retry briefly
+                let attempts = 0;
+                const checkSupabase = setInterval(async () => {
+                    attempts++;
                     if (window.supabase && typeof window.supabase.createClient === 'function') {
+                        clearInterval(checkSupabase);
                         const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
-                        const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0'; // Hardcoded fallback from script.js
+                        const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
                         window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                        clearInterval(checkSupabase);
                         await loadProduct(productId);
-                    } else {
+                    } else if (attempts > 20) { // Max 2 seconds (20 * 100ms)
                         clearInterval(checkSupabase);
-                        alert('Failed to load database. Please reload.');
+                        alert('Failed to load database. Please reload the page.');
                     }
-                }
-            }, 500);
+                }, 100);
+            }
         });
 
         async function loadProduct(id) {
@@ -574,19 +574,11 @@
                 // Load Product-Specific Reviews
                 loadProductReviews(id);
 
-                // Price
+                // Price Setup (Instant Display in INR)
                 const priceEl = document.getElementById('p-price');
                 const buyBtn = document.getElementById('buy-btn');
 
-                // We'll reuse script.js convertPrice if available, else fallback
                 let priceText = '₹' + product.price;
-                if (window.convertPrice && window.getUserCountry) {
-                    const country = await window.getUserCountry();
-                    const localPrice = await window.convertPrice(product.price, country);
-                    if (localPrice.currency.code !== 'INR') {
-                        priceText = `${localPrice.currency.symbol}${localPrice.amount} ${localPrice.currency.code}`;
-                    }
-                }
 
                 if (product.price === 0) {
                     priceEl.textContent = 'Free';
@@ -595,51 +587,16 @@
                     buyBtn.classList.replace('btn-primary', 'btn-success');
                     buyBtn.style.background = '#22c55e';
                 } else {
-                    // Logic for Slashed Original Price (PPP Aware)
                     let originalPriceDisplay = '';
                     if (product.original_price > product.price) {
-                        let originalText = `₹${product.original_price}`;
-
-                        if (window.convertPrice && window.getUserCountry) {
-                            // We need to re-calculate the original price in local currency
-                            // ensuring we apply the same PPP logic if applicable
-                            const country = await window.getUserCountry();
-                            const localPrice = await window.convertPrice(product.price, country);
-
-                            if (localPrice.currency.code !== 'INR') {
-                                const rate = localPrice.rate || 1;
-                                let convertedOriginal = product.original_price * rate;
-
-                                // PPP Exclusion List (Same as script.js)
-                                const weakersCurrencies = [
-                                    'PKR', 'BDT', 'LKR', 'NPR',
-                                    'NGN', 'EGP', 'KES', 'GHS', 'ZAR',
-                                    'VND', 'IDR', 'PHP', 'MYR', 'THB',
-                                    'TRY', 'RUB', 'UAH',
-                                    'BRL', 'MXN', 'ARS', 'COP', 'CLP', 'PEN'
-                                ];
-
-                                if (!weakersCurrencies.includes(localPrice.currency.code)) {
-                                    convertedOriginal = convertedOriginal * 1.5;
-                                }
-
-                                const originalObj = {
-                                    amount: Math.round(convertedOriginal),
-                                    currency: localPrice.currency
-                                };
-                                // Use formatPrice if available globally from script.js, else manual
-                                originalText = `${originalObj.currency.symbol}${originalObj.amount.toLocaleString()}`;
-                            }
-                        }
-
-                        originalPriceDisplay = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">${originalText}</span>`;
+                        originalPriceDisplay = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">₹${product.original_price}</span>`;
                     }
-
                     priceEl.innerHTML = `${originalPriceDisplay}${priceText}`;
                     buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${priceText}`;
 
                     // Add Coupon UI if price > 0
                     const couponContainer = document.createElement('div');
+                    // ... coupon structure intact ...
                     couponContainer.id = 'coupon-section';
                     couponContainer.style.marginBottom = '24px';
                     couponContainer.innerHTML = `
@@ -735,22 +692,50 @@
                     }
                 };
 
-                // Store price on button for the handler
+                // Show Content IMMEDIATELY (Do not block on currency conversion)
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('product-content').style.display = 'grid';
+
+                // Store base price on button for the handler
                 buyBtn.dataset.price = product.price;
                 buyBtn.dataset.currency = 'INR';
 
-                if (window.convertPrice && window.getUserCountry) {
-                    const country = await window.getUserCountry();
-                    const localPrice = await window.convertPrice(product.price, country);
-                    if (localPrice.currency.code !== 'INR') {
-                        buyBtn.dataset.price = localPrice.amount;
-                        buyBtn.dataset.currency = localPrice.currency.code;
-                    }
-                }
+                // Asynchronous currency conversion (Non-blocking)
+                if (window.convertPrice && window.getUserCountry && product.price > 0) {
+                    window.getUserCountry().then(country => {
+                        return window.convertPrice(product.price, country).then(localPrice => {
+                            if (localPrice.currency.code !== 'INR') {
+                                // Update Buy Button Dataset
+                                buyBtn.dataset.price = localPrice.amount;
+                                buyBtn.dataset.currency = localPrice.currency.code;
 
-                // Show Content
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('product-content').style.display = 'grid';
+                                // Update Display Text
+                                let newPriceText = `${localPrice.currency.symbol}${localPrice.amount} ${localPrice.currency.code}`;
+
+                                let newOriginalDisplay = '';
+                                if (product.original_price > product.price) {
+                                    const rate = localPrice.rate || 1;
+                                    let convertedOriginal = product.original_price * rate;
+
+                                    const weakersCurrencies = [
+                                        'PKR', 'BDT', 'LKR', 'NPR', 'NGN', 'EGP', 'KES', 'GHS', 'ZAR',
+                                        'VND', 'IDR', 'PHP', 'MYR', 'THB', 'TRY', 'RUB', 'UAH',
+                                        'BRL', 'MXN', 'ARS', 'COP', 'CLP', 'PEN'
+                                    ];
+
+                                    if (!weakersCurrencies.includes(localPrice.currency.code)) {
+                                        convertedOriginal = convertedOriginal * 1.5;
+                                    }
+
+                                    newOriginalDisplay = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">${localPrice.currency.symbol}${Math.round(convertedOriginal).toLocaleString()}</span>`;
+                                }
+
+                                priceEl.innerHTML = `${newOriginalDisplay}${newPriceText}`;
+                                buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${newPriceText}`;
+                            }
+                        });
+                    }).catch(err => console.warn('Deferred currency conversion failed', err));
+                }
 
                 // --- User Details Modal Logic ---
                 const productUserModal = document.getElementById('user-details-modal');
