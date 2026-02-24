@@ -23,6 +23,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- jsVectorMap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap/dist/css/jsvectormap.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap/dist/maps/world-merc.js"></script>
     <script>
         // Load config.js if it exists, otherwise gracefully fallback
         (function () {
@@ -855,6 +859,27 @@
                 transform: translateY(0);
             }
         }
+
+        /* Global Sales Map Styles */
+        #world-map {
+            height: 400px;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .map-section {
+            margin-top: 30px;
+        }
+
+        .jvm-tooltip {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--text-main) !important;
+            font-family: 'Space Grotesk', sans-serif !important;
+            backdrop-filter: blur(10px);
+        }
     </style>
 </head>
 
@@ -1070,633 +1095,644 @@
                         </div>
                     </div>
 
-                    <!-- Insights Row -->
-                    <div class="insights-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <!-- Top Products -->
-                        <div
-                            style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
-                            <h4
-                                style="margin: 0 0 20px 0; color: var(--text-secondary); display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-trophy" style="color: #f59e0b;"></i> Top Performing Products
-                            </h4>
-                            <div class="table-container" style="overflow-x: auto;">
-                                <table style="width: 100%; border-collapse: collapse;">
-                                    <thead>
-                                        <tr
-                                            style="border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 0.85em; text-align: left;">
-                                            <th style="padding: 10px;">Product</th>
-                                            <th style="padding: 10px; text-align: center;">Sales</th>
-                                            <th style="padding: 10px; text-align: right;">Revenue</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="topProductsList">
-                                        <tr>
-                                            <td colspan="3"
-                                                style="text-align: center; padding: 20px; color: var(--text-muted);">
-                                                Loading...
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+            </div>
 
-                        <!-- Recent Activity Feed -->
-                        <div
-                            style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
-                            <h4
-                                style="margin: 0 0 20px 0; color: var(--text-secondary); display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-history" style="color: #6366f1;"></i> Recent Activity
-                            </h4>
-                            <div id="recentActivityFeed"
-                                style="display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto;">
-                                <div style="text-align: center; padding: 20px; color: var(--text-muted);">Loading
-                                    activity...
-                                </div>
-                            </div>
-                        </div>
+            <!-- Global Sales Map Section -->
+            <div class="card map-section"
+                style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h4 style="margin: 0; color: var(--text-secondary); display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-globe-americas" style="color: #6366f1;"></i> Global Sales Density
+                    </h4>
+                    <div id="mapLegend" style="font-size: 0.8em; color: var(--text-muted); display: flex; gap: 15px;">
+                        <!-- Map legend will be injected by JS -->
                     </div>
-                </section>
+                </div>
+                <div id="world-map"></div>
+            </div>
 
-                <!-- Client Management & Exports Section -->
-                <section id="clientSection" class="content-section" style="margin-bottom: 60px;">
-                    <div class="card">
-                        <div class="card-header"
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                            <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-users" style="color: #10b981;"></i> Client Management
-                            </h2>
-                            <div style="display: flex; gap: 10px;">
-                                <button onclick="downloadBookings()" class="btn btn-secondary"
-                                    style="padding: 8px 16px; font-size: 0.9em;">
-                                    <i class="fas fa-file-csv"></i> Export Bookings
-                                </button>
-                                <button onclick="downloadPurchases()" class="btn btn-secondary"
-                                    style="padding: 8px 16px; font-size: 0.9em;">
-                                    <i class="fas fa-file-csv"></i> Export Purchases
-                                </button>
-                                <button onclick="downloadClients()" class="btn btn-primary"
-                                    style="padding: 8px 16px; font-size: 0.9em; background: linear-gradient(135deg, #10b981, #059669);">
-                                    <i class="fas fa-file-download"></i> Export Client List
-                                </button>
-                            </div>
-                        </div>
-
-                        <p style="color: var(--text-muted); margin-bottom: 20px;">
-                            Aggregated list of all unique clients from Bookings and Purchases.
-                        </p>
-
-                        <div class="table-container" style="overflow-x: auto; max-height: 500px; overflow-y: auto;">
-                            <table class="admin-table" style="width: 100%; border-collapse: collapse;">
-                                <thead>
-                                    <tr
-                                        style="border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface);">
-                                        <th style="text-align: left; padding: 12px; color: var(--text-muted);">Client
-                                        </th>
-                                        <th style="text-align: center; padding: 12px; color: var(--text-muted);">Type
-                                        </th>
-                                        <th style="text-align: center; padding: 12px; color: var(--text-muted);">Orders
-                                        </th>
-                                        <th style="text-align: right; padding: 12px; color: var(--text-muted);">Total
-                                            Spend</th>
-                                        <th style="text-align: center; padding: 12px; color: var(--text-muted);">Last
-                                            Active
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody id="clientListBody">
-                                    <tr>
-                                        <td colspan="5"
-                                            style="text-align: center; padding: 20px; color: var(--text-muted);">
-                                            Loading clients...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+            <!-- Insights Row -->
+            <div class="insights-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Top Products -->
+                <div
+                    style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+                    <h4
+                        style="margin: 0 0 20px 0; color: var(--text-secondary); display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-trophy" style="color: #f59e0b;"></i> Top Performing Products
+                    </h4>
+                    <div class="table-container" style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr
+                                    style="border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 0.85em; text-align: left;">
+                                    <th style="padding: 10px;">Product</th>
+                                    <th style="padding: 10px; text-align: center;">Sales</th>
+                                    <th style="padding: 10px; text-align: right;">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topProductsList">
+                                <tr>
+                                    <td colspan="3"
+                                        style="text-align: center; padding: 20px; color: var(--text-muted);">
+                                        Loading...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                </section>
+                </div>
 
-                <section id="productsSection" class="content-section" style="display: none;">
-                    <div class="card">
-                        <h2 style="margin-top: 0;">Add/Edit Product</h2>
-
-                        <!-- Tip for Free Resources -->
-                        <div
-                            style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); padding: 15px; border-radius: 8px; margin-bottom: 25px;">
-                            <h3 style="margin: 0 0 5px 0; color: #22c55e; font-size: 1em;"><i class="fas fa-gift"></i>
-                                Pro Tip:
-                                Managing Free Resources</h3>
-                            <p style="margin: 0; font-size: 0.9em; color: var(--text-muted);">
-                                To add a <strong>Free Resource</strong> (like a cheat sheet or guide), simply fill out
-                                the product
-                                form below and check the <strong>"Free"</strong> box next to the price. It will
-                                automatically appear
-                                in the "Free Resources" section on the homepage.
-                            </p>
-                        </div>
-
-                        <form id="productForm">
-                            <input type="hidden" id="productId">
-                            <div class="form-group">
-                                <label>Product Name</label>
-                                <input type="text" id="productName" required placeholder="e.g. Advanced C++ Guide">
-                            </div>
-
-                            <div class="form-group">
-                                <label>Cover Image (Required)</label>
-                                <input type="file" id="productCover" accept="image/*">
-                                <small style="color: var(--text-muted); display: block; margin-top: 5px;">
-                                    Upload a cover image for the product card (JPG, PNG, WEBP)
-                                </small>
-                            </div>
-
-                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                                <div class="form-group">
-                                    <label>Sale Price (₹)</label>
-                                    <div style="display:flex; gap:10px; align-items:center;">
-                                        <input type="number" id="productPrice" required placeholder="e.g. 699"
-                                            style="flex:1">
-                                        <label
-                                            style="display:flex; align-items:center; gap:5px; font-weight:normal; font-size:0.9em; cursor:pointer; color:var(--text);">
-                                            <input type="checkbox" id="productFree" onchange="togglePriceInput(this)">
-                                            Free
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Original Price (₹) - for slash pricing</label>
-                                    <input type="number" id="productOriginalPrice" placeholder="e.g. 999">
-                                </div>
-                            </div>
-
-                            <div class="form-group"
-                                style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
-                                <label style="display: flex; align-items: start; gap: 10px; cursor: pointer;">
-                                    <input type="checkbox" id="productPPP" style="width: auto; margin-top: 4px;">
-                                    <div>
-                                        <strong style="color: white;">Enable Country-Based Pricing (PPP)</strong>
-                                        <p style="margin: 4px 0 0; font-size: 0.85em; color: var(--text-muted);">
-                                            Automatically adjust price based on user's country purchasing power.
-                                            <br>(e.g. Lower price for developing countries)
-                                        </p>
-                                    </div>
-                                </label>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Discount Percentage (%)</label>
-                                <input type="number" id="productDiscount" min="0" max="100"
-                                    placeholder="e.g. 20 (leave 0 for no discount)">
-                            </div>
-
-                            <div class="form-group">
-                                <label>Coupon Code (Optional)</label>
-                                <input type="text" id="productCouponCode"
-                                    placeholder="e.g. WELCOME20 (users enter this for discount)">
-                                <small style="color: var(--text-muted); display: block; margin-top: 5px;">
-                                    Users can enter this code during purchase to get the discount
-                                </small>
-                            </div>
-
-                            <!-- Product Rating & Sales (Displayed on Product Page) -->
-                            <div class="form-row"
-                                style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
-                                <div class="form-group">
-                                    <label><i class="fas fa-star" style="color: #fbbf24;"></i> Average Rating
-                                        (1-5)</label>
-                                    <input type="number" id="productRating" min="1" max="5" step="0.1" value="5"
-                                        placeholder="5">
-                                    <small style="color: var(--text-muted); display: block; margin-top: 5px;">
-                                        Displayed on product page badges
-                                    </small>
-                                </div>
-                                <div class="form-group">
-                                    <label><i class="fas fa-bolt" style="color: #fbbf24;"></i> Sales Count</label>
-                                    <input type="number" id="productSalesCount" min="0" value="0" placeholder="0">
-                                    <small style="color: var(--text-muted); display: block; margin-top: 5px;">
-                                        Number of sales to display
-                                    </small>
-                                </div>
-                            </div>
-
-                            <!-- Product Reviews Selection -->
-                            <div class="form-group"
-                                style="margin-top: 20px; background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
-                                <label><i class="fas fa-comments" style="color: #a855f7;"></i> Select Reviews for
-                                    Product
-                                    Page</label>
-                                <p style="font-size: 0.85em; color: var(--text-muted); margin: 5px 0 15px;">
-                                    Check the reviews you want to display in the carousel on this product's page.
-                                </p>
-                                <div id="productReviewsCheckboxes"
-                                    style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 10px;">
-                                    <p style="color: var(--text-muted); text-align: center; font-size: 0.9em;">Loading
-                                        reviews...
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Description</label>
-                                <div style="background: white; border-radius: 4px; overflow: hidden;">
-                                    <div id="productDescEditor" style="height: 250px; color: black;"></div>
-                                </div>
-                            </div>
-
-                            <div class="form-group" id="fileUploadGroup">
-                                <label>Upload Resource (PDF, ZIP, RAR, Code files)</label>
-                                <input type="file" id="productFile"
-                                    accept=".pdf,.zip,.rar,.py,.cpp,.h,.js,.ipynb,.txt,.md">
-                                <small style="color: var(--text-muted); display: block; margin-top: 5px;">
-                                    Accepted: PDF documents, ZIP archives, Python scripts (.py), C++ files (.cpp, .h),
-                                    Accepted: PDF documents, ZIP archives, Python scripts (.py), C++ files (.cpp, .h),
-                                    Jupyter notebooks (.ipynb), JavaScript, Text files, Markdown
-                                </small>
-                            </div>
-
-                            <div class="form-group"
-                                style="background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(99, 102, 241, 0.3);">
-                                <label style="color: #a5b4fc; font-weight: 600;"><i class="fas fa-link"></i> OR Use
-                                    External File
-                                    Link (Recommended for Large Files)</label>
-                                <input type="url" id="productExternalUrl"
-                                    placeholder="e.g. https://drive.google.com/file/d/...">
-                                <small style="color: var(--text-muted); display: block; margin-top: 5px;">
-                                    Paste a direct download link from Google Drive, Dropbox, GitHub, etc. This saves
-                                    Supabase
-                                    storage bandwidth.
-                                    <br><strong>Note:</strong> If provided, this link takes precedence over uploaded
-                                    files.
-                                </small>
-                            </div>
-
-                            <button type="submit" id="productSubmitBtn">Upload & Save Product</button>
-                            <button type="button" id="cancelEditBtn" onclick="cancelProductEdit()"
-                                style="display: none; margin-left: 10px; background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted);">Cancel</button>
-                        </form>
-                        <div id="uploadStatus" class="status"></div>
-                    </div>
-
-                    <div class="product-list">
-                        <h2>Active Products</h2>
-                        <div class="card" id="productsList">
-                            <p style="color: var(--text-muted); text-align: center;">Loading products...</p>
-                        </div>
-                    </div>
-
-                    <div class="session-management" style="margin-top: 60px;">
-                        <h2>Mentorship Sessions Management</h2>
-                        <div class="card">
-                            <h3 style="margin-top: 0;">Add/Edit Session</h3>
-                            <form id="sessionForm">
-                                <input type="hidden" id="sessionId">
-                                <div class="form-group">
-                                    <label>Session Name</label>
-                                    <input type="text" id="sessionName" required placeholder="e.g. Quick Consultation">
-                                </div>
-                                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                                    <div class="form-group">
-                                        <label>Duration (minutes)</label>
-                                        <input type="number" id="sessionDuration" required placeholder="30" min="15">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Price (₹)</label>
-                                        <input type="number" id="sessionPrice" required placeholder="499" min="0">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Description</label>
-                                    <textarea id="sessionDesc" rows="2"
-                                        placeholder="Brief description of what the session covers..."></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label>Features (one per line)</label>
-                                    <textarea id="sessionFeatures" rows="4" placeholder="15-minute intro call
-Discuss your goals
-Brief Q&A"></textarea>
-                                </div>
-                                <div class="form-group" style="display: flex; gap: 20px; align-items: center;">
-                                    <label>
-                                        <input type="checkbox" id="sessionPopular"> Mark as Popular
-                                    </label>
-                                    <label>
-                                        <input type="checkbox" id="sessionActive" checked> Active
-                                    </label>
-                                </div>
-                                <div style="display: flex; gap: 10px;">
-                                    <button type="submit" id="sessionSubmitBtn">Save Session</button>
-                                    <button type="button" id="sessionResetBtn"
-                                        style="background: transparent; border: 1px solid var(--border);">Reset
-                                        Form</button>
-                                </div>
-                            </form>
-                        </div>
-
-                        <div class="card" style="margin-top: 20px;">
-                            <h3>Current Sessions</h3>
-                            <div id="sessionsList">
-                                <p style="color: var(--text-muted); text-align: center;">Loading sessions...</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- All Bookings Management -->
-                    <div class="bookings-management" style="margin-top: 60px;">
-                        <h2>All Bookings</h2>
-                        <div class="card">
-                            <div class="card-header"
-                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                                <div class="filter-tabs" style="display: flex; gap: 10px;">
-                                    <button onclick="loadBookings('all')" class="btn btn-sm active" id="btn-filter-all"
-                                        style="background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; font-size: 0.9em; cursor:pointer;">All</button>
-                                    <button onclick="loadBookings('upcoming')" class="btn btn-sm"
-                                        id="btn-filter-upcoming"
-                                        style="background: transparent; border: 1px solid var(--border); padding: 6px 12px; font-size: 0.9em; cursor:pointer;">Upcoming</button>
-                                    <button onclick="loadBookings('completed')" class="btn btn-sm"
-                                        id="btn-filter-completed"
-                                        style="background: transparent; border: 1px solid var(--border); padding: 6px 12px; font-size: 0.9em; cursor:pointer;">Completed</button>
-                                    <button onclick="loadBookings('cancelled')" class="btn btn-sm"
-                                        id="btn-filter-cancelled"
-                                        style="background: transparent; border: 1px solid var(--border); padding: 6px 12px; font-size: 0.9em; cursor:pointer;">Cancelled</button>
-                                </div>
-                                <button onclick="loadBookings(currentBookingFilter)" class="btn btn-secondary"
-                                    style="padding: 8px 16px; font-size: 0.9em;">
-                                    <i class="fas fa-sync-alt"></i> Refresh
-                                </button>
-                            </div>
-
-                            <div class="table-container" style="overflow-x: auto;">
-                                <table class="admin-table"
-                                    style="width: 100%; border-collapse: collapse; min-width: 600px;">
-                                    <thead>
-                                        <tr style="border-bottom: 1px solid var(--border);">
-                                            <th
-                                                style="text-align: left; padding: 12px; color: var(--text-muted); font-weight: 500;">
-                                                Date & Time</th>
-                                            <th
-                                                style="text-align: left; padding: 12px; color: var(--text-muted); font-weight: 500;">
-                                                Customer</th>
-                                            <th
-                                                style="text-align: left; padding: 12px; color: var(--text-muted); font-weight: 500;">
-                                                Service</th>
-                                            <th
-                                                style="text-align: left; padding: 12px; color: var(--text-muted); font-weight: 500;">
-                                                Status</th>
-                                            <th
-                                                style="text-align: right; padding: 12px; color: var(--text-muted); font-weight: 500;">
-                                                Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="allBookingsList">
-                                        <tr>
-                                            <td colspan="5"
-                                                style="text-align: center; padding: 20px; color: var(--text-muted);">
-                                                Loading bookings...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="reschedule-management" style="margin-top: 60px;">
-                        <h2>Reschedule Requests</h2>
-                        <div class="card">
-                            <div class="card-header"
-                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                <h3 style="margin: 0;">Pending Reschedule Requests</h3>
-                                <button onclick="loadRescheduleRequests()" class="btn btn-secondary"
-                                    style="padding: 8px 16px; font-size: 0.9em;">
-                                    <i class="fas fa-sync-alt"></i> Refresh
-                                </button>
-                            </div>
-                            <div id="rescheduleRequestsList">
-                                <p style="color: var(--text-muted); text-align: center;">Loading requests...</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Cancellation Requests Section -->
-                    <div class="card" style="border-left: 3px solid #ef4444;">
-                        <div class="card-header"
-                            style="display: flex; justify-content: space-between; align-items: center;">
-                            <h3 style="margin: 0;"><i class="fas fa-times-circle"
-                                    style="color: #ef4444; margin-right: 8px;"></i>Cancellation Requests</h3>
-                            <button onclick="loadCancellationRequests()" class="btn btn-secondary"
-                                style="padding: 8px 16px; font-size: 0.9em;">
-                                <i class="fas fa-sync-alt"></i> Refresh
-                            </button>
-                        </div>
-                        <p style="color: var(--text-muted); margin-bottom: 20px;">Review cancellation requests and
-                            process refunds.
-                        </p>
-                        <div id="cancellationRequestsList">
-                            <p style="color: var(--text-muted); text-align: center;">Loading cancellation requests...
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Blog Management -->
-                </section>
-
-                <!-- Blog Management -->
-                <section id="blogsSection" class="content-section" style="display: none;">
-                    <div class="blog-management" style="margin-top: 60px;">
-                        <h2>Blog & Articles Management</h2>
-                        <div class="card">
-                            <h3 style="margin-top: 0;">Add/Edit Article</h3>
-                            <form id="blogForm">
-                                <input type="hidden" id="blogId">
-
-                                <div class="form-group">
-                                    <label>Title</label>
-                                    <input type="text" id="blogTitle" required placeholder="Article Title">
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Slug (URL Friendly)</label>
-                                    <input type="text" id="blogSlug" placeholder="auto-generated-from-title"
-                                        style="color:var(--text-muted)">
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Excerpt (Short Summary)</label>
-                                    <textarea id="blogExcerpt" rows="2"
-                                        placeholder="Brief summary to display on cards..."></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Content</label>
-                                    <div style="background: white; border-radius: 4px; overflow: hidden;">
-                                        <div id="blogContentEditor" style="height: 300px; color: black;"></div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Cover Image URL</label>
-                                    <input type="text" id="blogCover" placeholder="https://...">
-                                </div>
-
-                                <div class="form-group">
-                                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                                        <input type="checkbox" id="blogPublished" checked>
-                                        Publish Immediately
-                                    </label>
-                                </div>
-
-                                <div style="display: flex; gap: 10px;">
-                                    <button type="submit" id="blogSubmitBtn">Save Article</button>
-                                    <button type="button" id="blogCancelBtn" onclick="cancelBlogEdit()"
-                                        style="display:none; background:transparent; border:1px solid var(--text-muted);">Cancel
-                                        Edit</button>
-                                </div>
-                            </form>
-                        </div>
-
-                        <div class="card" style="margin-top: 20px;">
-                            <h3>Existing Articles</h3>
-                            <div id="blogsList">
-                                <p style="color: var(--text-muted); text-align: center;">Loading articles...</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Availability Manager Section -->
-                </section>
-
-                <!-- Availability Manager Section -->
-                <section id="availabilitySection" class="content-section" style="display: none; margin-top: 30px;">
-                    <div class="card">
-                        <div class="card-header" style="margin-bottom: 20px;">
-                            <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-clock" style="color: #6366f1;"></i> Manage Availability
-                            </h2>
-                            <button onclick="saveAvailability()" class="btn btn-primary" style="padding: 8px 16px;">
-                                <i class="fas fa-save"></i> Save Changes
-                            </button>
-                        </div>
-
-                        <div style="overflow-x: auto;">
-                            <table class="admin-table" style="width: 100%; border-collapse: collapse;">
-                                <thead>
-                                    <tr>
-                                        <th style="text-align: left;">Day</th>
-                                        <th style="text-align: center;">Active</th>
-                                        <th style="text-align: left;">Start Time (IST)</th>
-                                        <th style="text-align: left;">End Time (IST)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="availabilityTableBody">
-                                    <!-- Rows generated by JS -->
-                                    <tr>
-                                        <td colspan="4" style="text-align:center;">Loading schedule...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Manage Blocked Dates Section -->
-                </section>
-
-                <!-- Manage Blocked Dates Section -->
-                <section id="blockedDatesSection" class="content-section" style="display: none; margin-top: 30px;">
-                    <div class="card">
-                        <div class="card-header" style="margin-bottom: 20px;">
-                            <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-ban" style="color: #ef4444;"></i> Manage Blocked Dates
-                            </h2>
-                            <p style="color: var(--text-muted); font-size: 0.9em; margin: 5px 0 0 0;">Disable all
-                                bookings for
-                                specific date ranges (e.g., holidays, personal leave).</p>
-                        </div>
-
-                        <div
-                            style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                            <h3 style="margin-top: 0; font-size: 1rem;">Add New Blocked Range</h3>
-                            <div
-                                style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: end;">
-                                <div class="form-group" style="margin-bottom: 0;">
-                                    <label>Start Date</label>
-                                    <input type="date" id="blockStartDate">
-                                </div>
-                                <div class="form-group" style="margin-bottom: 0;">
-                                    <label>End Date</label>
-                                    <input type="date" id="blockEndDate">
-                                </div>
-                                <button onclick="addBlockedDate()" style="height: 42px;">
-                                    <i class="fas fa-plus"></i> Add Block
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="blockedDatesList" style="margin-top: 20px;">
-                            <p style="color: var(--text-muted); text-align: center;">Loading blocked dates...</p>
-                        </div>
-                    </div>
-
-                    <!-- Testimonials Management Section -->
-                </section>
-
-                <!-- Testimonials Management Section -->
-                <section id="testimonialsSection" class="content-section" style="display: none; margin-top: 30px;">
-                    <div class="card">
-                        <div class="card-header"
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                            <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-star" style="color: #fbbf24;"></i> Review Approvals
-                            </h2>
-                            <button onclick="loadPendingTestimonials()" class="btn btn-secondary"
-                                style="padding: 8px 16px;">
-                                <i class="fas fa-sync-alt"></i> Refresh
-                            </button>
-                        </div>
-
-                        <div id="pendingTestimonialsList">
-                            <p style="color: var(--text-muted); text-align: center;">Loading pending reviews...</p>
-                        </div>
-                    </div>
-
-                    <!-- Alternative Date Modal -->
-                </section>
-
-                <!-- Alternative Date Modal -->
-                <div id="alternativeModal"
-                    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 15, 0.95); z-index: 2000; justify-content: center; align-items: center;">
-                    <div class="card" style="width: 400px; max-width: 90%;">
-                        <h3 style="margin-top: 0;">Suggest Alternative Date</h3>
-                        <input type="hidden" id="altBookingId">
-                        <div class="form-group">
-                            <label>Alternative Date</label>
-                            <input type="date" id="altDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Alternative Time</label>
-                            <select id="altTime" required>
-                                <option value="">Select time slot</option>
-                                <option value="10:00 AM">10:00 AM</option>
-                                <option value="11:00 AM">11:00 AM</option>
-                                <option value="12:00 PM">12:00 PM</option>
-                                <option value="2:00 PM">2:00 PM</option>
-                                <option value="3:00 PM">3:00 PM</option>
-                                <option value="4:00 PM">4:00 PM</option>
-                                <option value="5:00 PM">5:00 PM</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Message to Customer (Optional)</label>
-                            <textarea id="altMessage" rows="2"
-                                placeholder="Explain why you're suggesting this alternative..."></textarea>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <button onclick="submitAlternative()" style="flex: 1;">Send Alternative</button>
-                            <button onclick="closeAlternativeModal()"
-                                style="flex: 1; background: transparent; border: 1px solid var(--border);">Cancel</button>
+                <!-- Recent Activity Feed -->
+                <div
+                    style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+                    <h4
+                        style="margin: 0 0 20px 0; color: var(--text-secondary); display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-history" style="color: #6366f1;"></i> Recent Activity
+                    </h4>
+                    <div id="recentActivityFeed"
+                        style="display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto;">
+                        <div style="text-align: center; padding: 20px; color: var(--text-muted);">Loading
+                            activity...
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
+            </section>
+
+            <!-- Client Management & Exports Section -->
+            <section id="clientSection" class="content-section" style="margin-bottom: 60px;">
+                <div class="card">
+                    <div class="card-header"
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                        <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-users" style="color: #10b981;"></i> Client Management
+                        </h2>
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="downloadBookings()" class="btn btn-secondary"
+                                style="padding: 8px 16px; font-size: 0.9em;">
+                                <i class="fas fa-file-csv"></i> Export Bookings
+                            </button>
+                            <button onclick="downloadPurchases()" class="btn btn-secondary"
+                                style="padding: 8px 16px; font-size: 0.9em;">
+                                <i class="fas fa-file-csv"></i> Export Purchases
+                            </button>
+                            <button onclick="downloadClients()" class="btn btn-primary"
+                                style="padding: 8px 16px; font-size: 0.9em; background: linear-gradient(135deg, #10b981, #059669);">
+                                <i class="fas fa-file-download"></i> Export Client List
+                            </button>
+                        </div>
+                    </div>
+
+                    <p style="color: var(--text-muted); margin-bottom: 20px;">
+                        Aggregated list of all unique clients from Bookings and Purchases.
+                    </p>
+
+                    <div class="table-container" style="overflow-x: auto; max-height: 500px; overflow-y: auto;">
+                        <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr
+                                    style="border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface);">
+                                    <th style="text-align: left; padding: 12px; color: var(--text-muted);">Client
+                                    </th>
+                                    <th style="text-align: center; padding: 12px; color: var(--text-muted);">Type
+                                    </th>
+                                    <th style="text-align: center; padding: 12px; color: var(--text-muted);">Orders
+                                    </th>
+                                    <th style="text-align: right; padding: 12px; color: var(--text-muted);">Total
+                                        Spend</th>
+                                    <th style="text-align: center; padding: 12px; color: var(--text-muted);">Last
+                                        Active
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="clientListBody">
+                                <tr>
+                                    <td colspan="5"
+                                        style="text-align: center; padding: 20px; color: var(--text-muted);">
+                                        Loading clients...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="productsSection" class="content-section" style="display: none;">
+                <div class="card">
+                    <h2 style="margin-top: 0;">Add/Edit Product</h2>
+
+                    <!-- Tip for Free Resources -->
+                    <div
+                        style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                        <h3 style="margin: 0 0 5px 0; color: #22c55e; font-size: 1em;"><i class="fas fa-gift"></i>
+                            Pro Tip:
+                            Managing Free Resources</h3>
+                        <p style="margin: 0; font-size: 0.9em; color: var(--text-muted);">
+                            To add a <strong>Free Resource</strong> (like a cheat sheet or guide), simply fill out
+                            the product
+                            form below and check the <strong>"Free"</strong> box next to the price. It will
+                            automatically appear
+                            in the "Free Resources" section on the homepage.
+                        </p>
+                    </div>
+
+                    <form id="productForm">
+                        <input type="hidden" id="productId">
+                        <div class="form-group">
+                            <label>Product Name</label>
+                            <input type="text" id="productName" required placeholder="e.g. Advanced C++ Guide">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Cover Image (Required)</label>
+                            <input type="file" id="productCover" accept="image/*">
+                            <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                                Upload a cover image for the product card (JPG, PNG, WEBP)
+                            </small>
+                        </div>
+
+                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="form-group">
+                                <label>Sale Price (₹)</label>
+                                <div style="display:flex; gap:10px; align-items:center;">
+                                    <input type="number" id="productPrice" required placeholder="e.g. 699"
+                                        style="flex:1">
+                                    <label
+                                        style="display:flex; align-items:center; gap:5px; font-weight:normal; font-size:0.9em; cursor:pointer; color:var(--text);">
+                                        <input type="checkbox" id="productFree" onchange="togglePriceInput(this)">
+                                        Free
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Original Price (₹) - for slash pricing</label>
+                                <input type="number" id="productOriginalPrice" placeholder="e.g. 999">
+                            </div>
+                        </div>
+
+                        <div class="form-group"
+                            style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+                            <label style="display: flex; align-items: start; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" id="productPPP" style="width: auto; margin-top: 4px;">
+                                <div>
+                                    <strong style="color: white;">Enable Country-Based Pricing (PPP)</strong>
+                                    <p style="margin: 4px 0 0; font-size: 0.85em; color: var(--text-muted);">
+                                        Automatically adjust price based on user's country purchasing power.
+                                        <br>(e.g. Lower price for developing countries)
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Discount Percentage (%)</label>
+                            <input type="number" id="productDiscount" min="0" max="100"
+                                placeholder="e.g. 20 (leave 0 for no discount)">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Coupon Code (Optional)</label>
+                            <input type="text" id="productCouponCode"
+                                placeholder="e.g. WELCOME20 (users enter this for discount)">
+                            <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                                Users can enter this code during purchase to get the discount
+                            </small>
+                        </div>
+
+                        <!-- Product Rating & Sales (Displayed on Product Page) -->
+                        <div class="form-row"
+                            style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                            <div class="form-group">
+                                <label><i class="fas fa-star" style="color: #fbbf24;"></i> Average Rating
+                                    (1-5)</label>
+                                <input type="number" id="productRating" min="1" max="5" step="0.1" value="5"
+                                    placeholder="5">
+                                <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                                    Displayed on product page badges
+                                </small>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-bolt" style="color: #fbbf24;"></i> Sales Count</label>
+                                <input type="number" id="productSalesCount" min="0" value="0" placeholder="0">
+                                <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                                    Number of sales to display
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Product Reviews Selection -->
+                        <div class="form-group"
+                            style="margin-top: 20px; background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+                            <label><i class="fas fa-comments" style="color: #a855f7;"></i> Select Reviews for
+                                Product
+                                Page</label>
+                            <p style="font-size: 0.85em; color: var(--text-muted); margin: 5px 0 15px;">
+                                Check the reviews you want to display in the carousel on this product's page.
+                            </p>
+                            <div id="productReviewsCheckboxes"
+                                style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 10px;">
+                                <p style="color: var(--text-muted); text-align: center; font-size: 0.9em;">Loading
+                                    reviews...
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description</label>
+                            <div style="background: white; border-radius: 4px; overflow: hidden;">
+                                <div id="productDescEditor" style="height: 250px; color: black;"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="fileUploadGroup">
+                            <label>Upload Resource (PDF, ZIP, RAR, Code files)</label>
+                            <input type="file" id="productFile" accept=".pdf,.zip,.rar,.py,.cpp,.h,.js,.ipynb,.txt,.md">
+                            <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                                Accepted: PDF documents, ZIP archives, Python scripts (.py), C++ files (.cpp, .h),
+                                Accepted: PDF documents, ZIP archives, Python scripts (.py), C++ files (.cpp, .h),
+                                Jupyter notebooks (.ipynb), JavaScript, Text files, Markdown
+                            </small>
+                        </div>
+
+                        <div class="form-group"
+                            style="background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(99, 102, 241, 0.3);">
+                            <label style="color: #a5b4fc; font-weight: 600;"><i class="fas fa-link"></i> OR Use
+                                External File
+                                Link (Recommended for Large Files)</label>
+                            <input type="url" id="productExternalUrl"
+                                placeholder="e.g. https://drive.google.com/file/d/...">
+                            <small style="color: var(--text-muted); display: block; margin-top: 5px;">
+                                Paste a direct download link from Google Drive, Dropbox, GitHub, etc. This saves
+                                Supabase
+                                storage bandwidth.
+                                <br><strong>Note:</strong> If provided, this link takes precedence over uploaded
+                                files.
+                            </small>
+                        </div>
+
+                        <button type="submit" id="productSubmitBtn">Upload & Save Product</button>
+                        <button type="button" id="cancelEditBtn" onclick="cancelProductEdit()"
+                            style="display: none; margin-left: 10px; background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted);">Cancel</button>
+                    </form>
+                    <div id="uploadStatus" class="status"></div>
+                </div>
+
+                <div class="product-list">
+                    <h2>Active Products</h2>
+                    <div class="card" id="productsList">
+                        <p style="color: var(--text-muted); text-align: center;">Loading products...</p>
+                    </div>
+                </div>
+
+                <div class="session-management" style="margin-top: 60px;">
+                    <h2>Mentorship Sessions Management</h2>
+                    <div class="card">
+                        <h3 style="margin-top: 0;">Add/Edit Session</h3>
+                        <form id="sessionForm">
+                            <input type="hidden" id="sessionId">
+                            <div class="form-group">
+                                <label>Session Name</label>
+                                <input type="text" id="sessionName" required placeholder="e.g. Quick Consultation">
+                            </div>
+                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div class="form-group">
+                                    <label>Duration (minutes)</label>
+                                    <input type="number" id="sessionDuration" required placeholder="30" min="15">
+                                </div>
+                                <div class="form-group">
+                                    <label>Price (₹)</label>
+                                    <input type="number" id="sessionPrice" required placeholder="499" min="0">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea id="sessionDesc" rows="2"
+                                    placeholder="Brief description of what the session covers..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Features (one per line)</label>
+                                <textarea id="sessionFeatures" rows="4" placeholder="15-minute intro call
+Discuss your goals
+Brief Q&A"></textarea>
+                            </div>
+                            <div class="form-group" style="display: flex; gap: 20px; align-items: center;">
+                                <label>
+                                    <input type="checkbox" id="sessionPopular"> Mark as Popular
+                                </label>
+                                <label>
+                                    <input type="checkbox" id="sessionActive" checked> Active
+                                </label>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" id="sessionSubmitBtn">Save Session</button>
+                                <button type="button" id="sessionResetBtn"
+                                    style="background: transparent; border: 1px solid var(--border);">Reset
+                                    Form</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card" style="margin-top: 20px;">
+                        <h3>Current Sessions</h3>
+                        <div id="sessionsList">
+                            <p style="color: var(--text-muted); text-align: center;">Loading sessions...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- All Bookings Management -->
+                <div class="bookings-management" style="margin-top: 60px;">
+                    <h2>All Bookings</h2>
+                    <div class="card">
+                        <div class="card-header"
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                            <div class="filter-tabs" style="display: flex; gap: 10px;">
+                                <button onclick="loadBookings('all')" class="btn btn-sm active" id="btn-filter-all"
+                                    style="background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; font-size: 0.9em; cursor:pointer;">All</button>
+                                <button onclick="loadBookings('upcoming')" class="btn btn-sm" id="btn-filter-upcoming"
+                                    style="background: transparent; border: 1px solid var(--border); padding: 6px 12px; font-size: 0.9em; cursor:pointer;">Upcoming</button>
+                                <button onclick="loadBookings('completed')" class="btn btn-sm" id="btn-filter-completed"
+                                    style="background: transparent; border: 1px solid var(--border); padding: 6px 12px; font-size: 0.9em; cursor:pointer;">Completed</button>
+                                <button onclick="loadBookings('cancelled')" class="btn btn-sm" id="btn-filter-cancelled"
+                                    style="background: transparent; border: 1px solid var(--border); padding: 6px 12px; font-size: 0.9em; cursor:pointer;">Cancelled</button>
+                            </div>
+                            <button onclick="loadBookings(currentBookingFilter)" class="btn btn-secondary"
+                                style="padding: 8px 16px; font-size: 0.9em;">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+
+                        <div class="table-container" style="overflow-x: auto;">
+                            <table class="admin-table"
+                                style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid var(--border);">
+                                        <th
+                                            style="text-align: left; padding: 12px; color: var(--text-muted); font-weight: 500;">
+                                            Date & Time</th>
+                                        <th
+                                            style="text-align: left; padding: 12px; color: var(--text-muted); font-weight: 500;">
+                                            Customer</th>
+                                        <th
+                                            style="text-align: left; padding: 12px; color: var(--text-muted); font-weight: 500;">
+                                            Service</th>
+                                        <th
+                                            style="text-align: left; padding: 12px; color: var(--text-muted); font-weight: 500;">
+                                            Status</th>
+                                        <th
+                                            style="text-align: right; padding: 12px; color: var(--text-muted); font-weight: 500;">
+                                            Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allBookingsList">
+                                    <tr>
+                                        <td colspan="5"
+                                            style="text-align: center; padding: 20px; color: var(--text-muted);">
+                                            Loading bookings...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reschedule-management" style="margin-top: 60px;">
+                    <h2>Reschedule Requests</h2>
+                    <div class="card">
+                        <div class="card-header"
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="margin: 0;">Pending Reschedule Requests</h3>
+                            <button onclick="loadRescheduleRequests()" class="btn btn-secondary"
+                                style="padding: 8px 16px; font-size: 0.9em;">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <div id="rescheduleRequestsList">
+                            <p style="color: var(--text-muted); text-align: center;">Loading requests...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cancellation Requests Section -->
+                <div class="card" style="border-left: 3px solid #ef4444;">
+                    <div class="card-header"
+                        style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin: 0;"><i class="fas fa-times-circle"
+                                style="color: #ef4444; margin-right: 8px;"></i>Cancellation Requests</h3>
+                        <button onclick="loadCancellationRequests()" class="btn btn-secondary"
+                            style="padding: 8px 16px; font-size: 0.9em;">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <p style="color: var(--text-muted); margin-bottom: 20px;">Review cancellation requests and
+                        process refunds.
+                    </p>
+                    <div id="cancellationRequestsList">
+                        <p style="color: var(--text-muted); text-align: center;">Loading cancellation requests...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Blog Management -->
+            </section>
+
+            <!-- Blog Management -->
+            <section id="blogsSection" class="content-section" style="display: none;">
+                <div class="blog-management" style="margin-top: 60px;">
+                    <h2>Blog & Articles Management</h2>
+                    <div class="card">
+                        <h3 style="margin-top: 0;">Add/Edit Article</h3>
+                        <form id="blogForm">
+                            <input type="hidden" id="blogId">
+
+                            <div class="form-group">
+                                <label>Title</label>
+                                <input type="text" id="blogTitle" required placeholder="Article Title">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Slug (URL Friendly)</label>
+                                <input type="text" id="blogSlug" placeholder="auto-generated-from-title"
+                                    style="color:var(--text-muted)">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Excerpt (Short Summary)</label>
+                                <textarea id="blogExcerpt" rows="2"
+                                    placeholder="Brief summary to display on cards..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Content</label>
+                                <div style="background: white; border-radius: 4px; overflow: hidden;">
+                                    <div id="blogContentEditor" style="height: 300px; color: black;"></div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Cover Image URL</label>
+                                <input type="text" id="blogCover" placeholder="https://...">
+                            </div>
+
+                            <div class="form-group">
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" id="blogPublished" checked>
+                                    Publish Immediately
+                                </label>
+                            </div>
+
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" id="blogSubmitBtn">Save Article</button>
+                                <button type="button" id="blogCancelBtn" onclick="cancelBlogEdit()"
+                                    style="display:none; background:transparent; border:1px solid var(--text-muted);">Cancel
+                                    Edit</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card" style="margin-top: 20px;">
+                        <h3>Existing Articles</h3>
+                        <div id="blogsList">
+                            <p style="color: var(--text-muted); text-align: center;">Loading articles...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Availability Manager Section -->
+            </section>
+
+            <!-- Availability Manager Section -->
+            <section id="availabilitySection" class="content-section" style="display: none; margin-top: 30px;">
+                <div class="card">
+                    <div class="card-header" style="margin-bottom: 20px;">
+                        <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-clock" style="color: #6366f1;"></i> Manage Availability
+                        </h2>
+                        <button onclick="saveAvailability()" class="btn btn-primary" style="padding: 8px 16px;">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="admin-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: left;">Day</th>
+                                    <th style="text-align: center;">Active</th>
+                                    <th style="text-align: left;">Start Time (IST)</th>
+                                    <th style="text-align: left;">End Time (IST)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="availabilityTableBody">
+                                <!-- Rows generated by JS -->
+                                <tr>
+                                    <td colspan="4" style="text-align:center;">Loading schedule...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Manage Blocked Dates Section -->
+            </section>
+
+            <!-- Manage Blocked Dates Section -->
+            <section id="blockedDatesSection" class="content-section" style="display: none; margin-top: 30px;">
+                <div class="card">
+                    <div class="card-header" style="margin-bottom: 20px;">
+                        <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-ban" style="color: #ef4444;"></i> Manage Blocked Dates
+                        </h2>
+                        <p style="color: var(--text-muted); font-size: 0.9em; margin: 5px 0 0 0;">Disable all
+                            bookings for
+                            specific date ranges (e.g., holidays, personal leave).</p>
+                    </div>
+
+                    <div
+                        style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                        <h3 style="margin-top: 0; font-size: 1rem;">Add New Blocked Range</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: end;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Start Date</label>
+                                <input type="date" id="blockStartDate">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>End Date</label>
+                                <input type="date" id="blockEndDate">
+                            </div>
+                            <button onclick="addBlockedDate()" style="height: 42px;">
+                                <i class="fas fa-plus"></i> Add Block
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="blockedDatesList" style="margin-top: 20px;">
+                        <p style="color: var(--text-muted); text-align: center;">Loading blocked dates...</p>
+                    </div>
+                </div>
+
+                <!-- Testimonials Management Section -->
+            </section>
+
+            <!-- Testimonials Management Section -->
+            <section id="testimonialsSection" class="content-section" style="display: none; margin-top: 30px;">
+                <div class="card">
+                    <div class="card-header"
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                        <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-star" style="color: #fbbf24;"></i> Review Approvals
+                        </h2>
+                        <button onclick="loadPendingTestimonials()" class="btn btn-secondary"
+                            style="padding: 8px 16px;">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+
+                    <div id="pendingTestimonialsList">
+                        <p style="color: var(--text-muted); text-align: center;">Loading pending reviews...</p>
+                    </div>
+                </div>
+
+                <!-- Alternative Date Modal -->
+            </section>
+
+            <!-- Alternative Date Modal -->
+            <div id="alternativeModal"
+                style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 15, 0.95); z-index: 2000; justify-content: center; align-items: center;">
+                <div class="card" style="width: 400px; max-width: 90%;">
+                    <h3 style="margin-top: 0;">Suggest Alternative Date</h3>
+                    <input type="hidden" id="altBookingId">
+                    <div class="form-group">
+                        <label>Alternative Date</label>
+                        <input type="date" id="altDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Alternative Time</label>
+                        <select id="altTime" required>
+                            <option value="">Select time slot</option>
+                            <option value="10:00 AM">10:00 AM</option>
+                            <option value="11:00 AM">11:00 AM</option>
+                            <option value="12:00 PM">12:00 PM</option>
+                            <option value="2:00 PM">2:00 PM</option>
+                            <option value="3:00 PM">3:00 PM</option>
+                            <option value="4:00 PM">4:00 PM</option>
+                            <option value="5:00 PM">5:00 PM</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Message to Customer (Optional)</label>
+                        <textarea id="altMessage" rows="2"
+                            placeholder="Explain why you're suggesting this alternative..."></textarea>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="submitAlternative()" style="flex: 1;">Send Alternative</button>
+                        <button onclick="closeAlternativeModal()"
+                            style="flex: 1; background: transparent; border: 1px solid var(--border);">Cancel</button>
+                    </div>
+                </div>
+            </div>
+    </div>
+    </main>
     </div>
 
     <!-- Image Cropper Modal -->
@@ -3154,27 +3190,40 @@ QuantMentor
                 // Helper for Currency Conversion (Approximate Rates)
                 const EXCHANGE_RATES = {
                     'USD': 83,
-                    'EUR': 90,
-                    'GBP': 110,
+                    'EUR': 89,
+                    'GBP': 105,
                     'BRL': 16,
                     'INR': 1,
                     'CHF': 94,
                     'CAD': 61,
+                    'AUD': 55,
+                    'SGD': 62,
+                    'AED': 22,
+                    'KRW': 0.062,
+                    'JPY': 0.55,
+                    'ZAR': 4.4,
                     'NGN': 0.05
                 };
 
-                function normalizeToINR(amount, currency) {
+                function normalizeToINR(amount, currency, inrAmountOverride = null) {
+                    // 1. Priority: Direct INR Amount from DB
+                    if (inrAmountOverride !== null && inrAmountOverride !== undefined && !isNaN(parseFloat(inrAmountOverride))) {
+                        const val = parseFloat(inrAmountOverride);
+                        if (val > 0) return val;
+                    }
+
                     if (!amount) return 0;
                     const code = (currency || 'INR').toUpperCase();
 
-                    // AUTO-CORRECTION: If currency is NOT INR but amount matches a standard INR price point,
+                    // 2. AUTO-CORRECTION: If currency is NOT INR but amount matches a standard INR price point,
                     // we treat it as INR. (Professional fix for mislabeled webhook data)
                     const STANDARD_INR_PRICES = [449, 599, 719, 799, 1198, 1597, 1799, 1999, 7999];
                     if (code !== 'INR' && STANDARD_INR_PRICES.includes(amount)) {
                         return amount; // Treat as 1:1 INR
                     }
 
-                    const rate = EXCHANGE_RATES[code] || 1;
+                    // 3. Rate Fallback (Ensures KRW/AUD/etc don't default to 1:1)
+                    const rate = EXCHANGE_RATES[code] || (code === 'INR' ? 1 : 83); // Default to USD-ish if unknown but not INR
                     return amount * rate;
                 }
 
@@ -3221,6 +3270,7 @@ QuantMentor
                     await Promise.all([
                         updateDashboardStats(),
                         updateDashboardCharts(),
+                        updateSalesMap(),
                         loadTopProducts(),
                         loadRecentActivity(),
                         loadClients()
@@ -3262,7 +3312,7 @@ QuantMentor
 
                         let { data: currentPeriodPurchases } = await window.supabaseAdminClient
                             .from('purchases')
-                            .select('amount, currency, payment_id')
+                            .select('amount, currency, payment_id, inr_amount, customer_country')
                             .gte('created_at', startOfPeriod)
                             .lte('created_at', endOfPeriod);
 
@@ -3275,7 +3325,7 @@ QuantMentor
 
                         let { data: previousPeriodPurchases } = await window.supabaseAdminClient
                             .from('purchases')
-                            .select('amount, currency, payment_id')
+                            .select('amount, currency, payment_id, inr_amount, customer_country')
                             .gte('created_at', startOfPrevious)
                             .lte('created_at', endOfPrevious);
 
@@ -3288,7 +3338,7 @@ QuantMentor
 
                         let { data: allPurchasesRev } = await window.supabaseAdminClient
                             .from('purchases')
-                            .select('amount, currency, payment_id');
+                            .select('amount, currency, payment_id, inr_amount, customer_country');
 
                         // Deduplicate purchases by Payment ID to prevent ghost/duplicate counts
                         const deduplicatePurchases = (list) => {
@@ -3312,7 +3362,7 @@ QuantMentor
                             if (bookings) bookings.forEach(b => totals.INR += (b.service_price || 0));
                             if (purchases) {
                                 purchases.forEach(p => {
-                                    const normalizedAmt = normalizeToINR(p.amount, p.currency);
+                                    const normalizedAmt = normalizeToINR(p.amount, p.currency, p.inr_amount);
                                     totals.INR += normalizedAmt;
                                     const c = (p.currency || 'INR').toUpperCase();
                                     if (c !== 'INR') {
@@ -3326,10 +3376,10 @@ QuantMentor
 
                         // Period Metrics
                         const currentTotalNorm = (currentPeriodBookings?.reduce((s, b) => s + (b.service_price || 0), 0) || 0) +
-                            cleanCurrentPurchases.reduce((s, p) => s + normalizeToINR(p.amount, p.currency), 0);
+                            cleanCurrentPurchases.reduce((s, p) => s + normalizeToINR(p.amount, p.currency, p.inr_amount), 0);
 
                         const previousTotalNorm = (previousPeriodBookings?.reduce((s, b) => s + (b.service_price || 0), 0) || 0) +
-                            cleanPreviousPurchases.reduce((s, p) => s + normalizeToINR(p.amount, p.currency), 0);
+                            cleanPreviousPurchases.reduce((s, p) => s + normalizeToINR(p.amount, p.currency, p.inr_amount), 0);
 
                         const currentSalesCount = cleanCurrentPurchases.length;
                         const previousSalesCount = cleanPreviousPurchases.length;
@@ -3398,7 +3448,130 @@ QuantMentor
                         document.getElementById('avgOrderValue').textContent = `₹${aov.toLocaleString()}`;
 
                     } catch (err) {
-                        console.error('❌ Failed to load stats:', err);
+                        console.error('Error updating dashboard stats:', err);
+                    }
+                }
+
+                const MAP_COUNTRY_HINTS = {
+                    'USD': 'US', 'EUR': 'DE', 'GBP': 'GB', 'CHF': 'CH',
+                    'ZAR': 'ZA', 'NGN': 'NG', 'CAD': 'CA', 'AUD': 'AU',
+                    'KRW': 'KR', 'INR': 'IN', 'JPY': 'JP', 'SGD': 'SG',
+                    'AED': 'AE', 'BRL': 'BR'
+                };
+
+                let salesMap = null;
+                async function updateSalesMap() {
+                    if (!window.supabaseAdminClient) return;
+                    try {
+                        const { data: purchases, error } = await window.supabaseAdminClient
+                            .from('purchases')
+                            .select('customer_country, currency, inr_amount');
+
+                        if (error || !purchases) return;
+
+                        const countryData = {};
+                        const countryNames = {
+                            'US': 'USA', 'DE': 'Germany', 'GB': 'UK', 'CH': 'Switzerland',
+                            'ZA': 'South Africa', 'NG': 'Nigeria', 'CA': 'Canada', 'AU': 'Australia',
+                            'KR': 'S. Korea', 'IN': 'India', 'JP': 'Japan', 'SG': 'Singapore',
+                            'AE': 'UAE', 'BR': 'Brazil'
+                        };
+
+                        purchases.forEach(p => {
+                            let country = p.customer_country;
+
+                            // SMART FALLBACK: If country is missing, guess from currency for the map
+                            if (!country || country === 'Unknown') {
+                                country = MAP_COUNTRY_HINTS[p.currency?.toUpperCase()];
+                            }
+
+                            if (country && country !== 'Unknown') {
+                                countryData[country] = (countryData[country] || 0) + 1;
+                            }
+                        });
+
+                        const mapElement = document.getElementById('world-map');
+                        if (!mapElement) return;
+
+                        // Update Legend with actual counts
+                        const countryCount = Object.keys(countryData).length;
+                        const legendHtml = countryCount > 0
+                            ? `<div style="display:flex; flex-direction:column; gap:4px; font-size:0.7em; color:var(--text-muted);">
+                                ${Object.entries(countryData).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([code, count]) => `
+                                    <div style="display:flex; justify-content:space-between; gap:10px;">
+                                        <span>${countryNames[code] || code}:</span>
+                                        <span style="color:var(--primary);">${count}</span>
+                                    </div>
+                                `).join('')}
+                                ${countryCount > 5 ? '<span>...and more</span>' : ''}
+                               </div>`
+                            : 'No geographic data';
+
+                        const legendElement = document.getElementById('mapLegend');
+                        if (legendElement) {
+                            legendElement.innerHTML =
+                                `<div style="display:flex; align-items:center; gap:15px;">
+                                    ${legendHtml}
+                                    <span class="text-xs text-muted" style="border-left:1px solid rgba(255,255,255,0.1); padding-left:15px; display: flex; align-items: center;">${countryCount} Countries</span>
+                                 </div>`;
+                        }
+
+                        if (salesMap) {
+                            salesMap.destroy();
+                        }
+
+                        salesMap = new jsVectorMap({
+                            selector: '#world-map',
+                            map: 'world_merc',
+                            backgroundColor: 'transparent',
+                            draggable: true,
+                            zoomOnScroll: false,
+                            zoomButtons: true,
+                            bindTouchEvents: true,
+                            regionStyle: {
+                                initial: {
+                                    fill: '#2a2a3a',
+                                    stroke: 'rgba(255, 255, 255, 0.1)',
+                                    strokeWidth: 0.5,
+                                    fillOpacity: 1
+                                },
+                                hover: {
+                                    fill: '#6366f1',
+                                    fillOpacity: 1
+                                },
+                                selected: {
+                                    fill: '#6366f1'
+                                }
+                            },
+                            series: {
+                                regions: [{
+                                    attribute: 'fill',
+                                    legend: {
+                                        title: 'Sales Density',
+                                        vertical: false,
+                                    },
+                                    scale: ['#312e81', '#6366f1', '#a855f7'],
+                                    values: countryData
+                                }]
+                            },
+                            onRegionTooltipShow(event, tooltip, code) {
+                                const count = countryData[code] || 0;
+                                tooltip.text(
+                                    `<h5>${tooltip.text()}</h5>` +
+                                    `<p style="margin:0; font-size:0.9em; opacity:0.8;">Total Sales: ${count}</p>`
+                                );
+                            }
+                        });
+
+                        // Inject legend
+                        const legend = document.getElementById('mapLegend');
+                        if (legend) {
+                            const totalCountries = Object.keys(countryData).length;
+                            legend.innerHTML = `<span><strong>${totalCountries}</strong> Countries</span>`;
+                        }
+
+                    } catch (err) {
+                        console.error('Error updating Sales Map:', err);
                     }
                 }
 

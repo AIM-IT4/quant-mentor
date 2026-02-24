@@ -2063,7 +2063,9 @@ if (modalPayBtn) {
                     initRazorpayCheckout(productName, payAmount, payCurrency, logAmountInr, {
                         name: udName,
                         email: udEmail,
-                        phone: udPhone
+                        phone: udPhone,
+                        country: window.userCountryCode || 'Unknown',
+                        inr_amount: String(logAmountInr)
                     });
                 }
             };
@@ -2479,8 +2481,10 @@ async function initSessionPayment(description, amount, customerEmail, currency =
             session_time: bookingData ? bookingData.time : '',
             session_duration: bookingData ? String(bookingData.duration) : '',
             session_price: String(inrAmountForLogging || amount),
+            inr_amount: String(inrAmountForLogging || amount),
             customer_phone: bookingData ? bookingData.phone : '',
-            customer_message: bookingData ? bookingData.message : ''
+            customer_message: bookingData ? bookingData.message : '',
+            customer_country: window.userCountryCode || 'Unknown'
         };
         console.log('📦 Creating Razorpay order for session instant capture...');
         const orderRes = await fetch('/api/create-order', {

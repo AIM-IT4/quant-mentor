@@ -85,20 +85,24 @@ export default async function handler(req, res) {
             const customerEmail = payment.email;
             const customerName = payment.notes?.customer_name || 'Customer';
             const customerPhone = payment.notes?.customer_phone || '';
+            const customerCountry = payment.notes?.customer_country || payment.notes?.country || 'Unknown';
+            const inrAmount = payment.notes?.inr_amount ? parseFloat(payment.notes.inr_amount) : amount;
             const productName = payment.notes?.product_name;
             const productType = payment.notes?.type || 'product'; // 'product' or 'session'
 
-            console.log('Payment captured:', { paymentId, amount, customerEmail, productName, productType });
+            console.log('Payment captured:', { paymentId, amount, inrAmount, customerEmail, customerCountry, productName, productType });
 
             if (productType === 'product' && productName) {
                 // Handle product purchase
                 await handleProductPurchase({
                     paymentId,
                     amount,
+                    inrAmount,
                     currency,
                     customerEmail,
                     customerName,
                     customerPhone,
+                    customerCountry,
                     productName,
                     SUPABASE_URL,
                     SUPABASE_KEY,
@@ -139,7 +143,7 @@ export default async function handler(req, res) {
 // Handle product purchase - send email and log to Supabase
 async function handleProductPurchase(data) {
     const {
-        paymentId, amount, currency, customerEmail, customerName, customerPhone, productName,
+        paymentId, amount, inrAmount, currency, customerEmail, customerName, customerPhone, customerCountry, productName,
         SUPABASE_URL, SUPABASE_KEY, BREVO_API_KEY, ADMIN_EMAIL, SENDER_EMAIL, SENDER_NAME
     } = data;
 
@@ -224,7 +228,9 @@ async function handleProductPurchase(data) {
                 amount: Math.round(amount),
                 currency: currency || 'INR',
                 payment_id: paymentId,
-                source: 'webhook'
+                source: 'webhook',
+                customer_country: customerCountry,
+                inr_amount: inrAmount
             })
         });
         console.log('Purchase logged to Supabase');
@@ -456,7 +462,8 @@ async function handleSessionBooking(data) {
                 status: 'upcoming',
                 payment_id: paymentId,
                 meet_link: meetLink,
-                source: 'webhook' // Mark for debugging
+                source: 'webhook', // Mark for debugging
+                customer_country: notes.customer_country || notes.country || 'Unknown'
             })
         });
 
