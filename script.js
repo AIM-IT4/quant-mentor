@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (typeof window.supabase !== 'undefined' && !window.supabaseClient) {
         const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDEyNjUsImV4cCI6MjA4NTY3NzI2NX0.PYpNd_t_px09zi2d5WGjFVOB23sjb3ZPuAnxagYshe0';
         window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     }
 
@@ -1043,19 +1043,30 @@ async function loadProductsFromSupabase(prefetchPromise) {
             return;
         }
 
-        // Fire Supabase query immediately (runs in parallel with prefetch)
+        // Fire Supabase query immediately
         const queryPromise = window.supabaseClient
             .from('products')
             .select('*')
             .order('created_at', { ascending: false });
 
-        // Wait for both the prefetch (country + rates) and the query to finish
-        const [, queryResult] = await Promise.all([
-            prefetchPromise || Promise.all([getUserCountry(), fetchExchangeRates()]),
+        // Handle prefetch (country + rates) separately so it doesn't block products if it fails
+        const prefetch = prefetchPromise || Promise.all([
+            getUserCountry().catch(e => console.warn('getUserCountry failed:', e)),
+            fetchExchangeRates().catch(e => console.warn('fetchExchangeRates failed:', e))
+        ]);
+
+        // Wait for both, but process products as soon as we can
+        const [prefetchResult, queryResult] = await Promise.allSettled([
+            prefetch,
             queryPromise
         ]);
 
-        const { data, error } = queryResult;
+        if (queryResult.status === 'rejected') {
+            console.error('Error loading products from Supabase:', queryResult.reason);
+            return;
+        }
+
+        const { data, error } = queryResult.value;
 
         if (error) {
             console.error('Error loading products from Supabase:', error);
@@ -1283,20 +1294,31 @@ async function loadSessionsFromSupabase(prefetchPromise) {
             return;
         }
 
-        // Fire Supabase query immediately (runs in parallel with prefetch)
+        // Fire Supabase query immediately
         const queryPromise = window.supabaseClient
             .from('sessions')
             .select('*')
             .eq('is_active', true)
             .order('price', { ascending: true });
 
-        // Wait for both the prefetch (country + rates) and the query to finish
-        const [, queryResult] = await Promise.all([
-            prefetchPromise || Promise.all([getUserCountry(), fetchExchangeRates()]),
+        // Handle prefetch (country + rates) separately
+        const prefetch = prefetchPromise || Promise.all([
+            getUserCountry().catch(e => console.warn('getUserCountry failed:', e)),
+            fetchExchangeRates().catch(e => console.warn('fetchExchangeRates failed:', e))
+        ]);
+
+        // Wait for both, but process sessions as soon as we can
+        const [prefetchResult, queryResult] = await Promise.allSettled([
+            prefetch,
             queryPromise
         ]);
 
-        const { data, error } = queryResult;
+        if (queryResult.status === 'rejected') {
+            console.error('Error loading sessions from Supabase:', queryResult.reason);
+            return;
+        }
+
+        const { data, error } = queryResult.value;
 
         if (error) {
             console.error('Error loading sessions from Supabase:', error);

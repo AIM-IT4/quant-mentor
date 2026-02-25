@@ -3154,26 +3154,27 @@ QuantMentor
                 window.approveRefund = approveRefund;
                 window.rejectCancellation = rejectCancellation;
 
-                // --- SUPABASE ADMIN CONFIG ---
-                // ⚠️ SERVICE ROLE KEY for Admin Dashboard (Read-Only access to all data)
-                // This serves as the "Backend" access for the admin panel.
-                const SUPABASE_ADMIN_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDEyNjUsImV4cCI6MjA4NTY3NzI2NX0.PYpNd_t_px09zi2d5WGjFVOB23sjb3ZPuAnxagYshe0';
-                // Note: The above is actually the anon key from audit-revenue.js. 
-                // Wait, audit-revenue.js used the SAME key as what I thought was admin?
-                // Let's verify the key in audit-revenue.js vs script.js
-
-                // script.js key: sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0 (This looks like a public key alias or shortened?)
-                // audit-revenue.js key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... (JWT format)
-
-                // If audit-revenue.js worked, I MUST use that JWT key here.
-                // I will rename it to SUPABASE_JWT_KEY to be safe.
-
-                const SUPABASE_JWT_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDEyNjUsImV4cCI6MjA4NTY3NzI2NX0.PYpNd_t_px09zi2d5WGjFVOB23sjb3ZPuAnxagYshe0';
                 const SUPABASE_PROJECT_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
+                const SUPABASE_JWT_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDEyNjUsImV4cCI6MjA4NTY3NzI2NX0.PYpNd_t_px09zi2d5WGjFVOB23sjb3ZPuAnxagYshe0';
 
-                // Initialize Admin Client with the working key
-                if (typeof window.supabase !== 'undefined' && !window.supabaseAdminClient) {
-                    window.supabaseAdminClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_JWT_KEY);
+                // Robust initialization with retries
+                async function ensureSupabaseClient() {
+                    if (window.supabaseAdminClient) return true;
+                    if (typeof window.supabase !== 'undefined') {
+                        window.supabaseAdminClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_JWT_KEY);
+                        return true;
+                    }
+                    console.log('🔄 Supabase SDK not ready, waiting...');
+                    for (let i = 0; i < 20; i++) {
+                        await new Promise(r => setTimeout(r, 500));
+                        if (typeof window.supabase !== 'undefined') {
+                            window.supabaseAdminClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_JWT_KEY);
+                            console.log('✅ Supabase initialized after retry');
+                            return true;
+                        }
+                    }
+                    console.error('❌ Supabase SDK failed to load');
+                    return false;
                 }
 
                 function formatDate(dateString) {
@@ -3263,7 +3264,12 @@ QuantMentor
 
                 async function initDashboard() {
                     console.log('📊 Initializing Dashboard...');
-                    console.log('✅ Admin Fixes Applied: Professional v2.2 - Fully Dynamic Timeframes');
+
+                    const ready = await ensureSupabaseClient();
+                    if (!ready) {
+                        alert('❌ Critical: Supabase SDK failed to load. Please check your internet connection or disable ad-blockers.');
+                        return;
+                    }
                     document.getElementById('adminContainer').style.display = 'block';
 
                     // Load components in parallel
