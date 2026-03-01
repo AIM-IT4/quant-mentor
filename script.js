@@ -1865,8 +1865,8 @@ async function sendProductEmail(customerEmail, productName, paymentId, downloadL
                             <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #1a1a1a; border-bottom: 1px solid #e5e5e5; padding-bottom: 15px;">${productName}</h3>
                             <table style="width: 100%; border-collapse: collapse;">
                                 <tr>
-                                    <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold;">Amount</td>
-                                    <td style="font-size: 14px; font-weight: bold; text-align: right;">FREE</td>
+                                    <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold;">Status</td>
+                                    <td style="font-size: 14px; font-weight: bold; text-align: right; color: #16a34a;">Payment Processed</td>
                                 </tr>
                             </table>
                         </div>

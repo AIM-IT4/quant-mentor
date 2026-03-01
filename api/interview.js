@@ -281,7 +281,8 @@ async function sendEmailReport(toEmail, toName, reportMarkdown) {
         sender: { email: 'jha.8@alumni.iitj.ac.in', name: 'QuantMentor AI' },
         to: [{ email: toEmail, name: toName }],
         subject: 'Your AI Interview Scorecard 📊',
-        htmlContent: htmlContent
+        htmlContent: htmlContent,
+        textContent: `Hi ${toName},\n\nHere is your AI Interview Scorecard:\n\n${reportMarkdown}\n\nKeep practicing! Book a 1:1 session for personalized feedback.`
     };
 
     await httpRequest('https://api.brevo.com/v3/smtp/email', options, body);

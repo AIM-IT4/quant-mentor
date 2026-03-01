@@ -304,7 +304,8 @@ async function handleProductPurchase(data) {
                     sender: { name: SENDER_NAME, email: SENDER_EMAIL },
                     to: [{ email: customerEmail, name: customerName }],
                     subject: `Your Purchase: ${productName}`,
-                    htmlContent: customerHtml
+                    htmlContent: customerHtml,
+                    textContent: `Hi ${customerName},\n\nThank you for your purchase!\n\nProduct: ${productName}\nAmount: ${currency} ${amount}\n\nPlease download your resource using this link:\n${downloadLink}\n\nPayment ID: ${paymentId}\n\nHave an issue? Reply to this email.\n\nSent by QuantMentor`
                 })
             });
 
@@ -546,7 +547,8 @@ async function handleSessionBooking(data) {
                     sender: { name: SENDER_NAME, email: SENDER_EMAIL },
                     to: [{ email: customerEmail, name: customerName }],
                     subject: `Booking Confirmed: ${sessionName}`,
-                    htmlContent: customerHtml
+                    htmlContent: customerHtml,
+                    textContent: `Hi ${customerName},\n\nYour session is confirmed!\n\nSession: ${sessionName}\nDate: ${sessionDate}\nTime: ${displayTime} (${sessionDuration} mins)\nAmount Paid: ₹${sessionPrice}\n\nJoin Meeting Link:\n${meetLink}\n\nPayment ID: ${paymentId}\n\nNeed to reschedule? You can view and manage your bookings on our website.\n\nHave an issue? Reply to this email.\n\nSent by QuantMentor`
                 })
             });
 
