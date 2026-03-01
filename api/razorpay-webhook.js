@@ -190,9 +190,10 @@ async function handleProductPurchase(data) {
     }
 
     // Check if already processed
+    let frontendAlreadyProcessed = false;
     try {
         const existingResponse = await fetch(
-            `${SUPABASE_URL}/rest/v1/purchases?payment_id=eq.${paymentId}&select=id`,
+            `${SUPABASE_URL}/rest/v1/purchases?payment_id=eq.${paymentId}&select=id,source`,
             {
                 headers: {
                     'apikey': SUPABASE_KEY,
@@ -204,39 +205,48 @@ async function handleProductPurchase(data) {
         if (existingResponse.ok) {
             const existing = await existingResponse.json();
             if (existing && existing.length > 0) {
-                console.log('Payment already processed:', paymentId);
-                return;
+                const sources = existing.map(e => e.source);
+                if (sources.includes('webhook')) {
+                    console.log('Payment already fully processed by webhook:', paymentId);
+                    return; // Abort - webhook already handled parsing and email
+                }
+                if (sources.includes('frontend_legacy') || sources.includes('frontend')) {
+                    console.log('Payment logged by frontend, but ensuring webhook email delivery:', paymentId);
+                    frontendAlreadyProcessed = true;
+                }
             }
         }
     } catch (err) {
         console.error('Error checking existing purchase:', err);
     }
 
-    // Log to Supabase
-    try {
-        await fetch(`${SUPABASE_URL}/rest/v1/purchases`, {
-            method: 'POST',
-            headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': `Bearer ${SUPABASE_KEY}`,
-                'Content-Type': 'application/json',
-                'Prefer': 'return=minimal'
-            },
-            body: JSON.stringify({
-                customer_email: customerEmail,
-                product_name: productName,
-                amount: Math.round(amount),
-                currency: currency || 'INR',
-                payment_id: paymentId,
-                source: 'webhook',
-                customer_country: customerCountry,
-                inr_amount: inrAmount
-            })
-        });
-        console.log('Purchase logged to Supabase');
-    } catch (err) {
-        console.error('Error logging to Supabase:', err);
-    }
+    // Log to Supabase (only if frontend didn't already do it, to avoid duplicates)
+    if (!frontendAlreadyProcessed) {
+        try {
+            await fetch(`${SUPABASE_URL}/rest/v1/purchases`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    customer_email: customerEmail,
+                    product_name: productName,
+                    amount: Math.round(amount),
+                    currency: currency || 'INR',
+                    payment_id: paymentId,
+                    source: 'webhook',
+                    customer_country: customerCountry,
+                    inr_amount: inrAmount
+                })
+            });
+            console.log('Purchase logged to Supabase by webhook');
+        } catch (err) {
+            console.error('Error logging to Supabase:', err);
+        }
+    } // End if(!frontendAlreadyProcessed)
 
     // Send customer email
     if (BREVO_API_KEY && customerEmail) {
