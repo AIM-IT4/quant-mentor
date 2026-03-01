@@ -301,6 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 code: this.dataset.couponCode || '',
                 percent: parseInt(this.dataset.couponPercent) || 0
             };
+            window.isCouponApplied = false;
             // Clear coupon input
             const couponInput = document.getElementById('couponInput');
             if (couponInput) couponInput.value = '';
@@ -335,6 +336,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const discounted = Math.max(0, Math.round(basePrice * (100 - discount) / 100));
                 modalPriceEl.textContent = '₹' + discounted;
                 window.currentDiscountedPrice = discounted;
+                window.isCouponApplied = true;
 
                 // Success Feedback
                 if (feedbackEl) {
@@ -361,6 +363,7 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.classList.remove('active');
         window.currentDiscountedPrice = undefined;
         window.activeModalCoupon = { code: '', percent: 0 };
+        window.isCouponApplied = false;
         document.body.style.overflow = '';
 
         // Reset coupon input and feedback
@@ -1277,6 +1280,7 @@ window.openProductModal = async function (id) {
             code: product.coupon_code || '',
             percent: product.discount_percentage || 0
         };
+        window.isCouponApplied = false;
 
         const couponInput = document.getElementById('couponInput');
         if (couponInput) couponInput.value = '';
@@ -1997,7 +2001,7 @@ if (modalPayBtn) {
 
         // CHECK 2: Coupon Applied?
         // We use activeModalCoupon because currentDiscountedPrice is often INR-only
-        if (window.activeModalCoupon && window.activeModalCoupon.percent > 0) {
+        if (window.isCouponApplied && window.activeModalCoupon && window.activeModalCoupon.percent > 0) {
             const discountPercent = window.activeModalCoupon.percent;
 
             // Calculate discounted Pay Amount
