@@ -381,7 +381,8 @@ async function handleProductPurchase(data) {
                     sender: { name: SENDER_NAME, email: SENDER_EMAIL },
                     to: [{ email: ADMIN_EMAIL }],
                     subject: `💰 New Sale: ${productName}`,
-                    htmlContent: adminHtml
+                    htmlContent: adminHtml,
+                    textContent: `New Sale Received!\n\n${customerName} just purchased a digital product.\n\nProduct Sold: ${productName}\nAmount Received: ${currency} ${amount}\n\nCustomer Details:\nName: ${customerName}\nEmail: ${customerEmail}\nPhone: ${customerPhone || 'Not provided'}\nPayment ID: ${paymentId} (Webhook)`
                 })
             });
 
@@ -634,7 +635,8 @@ async function handleSessionBooking(data) {
                     sender: { name: SENDER_NAME, email: SENDER_EMAIL },
                     to: [{ email: ADMIN_EMAIL }],
                     subject: `🆕 New Booking: ${customerName} - ${sessionName}`,
-                    htmlContent: adminHtml
+                    htmlContent: adminHtml,
+                    textContent: `New Booking Received!\n\n${customerName} just booked a new session.\n\nSession Booked: ${sessionName}\nDate & Time: ${sessionDate} at ${displayTime}\nAmount Received: ₹${sessionPrice}\nLink: ${meetLink}\n\nCustomer Details:\nName: ${customerName}\nEmail: ${customerEmail}\nPhone: ${customerPhone || 'Not provided'}\nMessage: ${customerMessage || 'None'}\nPayment ID: ${paymentId}`
                 })
             });
 
