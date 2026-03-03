@@ -20,6 +20,14 @@ async function getRawBody(readable) {
     return Buffer.concat(chunks);
 }
 
+function normalizeProductName(value) {
+    return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[–—]/g, '-')
+        .replace(/\s+/g, ' ');
+}
+
 export default async function handler(req, res) {
     // Only accept POST requests
     if (req.method !== 'POST') {
@@ -104,6 +112,7 @@ export default async function handler(req, res) {
                     customerPhone,
                     customerCountry,
                     productName,
+                    downloadLink: payment.notes?.download_link || '',
                     SUPABASE_URL,
                     SUPABASE_KEY,
                     BREVO_API_KEY,
@@ -144,14 +153,24 @@ export default async function handler(req, res) {
 async function handleProductPurchase(data) {
     const {
         paymentId, amount, inrAmount, currency, customerEmail, customerName, customerPhone, customerCountry, productName,
+        downloadLink: checkoutDownloadLink,
         SUPABASE_URL, SUPABASE_KEY, BREVO_API_KEY, ADMIN_EMAIL, SENDER_EMAIL, SENDER_NAME
     } = data;
 
-    console.log(`📦 Processing product purchase: ${productName} for ${customerEmail}`);
+    console.log(`Processing product purchase: ${productName} for ${customerEmail}`);
 
-    // Product download links (fallback list)
     const PRODUCT_DOWNLOAD_LINKS = {
+        'Quant Interview Problem Book (1000+ Problems with solutions)': 'https://drive.google.com/uc?export=download&id=1sp48XJi8VZt5ufw4o6pHgg_EwBA0nkVJ',
+        'Quant Interview Problem Book (1000+)': 'https://drive.google.com/uc?export=download&id=1sp48XJi8VZt5ufw4o6pHgg_EwBA0nkVJ',
+        'Quant Models for Each Asset Class Master Pack: IR, FX, Credits, Equity': 'https://drive.google.com/uc?export=download&id=1CvriZOEfqiGkSRiKwR33kC3ny1T2oQSs',
+        'Quant Models for Each Asset Class Master Pack : IR, FX, CREDITS , EQUITY': 'https://drive.google.com/uc?export=download&id=1CvriZOEfqiGkSRiKwR33kC3ny1T2oQSs',
+        'Derivatives Products & Pricing Master Pack (6 PDFs): IR, FX, Equity, Credit, Inflation & Commodities': 'https://drive.google.com/uc?export=download&id=1kf_Qln0AFRi_Z1zvzaRHMojmZ152tY0j',
+        'Ultimate Industry Grade Quant Project Pack (45 Projects)': 'https://drive.google.com/uc?export=download&id=1jktrsnX880xtd3RVBw0nwC18beSc-toz',
+        'Complete Front Office & Risk Quant Professional Bundle (40+ PDFs & 60+ scripts)': 'https://drive.google.com/uc?export=download&id=1XrgmUHRy-QjCt5IOTWg1e0WTM_4_Kaid',
+        'Complete Front Office & Risk Quant Professional Bundle (40+ high quality PDFs & 55 scripts)': 'https://drive.google.com/uc?export=download&id=1XrgmUHRy-QjCt5IOTWg1e0WTM_4_Kaid',
+        'Python for Quants: Complete Interview Guide': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
         'Python for Quants': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
+        'C++ for Quants: Desk-Ready Notes': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
         'C++ for Quants': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
         'XVA Derivatives Primer': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
         'Quant Projects Bundle': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing',
@@ -159,41 +178,12 @@ async function handleProductPurchase(data) {
         'Complete Quant Bundle': 'https://drive.google.com/file/d/13DP6sF_II4LE9cwBRc6QZzeg9ngellmf/view?usp=sharing'
     };
 
-    let downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
-
-    // Try to get download link from Supabase
-    try {
-        const productResponse = await fetch(
-            `${SUPABASE_URL}/rest/v1/products?name=ilike.${encodeURIComponent(productName.trim())}&select=file_url`,
-            {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
-            }
-        );
-
-        if (productResponse.ok) {
-            const products = await productResponse.json();
-            if (products && products.length > 0 && products[0].file_url) {
-                downloadLink = products[0].file_url;
-                console.log('✅ Found custom link in Supabase:', downloadLink);
-            }
-        }
-    } catch (err) {
-        console.warn('Error fetching product from Supabase, using fallback list:', err);
-    }
-
-    if (!downloadLink) {
-        console.error('No download link found for product:', productName);
-        downloadLink = '#';
-    }
-
-    // Check if already processed
+    let downloadLink = checkoutDownloadLink || '';
     let frontendAlreadyProcessed = false;
+
     try {
         const existingResponse = await fetch(
-            `${SUPABASE_URL}/rest/v1/purchases?payment_id=eq.${paymentId}&select=id,source`,
+            `${SUPABASE_URL}/rest/v1/purchases?payment_id=eq.${paymentId}&select=id,source,download_link`,
             {
                 headers: {
                     'apikey': SUPABASE_KEY,
@@ -205,14 +195,21 @@ async function handleProductPurchase(data) {
         if (existingResponse.ok) {
             const existing = await existingResponse.json();
             if (existing && existing.length > 0) {
-                const sources = existing.map(e => e.source);
+                const sources = existing.map((entry) => entry.source);
                 if (sources.includes('webhook')) {
                     console.log('Payment already fully processed by webhook:', paymentId);
-                    return; // Abort - webhook already handled parsing and email
+                    return;
                 }
                 if (sources.includes('frontend_legacy') || sources.includes('frontend')) {
                     console.log('Payment logged by frontend, but ensuring webhook email delivery:', paymentId);
                     frontendAlreadyProcessed = true;
+                }
+                if (!downloadLink) {
+                    const loggedLink = existing.map((entry) => entry.download_link).find(Boolean);
+                    if (loggedLink) {
+                        downloadLink = loggedLink;
+                        console.log('Reusing download link from purchase log');
+                    }
                 }
             }
         }
@@ -220,7 +217,50 @@ async function handleProductPurchase(data) {
         console.error('Error checking existing purchase:', err);
     }
 
-    // Log to Supabase (only if frontend didn't already do it, to avoid duplicates)
+    if (!downloadLink) {
+        try {
+            const productResponse = await fetch(
+                `${SUPABASE_URL}/rest/v1/products?select=name,file_url`,
+                {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                }
+            );
+
+            if (productResponse.ok) {
+                const products = await productResponse.json();
+                const normalizedProductName = normalizeProductName(productName);
+                const matchedProduct = Array.isArray(products)
+                    ? products.find((product) => normalizeProductName(product.name) === normalizedProductName && product.file_url)
+                    : null;
+
+                if (matchedProduct) {
+                    downloadLink = matchedProduct.file_url;
+                    console.log('Found product link in Supabase:', matchedProduct.name);
+                }
+            }
+        } catch (err) {
+            console.warn('Error fetching product from Supabase, falling back to static link map:', err);
+        }
+    }
+
+    if (!downloadLink) {
+        const normalizedProductName = normalizeProductName(productName);
+        const fallbackEntry = Object.entries(PRODUCT_DOWNLOAD_LINKS)
+            .find(([name]) => normalizeProductName(name) === normalizedProductName);
+        if (fallbackEntry) {
+            downloadLink = fallbackEntry[1];
+            console.log('Using fallback product link for webhook fulfillment');
+        }
+    }
+
+    if (!downloadLink) {
+        console.error('No download link found for product:', productName);
+        downloadLink = '#';
+    }
+
     if (!frontendAlreadyProcessed) {
         try {
             await fetch(`${SUPABASE_URL}/rest/v1/purchases`, {
@@ -239,16 +279,16 @@ async function handleProductPurchase(data) {
                     payment_id: paymentId,
                     source: 'webhook',
                     customer_country: customerCountry,
-                    inr_amount: inrAmount
+                    inr_amount: inrAmount,
+                    download_link: downloadLink
                 })
             });
             console.log('Purchase logged to Supabase by webhook');
         } catch (err) {
             console.error('Error logging to Supabase:', err);
         }
-    } // End if(!frontendAlreadyProcessed)
+    }
 
-    // Send customer email
     if (BREVO_API_KEY && customerEmail) {
         const customerHtml = `
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
@@ -277,6 +317,14 @@ async function handleProductPurchase(data) {
                         <center>
                             <a href="${downloadLink}" style="display: inline-block; background: #e95836; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; border-radius: 6px; font-size: 16px; margin-bottom: 30px;">Download Resource</a>
                         </center>
+
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 15px 0; letter-spacing: 0.5px;">Direct Link Backup</p>
+                            <p style="font-size: 14px; margin: 0 0 8px 0; color: #1a1a1a;">If the button does not open in your email app, copy and paste this link into your browser:</p>
+                            <p style="font-size: 13px; margin: 0; word-break: break-all;">
+                                <a href="${downloadLink}" style="color: #2563eb; text-decoration: underline;">${downloadLink}</a>
+                            </p>
+                        </div>
 
                         <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
                             <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 15px 0; letter-spacing: 0.5px;">Purchase Details</p>
@@ -315,22 +363,21 @@ async function handleProductPurchase(data) {
                     to: [{ email: customerEmail, name: customerName }],
                     subject: `Your Purchase: ${productName}`,
                     htmlContent: customerHtml,
-                    textContent: `Hi ${customerName},\n\nThank you for your purchase!\n\nProduct: ${productName}\nAmount: ${currency} ${amount}\n\nPlease download your resource using this link:\n${downloadLink}\n\nPayment ID: ${paymentId}\n\nHave an issue? Reply to this email.\n\nSent by QuantMentor`
+                    textContent: `Hi ${customerName},\n\nThank you for your purchase!\n\nProduct: ${productName}\nAmount: ${currency} ${amount}\n\nPlease download your resource using this link:\n${downloadLink}\n\nIf the button does not work, copy and paste the same link into your browser.\n\nPayment ID: ${paymentId}\n\nHave an issue? Reply to this email.\n\nSent by QuantMentor`
                 })
             });
 
             if (emailResponse.ok) {
-                console.log(`✅ Customer purchase email sent to ${customerEmail}`);
+                console.log(`Customer purchase email sent to ${customerEmail}`);
             } else {
                 const errorData = await emailResponse.text();
-                console.error(`❌ Brevo Error (Product Email): ${emailResponse.status} - ${errorData}`);
+                console.error(`Brevo Error (Product Email): ${emailResponse.status} - ${errorData}`);
             }
         } catch (err) {
             console.error('Error sending customer email:', err);
         }
     }
 
-    // Send admin notification
     if (BREVO_API_KEY) {
         const adminHtml = `
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
@@ -361,6 +408,7 @@ async function handleProductPurchase(data) {
                                 <tr><td style="padding: 5px 0; color: #666; width: 30%;">Name</td><td style="padding: 5px 0; color: #1a1a1a;">${customerName}</td></tr>
                                 <tr><td style="padding: 5px 0; color: #666;">Email</td><td style="padding: 5px 0; color: #1a1a1a;"><a href="mailto:${customerEmail}" style="color: #2563eb; text-decoration: none;">${customerEmail}</a></td></tr>
                                 <tr><td style="padding: 5px 0; color: #666;">Phone</td><td style="padding: 5px 0; color: #1a1a1a;">${customerPhone || 'Not provided'}</td></tr>
+                                <tr><td style="padding: 5px 0; color: #666;">Download Link</td><td style="padding: 5px 0; color: #1a1a1a; word-break: break-all;">${downloadLink}</td></tr>
                                 <tr><td style="padding: 5px 0; border-top: 1px solid #e5e5e5; margin-top: 5px; color: #666;">Payment ID</td><td style="padding: 5px 0; border-top: 1px solid #e5e5e5; margin-top: 5px; color: #1a1a1a;">${paymentId} (Webhook)</td></tr>
                             </table>
                         </div>
@@ -380,17 +428,17 @@ async function handleProductPurchase(data) {
                 body: JSON.stringify({
                     sender: { name: SENDER_NAME, email: SENDER_EMAIL },
                     to: [{ email: ADMIN_EMAIL }],
-                    subject: `💰 New Sale: ${productName}`,
+                    subject: `New Sale: ${productName}`,
                     htmlContent: adminHtml,
-                    textContent: `New Sale Received!\n\n${customerName} just purchased a digital product.\n\nProduct Sold: ${productName}\nAmount Received: ${currency} ${amount}\n\nCustomer Details:\nName: ${customerName}\nEmail: ${customerEmail}\nPhone: ${customerPhone || 'Not provided'}\nPayment ID: ${paymentId} (Webhook)`
+                    textContent: `New Sale Received!\n\n${customerName} just purchased a digital product.\n\nProduct Sold: ${productName}\nAmount Received: ${currency} ${amount}\nDownload Link: ${downloadLink}\n\nCustomer Details:\nName: ${customerName}\nEmail: ${customerEmail}\nPhone: ${customerPhone || 'Not provided'}\nPayment ID: ${paymentId} (Webhook)`
                 })
             });
 
             if (adminEmailResponse.ok) {
-                console.log('✅ Admin notification sent via webhook');
+                console.log('Admin notification sent via webhook');
             } else {
                 const errorData = await adminEmailResponse.text();
-                console.error(`❌ Brevo Error (Admin Product): ${adminEmailResponse.status} - ${errorData}`);
+                console.error(`Brevo Error (Admin Product): ${adminEmailResponse.status} - ${errorData}`);
             }
         } catch (err) {
             console.error('Error sending admin notification:', err);
@@ -651,3 +699,4 @@ async function handleSessionBooking(data) {
         }
     }
 }
+

@@ -1644,12 +1644,12 @@ async function fetchProductLinks() {
 }
 
 async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountForLogging = null, userDetails = null) {
+    const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName] || '';
     console.log('🚀 initRazorpayCheckout called:', { productName, amount, currency, inrAmountForLogging, userDetails });
 
     // Handle FREE products (0 value) - skip payment, go directly to download
     if (amount <= 0) {
         console.log('🆓 Free product detected');
-        const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
         if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
             // Use provided details or prompt if missing
             const customerName = (userDetails && userDetails.name) ? userDetails.name : (prompt('Enter your Name:') || 'Customer');
@@ -1704,6 +1704,7 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
         const orderNotes = {
             type: 'product',
             product_name: productName,
+            download_link: downloadLink,
             customer_name: userDetails ? userDetails.name : '',
             customer_email: userDetails ? userDetails.email : '',
             customer_phone: userDetails ? userDetails.phone : '',
@@ -1737,6 +1738,7 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
         "notes": {
             "type": "product",
             "product_name": productName,
+            "download_link": downloadLink,
             "customer_name": userDetails ? userDetails.name : "",
             "customer_email": userDetails ? userDetails.email : "",
             "customer_phone": userDetails ? userDetails.phone : "",
@@ -1751,7 +1753,6 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
             console.log('Payment success:', response);
             // ✅ Payment successful! (Instant capture via order_id means payment is already captured)
             const paymentId = response.razorpay_payment_id;
-            const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
             const customerEmail = (userDetails && userDetails.email) ? userDetails.email : prompt('Enter your email to receive the download link:');
 
             // ✅ FULFILLMENT: Log purchase + Send email with Drive link
@@ -1878,6 +1879,14 @@ async function sendProductEmail(customerEmail, productName, paymentId, downloadL
                         <center>
                             <a href="${downloadLink}" style="display: inline-block; background: #e95836; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; border-radius: 6px; font-size: 16px; margin-bottom: 30px;">Download Resource</a>
                         </center>
+
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 15px 0; letter-spacing: 0.5px;">Direct Link Backup</p>
+                            <p style="font-size: 14px; margin: 0 0 8px 0; color: #1a1a1a;">If the button does not open in your email app, copy and paste this link into your browser:</p>
+                            <p style="font-size: 13px; margin: 0; word-break: break-all;">
+                                <a href="${downloadLink}" style="color: #2563eb; text-decoration: underline;">${downloadLink}</a>
+                            </p>
+                        </div>
 
                         <div style="background: #f9f8f4; padding: 20px; border-radius: 6px;">
                             <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 15px 0; letter-spacing: 0.5px;">Order Details</p>
