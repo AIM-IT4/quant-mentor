@@ -8,7 +8,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const ARTICLE_PATH = 'C:/Users/iitak/.gemini/antigravity/brain/54439cb6-7ff3-43f8-b28d-aff83e2f4f9a/article_heston_calibration.md';
 
 // Base URL for resolving relative image paths
-const SITE_BASE_URL = 'https://quantmentor.vercel.app';
+const SITE_BASE_URL = 'https://quant-mentor.vercel.app';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -29,14 +29,16 @@ function convertMarkdownToHtml(markdown) {
     const tableBlocks = [];
 
     // Extract fenced code blocks (```lang ... ```)
-    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+    // Handle both \n and \r\n line endings
+    html = html.replace(/```(\w*)\r?\n([\s\S]*?)```/g, (match, lang, code) => {
         const idx = codeBlocks.length;
         const escapedCode = code
+            .replace(/\r\n/g, '\n')  // Normalize line endings first
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
         codeBlocks.push(
-            `<pre style="background:#1a1a2e; color:#e0e0e0; padding:16px 20px; border-radius:8px; overflow-x:auto; font-family:'Fira Code',Consolas,monospace; font-size:0.88em; line-height:1.6; border-left:3px solid #8b5cf6; margin:15px 0;">` +
+            `<pre style="background:#1a1a2e; color:#e0e0e0; padding:16px 20px; border-radius:8px; overflow-x:auto; font-family:'Fira Code',Consolas,monospace; font-size:0.88em; line-height:1.6; border-left:3px solid #8b5cf6; margin:15px 0; white-space:pre;">` +
             `<code class="language-${lang || 'text'}">${escapedCode}</code></pre>`
         );
         return `%%CODEBLOCK_${idx}%%`;

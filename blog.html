@@ -11,6 +11,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+            options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
 </head>
 
 <body>
@@ -34,7 +41,7 @@
             Insights, tutorials, and career advice from years of quantitative finance experience.
         </p>
 
-        <div id="blog-list" style="display: flex; flex-direction: column; gap: 30px;">
+        <div id="blog-grid" style="display: flex; flex-direction: column; gap: 30px;">
             <p style="text-align:center; color: var(--text-muted);">Loading articles...</p>
         </div>
 
