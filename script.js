@@ -1012,7 +1012,14 @@ async function loadBlogsFromSupabase() {
             const card = document.createElement('div');
             card.className = 'product-card reveal-up';
             card.style.cursor = 'pointer';
-            card.onclick = () => window.openBlogModal(blog.id);
+            card.onclick = () => {
+                // Navigate to blog page with slug for full reading experience
+                if (blog.slug) {
+                    window.location.href = `blog.html?slug=${blog.slug}`;
+                } else {
+                    window.openBlogModal(blog.id);
+                }
+            };
 
             const imageHtml = blog.cover_image_url
                 ? `<div class="product-image" style="height:200px; padding:0; overflow:hidden;"><img src="${blog.cover_image_url}" style="width:100%; height:100%; object-fit:cover; transition:transform 0.5s ease;"></div>`
@@ -1024,8 +1031,15 @@ async function loadBlogsFromSupabase() {
                     <div style="font-size:0.85em; color:var(--primary); margin-bottom:5px;">${date}</div>
                     <h3 class="product-title" style="margin-bottom:10px;">${blog.title}</h3>
                     <p class="product-description" style="margin-bottom:15px;">${blog.excerpt || ''}</p>
-                    <div style="margin-top:auto; color:var(--text-color); font-weight:600; font-size:0.9em; display:flex; align-items:center; gap:5px;">
-                        Read Article <i class="fas fa-arrow-right" style="font-size:0.8em;"></i>
+                    <div style="margin-top:auto; display:flex; align-items:center; justify-content:space-between;">
+                        <span style="color:var(--text-color); font-weight:600; font-size:0.9em; display:flex; align-items:center; gap:5px;">
+                            Read Article <i class="fas fa-arrow-right" style="font-size:0.8em;"></i>
+                        </span>
+                        <div style="display:flex; gap:6px;" onclick="event.stopPropagation();">
+                            <button onclick="navigator.clipboard.writeText('${window.location.origin}/blog.html?slug=${blog.slug}').then(()=>{this.innerHTML='<i class=\\'fas fa-check\\'></i>';setTimeout(()=>this.innerHTML='<i class=\\'fas fa-share-alt\\'></i>',1500)})" title="Copy share link" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); color:var(--text-muted); width:30px; height:30px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:0.8em; transition:all 0.2s;">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
