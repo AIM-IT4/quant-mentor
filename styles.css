@@ -252,6 +252,7 @@ h6 {
     letter-spacing: -0.02em;
     color: inherit;
     margin-bottom: 24px;
+    min-height: 4.5em; /* Reserve space for longest typewriter phrase to prevent layout shift */
 }
 
 .typewriter-cursor {
