@@ -51,10 +51,10 @@ function convertMarkdownToHtml(markdown) {
         return `%%MATHBLOCK_${idx}%%`;
     });
 
-    // Extract markdown tables
-    html = html.replace(/(\|[^\n]+\|\n\|[-\s|:]+\|\n(?:\|[^\n]+\|\n?)*)/g, (match) => {
+    // Extract markdown tables (handle both \n and \r\n)
+    html = html.replace(/(\|[^\r\n]+\|\r?\n\|[-\s|:\r]+\|\r?\n(?:\|[^\r\n]+\|\r?\n?)*)/g, (match) => {
         const idx = tableBlocks.length;
-        const rows = match.trim().split('\n');
+        const rows = match.trim().split(/\r?\n/);
         let tableHtml = '<table style="width:100%; border-collapse:collapse; margin:20px 0; font-size:0.92em;">';
 
         rows.forEach((row, rowIdx) => {
