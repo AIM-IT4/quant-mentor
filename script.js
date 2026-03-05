@@ -2955,6 +2955,18 @@ window.openBlogModal = async function (id) {
             document.getElementById('blogModalMeta').textContent = new Date(data.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
             document.getElementById('blogModalContent').innerHTML = data.content;
 
+            // Store current blog info for sharing
+            window._currentBlog = {
+                title: data.title,
+                slug: data.slug,
+                excerpt: data.excerpt || ''
+            };
+
+            // Update URL without reload for deep linking
+            if (data.slug) {
+                history.replaceState(null, '', `?slug=${data.slug}`);
+            }
+
             // Trigger MathJax to render equations in the new content
             // Wait for content to be fully inserted, then typeset
             if (window.MathJax) {
@@ -2983,6 +2995,68 @@ window.openBlogModal = async function (id) {
     }
 };
 
+// --- BLOG SHARING ---
+window.shareBlog = function (platform) {
+    const blog = window._currentBlog;
+    if (!blog || !blog.slug) {
+        alert('No article is currently open.');
+        return;
+    }
+
+    const shareUrl = `${window.location.origin}/blog.html?slug=${blog.slug}`;
+    const shareTitle = blog.title;
+    const shareText = `${blog.title} — ${blog.excerpt.substring(0, 100)}`;
+
+    switch (platform) {
+        case 'copy':
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    // Visual feedback: briefly change the copy button icon
+                    const copyBtn = document.querySelector('#blogShareBar button[title="Copy Link"] i');
+                    if (copyBtn) {
+                        copyBtn.className = 'fas fa-check';
+                        copyBtn.style.color = '#10b981';
+                        setTimeout(() => { copyBtn.className = 'fas fa-link'; copyBtn.style.color = ''; }, 2000);
+                    }
+                }).catch(() => {
+                    prompt('Copy this link:', shareUrl);
+                });
+            } else {
+                prompt('Copy this link:', shareUrl);
+            }
+            break;
+        case 'linkedin':
+            window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank', 'width=600,height=500');
+            break;
+        case 'twitter':
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareTitle)}&url=${encodeURIComponent(shareUrl)}`, '_blank', 'width=600,height=400');
+            break;
+        case 'whatsapp':
+            window.open(`https://wa.me/?text=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`, '_blank');
+            break;
+    }
+};
+
+// --- BLOG DEEP LINK SUPPORT ---
+// If URL has ?slug=xxx, auto-open that blog post
+document.addEventListener('DOMContentLoaded', function () {
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug');
+    if (slug && window.supabaseClient) {
+        // Wait for Supabase to be ready, then fetch blog by slug
+        setTimeout(async () => {
+            try {
+                const { data } = await window.supabaseClient.from('blogs').select('id').eq('slug', slug).single();
+                if (data && data.id) {
+                    window.openBlogModal(data.id);
+                }
+            } catch (e) {
+                console.error('Deep link blog load failed:', e);
+            }
+        }, 500);
+    }
+});
+
 // Initialize Listeners
 document.addEventListener('DOMContentLoaded', () => {
     // Blogs now loaded in main init sequence above
@@ -2993,6 +3067,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const m = document.getElementById('blogModal');
             m.classList.remove('active');
             m.style.display = 'none';
+            window._currentBlog = null;
+            history.replaceState(null, '', window.location.pathname);
         }
     }
 

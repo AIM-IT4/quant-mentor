@@ -64,7 +64,37 @@
             <button class="modal-close" id="blogModalClose"><i class="fas fa-times"></i></button>
             <div class="modal-header">
                 <h3 id="blogModalTitle" style="font-size: 1.5em; margin: 0;">Article Title</h3>
-                <p id="blogModalMeta" style="color:var(--text-muted); font-size:0.9em; margin-top:5px;"></p>
+                <div
+                    style="display:flex; align-items:center; justify-content:space-between; margin-top:8px; flex-wrap:wrap; gap:10px;">
+                    <p id="blogModalMeta" style="color:var(--text-muted); font-size:0.9em; margin:0;"></p>
+                    <div id="blogShareBar" style="display:flex; gap:8px; align-items:center;">
+                        <span style="color:var(--text-muted); font-size:0.8em; margin-right:4px;">Share:</span>
+                        <button onclick="shareBlog('copy')" title="Copy Link"
+                            style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#e0e0e0; width:34px; height:34px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s ease;"
+                            onmouseover="this.style.background='rgba(139,92,246,0.3)'"
+                            onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                            <i class="fas fa-link" style="font-size:0.85em;"></i>
+                        </button>
+                        <button onclick="shareBlog('linkedin')" title="Share on LinkedIn"
+                            style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#0a66c2; width:34px; height:34px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s ease;"
+                            onmouseover="this.style.background='rgba(10,102,194,0.2)'"
+                            onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                            <i class="fab fa-linkedin-in" style="font-size:0.9em;"></i>
+                        </button>
+                        <button onclick="shareBlog('twitter')" title="Share on X"
+                            style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#e0e0e0; width:34px; height:34px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s ease;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.15)'"
+                            onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                            <i class="fab fa-x-twitter" style="font-size:0.85em;"></i>
+                        </button>
+                        <button onclick="shareBlog('whatsapp')" title="Share on WhatsApp"
+                            style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#25d366; width:34px; height:34px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s ease;"
+                            onmouseover="this.style.background='rgba(37,211,102,0.2)'"
+                            onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                            <i class="fab fa-whatsapp" style="font-size:1em;"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="modal-body">
                 <div id="blogModalCover" style="margin-bottom:20px; border-radius:8px; overflow:hidden; display:none;">
