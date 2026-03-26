@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const STATS_CONFIG = {
         students: { base: 50, id: 'stat-students' },
         experience: { startYear: 2022, id: 'stat-experience' },
-        products: { base: 15, id: 'stat-products' }
+        products: { base: 0, id: 'stat-products' }
     };
 
     if (typeof window.supabase !== 'undefined' && !window.supabaseClient) {
@@ -188,6 +188,17 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof loadProductsFromSupabase === 'function') loadProductsFromSupabase();
     if (typeof loadSessionsFromSupabase === 'function') loadSessionsFromSupabase();
     if (typeof loadBlogsFromSupabase === 'function') loadBlogsFromSupabase();
+
+    // --- Auto-open product modal if ?id= present ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const productIdCode = urlParams.get('id');
+    if (productIdCode) {
+        setTimeout(() => {
+            if (typeof window.openProductModal === 'function') {
+                window.openProductModal(productIdCode);
+            }
+        }, 300); // Small delay to ensure UI is ready
+    }
     // -------------------------------------
 
     // --------------------------------
@@ -2891,14 +2902,19 @@ function displayApprovedTestimonials(testimonials) {
     const grid = document.getElementById('approved-testimonials-grid');
     if (!grid) return;
 
+    // Count static testimonials before clearing them (5 hardcoded 5-star reviews in index.html)
+    const staticTestimonialCount = grid.querySelectorAll('.testimonial-card').length;
+    const staticRatingSum = staticTestimonialCount * 5; // All static testimonials are 5-star
+
     grid.innerHTML = '';
 
-    // Calculate Summary Stats
-    const totalTestimonials = testimonials.length;
+    // Calculate Summary Stats (static + dynamic)
+    const dynamicCount = testimonials.length;
+    const totalTestimonials = staticTestimonialCount + dynamicCount;
     let averageRating = 0;
     if (totalTestimonials > 0) {
-        const sum = testimonials.reduce((acc, curr) => acc + (curr.rating || 5), 0);
-        averageRating = (sum / totalTestimonials).toFixed(1);
+        const dynamicSum = testimonials.reduce((acc, curr) => acc + (curr.rating || 5), 0);
+        averageRating = ((staticRatingSum + dynamicSum) / totalTestimonials).toFixed(1);
     }
 
     // Update Summary UI if elements exist (e.g. on index.html)
