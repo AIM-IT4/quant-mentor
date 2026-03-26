@@ -444,6 +444,63 @@ async function handleProductPurchase(data) {
             console.error('Error sending admin notification:', err);
         }
     }
+
+    // 📧 Schedule recommendation email (1 hour after purchase)
+    // Skip if the customer bought the Complete Bundle (nothing more to upsell)
+    const isBundle = productName.toLowerCase().includes('complete') && productName.toLowerCase().includes('bundle');
+    if (!isBundle) {
+        try {
+            // Check if we already scheduled a recommendation for this customer+product
+            const existingRecResponse = await fetch(
+                `${SUPABASE_URL}/rest/v1/recommendation_emails?customer_email=eq.${encodeURIComponent(customerEmail)}&purchased_product=eq.${encodeURIComponent(productName)}&select=id&limit=1`,
+                {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                }
+            );
+
+            let alreadyScheduled = false;
+            if (existingRecResponse.ok) {
+                const existingRec = await existingRecResponse.json();
+                alreadyScheduled = existingRec && existingRec.length > 0;
+            }
+
+            if (!alreadyScheduled) {
+                const sendAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour from now
+                const recResponse = await fetch(`${SUPABASE_URL}/rest/v1/recommendation_emails`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        customer_email: customerEmail,
+                        customer_name: customerName,
+                        purchased_product: productName,
+                        send_at: sendAt
+                    })
+                });
+
+                if (recResponse.ok) {
+                    console.log(`📧 Recommendation email scheduled for ${customerEmail} at ${sendAt}`);
+                } else {
+                    const errText = await recResponse.text();
+                    console.error('Failed to schedule recommendation:', errText);
+                }
+            } else {
+                console.log(`⏭️ Recommendation already scheduled for ${customerEmail} + ${productName}`);
+            }
+        } catch (err) {
+            console.error('Error scheduling recommendation email:', err);
+            // Non-critical — don't fail the webhook
+        }
+    } else {
+        console.log('⏭️ Skipping recommendation for bundle purchase');
+    }
 }
 
 // Handle session booking - send email and log to Supabase
