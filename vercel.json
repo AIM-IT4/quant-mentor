@@ -1,10 +1,4 @@
 {
     "buildCommand": "node generate-config.js",
-    "outputDirectory": ".",
-    "crons": [
-        {
-            "path": "/api/send-recommendations",
-            "schedule": "*/15 * * * *"
-        }
-    ]
+    "outputDirectory": "."
 }

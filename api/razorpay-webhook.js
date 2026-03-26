@@ -445,14 +445,14 @@ async function handleProductPurchase(data) {
         }
     }
 
-    // 📧 Schedule recommendation email (1 hour after purchase)
+    // 📧 Send recommendation email 1 hour after purchase via Brevo scheduledAt
     // Skip if the customer bought the Complete Bundle (nothing more to upsell)
     const isBundle = productName.toLowerCase().includes('complete') && productName.toLowerCase().includes('bundle');
-    if (!isBundle) {
+    if (!isBundle && BREVO_API_KEY && customerEmail) {
         try {
-            // Check if we already scheduled a recommendation for this customer+product
-            const existingRecResponse = await fetch(
-                `${SUPABASE_URL}/rest/v1/recommendation_emails?customer_email=eq.${encodeURIComponent(customerEmail)}&purchased_product=eq.${encodeURIComponent(productName)}&select=id&limit=1`,
+            // Fetch all paid products for recommendations
+            const productsResponse = await fetch(
+                `${SUPABASE_URL}/rest/v1/products?select=id,name,description,price,cover_image_url&price=gt.0&order=price.desc`,
                 {
                     headers: {
                         'apikey': SUPABASE_KEY,
@@ -461,44 +461,131 @@ async function handleProductPurchase(data) {
                 }
             );
 
-            let alreadyScheduled = false;
-            if (existingRecResponse.ok) {
-                const existingRec = await existingRecResponse.json();
-                alreadyScheduled = existingRec && existingRec.length > 0;
+            let allProducts = [];
+            if (productsResponse.ok) {
+                allProducts = await productsResponse.json();
             }
 
-            if (!alreadyScheduled) {
-                const sendAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour from now
-                const recResponse = await fetch(`${SUPABASE_URL}/rest/v1/recommendation_emails`, {
-                    method: 'POST',
+            // Fetch customer's purchase history to exclude already-bought products
+            const purchasesResponse = await fetch(
+                `${SUPABASE_URL}/rest/v1/purchases?customer_email=eq.${encodeURIComponent(customerEmail)}&select=product_name`,
+                {
                     headers: {
                         'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                }
+            );
+
+            let purchasedNames = [productName.toLowerCase().trim()];
+            if (purchasesResponse.ok) {
+                const purchases = await purchasesResponse.json();
+                purchasedNames = purchases.map(p => (p.product_name || '').toLowerCase().trim());
+            }
+
+            // Filter out already-purchased products
+            const available = allProducts.filter(p =>
+                !purchasedNames.includes((p.name || '').toLowerCase().trim())
+            );
+
+            if (available.length > 0) {
+                // Pick up to 3 recommendations — prioritize bundles, then by price desc
+                const bundles = available.filter(p => (p.name || '').toLowerCase().includes('bundle') || (p.name || '').toLowerCase().includes('pack'));
+                const nonBundles = available.filter(p => !(p.name || '').toLowerCase().includes('bundle') && !(p.name || '').toLowerCase().includes('pack'));
+
+                const recommendations = [];
+                if (bundles.length > 0) recommendations.push(bundles[0]);
+                for (const p of nonBundles) {
+                    if (recommendations.length >= 3) break;
+                    recommendations.push(p);
+                }
+                for (let i = 1; i < bundles.length && recommendations.length < 3; i++) {
+                    recommendations.push(bundles[i]);
+                }
+
+                // Build product cards HTML
+                const productCards = recommendations.map(p => {
+                    const desc = (p.description || '').replace(/<[^>]*>/g, '').substring(0, 120);
+                    const coverImg = p.cover_image_url
+                        ? `<img src="${p.cover_image_url}" alt="${p.name}" style="width:100%; height:140px; object-fit:contain; border-radius:4px; margin-bottom:12px; background:#f9f8f4;">`
+                        : '';
+                    return `
+                        <div style="background:#ffffff; border:1px solid #e5e5e5; border-radius:8px; padding:20px; margin-bottom:16px;">
+                            ${coverImg}
+                            <h3 style="margin:0 0 8px 0; font-size:16px; color:#1a1a1a;">${p.name}</h3>
+                            <p style="margin:0 0 12px 0; font-size:13px; color:#666; line-height:1.5;">${desc}...</p>
+                            <div style="display:flex; align-items:center; justify-content:space-between;">
+                                <span style="font-size:18px; font-weight:bold; color:#1a1a1a;">₹${p.price}</span>
+                                <a href="https://quant-mentor.vercel.app/?id=${p.id}" style="display:inline-block; background:#6366f1; color:#ffffff; font-weight:600; text-decoration:none; padding:8px 20px; border-radius:6px; font-size:14px;">View Product</a>
+                            </div>
+                        </div>`;
+                }).join('');
+
+                const recHtml = `
+                    <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
+                        <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                            <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
+                                <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                            </div>
+                            <div style="padding: 30px;">
+                                <p style="font-size: 16px; margin-bottom: 8px;">Hi <strong>${customerName}</strong>,</p>
+                                <p style="font-size: 15px; color: #444; margin-bottom: 25px; line-height: 1.6;">
+                                    Thank you for purchasing <strong>${productName}</strong>!
+                                    Based on your interest, here are a few more resources that complement your purchase perfectly:
+                                </p>
+                                ${productCards}
+                                <div style="text-align:center; margin-top:25px;">
+                                    <a href="https://quant-mentor.vercel.app/#products" style="display:inline-block; background:#e95836; color:#ffffff; font-weight:bold; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:16px;">Browse All Products</a>
+                                </div>
+                                <p style="font-size: 13px; color: #999; margin-top: 30px; text-align: center; line-height: 1.5;">
+                                    You're receiving this because you recently purchased from QuantMentor.<br>
+                                    If you have any questions, simply reply to this email.
+                                </p>
+                            </div>
+                            <div style="background-color: #1a1a1a; padding: 20px; text-align: center; color: #888; font-size: 12px;">
+                                <p style="margin: 0;">Sent by QuantMentor</p>
+                            </div>
+                        </div>
+                    </div>`;
+
+                const recText = recommendations.map(p =>
+                    `• ${p.name} — ₹${p.price}\n  View: https://quant-mentor.vercel.app/?id=${p.id}`
+                ).join('\n\n');
+
+                // Schedule via Brevo with 1 hour delay
+                const scheduledAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+
+                const recEmailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
+                    method: 'POST',
+                    headers: {
+                        'accept': 'application/json',
+                        'api-key': BREVO_API_KEY,
+                        'content-type': 'application/json'
                     },
                     body: JSON.stringify({
-                        customer_email: customerEmail,
-                        customer_name: customerName,
-                        purchased_product: productName,
-                        send_at: sendAt
+                        sender: { name: SENDER_NAME, email: SENDER_EMAIL },
+                        to: [{ email: customerEmail, name: customerName }],
+                        subject: `${customerName}, you might also like these quant resources`,
+                        htmlContent: recHtml,
+                        textContent: `Hi ${customerName},\n\nThank you for purchasing "${productName}"!\n\nYou might also like:\n\n${recText}\n\nBrowse all: https://quant-mentor.vercel.app/#products`,
+                        scheduledAt: scheduledAt
                     })
                 });
 
-                if (recResponse.ok) {
-                    console.log(`📧 Recommendation email scheduled for ${customerEmail} at ${sendAt}`);
+                if (recEmailResponse.ok) {
+                    console.log(`📧 Recommendation email scheduled via Brevo for ${customerEmail} at ${scheduledAt}`);
                 } else {
-                    const errText = await recResponse.text();
-                    console.error('Failed to schedule recommendation:', errText);
+                    const errData = await recEmailResponse.text();
+                    console.error(`❌ Failed to schedule recommendation email:`, errData);
                 }
             } else {
-                console.log(`⏭️ Recommendation already scheduled for ${customerEmail} + ${productName}`);
+                console.log('⏭️ No products to recommend — customer may own everything');
             }
         } catch (err) {
-            console.error('Error scheduling recommendation email:', err);
+            console.error('Error sending recommendation email:', err);
             // Non-critical — don't fail the webhook
         }
-    } else {
+    } else if (isBundle) {
         console.log('⏭️ Skipping recommendation for bundle purchase');
     }
 }
