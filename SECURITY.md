@@ -26,7 +26,7 @@ The following sensitive credentials are hardcoded in your source files and visib
 - **Risk**: Form spam
 
 ### 5. Admin Password (FIXED)
-- **Status**: Secure. The hardcoded `admin123` password was removed and replaced with a secure backend Vercel API check.
+- **Status**: Secure. The previously hardcoded password was removed and replaced with a secure backend Vercel API check.
 - **Action Required**: You must set `ADMIN_PASSWORD` in your Vercel Environment Variables.
 
 ## Immediate Actions Required (Do These NOW!)
