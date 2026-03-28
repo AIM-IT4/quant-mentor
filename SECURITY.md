@@ -25,10 +25,9 @@ The following sensitive credentials are hardcoded in your source files and visib
 - **Location**: `script.js:1012`
 - **Risk**: Form spam
 
-### 5. Admin Password (HIGH RISK)
-- **Location**: `admin.html:622`
-- **Current Value**: `admin123` (very weak!)
-- **Risk**: Unauthorized admin access
+### 5. Admin Password (FIXED)
+- **Status**: Secure. The hardcoded `admin123` password was removed and replaced with a secure backend Vercel API check.
+- **Action Required**: You must set `ADMIN_PASSWORD` in your Vercel Environment Variables.
 
 ## Immediate Actions Required (Do These NOW!)
 
@@ -50,8 +49,8 @@ The following sensitive credentials are hardcoded in your source files and visib
    - Generate new User ID and update templates
 
 4. **Change Admin Password**:
-   - Edit `admin.html` line 622
-   - Change from `admin123` to a strong password (16+ characters)
+   - The password is no longer hardcoded in `admin.html`.
+   - Set the `ADMIN_PASSWORD` variable in your Vercel project Settings.
 
 ### Step 2: Clean Git History (Critical!)
 
@@ -147,9 +146,8 @@ const FORMSPREE_ID = 'YOUR_FORMSPREE_ID';
 // Line 615 - Service Role Key (CRITICAL!)
 const SUPABASE_KEY = 'YOUR_SERVICE_ROLE_KEY_HERE';
 
-// Line 622 - Admin password
-if (pwd === 'YOUR_STRONG_PASSWORD_HERE') {
-```
+// Admin authentication is now handled securely via /api/admin-auth
+// Password must be set in Vercel Environment Variables.
 
 ## Need Help?
 
