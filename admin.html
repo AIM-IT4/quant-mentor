@@ -57,59 +57,24 @@
         })();
     </script>
     <script>
-        // BREVO EMAIL CONFIGURATION (replaces EmailJS)
-        const BREVO_API_KEY_BASE = 'xkeysib-your-api-key-here';
-        const BREVO_SENDER_EMAIL_BASE = 'jha.8@alumni.iitj.ac.in';
-        const BREVO_SENDER_NAME_BASE = 'QuantMentor';
-
-        // Helper to get latest config
-        function getBrevoConfig() {
-            return {
-                apiKey: (window.CONFIG && window.CONFIG.BREVO_API_KEY) || BREVO_API_KEY_BASE,
-                senderEmail: (window.CONFIG && window.CONFIG.BREVO_SENDER_EMAIL) || BREVO_SENDER_EMAIL_BASE,
-                senderName: (window.CONFIG && window.CONFIG.BREVO_SENDER_NAME) || BREVO_SENDER_NAME_BASE
-            };
-        }
-
-        // Send email via Brevo API
+        // Send email via secure backend API
         async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
-            const config = getBrevoConfig();
-
-            if (!config.apiKey || config.apiKey === 'xkeysib-your-api-key-here') {
-                console.warn('⚠️ Brevo API key not configured. Email not sent.');
-                return { success: false, error: 'API key not configured' };
-            }
-
             try {
-                const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+                const response = await fetch('/api/send-email', {
                     method: 'POST',
-                    headers: {
-                        'accept': 'application/json',
-                        'api-key': config.apiKey,
-                        'content-type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        sender: {
-                            email: config.senderEmail,
-                            name: config.senderName
-                        },
-                        to: [{ email: to }],
-                        subject: subject,
-                        htmlContent: htmlContent,
-                        textContent: textContent
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ to, subject, htmlContent, textContent })
                 });
-
-                if (response.ok) {
-                    console.log('✅ Email sent successfully via Brevo to:', to);
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    console.log('✅ Email sent successfully via Secure API.', { to });
                     return { success: true };
                 } else {
-                    const error = await response.json();
-                    console.error('❌ Brevo error:', error);
-                    return { success: false, error: error.message };
+                    console.error('❌ Email sending error:', data.error);
+                    return { success: false, error: data.error };
                 }
             } catch (error) {
-                console.error('❌ Failed to send email:', error);
+                console.error('❌ Failed to fetch send-email API:', error);
                 return { success: false, error: error.message };
             }
         }
@@ -1802,12 +1767,28 @@ Brief Q&A"></textarea>
                     }
                 }
 
-                // Check Password Function (globally accessible)
-                function checkPassword() {
+                // Check Password Function (globally accessible) via Secure API
+                async function checkPassword() {
                     try {
                         console.log('Login button clicked');
                         const pwd = document.getElementById('adminPassword').value;
-                        if (pwd === 'admin123') {
+                        
+                        const verifyBtn = document.getElementById('loginBtn');
+                        const originalText = verifyBtn.innerText;
+                        verifyBtn.innerText = 'Verifying...';
+                        verifyBtn.disabled = true;
+
+                        const response = await fetch('/api/admin-auth', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ password: pwd })
+                        });
+
+                        const data = await response.json();
+                        verifyBtn.innerText = originalText;
+                        verifyBtn.disabled = false;
+
+                        if (response.ok && data.success) {
                             console.log('Password correct, logging in...');
                             document.getElementById('loginOverlay').style.display = 'none';
                             document.getElementById('adminLayout').style.display = 'flex';
@@ -1828,13 +1809,17 @@ Brief Q&A"></textarea>
                             try { if (typeof loadBookings === 'function') loadBookings(); } catch (e) { console.error('Bookings load error', e); }
                             try { if (typeof loadBlockedDates === 'function') loadBlockedDates(); } catch (e) { console.error('Blocked dates load error', e); }
                             try { if (typeof initDashboard === 'function') initDashboard(); } catch (e) { console.error('Dashboard init error', e); }
-                            try { if (typeof initDashboard === 'function') initDashboard(); } catch (e) { console.error('Dashboard init error', e); }
                         } else {
-                            alert('Incorrect password');
+                            alert(data.error || 'Incorrect password');
                         }
                     } catch (err) {
-                        alert('Login Critical Error: ' + err.message);
+                        alert('Login Request Failed: ' + err.message);
                         console.error(err);
+                        const verifyBtn = document.getElementById('loginBtn');
+                        if (verifyBtn) {
+                            verifyBtn.innerText = 'Login';
+                            verifyBtn.disabled = false;
+                        }
                     }
                 }
 

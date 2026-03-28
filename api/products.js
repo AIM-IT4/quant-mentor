@@ -40,7 +40,7 @@ export default async function handler(req, res) {
             priceINR: p.price,
             coverImage: p.cover_image_url || null,
             purchaseUrl: p.price > 0
-                ? 'https://quant-mentor.vercel.app/#products'
+                ? `https://quant-mentor.vercel.app/?id=${p.id}`
                 : 'https://quant-mentor.vercel.app/#resources',
             createdAt: p.created_at
         }));

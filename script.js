@@ -1,63 +1,33 @@
 // --- Brevo Email Configuration (Global) ---
-// These are fallback values. Priority is given to window.CONFIG from config.js
-// Key split to avoid GitHub Secret Scanner (Client-side key)
-const _p1 = 'xkeysib-6c7b7522a295729d2d38f88a04498ab8bef2271b793fef5a08d8fc13ed495550';
-const _p2 = '-Gqs6kCtw2x0RBIP0';
-let BREVO_API_KEY = _p1 + _p2;
+// Now handled securely via Vercel backend.
 
-let BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in';
-let BREVO_SENDER_NAME = 'QuantMentor';
-
-// Helper to get latest config
-function getBrevoConfig() {
-    let apiKey = (window.CONFIG && window.CONFIG.BREVO_API_KEY) || BREVO_API_KEY;
-    // Safety: If config.js has the placeholder, fallback to the hardcoded variable
-    if (apiKey === 'xkeysib-your-api-key-here') apiKey = BREVO_API_KEY;
-
-    return {
-        apiKey: apiKey,
-        senderEmail: (window.CONFIG && window.CONFIG.BREVO_SENDER_EMAIL) || BREVO_SENDER_EMAIL,
-        senderName: (window.CONFIG && window.CONFIG.BREVO_SENDER_NAME) || BREVO_SENDER_NAME
-    };
-}
-
-// Send email via Brevo API
+// Send email via secure backend API
 async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
-    const config = getBrevoConfig();
-
-    if (!config.apiKey || config.apiKey === 'xkeysib-your-api-key-here') {
-        console.warn('⚠️ Brevo API key not configured. Email not sent.');
-        return { success: false, error: 'API key not configured' };
-    }
-
     try {
-        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        const response = await fetch('/api/send-email', {
             method: 'POST',
             headers: {
-                'accept': 'application/json',
-                'api-key': config.apiKey,
-                'content-type': 'application/json'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                sender: { email: config.senderEmail, name: config.senderName },
-                to: [{ email: to }],
-                subject: subject,
-                htmlContent: htmlContent,
-                textContent: textContent
+                to,
+                subject,
+                htmlContent,
+                textContent
             })
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            console.log('✅ Email sent successfully via Brevo.', { to, messageId: data.messageId });
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            console.log('✅ Email sent successfully via Secure API.', { to });
             return { success: true };
         } else {
-            const error = await response.json();
-            console.error('❌ Brevo error:', error);
-            return { success: false, error: error.message };
+            console.error('❌ Email sending error:', data.error);
+            return { success: false, error: data.error };
         }
     } catch (error) {
-        console.error('❌ Failed to send email:', error);
+        console.error('❌ Failed to fetch send-email API:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1872,10 +1842,8 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
 async function sendProductEmail(customerEmail, productName, paymentId, downloadLink, customerName = 'Customer') {
     console.log('📧 sendProductEmail called with:', customerEmail);
 
-    // Send to CUSTOMER via Brevo
-    const config = getBrevoConfig();
-    if (config.apiKey && config.apiKey !== 'xkeysib-your-api-key-here') {
-        console.log('📧 Attempting to send via Brevo...');
+    // Send to CUSTOMER via Brevo backend
+    console.log('📧 Attempting to send via Brevo secure API...');
 
         const htmlContent = `
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
@@ -1958,9 +1926,6 @@ ${BUSINESS_NAME}`;
         } catch (error) {
             console.error('❌ Brevo email failed:', error);
         }
-    } else {
-        console.log('⚠️ Brevo API key not configured. Skipping customer email.');
-    }
 
     // ===== ADMIN NOTIFICATION (NEW) =====
     try {
@@ -2640,9 +2605,7 @@ async function handleSessionPaymentSuccess(response) {
     // ===== STEP 1: SEND CUSTOMER EMAIL FIRST (HIGHEST PRIORITY) =====
     console.log('📧 Sending session confirmation to customer:', booking.email);
 
-    const config = getBrevoConfig();
-    if (config.apiKey && config.apiKey !== 'xkeysib-your-api-key-here') {
-        console.log('📧 Brevo is available, sending customer email FIRST...');
+    console.log('📧 Sending customer email securely via API...');
 
         const htmlContent = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -2701,9 +2664,6 @@ ${BUSINESS_NAME}`;
         } catch (error) {
             console.error('❌ Session email failed:', error);
         }
-    } else {
-        console.log('⚠️ Brevo API key not configured - customer confirmation email not sent');
-    }
 
     // ===== STEP 2: STORE IN SUPABASE (SECONDARY) =====
     console.log('📋 Attempting to store booking in Supabase...');
@@ -3214,12 +3174,10 @@ async function sendTestimonialRequestEmail(bookingData) {
 
     if (!userEmail) return;
 
-    console.log('📧 Sending Testimonial Request to:', userEmail);
+    console.log('📧 Sending Testimonial Request securely via API to:', userEmail);
 
-    const config = getBrevoConfig();
-    if (config.apiKey && config.apiKey !== 'xkeysib-your-api-key-here') {
-        const testimonialLink = window.location.origin + '/index.html#testimonials'; // Point to testimonials section
-        const customerName = userName || 'Valued Learner';
+    const testimonialLink = window.location.origin + '/index.html#testimonials'; // Point to testimonials section
+    const customerName = userName || 'Valued Learner';
 
         const htmlContent = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -3275,11 +3233,6 @@ ${BUSINESS_NAME}`;
             console.error('❌ Error sending testimonial email:', error);
             return false;
         }
-    } else {
-        console.warn('⚠️ Brevo API Key not configured. Skipping email.');
-        alert('⚠️ Email NOT Sent.\n\nReason: Brevo API Key is missing.\n\nPlease open script.js (Line 3) and paste your actual API key there.');
-        return false;
-    }
 }
 
 // Make it available globally so admin.html can use it
