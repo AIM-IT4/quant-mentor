@@ -72,7 +72,7 @@ export default async function handler(req, res) {
                 body: JSON.stringify({
                     sender: { name: SENDER_NAME, email: SENDER_EMAIL },
                     to: [{ email: testEmail }],
-                    subject: `🚀 You're Missing Out! 3 New Resources Just Dropped on QuantMentor`,
+                    subject: `Update: New resources added to QuantMentor`,
                     htmlContent: emailHtml,
                     textContent: emailText
                 })
@@ -149,7 +149,7 @@ export default async function handler(req, res) {
                     body: JSON.stringify({
                         sender: { name: SENDER_NAME, email: SENDER_EMAIL },
                         to: [{ email: email }],
-                        subject: `🚀 You're Missing Out! 3 New Resources Just Dropped on QuantMentor`,
+                        subject: `Update: New resources added to QuantMentor`,
                         htmlContent: emailHtml,
                         textContent: emailText
                     })
