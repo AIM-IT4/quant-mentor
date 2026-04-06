@@ -58,7 +58,7 @@ export default async function handler(req, res) {
         if (testEmail) {
             console.log(`🧪 TEST MODE — sending only to: ${testEmail}`);
             const productCardsHtml = buildProductCards(latestProducts);
-            const productListText = latestProducts.map(p => `• ${p.name} — ₹${p.price} → https://quant-mentor.vercel.app/?id=${p.id}`).join('\n');
+            const productListText = latestProducts.map(p => `• ${p.name} — ₹${p.price} → https://quant-mentor.vercel.app/product.html?id=${p.id}`).join('\n');
             const emailHtml = buildEmailHtml(productCardsHtml);
             const emailText = buildEmailText(productListText);
 
@@ -131,7 +131,7 @@ export default async function handler(req, res) {
 
         // 5. Build the product cards HTML (same for all emails)
         const productCardsHtml = buildProductCards(latestProducts);
-        const productListText = latestProducts.map(p => `• ${p.name} — ₹${p.price} → https://quant-mentor.vercel.app/?id=${p.id}`).join('\n');
+        const productListText = latestProducts.map(p => `• ${p.name} — ₹${p.price} → https://quant-mentor.vercel.app/product.html?id=${p.id}`).join('\n');
 
         // 6. Send to each eligible customer
         for (const [email] of eligibleCustomers) {
@@ -274,7 +274,7 @@ function buildProductCards(products) {
                     <p style="margin:0 0 16px 0; font-size:13px; color:#666; line-height:1.6;">${desc}...</p>
                     <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
                         <span style="font-size:22px; font-weight:800; color:#1a1a1a;">₹${p.price}</span>
-                        <a href="https://quant-mentor.vercel.app/?id=${p.id}" style="display:inline-block; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#ffffff; font-weight:700; text-decoration:none; padding:10px 24px; border-radius:8px; font-size:14px; letter-spacing:0.3px;">View Product →</a>
+                        <a href="https://quant-mentor.vercel.app/product.html?id=${p.id}" style="display:inline-block; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#ffffff; font-weight:700; text-decoration:none; padding:10px 24px; border-radius:8px; font-size:14px; letter-spacing:0.3px;">View Product →</a>
                     </div>
                 </div>
             </div>`;
