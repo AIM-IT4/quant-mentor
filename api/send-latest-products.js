@@ -1,5 +1,6 @@
 // Bulk email sender: Latest 3 products to customers who haven't bought them
 // Trigger: GET /api/send-latest-products?secret=YOUR_CRON_SECRET
+// Test mode: GET /api/send-latest-products?secret=YOUR_CRON_SECRET&test_email=someone@example.com
 // Sends the 3 most recently added products to every customer who hasn't purchased them
 
 export default async function handler(req, res) {
@@ -52,6 +53,41 @@ export default async function handler(req, res) {
         const latestProductNames = new Set(latestProducts.map(p => (p.name || '').toLowerCase().trim()));
         console.log(`🆕 Latest ${latestProducts.length} products: ${latestProducts.map(p => p.name).join(', ')}`);
 
+        // ── TEST MODE: send to single email and return ──
+        const testEmail = req.query?.test_email;
+        if (testEmail) {
+            console.log(`🧪 TEST MODE — sending only to: ${testEmail}`);
+            const productCardsHtml = buildProductCards(latestProducts);
+            const productListText = latestProducts.map(p => `• ${p.name} — ₹${p.price} → https://quant-mentor.vercel.app/?id=${p.id}`).join('\n');
+            const emailHtml = buildEmailHtml(productCardsHtml);
+            const emailText = buildEmailText(productListText);
+
+            const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
+                method: 'POST',
+                headers: {
+                    'accept': 'application/json',
+                    'api-key': BREVO_API_KEY,
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sender: { name: SENDER_NAME, email: SENDER_EMAIL },
+                    to: [{ email: testEmail }],
+                    subject: `🚀 You're Missing Out! 3 New Resources Just Dropped on QuantMentor`,
+                    htmlContent: emailHtml,
+                    textContent: emailText
+                })
+            });
+
+            if (emailResponse.ok) {
+                return res.status(200).json({ mode: 'test', sent: 1, testEmail, latestProducts: results.latestProducts });
+            } else {
+                const errData = await emailResponse.text();
+                return res.status(500).json({ mode: 'test', sent: 0, testEmail, error: errData });
+            }
+        }
+
+        // ── BULK MODE ──
+
         // 2. Fetch ALL purchases to find unique customers and what they've bought
         const purchasesResponse = await fetch(
             `${SUPABASE_URL}/rest/v1/purchases?select=customer_email,product_name&order=created_at.desc`,
@@ -94,27 +130,7 @@ export default async function handler(req, res) {
         console.log(`🎯 ${eligibleCustomers.length} customers haven't purchased any of the latest 3 products`);
 
         // 5. Build the product cards HTML (same for all emails)
-        const productCardsHtml = latestProducts.map((p, idx) => {
-            const desc = stripHtml(p.description || '').substring(0, 130);
-            const coverImg = p.cover_image_url
-                ? `<img src="${p.cover_image_url}" alt="${escapeHtml(p.name)}" style="width:100%; height:160px; object-fit:contain; border-radius:8px 8px 0 0; background:#f4f1ec;">`
-                : '';
-            const badges = ['🔥 Hot', '⭐ New', '💎 Premium'];
-            return `
-                <div style="background:#ffffff; border-radius:12px; overflow:hidden; margin-bottom:20px; box-shadow:0 2px 12px rgba(0,0,0,0.08); border:1px solid #eee;">
-                    ${coverImg}
-                    <div style="padding:20px;">
-                        <div style="display:inline-block; background:linear-gradient(135deg,#ff6b35,#f7c948); color:#fff; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; margin-bottom:10px; letter-spacing:0.5px;">${badges[idx] || '🆕 New'}</div>
-                        <h3 style="margin:8px 0; font-size:17px; color:#1a1a1a; font-weight:700;">${escapeHtml(p.name)}</h3>
-                        <p style="margin:0 0 16px 0; font-size:13px; color:#666; line-height:1.6;">${desc}...</p>
-                        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-                            <span style="font-size:22px; font-weight:800; color:#1a1a1a;">₹${p.price}</span>
-                            <a href="https://quant-mentor.vercel.app/?id=${p.id}" style="display:inline-block; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#ffffff; font-weight:700; text-decoration:none; padding:10px 24px; border-radius:8px; font-size:14px; letter-spacing:0.3px; transition:transform 0.2s;">View Product →</a>
-                        </div>
-                    </div>
-                </div>`;
-        }).join('');
-
+        const productCardsHtml = buildProductCards(latestProducts);
         const productListText = latestProducts.map(p => `• ${p.name} — ₹${p.price} → https://quant-mentor.vercel.app/?id=${p.id}`).join('\n');
 
         // 6. Send to each eligible customer
@@ -241,6 +257,29 @@ You're receiving this because you previously purchased from QuantMentor.`;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
+
+function buildProductCards(products) {
+    return products.map((p, idx) => {
+        const desc = stripHtml(p.description || '').substring(0, 130);
+        const coverImg = p.cover_image_url
+            ? `<img src="${p.cover_image_url}" alt="${escapeHtml(p.name)}" style="width:100%; height:160px; object-fit:contain; border-radius:8px 8px 0 0; background:#f4f1ec;">`
+            : '';
+        const badges = ['🔥 Hot', '⭐ New', '💎 Premium'];
+        return `
+            <div style="background:#ffffff; border-radius:12px; overflow:hidden; margin-bottom:20px; box-shadow:0 2px 12px rgba(0,0,0,0.08); border:1px solid #eee;">
+                ${coverImg}
+                <div style="padding:20px;">
+                    <div style="display:inline-block; background:linear-gradient(135deg,#ff6b35,#f7c948); color:#fff; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; margin-bottom:10px; letter-spacing:0.5px;">${badges[idx] || '🆕 New'}</div>
+                    <h3 style="margin:8px 0; font-size:17px; color:#1a1a1a; font-weight:700;">${escapeHtml(p.name)}</h3>
+                    <p style="margin:0 0 16px 0; font-size:13px; color:#666; line-height:1.6;">${desc}...</p>
+                    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                        <span style="font-size:22px; font-weight:800; color:#1a1a1a;">₹${p.price}</span>
+                        <a href="https://quant-mentor.vercel.app/?id=${p.id}" style="display:inline-block; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#ffffff; font-weight:700; text-decoration:none; padding:10px 24px; border-radius:8px; font-size:14px; letter-spacing:0.3px;">View Product →</a>
+                    </div>
+                </div>
+            </div>`;
+    }).join('');
+}
 
 function stripHtml(html) {
     if (!html) return '';
