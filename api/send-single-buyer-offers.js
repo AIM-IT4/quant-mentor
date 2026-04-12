@@ -184,7 +184,7 @@ export default async function handler(req, res) {
                     body: JSON.stringify({
                         sender: { name: SENDER_NAME, email: SENDER_EMAIL },
                         to: [{ email }],
-                        subject: `A quick recommendation based on your recent purchase`,
+                        subject: `🎁 Exclusive 20% Off — Handpicked Quant Resources Just for You`,
                         htmlContent: emailHtml,
                         textContent: emailText
                     })
@@ -256,7 +256,7 @@ export default async function handler(req, res) {
                     body: JSON.stringify({
                         sender: { name: SENDER_NAME, email: SENDER_EMAIL },
                         to: [{ email: testEmail }],
-                        subject: `A quick recommendation based on your recent purchase`,
+                        subject: `🎁 Exclusive 20% Off — Handpicked Quant Resources Just for You`,
                         htmlContent: emailHtml,
                         textContent: emailText
                     })
@@ -474,76 +474,116 @@ function getCouponCode20(productName) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// EMAIL TEMPLATE - SIMPLE/PLAIN TEXT STYLE FOR INBOX DELIVERY
+// EMAIL TEMPLATE
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function buildCampaignEmail(purchasedProductName, recommendations, expiryStr) {
-    const productList = recommendations.map(rec => {
+    const productCards = recommendations.map(rec => {
+        const coverImg = rec.coverImage
+            ? `<img src="${rec.coverImage}" alt="${escapeHtml(rec.name)}" style="width:100%; height:160px; object-fit:contain; border-radius:8px 8px 0 0; background:#f4f1ec;">`
+            : '';
+
+        const savings = rec.price - rec.discountedPrice;
+
         return `
-            <div style="margin-bottom: 20px; padding: 15px; border-left: 3px solid #cbd5e1; background-color: #f8fafc;">
-                <h3 style="margin: 0 0 5px 0; font-size: 16px; color: #0f172a;">${escapeHtml(rec.name)}</h3>
-                <p style="margin: 0 0 8px 0; font-size: 14px; color: #475569;">
-                    Normal price: <strike>₹${rec.price}</strike> <br/>
-                    <strong>Your price: ₹${rec.discountedPrice}</strong>
-                </p>
-                <p style="margin: 0 0 10px 0; font-size: 14px; color: #334155;">
-                    Enter code <strong>${rec.couponCode}</strong> at checkout.
-                </p>
-                <a href="https://quant-mentor.vercel.app/product.html?id=${rec.id}" style="color: #2563eb; font-size: 14px; text-decoration: underline;">View details &rarr;</a>
+            <div style="background:#ffffff; border-radius:12px; overflow:hidden; margin-bottom:20px; box-shadow:0 2px 12px rgba(0,0,0,0.08); border:1px solid #eee;">
+                ${coverImg}
+                <div style="padding:20px;">
+                    <div style="display:inline-block; background:linear-gradient(135deg,#dc2626,#ef4444); color:#fff; font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px; margin-bottom:10px; letter-spacing:0.5px;">🔥 20% OFF — SAVE ₹${savings}</div>
+                    <h3 style="margin:8px 0; font-size:16px; color:#1a1a1a; font-weight:700; line-height:1.4;">${escapeHtml(rec.name)}</h3>
+                    <div style="margin:12px 0; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <span style="font-size:14px; color:#999; text-decoration:line-through;">₹${rec.price}</span>
+                        <span style="font-size:22px; font-weight:800; color:#dc2626;">₹${rec.discountedPrice}</span>
+                    </div>
+                    <div style="background:linear-gradient(135deg,#fef3c7,#fde68a); border:2px dashed #f59e0b; border-radius:8px; padding:10px 14px; margin-bottom:14px; text-align:center;">
+                        <span style="font-size:12px; color:#92400e; font-weight:600;">Use code at checkout:</span>
+                        <div style="font-size:20px; font-weight:800; color:#92400e; letter-spacing:2px; margin-top:2px;">${rec.couponCode}</div>
+                    </div>
+                    <a href="https://quant-mentor.vercel.app/product.html?id=${rec.id}" style="display:block; text-align:center; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#ffffff; font-weight:700; text-decoration:none; padding:12px 24px; border-radius:8px; font-size:14px; letter-spacing:0.3px;">View Product →</a>
+                </div>
             </div>`;
     }).join('');
 
     return `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #333333; max-width: 600px; padding: 20px;">
-        
-        <p>Hi there,</p>
-        
-        <p>You previously purchased <em>${escapeHtml(purchasedProductName)}</em> from my site, and I wanted to quickly reach out.</p>
+    <div style="font-family:'Segoe UI',Arial,sans-serif; background-color:#f4f1ec; padding:0; margin:0;">
+        <div style="max-width:620px; margin:0 auto; padding:20px;">
 
-        <p>Based on that topic, I thought these three resources might be the best next step for you. To help you along, I've created a custom 20% off code for each of them:</p>
+            <!-- Header -->
+            <div style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%); border-radius:16px 16px 0 0; padding:40px 30px; text-align:center;">
+                <div style="font-size:28px; font-weight:800; color:#ffffff; letter-spacing:1px; margin-bottom:6px;">QuantMentor</div>
+                <div style="font-size:13px; color:#a0aec0; letter-spacing:2px; text-transform:uppercase;">Exclusive Offer</div>
+            </div>
 
-        <div style="margin: 25px 0;">
-            ${productList}
-        </div>
+            <!-- Hero Banner -->
+            <div style="background:linear-gradient(135deg,#dc2626,#ef4444,#f97316); padding:30px; text-align:center;">
+                <div style="font-size:40px; margin-bottom:8px;">🎁</div>
+                <h1 style="color:#ffffff; font-size:26px; font-weight:800; margin:0 0 10px 0; line-height:1.3;">Exclusive 20% Off — Just for You!</h1>
+                <p style="color:#fde8e8; font-size:15px; margin:0; line-height:1.5;">As a valued customer, we've handpicked resources<br>that perfectly complement your learning journey.</p>
+            </div>
 
-        <p>Just a quick note that these codes will only be active until <strong>${expiryStr}</strong>.</p>
-        
-        <p>Happy learning, and let me know if you have any questions.</p>
-        
-        <p>
-            Best regards,<br/>
-            QuantMentor
-        </p>
+            <!-- Body -->
+            <div style="background:#ffffff; padding:30px; border-left:1px solid #eee; border-right:1px solid #eee;">
+                <p style="font-size:16px; color:#333; margin:0 0 8px 0;">Hi there 👋</p>
+                <p style="font-size:15px; color:#555; margin:0 0 10px 0; line-height:1.6;">
+                    Thank you for purchasing <strong style="color:#1a1a1a;">${escapeHtml(purchasedProductName)}</strong>!
+                </p>
+                <p style="font-size:15px; color:#555; margin:0 0 25px 0; line-height:1.6;">
+                    Based on your purchase, we've selected <strong>3 resources</strong> that will accelerate your quant career even further.
+                    As a loyal customer, you get an <strong style="color:#dc2626;">exclusive 20% discount</strong> on each — a deal not available to anyone else.
+                </p>
 
-        <div style="margin-top: 40px; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px;">
-            You're receiving this because you previously purchased a resource from <a href="https://quant-mentor.vercel.app" style="color: #94a3b8;">QuantMentor</a>.
+                <!-- Product Cards -->
+                ${productCards}
+
+                <!-- Expiry Notice -->
+                <div style="background:linear-gradient(135deg,#fef3c7,#fffbeb); border:1px solid #f59e0b; border-radius:10px; padding:16px; text-align:center; margin-top:10px; margin-bottom:20px;">
+                    <p style="font-size:14px; color:#92400e; font-weight:700; margin:0;">⏰ These exclusive codes expire on <strong>${expiryStr}</strong></p>
+                    <p style="font-size:13px; color:#b45309; margin:6px 0 0 0;">Don't miss out — your peers are already leveling up!</p>
+                </div>
+
+                <!-- CTA -->
+                <div style="text-align:center; margin-top:16px;">
+                    <a href="https://quant-mentor.vercel.app/#products" style="display:inline-block; background:linear-gradient(135deg,#ea580c,#f97316); color:#ffffff; font-weight:700; text-decoration:none; padding:14px 36px; border-radius:8px; font-size:16px; letter-spacing:0.3px;">Browse All Products →</a>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="background:#1a1a2e; border-radius:0 0 16px 16px; padding:25px; text-align:center;">
+                <p style="color:#888; font-size:12px; margin:0 0 8px 0; line-height:1.6;">
+                    You're receiving this because you previously purchased from QuantMentor.<br>
+                    Questions? Simply reply to this email.
+                </p>
+                <p style="margin:0;">
+                    <a href="https://quant-mentor.vercel.app" style="color:#818cf8; text-decoration:none; font-size:13px; font-weight:600;">quant-mentor.vercel.app</a>
+                </p>
+            </div>
+
         </div>
     </div>`;
 }
 
 function buildCampaignText(purchasedProductName, recommendations, expiryStr) {
     const recList = recommendations.map(r =>
-        `- ${r.name}\n  Normal: ₹${r.price} | Your price: ₹${r.discountedPrice}\n  Use code: ${r.couponCode}\n  Link: https://quant-mentor.vercel.app/product.html?id=${r.id}`
+        `• ${r.name}\n  Original: ₹${r.price} → Your price: ₹${r.discountedPrice} (20% OFF)\n  Coupon code: ${r.couponCode}\n  View: https://quant-mentor.vercel.app/product.html?id=${r.id}`
     ).join('\n\n');
 
-    return `Hi there,
+    return `🎁 Exclusive 20% Off — Just for You!
 
-You previously purchased "${purchasedProductName}" from my site, and I wanted to quickly reach out.
+Hi there,
 
-Based on that topic, I thought these three resources might be the best next step for you. To help you along, I've created a custom 20% off code for each of them:
+Thank you for purchasing "${purchasedProductName}" from QuantMentor!
+
+Based on your purchase, here are 3 handpicked resources with an exclusive 20% discount — just for you:
 
 ${recList}
 
-Just a quick note that these codes will only be active until ${expiryStr}.
+⏰ These codes expire on ${expiryStr}. Don't miss out!
 
-Happy learning, and let me know if you have any questions.
-
-Best regards,
-QuantMentor
+Browse all products: https://quant-mentor.vercel.app/#products
 
 ---
-You're receiving this because you previously purchased a resource from QuantMentor.
-https://quant-mentor.vercel.app`;
+Sent by QuantMentor • quant-mentor.vercel.app
+You're receiving this because you previously purchased from QuantMentor.`;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
@@ -552,4 +592,3 @@ function escapeHtml(text) {
     if (!text) return '';
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
-
