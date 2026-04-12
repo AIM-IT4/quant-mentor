@@ -381,29 +381,11 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
 
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Font Awesome Icons (preloaded for faster rendering) -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 
-    <!-- MathJax for LaTeX Support -->
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['\\[', '\\]'], ['$$', '$$']],
-                processEscapes: true,
-                processEnvironments: true
-            },
-            options: {
-                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
-                ignoreHtmlClass: 'tex2jax_ignore'
-            },
-            startup: {
-                typeset: true
-            }
-        };
-    </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- MathJax removed from index.html for performance (~1MB). Load only on pages that render LaTeX. -->
 
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -488,7 +470,7 @@
                     <div class="profile-card">
                         <div class="profile-glow"></div>
                         <div class="profile-image">
-                            <img src="assets/images/me_img.png" alt="Amit Kumar Jha"
+                            <img src="assets/images/me_img.png" alt="Amit Kumar Jha" loading="lazy"
                                 onerror="this.src='assets/images/profile-placeholder.svg'; this.onerror=null;">
                             <div class="profile-placeholder" style="display:none;">
                                 <i class="fas fa-user-tie"></i>
@@ -1350,7 +1332,7 @@
         })();
     </script>
 
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
 
     <!-- Scroll to Top Button -->
     <button class="scroll-top-btn" id="scrollTopBtn" title="Back to top">

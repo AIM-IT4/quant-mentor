@@ -478,8 +478,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (canvas) {
         const ctx = canvas.getContext('2d');
         let particles = [];
-        const PARTICLE_COUNT = 60;
-        const CONNECTION_DIST = 120;
+        // Reduce particles on mobile for better performance
+        const isMobile = window.innerWidth < 768;
+        const PARTICLE_COUNT = isMobile ? 20 : 60;
+        const CONNECTION_DIST = isMobile ? 80 : 120;
         let animId;
 
         function resizeCanvas() {
@@ -680,10 +682,22 @@ if (!initSupabaseAndLoad()) {
 
 // Fetched country cache
 let userCountryCode = null;
+const COUNTRY_CACHE_KEY = 'qm_country_code';
+const COUNTRY_CACHE_TTL = 86400000; // 24 hours in ms
 
-// Try to get user country (simple caching)
+// Try to get user country (with localStorage caching for 24h)
 async function getUserCountry() {
     if (userCountryCode) return userCountryCode;
+
+    // Check localStorage first to avoid redundant API calls
+    try {
+        const cached = JSON.parse(localStorage.getItem(COUNTRY_CACHE_KEY));
+        if (cached && cached.code && (Date.now() - cached.ts) < COUNTRY_CACHE_TTL) {
+            userCountryCode = cached.code;
+            console.log('🌍 Using cached country:', userCountryCode);
+            return userCountryCode;
+        }
+    } catch (_) { /* ignore parse errors */ }
 
     // Helper to fetch with timeout
     const fetchWithTimeout = async (url, timeout = 5000) => {
@@ -734,6 +748,11 @@ async function getUserCountry() {
             userCountryCode = 'IN';
         }
     }
+
+    // Persist to localStorage for future visits
+    try {
+        localStorage.setItem(COUNTRY_CACHE_KEY, JSON.stringify({ code: userCountryCode, ts: Date.now() }));
+    } catch (_) { /* quota exceeded or private mode */ }
 
     console.log('🌍 User country detected:', userCountryCode);
     return userCountryCode;
@@ -790,10 +809,11 @@ const CURRENCY_MAP = {
     'GH': { code: 'GHS', symbol: 'GH₵', name: 'Ghanaian Cedi' }
 };
 
-// Cache for exchange rates
+// Cache for exchange rates (persisted to localStorage)
 let exchangeRatesCache = null;
 let exchangeRatesTimestamp = null;
 const RATES_CACHE_DURATION = 3600000; // 1 hour in milliseconds
+const RATES_CACHE_KEY = 'qm_exchange_rates';
 
 // Currencies with no fractional subunits for payment gateways
 const ZERO_DECIMAL_CURRENCIES = new Set(['JPY', 'KRW', 'VND']);
@@ -802,9 +822,9 @@ function getSubunitMultiplier(currencyCode = 'INR') {
     return ZERO_DECIMAL_CURRENCIES.has(String(currencyCode).toUpperCase()) ? 1 : 100;
 }
 
-// Fetch real-time exchange rates from API
+// Fetch real-time exchange rates from API (with localStorage persistence)
 async function fetchExchangeRates() {
-    // Check if we have cached rates that are still valid
+    // Check in-memory cache first
     if (exchangeRatesCache && exchangeRatesTimestamp) {
         const age = Date.now() - exchangeRatesTimestamp;
         if (age < RATES_CACHE_DURATION) {
@@ -812,6 +832,17 @@ async function fetchExchangeRates() {
             return exchangeRatesCache;
         }
     }
+
+    // Check localStorage for rates that survive page refreshes
+    try {
+        const stored = JSON.parse(localStorage.getItem(RATES_CACHE_KEY));
+        if (stored && stored.rates && (Date.now() - stored.ts) < RATES_CACHE_DURATION) {
+            exchangeRatesCache = stored.rates;
+            exchangeRatesTimestamp = stored.ts;
+            console.log('💱 Using localStorage exchange rates (age:', Math.round((Date.now() - stored.ts) / 60000), 'minutes)');
+            return exchangeRatesCache;
+        }
+    } catch (_) { /* ignore parse errors */ }
 
     try {
         // Try multiple exchange rate APIs in case one fails
@@ -851,6 +882,10 @@ async function fetchExchangeRates() {
                 if (rates && Object.keys(rates).length > 0) {
                     exchangeRatesCache = rates;
                     exchangeRatesTimestamp = Date.now();
+                    // Persist to localStorage for future page loads
+                    try {
+                        localStorage.setItem(RATES_CACHE_KEY, JSON.stringify({ rates, ts: exchangeRatesTimestamp }));
+                    } catch (_) { /* quota exceeded */ }
                     console.log('💱 Fetched fresh exchange rates from:', apiUrl);
                     return rates;
                 }
