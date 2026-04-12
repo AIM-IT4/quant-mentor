@@ -627,8 +627,58 @@
 
                         if (!code) return;
 
-                        if (product.coupon_code && code === product.coupon_code) {
-                            const discount = product.discount_percentage || 0;
+                        // Campaign 20% discount codes
+                        const COUPON_MAP_20 = {
+                            'quantitative finance for absolute beginners': 'BEGINNER20',
+                            'common mistakes in quant interviews': 'MISTAKES20',
+                            'quant interview problem book': 'PROBLEMS20',
+                            'greek explainer lab': 'GLAB20',
+                            'quant models for each asset class master pack': 'MODELS20',
+                            'the stochastic calculus visual lab': 'STOCHLAB20',
+                            'complete quant ats friendly resume': 'RESUME20',
+                            'mental math & market intuition for quants': 'MENTALMATH20',
+                            'python for quants': 'PYTHON20',
+                            'derivatives products & pricing master pack': 'DERIVATIVE20',
+                            'statistics & econometrics for quants': 'STATS20',
+                            'pnl attribution & desk diagnostics for quants': 'PNL20',
+                            'equity models': 'EQUITIES20',
+                            'interest rate models': 'RATES20',
+                            'machine learning for quants': 'ML20',
+                            'stochastic calculus for quants': 'STOCHASTIC20',
+                            'linear algebra & differential equations for quants': 'LADE20',
+                            'ultimate industry grade quant project pack': 'PROJECT20',
+                            'greeks,vols,ycurves,numerical meth./mc & xva guide': 'DESK20',
+                            'credit models': 'CREDITS20',
+                            'sql for quant interviews': 'SQL20',
+                            'regulatory & risk frameworks for quants': 'RISK20',
+                            'probability theory for quants': 'PROBABILITY20',
+                            'fx models': 'FXD20',
+                            'c++ for quants': 'CPP20',
+                            'r for risk quants': 'R20',
+                            'fixed income math & bond pricing': 'FIXEDINCOME20',
+                            'exotic options pricing guide': 'EXOTICS20'
+                        };
+
+                        const expected20Code = product.coupon_code ? product.coupon_code.replace('10', '20').toUpperCase() : null;
+                        const productName = (product.name || '').toLowerCase().trim();
+                        const mapKey = Object.keys(COUPON_MAP_20).find(k => productName.includes(k));
+                        const hardcoded20 = mapKey ? COUPON_MAP_20[mapKey].toUpperCase() : null;
+                        
+                        const inputCodeUpper = code.toUpperCase();
+
+                        let appliedDiscount = 0;
+                        let isValid = false;
+
+                        if (inputCodeUpper && product.coupon_code && inputCodeUpper === product.coupon_code.toUpperCase()) {
+                            isValid = true;
+                            appliedDiscount = product.discount_percentage || 0;
+                        } else if (inputCodeUpper && (inputCodeUpper === expected20Code || inputCodeUpper === hardcoded20)) {
+                            isValid = true;
+                            appliedDiscount = 20;
+                        }
+
+                        if (isValid) {
+                            const discount = appliedDiscount;
                             const originalPrice = parseFloat(buyBtn.dataset.price);
                             // Calculate new price
                             const discountedPrice = Math.max(0, Math.round(originalPrice * (100 - discount) / 100));
