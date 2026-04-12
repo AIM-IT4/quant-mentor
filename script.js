@@ -312,8 +312,57 @@ document.addEventListener('DOMContentLoaded', function () {
                 feedbackEl.className = '';
             }
 
+            // Campaign 20% discount codes
+            const COUPON_MAP_20 = {
+                'quantitative finance for absolute beginners': 'BEGINNER20',
+                'common mistakes in quant interviews': 'MISTAKES20',
+                'quant interview problem book': 'PROBLEMS20',
+                'greek explainer lab': 'GLAB20',
+                'quant models for each asset class master pack': 'MODELS20',
+                'the stochastic calculus visual lab': 'STOCHLAB20',
+                'complete quant ats friendly resume': 'RESUME20',
+                'mental math & market intuition for quants': 'MENTALMATH20',
+                'python for quants': 'PYTHON20',
+                'derivatives products & pricing master pack': 'DERIVATIVE20',
+                'statistics & econometrics for quants': 'STATS20',
+                'pnl attribution & desk diagnostics for quants': 'PNL20',
+                'equity models': 'EQUITIES20',
+                'interest rate models': 'RATES20',
+                'machine learning for quants': 'ML20',
+                'stochastic calculus for quants': 'STOCHASTIC20',
+                'linear algebra & differential equations for quants': 'LADE20',
+                'ultimate industry grade quant project pack': 'PROJECT20',
+                'greeks,vols,ycurves,numerical meth./mc & xva guide': 'DESK20',
+                'credit models': 'CREDITS20',
+                'sql for quant interviews': 'SQL20',
+                'regulatory & risk frameworks for quants': 'RISK20',
+                'probability theory for quants': 'PROBABILITY20',
+                'fx models': 'FXD20',
+                'c++ for quants': 'CPP20',
+                'r for risk quants': 'R20',
+                'fixed income math & bond pricing': 'FIXEDINCOME20',
+                'exotic options pricing guide': 'EXOTICS20'
+            };
+
+            const expected20Code = couponInfo.code ? couponInfo.code.replace('10', '20') : null;
+            const productName = document.getElementById('modalTitle')?.textContent.toLowerCase().trim() || '';
+            const mapKey = Object.keys(COUPON_MAP_20).find(k => productName.includes(k));
+            const hardcoded20 = mapKey ? COUPON_MAP_20[mapKey] : null;
+
+            let appliedDiscount = 0;
+            let isValid = false;
+
             if (inputCode && couponInfo.code && inputCode === couponInfo.code) {
-                const discount = parseInt(couponInfo.percent) || 0;
+                isValid = true;
+                appliedDiscount = parseInt(couponInfo.percent) || 0;
+            } else if (inputCode && (inputCode === expected20Code || inputCode === hardcoded20)) {
+                isValid = true;
+                appliedDiscount = 20;
+                window.activeModalCoupon.percent = 20; // Ensure checkout button uses 20%
+            }
+
+            if (isValid) {
+                const discount = appliedDiscount;
                 const discounted = Math.max(0, Math.round(basePrice * (100 - discount) / 100));
                 modalPriceEl.textContent = '₹' + discounted;
                 window.currentDiscountedPrice = discounted;
