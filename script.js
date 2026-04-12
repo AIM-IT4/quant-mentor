@@ -344,18 +344,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 'exotic options pricing guide': 'EXOTICS20'
             };
 
-            const expected20Code = couponInfo.code ? couponInfo.code.replace('10', '20') : null;
+            const expected20Code = couponInfo.code ? couponInfo.code.replace('10', '20').toUpperCase() : null;
             const productName = document.getElementById('modalTitle')?.textContent.toLowerCase().trim() || '';
             const mapKey = Object.keys(COUPON_MAP_20).find(k => productName.includes(k));
-            const hardcoded20 = mapKey ? COUPON_MAP_20[mapKey] : null;
+            const hardcoded20 = mapKey ? COUPON_MAP_20[mapKey].toUpperCase() : null;
+
+            const inputCodeUpper = inputCode.toUpperCase();
 
             let appliedDiscount = 0;
             let isValid = false;
 
-            if (inputCode && couponInfo.code && inputCode === couponInfo.code) {
+            if (inputCodeUpper && couponInfo.code && inputCodeUpper === couponInfo.code.toUpperCase()) {
                 isValid = true;
                 appliedDiscount = parseInt(couponInfo.percent) || 0;
-            } else if (inputCode && (inputCode === expected20Code || inputCode === hardcoded20)) {
+            } else if (inputCodeUpper && (inputCodeUpper === expected20Code || inputCodeUpper === hardcoded20)) {
                 isValid = true;
                 appliedDiscount = 20;
                 window.activeModalCoupon.percent = 20; // Ensure checkout button uses 20%
