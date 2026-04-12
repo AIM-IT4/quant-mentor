@@ -1,63 +1,33 @@
 // --- Brevo Email Configuration (Global) ---
-// These are fallback values. Priority is given to window.CONFIG from config.js
-// Key split to avoid GitHub Secret Scanner (Client-side key)
-const _p1 = 'xkeysib-6c7b7522a295729d2d38f88a04498ab8bef2271b793fef5a08d8fc13ed495550';
-const _p2 = '-Gqs6kCtw2x0RBIP0';
-let BREVO_API_KEY = _p1 + _p2;
+// Now handled securely via Vercel backend.
 
-let BREVO_SENDER_EMAIL = 'jha.8@alumni.iitj.ac.in';
-let BREVO_SENDER_NAME = 'QuantMentor';
-
-// Helper to get latest config
-function getBrevoConfig() {
-    let apiKey = (window.CONFIG && window.CONFIG.BREVO_API_KEY) || BREVO_API_KEY;
-    // Safety: If config.js has the placeholder, fallback to the hardcoded variable
-    if (apiKey === 'xkeysib-your-api-key-here') apiKey = BREVO_API_KEY;
-
-    return {
-        apiKey: apiKey,
-        senderEmail: (window.CONFIG && window.CONFIG.BREVO_SENDER_EMAIL) || BREVO_SENDER_EMAIL,
-        senderName: (window.CONFIG && window.CONFIG.BREVO_SENDER_NAME) || BREVO_SENDER_NAME
-    };
-}
-
-// Send email via Brevo API
+// Send email via secure backend API
 async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
-    const config = getBrevoConfig();
-
-    if (!config.apiKey || config.apiKey === 'xkeysib-your-api-key-here') {
-        console.warn('⚠️ Brevo API key not configured. Email not sent.');
-        return { success: false, error: 'API key not configured' };
-    }
-
     try {
-        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        const response = await fetch('/api/send-email', {
             method: 'POST',
             headers: {
-                'accept': 'application/json',
-                'api-key': config.apiKey,
-                'content-type': 'application/json'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                sender: { email: config.senderEmail, name: config.senderName },
-                to: [{ email: to }],
-                subject: subject,
-                htmlContent: htmlContent,
-                textContent: textContent
+                to,
+                subject,
+                htmlContent,
+                textContent
             })
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            console.log('✅ Email sent successfully via Brevo.', { to, messageId: data.messageId });
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            console.log('✅ Email sent successfully via Secure API.', { to });
             return { success: true };
         } else {
-            const error = await response.json();
-            console.error('❌ Brevo error:', error);
-            return { success: false, error: error.message };
+            console.error('❌ Email sending error:', data.error);
+            return { success: false, error: data.error };
         }
     } catch (error) {
-        console.error('❌ Failed to send email:', error);
+        console.error('❌ Failed to fetch send-email API:', error);
         return { success: false, error: error.message };
     }
 }
@@ -331,8 +301,57 @@ document.addEventListener('DOMContentLoaded', function () {
                 feedbackEl.className = '';
             }
 
+            // Campaign 20% discount codes
+            const COUPON_MAP_20 = {
+                'quantitative finance for absolute beginners': 'BEGINNER20',
+                'common mistakes in quant interviews': 'MISTAKES20',
+                'quant interview problem book': 'PROBLEMS20',
+                'greek explainer lab': 'GLAB20',
+                'quant models for each asset class master pack': 'MODELS20',
+                'the stochastic calculus visual lab': 'STOCHLAB20',
+                'complete quant ats friendly resume': 'RESUME20',
+                'mental math & market intuition for quants': 'MENTALMATH20',
+                'python for quants': 'PYTHON20',
+                'derivatives products & pricing master pack': 'DERIVATIVE20',
+                'statistics & econometrics for quants': 'STATS20',
+                'pnl attribution & desk diagnostics for quants': 'PNL20',
+                'equity models': 'EQUITIES20',
+                'interest rate models': 'RATES20',
+                'machine learning for quants': 'ML20',
+                'stochastic calculus for quants': 'STOCHASTIC20',
+                'linear algebra & differential equations for quants': 'LADE20',
+                'ultimate industry grade quant project pack': 'PROJECT20',
+                'greeks,vols,ycurves,numerical meth./mc & xva guide': 'DESK20',
+                'credit models': 'CREDITS20',
+                'sql for quant interviews': 'SQL20',
+                'regulatory & risk frameworks for quants': 'RISK20',
+                'probability theory for quants': 'PROBABILITY20',
+                'fx models': 'FXD20',
+                'c++ for quants': 'CPP20',
+                'r for risk quants': 'R20',
+                'fixed income math & bond pricing': 'FIXEDINCOME20',
+                'exotic options pricing guide': 'EXOTICS20'
+            };
+
+            const expected20Code = couponInfo.code ? couponInfo.code.replace('10', '20') : null;
+            const productName = document.getElementById('modalTitle')?.textContent.toLowerCase().trim() || '';
+            const mapKey = Object.keys(COUPON_MAP_20).find(k => productName.includes(k));
+            const hardcoded20 = mapKey ? COUPON_MAP_20[mapKey] : null;
+
+            let appliedDiscount = 0;
+            let isValid = false;
+
             if (inputCode && couponInfo.code && inputCode === couponInfo.code) {
-                const discount = parseInt(couponInfo.percent) || 0;
+                isValid = true;
+                appliedDiscount = parseInt(couponInfo.percent) || 0;
+            } else if (inputCode && (inputCode === expected20Code || inputCode === hardcoded20)) {
+                isValid = true;
+                appliedDiscount = 20;
+                window.activeModalCoupon.percent = 20; // Ensure checkout button uses 20%
+            }
+
+            if (isValid) {
+                const discount = appliedDiscount;
                 const discounted = Math.max(0, Math.round(basePrice * (100 - discount) / 100));
                 modalPriceEl.textContent = '₹' + discounted;
                 window.currentDiscountedPrice = discounted;
@@ -1846,10 +1865,8 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
 async function sendProductEmail(customerEmail, productName, paymentId, downloadLink, customerName = 'Customer') {
     console.log('📧 sendProductEmail called with:', customerEmail);
 
-    // Send to CUSTOMER via Brevo
-    const config = getBrevoConfig();
-    if (config.apiKey && config.apiKey !== 'xkeysib-your-api-key-here') {
-        console.log('📧 Attempting to send via Brevo...');
+    // Send to CUSTOMER via Brevo backend
+    console.log('📧 Attempting to send via Brevo secure API...');
 
         const htmlContent = `
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
@@ -1924,9 +1941,6 @@ ${BUSINESS_NAME}`;
         } catch (error) {
             console.error('❌ Brevo email failed:', error);
         }
-    } else {
-        console.log('⚠️ Brevo API key not configured. Skipping customer email.');
-    }
 
     // ===== ADMIN NOTIFICATION (NEW) =====
     try {
@@ -2606,9 +2620,7 @@ async function handleSessionPaymentSuccess(response) {
     // ===== STEP 1: SEND CUSTOMER EMAIL FIRST (HIGHEST PRIORITY) =====
     console.log('📧 Sending session confirmation to customer:', booking.email);
 
-    const config = getBrevoConfig();
-    if (config.apiKey && config.apiKey !== 'xkeysib-your-api-key-here') {
-        console.log('📧 Brevo is available, sending customer email FIRST...');
+    console.log('📧 Sending customer email securely via API...');
 
         const htmlContent = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -2667,9 +2679,6 @@ ${BUSINESS_NAME}`;
         } catch (error) {
             console.error('❌ Session email failed:', error);
         }
-    } else {
-        console.log('⚠️ Brevo API key not configured - customer confirmation email not sent');
-    }
 
     // ===== STEP 2: STORE IN SUPABASE (SECONDARY) =====
     console.log('📋 Attempting to store booking in Supabase...');
@@ -3099,12 +3108,10 @@ async function sendTestimonialRequestEmail(bookingData) {
 
     if (!userEmail) return;
 
-    console.log('📧 Sending Testimonial Request to:', userEmail);
+    console.log('📧 Sending Testimonial Request securely via API to:', userEmail);
 
-    const config = getBrevoConfig();
-    if (config.apiKey && config.apiKey !== 'xkeysib-your-api-key-here') {
-        const testimonialLink = window.location.origin + '/index.html#testimonials'; // Point to testimonials section
-        const customerName = userName || 'Valued Learner';
+    const testimonialLink = window.location.origin + '/index.html#testimonials'; // Point to testimonials section
+    const customerName = userName || 'Valued Learner';
 
         const htmlContent = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -3160,11 +3167,6 @@ ${BUSINESS_NAME}`;
             console.error('❌ Error sending testimonial email:', error);
             return false;
         }
-    } else {
-        console.warn('⚠️ Brevo API Key not configured. Skipping email.');
-        alert('⚠️ Email NOT Sent.\n\nReason: Brevo API Key is missing.\n\nPlease open script.js (Line 3) and paste your actual API key there.');
-        return false;
-    }
 }
 
 // Make it available globally so admin.html can use it
