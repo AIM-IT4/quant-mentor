@@ -674,6 +674,75 @@ h6 {
     display: flex;
     gap: 16px;
     flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+/* Social Proof Banner */
+.hero-social-proof {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 10px;
+    padding: 14px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    width: fit-content;
+}
+
+.avatar-group {
+    display: flex;
+    align-items: center;
+}
+
+.avatar-group img,
+.avatar-more {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--bg-secondary);
+    margin-left: -12px;
+    object-fit: cover;
+}
+
+.avatar-group img:first-child {
+    margin-left: 0;
+}
+
+.avatar-more {
+    background: var(--accent-gradient);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    z-index: 10;
+}
+
+.social-proof-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.social-proof-text .stars {
+    color: #fbbf24;
+    font-size: 0.85rem;
+    display: flex;
+    gap: 2px;
+}
+
+.social-proof-text p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.social-proof-text strong {
+    color: var(--text-primary);
 }
 
 /* Profile Card */
