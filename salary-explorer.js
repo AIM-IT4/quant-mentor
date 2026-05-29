@@ -20,23 +20,25 @@
     if (!regionSel) return;
     regionSel.addEventListener('change', () => {
       const r = regionSel.value;
-      countrySel.innerHTML = '<option value="">Select Country</option>';
-      citySel.innerHTML = '<option value="">Select City</option>';
-      if (REGION_DATA[r]) {
+      if (countrySel) countrySel.innerHTML = '<option value="">Select Country</option>';
+      if (citySel) citySel.innerHTML = '<option value="">Select City</option>';
+      if (REGION_DATA[r] && countrySel) {
         Object.keys(REGION_DATA[r].countries).forEach(c => {
           countrySel.innerHTML += `<option value="${c}">${c}</option>`;
         });
       }
     });
-    countrySel.addEventListener('change', () => {
-      const r = regionSel.value, c = countrySel.value;
-      citySel.innerHTML = '<option value="">Select City</option>';
-      if (REGION_DATA[r] && REGION_DATA[r].countries[c]) {
-        REGION_DATA[r].countries[c].forEach(city => {
-          citySel.innerHTML += `<option value="${city}">${city}</option>`;
-        });
-      }
-    });
+    if (countrySel) {
+      countrySel.addEventListener('change', () => {
+        const r = regionSel.value, c = countrySel.value;
+        if (citySel) citySel.innerHTML = '<option value="">Select City</option>';
+        if (REGION_DATA[r] && REGION_DATA[r].countries[c] && citySel) {
+          REGION_DATA[r].countries[c].forEach(city => {
+            citySel.innerHTML += `<option value="${city}">${city}</option>`;
+          });
+        }
+      });
+    }
   }
 
   // --- Chart Color Palette ---
@@ -287,6 +289,15 @@
     entry.total_comp = entry.base + entry.bonus + entry.equity;
     entry.id = 'user-' + Date.now();
 
+    // Save locally to localStorage (fallback so it displays in UI instantly & persists across page refresh even if DB insert fails)
+    let localSubmissions = [];
+    try {
+      const stored = localStorage.getItem('quant_mentor_local_salaries');
+      localSubmissions = stored ? JSON.parse(stored) : [];
+      localSubmissions.push(entry);
+      localStorage.setItem('quant_mentor_local_salaries', JSON.stringify(localSubmissions));
+    } catch (e) { console.warn('Failed to save salary locally:', e); }
+
     // Save to Supabase if available
     if (window.supabaseClient) {
       window.supabaseClient.from('salary_submissions').insert([{
@@ -299,8 +310,10 @@
       }]).then(res => { if (res.error) console.error('Supabase insert error:', res.error); else console.log('✅ Salary saved to Supabase'); });
     }
 
-    // Add to local data & refresh
-    allData.push(entry);
+    // Refresh display (combines loaded DB entries + user's current session/local entries)
+    if (!allData.some(d => d.id === entry.id)) {
+      allData.push(entry);
+    }
     renderDashboard(allData);
 
     // Show success
@@ -311,6 +324,16 @@
 
   // --- Load from Supabase ---
   async function loadFromSupabase() {
+    let localSubmissions = [];
+    try {
+      const stored = localStorage.getItem('quant_mentor_local_salaries');
+      if (stored) localSubmissions = JSON.parse(stored);
+    } catch (e) { console.warn('Failed to load local salaries:', e); }
+
+    allData = [...localSubmissions];
+    renderDashboard(allData);
+    if (typeof renderSalaryWidget === 'function') renderSalaryWidget();
+
     if (!window.supabaseClient) return;
     try {
       const { data, error } = await window.supabaseClient.from('salary_submissions').select('*').eq('is_approved', true);
@@ -324,8 +347,17 @@
           currency: d.currency || 'USD', education: d.education,
           id: d.id, is_seed: false
         }));
-        allData = [...mapped];
+        
+        // Merge mapped with local submissions, avoiding duplicates by id
+        const merged = [...localSubmissions];
+        mapped.forEach(m => {
+          if (!merged.some(l => l.id === m.id)) {
+            merged.push(m);
+          }
+        });
+        allData = merged;
         renderDashboard(allData);
+        if (typeof renderSalaryWidget === 'function') renderSalaryWidget();
       }
     } catch (e) { console.warn('Supabase salary fetch failed:', e); }
   }
