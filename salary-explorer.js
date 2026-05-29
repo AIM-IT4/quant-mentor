@@ -12,6 +12,20 @@
   const FX_TO_USD = { USD: 1, GBP: 1.27, EUR: 1.09, SGD: 0.75, HKD: 0.13, JPY: 0.0067, AUD: 0.65, INR: 0.012, CHF: 1.13, CNY: 0.14, ZAR: 0.055, AED: 0.27, SAR: 0.27, ILS: 0.28, QAR: 0.27 };
   function toUSD(amount, currency) { return Math.round(amount * (FX_TO_USD[currency] || 1)); }
 
+  const CURRENCY_SYMBOLS = {
+    USD: '$', GBP: '£', EUR: '€', SGD: 'S$', HKD: 'HK$', JPY: '¥',
+    AUD: 'A$', INR: '₹', CHF: 'CHF', CNY: '¥', ZAR: 'R',
+    AED: 'AED', SAR: 'SR', ILS: '₪', QAR: 'QR'
+  };
+
+  function formatCurrency(amount, currency) {
+    const symbol = CURRENCY_SYMBOLS[currency] || (currency + ' ');
+    const amt = amount || 0;
+    if (amt >= 1000000) return symbol + (amt / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (amt >= 1000) return symbol + Math.round(amt / 1000) + 'K';
+    return symbol + amt;
+  }
+
   // All data (user submitted)
   let allData = [];
 
@@ -243,9 +257,9 @@
         <td>${d.role}</td>
         <td>${d.level}</td>
         <td>${d.yoe}</td>
-        <td>${formatK(toUSD(d.base, d.currency))}</td>
-        <td>${formatK(toUSD(d.bonus, d.currency))}</td>
-        <td class="fw-600 tc-highlight">${formatK(d.tc_usd || toUSD(d.total_comp, d.currency))}</td>
+        <td>${formatCurrency(d.base, d.currency)}</td>
+        <td>${formatCurrency(d.bonus, d.currency)}</td>
+        <td class="fw-600 tc-highlight">${formatCurrency(d.total_comp || (d.base + d.bonus + d.equity), d.currency)}</td>
       </tr>
     `).join('');
   }
