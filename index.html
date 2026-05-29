@@ -388,6 +388,7 @@
     <!-- MathJax removed from index.html for performance (~1MB). Load only on pages that render LaTeX. -->
 
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="salary-styles.css">
 </head>
 
 <body>
@@ -408,6 +409,7 @@
                 <li><a href="#testimonials">Reviews</a></li>
                 <li><a href="interview.html"><i class="fas fa-brain"></i> AI Interview</a></li>
                 <li><a href="code-playground.html"><i class="fas fa-code"></i> Playground</a></li>
+                <li><a href="salary-explorer.html"><i class="fas fa-chart-line"></i> Salaries</a></li>
                 <li><a href="#contact" class="nav-cta">Book Now</a></li>
             </ul>
             <div class="nav-actions">
@@ -952,6 +954,35 @@
             </div>
         </section>
 
+        <!-- Salary Insights Widget -->
+        <section class="sal-widget-section" id="salary-insights" style="background: var(--bg-secondary);">
+            <div class="section-container">
+                <div class="section-header reveal-up">
+                    <span class="section-label" style="color: var(--accent-secondary);">Compensation Data</span>
+                    <h2 class="section-headline">Quant <span class="gradient-text">Salary Insights</span></h2>
+                    <p class="subheadline">Crowdsourced compensation data from quants at the world's top financial hubs.</p>
+                </div>
+                <div class="sal-widget-stats">
+                    <div class="sal-widget-stat"><div class="sal-widget-stat-val" id="widgetStatTotal">—</div><div class="sal-widget-stat-label">Submissions</div></div>
+                    <div class="sal-widget-stat"><div class="sal-widget-stat-val" id="widgetStatMedian">—</div><div class="sal-widget-stat-label">Median TC</div></div>
+                    <div class="sal-widget-stat"><div class="sal-widget-stat-val" id="widgetStatRegions">—</div><div class="sal-widget-stat-label">Regions</div></div>
+                </div>
+                <div class="sal-widget-grid">
+                    <div class="sal-widget-card reveal-up">
+                        <h4><i class="fas fa-chart-bar"></i> Median TC by Region</h4>
+                        <div class="sal-widget-chart"><canvas id="widgetChartRegion"></canvas></div>
+                    </div>
+                    <div class="sal-widget-card reveal-up delay-100">
+                        <h4><i class="fas fa-chart-pie"></i> TC Distribution</h4>
+                        <div class="sal-widget-chart"><canvas id="widgetChartDist"></canvas></div>
+                    </div>
+                </div>
+                <div style="text-align:center; margin-top: 40px;" class="reveal-up delay-200">
+                    <a href="salary-explorer.html" class="btn btn-primary"><i class="fas fa-chart-line"></i> Explore Full Salary Data</a>
+                </div>
+            </div>
+        </section>
+
         <!-- Blog Section -->
         <section class="blog" id="blog" style="padding: 80px 0;">
             <div class="section-container">
@@ -1133,6 +1164,7 @@
                         <h4>Resources</h4>
                         <ul>
                             <li><a href="resources.html">Free Resources</a></li>
+                            <li><a href="salary-explorer.html">Salary Explorer</a></li>
                             <li><a href="blog.html">Blog & Articles</a></li>
                             <li><a href="faq.html">FAQs</a></li>
                         </ul>
@@ -1353,7 +1385,11 @@
         })();
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script src="salary-seed.js" defer></script>
+    <script src="salary-explorer.js" defer></script>
     <script src="script.js?v=2" defer></script>
+    <script>document.addEventListener('DOMContentLoaded', function(){ if(typeof renderSalaryWidget==='function') setTimeout(renderSalaryWidget, 800); });</script>
 
     <!-- Scroll to Top Button -->
     <button class="scroll-top-btn" id="scrollTopBtn" title="Back to top">

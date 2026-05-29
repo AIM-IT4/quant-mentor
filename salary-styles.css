@@ -1,0 +1,357 @@
+/* ================================
+   Quant Salary Explorer Styles
+   ================================ */
+
+/* --- Hero --- */
+.sal-hero {
+    position: relative;
+    padding: 160px 0 60px;
+    background: var(--bg-primary);
+    overflow: hidden;
+    text-align: center;
+}
+.sal-hero-bg { position: absolute; inset: 0; pointer-events: none; }
+.sal-hero-content { position: relative; z-index: 2; }
+.sal-hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 20px; background: rgba(59,130,246,0.12);
+    border: 1px solid rgba(59,130,246,0.25); border-radius: 100px;
+    color: var(--accent-secondary); font-size: 0.85rem; font-weight: 500;
+    margin-bottom: 20px;
+}
+.sal-hero-title {
+    font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800;
+    line-height: 1.1; margin-bottom: 16px;
+}
+.sal-hero-sub {
+    font-size: 1.1rem; color: var(--text-secondary);
+    max-width: 620px; margin: 0 auto 40px; line-height: 1.6;
+}
+
+/* --- Stat Cards Row --- */
+.sal-stats-row {
+    display: flex; flex-wrap: wrap; gap: 16px;
+    justify-content: center; margin-bottom: 20px;
+}
+.sal-stat-card {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px; padding: 20px 24px; min-width: 150px;
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: var(--radius-md); backdrop-filter: blur(12px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.sal-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+.sal-stat-card i {
+    font-size: 1.3rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.sal-stat-val {
+    font-size: 1.4rem; font-weight: 800; color: var(--text-primary);
+    white-space: nowrap;
+}
+.sal-stat-label {
+    font-size: 0.75rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.04em;
+}
+
+/* --- Filters --- */
+.sal-filters-section {
+    padding: 30px 0 20px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-subtle);
+    position: sticky; top: 70px; z-index: 50;
+    backdrop-filter: blur(16px);
+}
+.sal-filters {
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
+}
+.sal-filter-group { flex: 1; min-width: 180px; }
+.sal-filter-group label {
+    display: block; font-size: 0.8rem; font-weight: 600;
+    color: var(--text-muted); margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+}
+.sal-filter-group select,
+.sal-filter-group input {
+    width: 100%; padding: 10px 14px;
+    background: var(--bg-card); color: var(--text-primary);
+    border: 1px solid var(--border-light); border-radius: var(--radius-sm);
+    font-size: 0.9rem; transition: border-color 0.2s;
+}
+.sal-filter-group select:focus,
+.sal-filter-group input:focus {
+    outline: none; border-color: var(--accent-secondary);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+.yoe-range { display: flex; gap: 8px; align-items: center; }
+.yoe-range input { width: 70px; text-align: center; }
+.yoe-range span { color: var(--text-muted); font-size: 0.85rem; }
+
+/* --- Dashboard Charts --- */
+.sal-dashboard { padding: 80px 0 40px; }
+.sal-charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px; margin-bottom: 32px;
+}
+.sal-chart-card {
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: var(--radius-md); padding: 24px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.sal-chart-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+}
+.sal-chart-card h3 {
+    font-size: 1rem; font-weight: 600; color: var(--text-primary);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+}
+.sal-chart-card h3 i {
+    color: var(--accent-secondary); font-size: 0.9rem;
+}
+.sal-chart-wide { grid-column: span 2; }
+.sal-chart-wrap {
+    position: relative; height: 300px;
+}
+
+/* --- Leaderboard --- */
+.sal-leaderboard-card {
+    margin-top: 8px;
+    max-width: 800px;
+    margin-left: auto; margin-right: auto;
+}
+.sal-leaderboard-header {
+    display: grid; grid-template-columns: 50px 1fr 120px 100px;
+    padding: 10px 16px; font-size: 0.75rem; font-weight: 700;
+    color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.05em; border-bottom: 1px solid var(--border-subtle);
+}
+.sal-leaderboard { max-height: 500px; overflow-y: auto; }
+.lb-row {
+    display: grid; grid-template-columns: 50px 1fr 120px 100px;
+    padding: 12px 16px; align-items: center;
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background 0.2s;
+}
+.lb-row:hover { background: rgba(255,255,255,0.03); }
+.lb-top { background: rgba(244,63,94,0.05); }
+.lb-rank {
+    font-weight: 800; font-size: 1.1rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.lb-firm { font-weight: 600; color: var(--text-primary); }
+.lb-tc { font-weight: 700; color: var(--accent-secondary); font-family: var(--font-mono); }
+.lb-count { font-size: 0.8rem; color: var(--text-muted); }
+
+/* --- Data Table --- */
+.sal-table-section { padding: 60px 0; }
+.sal-table-wrap {
+    overflow-x: auto; border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    background: var(--bg-card);
+}
+.sal-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.85rem;
+}
+.sal-table thead th {
+    padding: 14px 12px; text-align: left;
+    font-weight: 700; font-size: 0.75rem;
+    color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.05em; border-bottom: 2px solid var(--border-light);
+    cursor: pointer; user-select: none; white-space: nowrap;
+    transition: color 0.2s;
+}
+.sal-table thead th:hover { color: var(--accent-secondary); }
+.sal-table tbody tr {
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background 0.2s;
+}
+.sal-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+.sal-table tbody td {
+    padding: 12px; white-space: nowrap; color: var(--text-secondary);
+}
+.fw-600 { font-weight: 600; color: var(--text-primary) !important; }
+.tc-highlight {
+    color: var(--accent-secondary) !important;
+    font-family: var(--font-mono);
+}
+.region-badge {
+    display: inline-block; padding: 3px 10px;
+    border-radius: 100px; font-size: 0.7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+}
+.region-US { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.region-UK { background: rgba(244,63,94,0.15); color: #fb7185; }
+.region-EU { background: rgba(139,92,246,0.15); color: #a78bfa; }
+.region-APAC { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.region-EMEA { background: rgba(34,197,94,0.15); color: #4ade80; }
+
+/* --- Submit Form --- */
+.sal-form-section {
+    padding: 80px 0;
+    background: var(--bg-secondary);
+}
+.sal-form-wrapper {
+    max-width: 900px; margin: 0 auto;
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg); padding: 40px;
+}
+.sal-form-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
+}
+.sal-form-section-label {
+    grid-column: span 2;
+    font-size: 0.85rem; font-weight: 700; color: var(--accent-primary);
+    text-transform: uppercase; letter-spacing: 0.04em;
+    padding: 12px 0 4px; border-bottom: 1px solid var(--border-subtle);
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 8px;
+}
+.sal-form-section-label:first-child { margin-top: 0; }
+.sal-form-group { display: flex; flex-direction: column; gap: 6px; }
+.sal-form-group label {
+    font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);
+}
+.sal-form-group input,
+.sal-form-group select {
+    padding: 10px 14px;
+    background: var(--bg-tertiary); color: var(--text-primary);
+    border: 1px solid var(--border-light); border-radius: var(--radius-sm);
+    font-size: 0.9rem; transition: border-color 0.2s;
+}
+.sal-form-group input:focus,
+.sal-form-group select:focus {
+    outline: none; border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(244,63,94,0.12);
+}
+.sal-form-group input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    height: 6px; background: var(--border-light); border-radius: 3px;
+    padding: 0; border: none;
+}
+.sal-form-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 20px; height: 20px;
+    background: var(--accent-primary); border-radius: 50%; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(244,63,94,0.3);
+}
+.sal-form-full { grid-column: span 2; }
+.yoe-val {
+    font-family: var(--font-mono); font-weight: 700;
+    color: var(--accent-primary); font-size: 0.85rem;
+}
+.sal-submit-btn {
+    margin-top: 24px; font-size: 1.05rem; padding: 16px 32px;
+}
+.sal-form-note {
+    text-align: center; margin-top: 12px;
+    font-size: 0.8rem; color: var(--text-muted);
+}
+.sal-form-success {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 12px; padding: 40px; text-align: center;
+    animation: fadeIn 0.4s ease;
+}
+.sal-form-success i {
+    font-size: 3rem; color: var(--success);
+}
+.sal-form-success h4 {
+    font-size: 1.3rem; color: var(--text-primary);
+}
+.sal-form-success p {
+    color: var(--text-secondary);
+}
+
+/* --- Homepage Widget --- */
+.sal-widget-section { padding: 80px 0; }
+.sal-widget-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 24px; margin-top: 40px;
+}
+.sal-widget-card {
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: var(--radius-md); padding: 24px;
+}
+.sal-widget-card h4 {
+    font-size: 0.9rem; font-weight: 600; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+    color: var(--text-secondary);
+}
+.sal-widget-card h4 i { color: var(--accent-secondary); }
+.sal-widget-chart { position: relative; height: 220px; }
+.sal-widget-stats {
+    display: flex; gap: 20px; justify-content: center;
+    margin-bottom: 30px;
+}
+.sal-widget-stat {
+    text-align: center; padding: 16px 24px;
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: var(--radius-md); min-width: 130px;
+}
+.sal-widget-stat-val {
+    font-size: 1.8rem; font-weight: 800;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.sal-widget-stat-label {
+    font-size: 0.75rem; color: var(--text-muted);
+    text-transform: uppercase; margin-top: 4px;
+}
+
+/* --- Light Mode --- */
+body.light-mode .sal-stat-card,
+body.light-mode .sal-chart-card,
+body.light-mode .sal-form-wrapper,
+body.light-mode .sal-widget-card,
+body.light-mode .sal-table-wrap {
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+body.light-mode .sal-filters-section {
+    background: rgba(255,255,255,0.9);
+}
+body.light-mode .lb-row:hover,
+body.light-mode .sal-table tbody tr:hover {
+    background: rgba(0,0,0,0.02);
+}
+body.light-mode .sal-form-group input,
+body.light-mode .sal-form-group select {
+    background: #f8fafc;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    .sal-hero { padding: 130px 0 40px; }
+    .sal-stats-row { gap: 10px; }
+    .sal-stat-card { min-width: 120px; padding: 14px 16px; }
+    .sal-stat-val { font-size: 1.1rem; }
+    .sal-charts-grid { grid-template-columns: 1fr; }
+    .sal-chart-wide { grid-column: span 1; }
+    .sal-filters { flex-direction: column; }
+    .sal-filter-group { min-width: 100%; }
+    .sal-form-grid { grid-template-columns: 1fr; }
+    .sal-form-section-label,
+    .sal-form-full { grid-column: span 1; }
+    .sal-form-wrapper { padding: 24px; }
+    .sal-leaderboard-header,
+    .lb-row { grid-template-columns: 40px 1fr 90px 70px; font-size: 0.8rem; }
+    .sal-widget-grid { grid-template-columns: 1fr; }
+    .sal-widget-stats { flex-wrap: wrap; }
+    .sal-filters-section { position: static; }
+    .sal-table { font-size: 0.78rem; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

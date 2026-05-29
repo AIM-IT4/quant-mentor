@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explore crowdsourced quant salary data across global financial hubs — US, UK, APAC, EU, EMEA. Compare compensation by firm, role, and seniority.">
+    <title>Quant Salary Explorer | QuantMentor</title>
+    <link rel="icon" type="image/png" href="assets/images/quantmentor-logo-icon-QM-1024.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="salary-styles.css">
+</head>
+<body>
+    <div class="scroll-progress" id="scrollProgress"></div>
+    <!-- Navigation -->
+    <nav class="navbar scrolled">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="assets/images/quantmentor-logo-icon-QM-1024.png" alt="QuantMentor" class="logo-img"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                <span class="logo-icon" style="display:none;">📊</span>
+                <span class="logo-text">QuantMentor</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#services">Sessions</a></li>
+                <li><a href="index.html#products">Products</a></li>
+                <li><a href="index.html#testimonials">Reviews</a></li>
+                <li><a href="interview.html"><i class="fas fa-brain"></i> AI Interview</a></li>
+                <li><a href="salary-explorer.html" class="active"><i class="fas fa-chart-line"></i> Salaries</a></li>
+                <li><a href="index.html#contact" class="nav-cta">Book Now</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+                    <i class="fas fa-moon"></i><i class="fas fa-sun"></i>
+                </button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero -->
+        <section class="sal-hero">
+            <div class="sal-hero-bg">
+                <div class="gradient-orb orb-1"></div>
+                <div class="gradient-orb orb-2"></div>
+                <div class="grid-overlay"></div>
+            </div>
+            <div class="section-container sal-hero-content">
+                <div class="sal-hero-badge"><i class="fas fa-globe"></i> Crowdsourced from Global Quant Professionals</div>
+                <h1 class="sal-hero-title">Quant <span class="gradient-text">Compensation Explorer</span></h1>
+                <p class="sal-hero-sub">Real salary data from quants at the world's top financial hubs. Browse, compare, and contribute anonymously.</p>
+                <!-- Quick Stats -->
+                <div class="sal-stats-row">
+                    <div class="sal-stat-card">
+                        <i class="fas fa-users"></i>
+                        <span class="sal-stat-val" id="stat-total-subs">0</span>
+                        <span class="sal-stat-label">Submissions</span>
+                    </div>
+                    <div class="sal-stat-card">
+                        <i class="fas fa-dollar-sign"></i>
+                        <span class="sal-stat-val" id="stat-median-tc">$0</span>
+                        <span class="sal-stat-label">Median TC</span>
+                    </div>
+                    <div class="sal-stat-card">
+                        <i class="fas fa-trophy"></i>
+                        <span class="sal-stat-val" id="stat-top-region">—</span>
+                        <span class="sal-stat-label">Highest Paying Region</span>
+                    </div>
+                    <div class="sal-stat-card">
+                        <i class="fas fa-building"></i>
+                        <span class="sal-stat-val" id="stat-top-firm">—</span>
+                        <span class="sal-stat-label">Top Paying Firm</span>
+                    </div>
+                    <div class="sal-stat-card">
+                        <i class="fas fa-briefcase"></i>
+                        <span class="sal-stat-val" id="stat-top-role">—</span>
+                        <span class="sal-stat-label">Most Common Role</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filters -->
+        <section class="sal-filters-section">
+            <div class="section-container">
+                <div class="sal-filters">
+                    <div class="sal-filter-group">
+                        <label><i class="fas fa-globe"></i> Region</label>
+                        <select id="filterRegion"><option value="">All Regions</option><option value="US">US</option><option value="UK">UK</option><option value="EU">EU</option><option value="APAC">APAC</option><option value="EMEA">EMEA</option></select>
+                    </div>
+                    <div class="sal-filter-group">
+                        <label><i class="fas fa-briefcase"></i> Role</label>
+                        <select id="filterRole"><option value="">All Roles</option><option>Quant Developer</option><option>Quant Researcher</option><option>Quant Trader</option><option>Risk Quant</option><option>Model Validation</option><option>Algo Trader</option><option>Data Scientist - Quant</option></select>
+                    </div>
+                    <div class="sal-filter-group">
+                        <label><i class="fas fa-search"></i> Firm</label>
+                        <input type="text" id="filterFirm" placeholder="Search firm...">
+                    </div>
+                    <div class="sal-filter-group">
+                        <label><i class="fas fa-clock"></i> YoE Range</label>
+                        <div class="yoe-range">
+                            <input type="number" id="filterMinYoe" value="0" min="0" max="30" placeholder="Min">
+                            <span>to</span>
+                            <input type="number" id="filterMaxYoe" value="30" min="0" max="30" placeholder="Max">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Charts -->
+        <section class="sal-dashboard">
+            <div class="section-container">
+                <div class="section-header">
+                    <span class="section-label" style="color:var(--accent-secondary);">Analytics</span>
+                    <h2 class="section-headline">Compensation <span class="gradient-text">Dashboard</span></h2>
+                </div>
+                <div class="sal-charts-grid">
+                    <div class="sal-chart-card sal-chart-wide">
+                        <h3><i class="fas fa-chart-bar"></i> Median TC by Region (USD)</h3>
+                        <div class="sal-chart-wrap"><canvas id="chartRegion"></canvas></div>
+                    </div>
+                    <div class="sal-chart-card">
+                        <h3><i class="fas fa-layer-group"></i> Median TC by Seniority</h3>
+                        <div class="sal-chart-wrap"><canvas id="chartLevel"></canvas></div>
+                    </div>
+                    <div class="sal-chart-card">
+                        <h3><i class="fas fa-chart-pie"></i> Submissions by Firm Tier</h3>
+                        <div class="sal-chart-wrap"><canvas id="chartTier"></canvas></div>
+                    </div>
+                    <div class="sal-chart-card sal-chart-wide">
+                        <h3><i class="fas fa-chart-area"></i> Total Compensation Distribution</h3>
+                        <div class="sal-chart-wrap"><canvas id="chartDist"></canvas></div>
+                    </div>
+                    <div class="sal-chart-card sal-chart-wide">
+                        <h3><i class="fas fa-chart-bar"></i> Region × Seniority Breakdown</h3>
+                        <div class="sal-chart-wrap"><canvas id="chartRegionLevel"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Top Firms Leaderboard -->
+                <div class="sal-chart-card sal-leaderboard-card">
+                    <h3><i class="fas fa-medal"></i> Top Paying Firms (by Median TC)</h3>
+                    <div class="sal-leaderboard-header">
+                        <span>Rank</span><span>Firm</span><span>Median TC</span><span>Data Points</span>
+                    </div>
+                    <div id="firmLeaderboard" class="sal-leaderboard"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Table -->
+        <section class="sal-table-section">
+            <div class="section-container">
+                <div class="section-header">
+                    <span class="section-label" style="color:var(--accent-tertiary);">Raw Data</span>
+                    <h2 class="section-headline">Salary <span class="gradient-text">Entries</span></h2>
+                </div>
+                <div class="sal-table-wrap">
+                    <table class="sal-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="region">Region</th>
+                                <th data-sort="country">Country</th>
+                                <th data-sort="city">City</th>
+                                <th data-sort="firm">Firm</th>
+                                <th data-sort="role">Role</th>
+                                <th data-sort="level">Level</th>
+                                <th data-sort="yoe">YoE</th>
+                                <th data-sort="base">Base</th>
+                                <th data-sort="bonus">Bonus</th>
+                                <th data-sort="tc_usd">Total TC ↓</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salaryTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Submit Form -->
+        <section class="sal-form-section" id="submit-salary">
+            <div class="section-container">
+                <div class="section-header">
+                    <span class="section-label" style="color:var(--accent-primary);">Contribute</span>
+                    <h2 class="section-headline">Share Your <span class="gradient-text">Compensation</span></h2>
+                    <p class="subheadline">Help fellow quants make informed career decisions. All submissions are anonymous.</p>
+                </div>
+                <div class="sal-form-wrapper">
+                    <form id="salaryForm" class="sal-form">
+                        <div class="sal-form-grid">
+                            <!-- Location -->
+                            <div class="sal-form-section-label"><i class="fas fa-map-marker-alt"></i> Location</div>
+                            <div class="sal-form-group">
+                                <label for="salRegion">Region *</label>
+                                <select id="salRegion" name="salRegion" required>
+                                    <option value="">Select Region</option>
+                                    <option value="US">US</option><option value="UK">UK</option><option value="EU">EU</option><option value="APAC">APAC</option><option value="EMEA">EMEA</option>
+                                </select>
+                            </div>
+                            <div class="sal-form-group">
+                                <label for="salCountry">Country *</label>
+                                <select id="salCountry" name="salCountry" required><option value="">Select Country</option></select>
+                            </div>
+                            <div class="sal-form-group">
+                                <label for="salCity">City *</label>
+                                <select id="salCity" name="salCity" required><option value="">Select City</option></select>
+                            </div>
+
+                            <!-- Role -->
+                            <div class="sal-form-section-label"><i class="fas fa-briefcase"></i> Role Details</div>
+                            <div class="sal-form-group">
+                                <label for="salFirm">Firm Name *</label>
+                                <input type="text" id="salFirm" name="salFirm" required placeholder="e.g. Citadel, Goldman Sachs">
+                            </div>
+                            <div class="sal-form-group">
+                                <label for="salRole">Role *</label>
+                                <select id="salRole" name="salRole" required>
+                                    <option value="">Select Role</option>
+                                    <option>Quant Developer</option><option>Quant Researcher</option><option>Quant Trader</option><option>Risk Quant</option><option>Model Validation</option><option>Algo Trader</option><option>Data Scientist - Quant</option>
+                                </select>
+                            </div>
+                            <div class="sal-form-group">
+                                <label for="salLevel">Seniority *</label>
+                                <select id="salLevel" name="salLevel" required>
+                                    <option value="">Select Level</option>
+                                    <option>Intern</option><option>Junior / Analyst</option><option>Mid / Associate</option><option>Senior / VP</option><option>Lead / Director</option><option>Principal / MD</option>
+                                </select>
+                            </div>
+                            <div class="sal-form-group">
+                                <label for="salYoe">Years of Experience * <span id="yoeDisplay" class="yoe-val">0 years</span></label>
+                                <input type="range" id="salYoe" name="salYoe" min="0" max="30" value="0" required>
+                            </div>
+
+                            <!-- Compensation -->
+                            <div class="sal-form-section-label"><i class="fas fa-money-bill-wave"></i> Compensation (Annual)</div>
+                            <div class="sal-form-group">
+                                <label for="salBase">Base Salary *</label>
+                                <input type="number" id="salBase" name="salBase" required placeholder="e.g. 200000" min="0">
+                            </div>
+                            <div class="sal-form-group">
+                                <label for="salBonus">Bonus</label>
+                                <input type="number" id="salBonus" name="salBonus" placeholder="e.g. 100000" min="0" value="0">
+                            </div>
+                            <div class="sal-form-group">
+                                <label for="salEquity">Equity / Stock</label>
+                                <input type="number" id="salEquity" name="salEquity" placeholder="e.g. 50000" min="0" value="0">
+                            </div>
+                            <div class="sal-form-group">
+                                <label for="salCurrency">Currency</label>
+                                <select id="salCurrency" name="salCurrency">
+                                    <option value="USD">USD ($)</option><option value="GBP">GBP (£)</option><option value="EUR">EUR (€)</option><option value="INR">INR (₹)</option><option value="SGD">SGD</option><option value="HKD">HKD</option><option value="JPY">JPY (¥)</option><option value="AUD">AUD</option><option value="CHF">CHF</option><option value="AED">AED</option>
+                                </select>
+                            </div>
+
+                            <!-- Optional -->
+                            <div class="sal-form-section-label"><i class="fas fa-user"></i> Optional</div>
+                            <div class="sal-form-group">
+                                <label for="salEducation">Education</label>
+                                <select id="salEducation" name="salEducation">
+                                    <option value="">Select</option><option>PhD</option><option>Masters</option><option>Bachelors</option><option>Self-Taught</option>
+                                </select>
+                            </div>
+                            <div class="sal-form-group">
+                                <label for="salGender">Gender</label>
+                                <select id="salGender" name="salGender">
+                                    <option value="">Prefer not to say</option><option>Male</option><option>Female</option><option>Non-binary</option>
+                                </select>
+                            </div>
+                            <div class="sal-form-group sal-form-full">
+                                <label for="salLinkedin">LinkedIn URL (for verification)</label>
+                                <input type="url" id="salLinkedin" name="salLinkedin" placeholder="https://linkedin.com/in/...">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full sal-submit-btn">
+                            <i class="fas fa-paper-plane"></i> Submit Anonymously
+                        </button>
+                        <p class="sal-form-note"><i class="fas fa-lock"></i> Your data is stored anonymously. LinkedIn is optional and only used for verification.</p>
+                    </form>
+
+                    <div class="sal-form-success" id="salaryFormSuccess" style="display:none;">
+                        <i class="fas fa-check-circle"></i>
+                        <h4>Thank you for contributing!</h4>
+                        <p>Your salary data has been submitted successfully and will appear in the dashboard.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-main">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <img src="assets/images/quantmentor-logo-icon-QM-1024.png" alt="QuantMentor" class="logo-img"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                        <span class="logo-icon" style="display:none;">📊</span>
+                        <span class="logo-text">QuantMentor</span>
+                    </a>
+                    <p class="footer-tagline">Expert quant mentorship for the next generation of traders and risk professionals.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="index.html#services">Sessions</a></li>
+                            <li><a href="index.html#products">Products</a></li>
+                            <li><a href="salary-explorer.html">Salary Explorer</a></li>
+                            <li><a href="index.html#contact">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="resources.html">Free Resources</a></li>
+                            <li><a href="blog.html">Blog & Articles</a></li>
+                            <li><a href="faq.html">FAQs</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <ul>
+                            <li><a href="privacy.html">Privacy Policy</a></li>
+                            <li><a href="terms.html">Terms of Service</a></li>
+                            <li><a href="refund.html">Refund Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 QuantMentor. All rights reserved.</p>
+                <div class="footer-social">
+                    <a href="https://www.linkedin.com/in/akjha002/" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://github.com/AIM-IT4" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="https://x.com/Akjha2023" target="_blank" title="X"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Theme
+        (function(){const t=localStorage.getItem('theme');if(t==='light')document.body.classList.add('light-mode');})();
+        // Supabase init
+        if(typeof window.supabase!=='undefined'){
+            window.supabaseClient=window.supabase.createClient('https://dntabmyurlrlnoajdnja.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDEyNjUsImV4cCI6MjA4NTY3NzI2NX0.PYpNd_t_px09zi2d5WGjFVOB23sjb3ZPuAnxagYshe0');
+        }
+        // Theme toggle
+        document.addEventListener('DOMContentLoaded',()=>{
+            const t=document.getElementById('themeToggle');
+            if(t)t.addEventListener('click',()=>{document.body.classList.toggle('light-mode');localStorage.setItem('theme',document.body.classList.contains('light-mode')?'light':'dark');});
+            const m=document.getElementById('mobileMenuBtn'),n=document.querySelector('.nav-links');
+            if(m)m.addEventListener('click',()=>{n.classList.toggle('mobile-active');const i=m.querySelector('i');i.classList.toggle('fa-bars');i.classList.toggle('fa-times');});
+        });
+    </script>
+    <script src="salary-seed.js"></script>
+    <script src="salary-explorer.js"></script>
+
+    <button class="scroll-top-btn" id="scrollTopBtn" title="Back to top"><i class="fas fa-chevron-up"></i></button>
+    <script>
+        const sb=document.getElementById('scrollTopBtn');
+        if(sb){window.addEventListener('scroll',()=>{sb.classList.toggle('visible',window.scrollY>600);});sb.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));}
+    </script>
+</body>
+</html>
