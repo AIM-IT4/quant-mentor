@@ -209,10 +209,21 @@
   }
 
   function renderChart(canvasId, type, data, options) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-    if (charts[canvasId]) charts[canvasId].destroy();
-    charts[canvasId] = new Chart(canvas, { type, data, options: { responsive: true, maintainAspectRatio: false, ...options }});
+    try {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      if (typeof Chart === 'undefined') {
+        console.warn(`Chart.js is not loaded yet. Skipping rendering chart: ${canvasId}`);
+        return;
+      }
+      if (charts[canvasId]) {
+        charts[canvasId].destroy();
+        charts[canvasId] = null;
+      }
+      charts[canvasId] = new Chart(canvas, { type, data, options: { responsive: true, maintainAspectRatio: false, ...options }});
+    } catch (e) {
+      console.error(`Error rendering chart ${canvasId}:`, e);
+    }
   }
 
   // --- Data Table ---
@@ -265,8 +276,8 @@
       firm: form.salFirm.value.trim(),
       role: form.salRole.value,
       level: form.salLevel.value,
-      yoe: parseInt(form.salYoe.value),
-      base: parseInt(form.salBase.value),
+      yoe: parseInt(form.salYoe.value) || 0,
+      base: parseInt(form.salBase.value) || 0,
       bonus: parseInt(form.salBonus.value) || 0,
       equity: parseInt(form.salEquity.value) || 0,
       currency: form.salCurrency.value,
@@ -422,17 +433,29 @@
     // Mini region chart
     const c1 = document.getElementById('widgetChartRegion');
     if (c1) {
-      new Chart(c1, { type: 'bar', data: { labels: regionLabels, datasets: [{ data: regionMedians, backgroundColor: COLORS.slice(0, regionLabels.length), borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => formatK(ctx.raw) }}}, scales: { x: { ticks: { callback: v => formatK(v) }, grid: { display: false }}, y: { grid: { display: false }}}}});
+      try {
+        if (typeof Chart !== 'undefined') {
+          new Chart(c1, { type: 'bar', data: { labels: regionLabels, datasets: [{ data: regionMedians, backgroundColor: COLORS.slice(0, regionLabels.length), borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => formatK(ctx.raw) }}}, scales: { x: { ticks: { callback: v => formatK(v) }, grid: { display: false }}, y: { grid: { display: false }}}}});
+        }
+      } catch (e) {
+        console.error('Error rendering widget region chart:', e);
+      }
     }
 
     // Mini TC distribution
     const c2 = document.getElementById('widgetChartDist');
     if (c2) {
-      const buckets = [0,100000,250000,500000,750000,1500000];
-      const bLabels = buckets.slice(0,-1).map((b,i) => formatK(b)+'-'+formatK(buckets[i+1]));
-      const hist = new Array(buckets.length-1).fill(0);
-      usdData.forEach(d => { for (let i=0;i<buckets.length-1;i++) { if (d.tc_usd>=buckets[i]&&d.tc_usd<buckets[i+1]) { hist[i]++; break; }}});
-      new Chart(c2, { type: 'doughnut', data: { labels: bLabels, datasets: [{ data: hist, backgroundColor: COLORS.slice(0,bLabels.length), borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, font: { size: 11 }}}}}});
+      try {
+        if (typeof Chart !== 'undefined') {
+          const buckets = [0,100000,250000,500000,750000,1500000];
+          const bLabels = buckets.slice(0,-1).map((b,i) => formatK(b)+'-'+formatK(buckets[i+1]));
+          const hist = new Array(buckets.length-1).fill(0);
+          usdData.forEach(d => { for (let i=0;i<buckets.length-1;i++) { if (d.tc_usd>=buckets[i]&&d.tc_usd<buckets[i+1]) { hist[i]++; break; }}});
+          new Chart(c2, { type: 'doughnut', data: { labels: bLabels, datasets: [{ data: hist, backgroundColor: COLORS.slice(0,bLabels.length), borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, font: { size: 11 }}}}}});
+        }
+      } catch (e) {
+        console.error('Error rendering widget dist chart:', e);
+      }
     }
 
     if (ws1) ws1.textContent = usdData.length;
