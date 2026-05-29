@@ -441,9 +441,16 @@
       });
     }
 
-    // Reset local data button
+    // Reset local data button (only visible in local development environment for testing)
     const btnReset = document.getElementById('btnResetLocal');
-    if (btnReset) {
+    const devResetWrapper = document.getElementById('devResetWrapper');
+    if (btnReset && devResetWrapper) {
+      const isLocal = window.location.hostname === 'localhost' || 
+                      window.location.hostname === '127.0.0.1' || 
+                      window.location.hostname.startsWith('192.168.');
+      if (isLocal) {
+        devResetWrapper.style.display = 'block';
+      }
       btnReset.addEventListener('click', () => {
         if (confirm('Are you sure you want to clear your local testing submissions? This will completely reset the dashboard to a fresh zero-state.')) {
           localStorage.removeItem('quant_mentor_local_salaries');
