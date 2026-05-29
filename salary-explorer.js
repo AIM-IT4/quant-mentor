@@ -12,8 +12,8 @@
   const FX_TO_USD = { USD: 1, GBP: 1.27, EUR: 1.09, SGD: 0.75, HKD: 0.13, JPY: 0.0067, AUD: 0.65, INR: 0.012, CHF: 1.13, CNY: 0.14, ZAR: 0.055, AED: 0.27, SAR: 0.27, ILS: 0.28, QAR: 0.27 };
   function toUSD(amount, currency) { return Math.round(amount * (FX_TO_USD[currency] || 1)); }
 
-  // All data (seed + user submitted)
-  let allData = [...SEED_DATA];
+  // All data (user submitted)
+  let allData = [];
 
   // --- Region/City Cascading Dropdowns ---
   function setupRegionCascade(regionSel, countrySel, citySel) {
@@ -52,16 +52,78 @@
 
   // --- Render Dashboard ---
   function renderDashboard(data) {
-    if (!data.length) return;
-    const usdData = data.map(d => ({ ...d, tc_usd: toUSD(d.total_comp, d.currency) }));
-
-    // Stat cards
     const el = id => document.getElementById(id);
     const totalSubs = el('stat-total-subs');
     const medianTC = el('stat-median-tc');
     const topRegion = el('stat-top-region');
     const topFirm = el('stat-top-firm');
     const topRole = el('stat-top-role');
+
+    if (!data.length) {
+      if (totalSubs) totalSubs.textContent = '0';
+      if (medianTC) medianTC.textContent = '$0';
+      if (topRegion) topRegion.textContent = '—';
+      if (topFirm) topFirm.textContent = '—';
+      if (topRole) topRole.textContent = '—';
+
+      // Clear existing charts
+      Object.keys(charts).forEach(key => {
+        if (charts[key]) {
+          charts[key].destroy();
+          charts[key] = null;
+        }
+      });
+
+      // Show friendly empty placeholder inside chart wrapping containers
+      const wraps = [
+        { parentId: 'chartRegionWrap', id: 'chartRegion' },
+        { parentId: 'chartLevelWrap', id: 'chartLevel' },
+        { parentId: 'chartTierWrap', id: 'chartTier' },
+        { parentId: 'chartDistWrap', id: 'chartDist' },
+        { parentId: 'chartRegionLevelWrap', id: 'chartRegionLevel' }
+      ];
+      wraps.forEach(w => {
+        const p = el(w.parentId);
+        if (p) {
+          p.innerHTML = `
+            <div class="sal-chart-empty-state" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; color:var(--text-muted); font-size:0.85rem; border: 1px dashed var(--border-light); border-radius: var(--radius-sm); padding:20px; background:rgba(0,0,0,0.05);">
+              <i class="fas fa-chart-line" style="font-size:1.8rem; margin-bottom:8px; color:var(--accent-secondary); opacity:0.6;"></i>
+              <span>No data yet. Share your salary anonymously below to populate this dashboard!</span>
+            </div>
+          `;
+        }
+      });
+
+      // Empty leaderboard
+      const leaderboardEl = el('firmLeaderboard');
+      if (leaderboardEl) {
+        leaderboardEl.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-size: 0.9rem;"><i class="fas fa-inbox" style="font-size:1.8rem; margin-bottom:8px; display:block; color:var(--accent-secondary);"></i>No submissions yet. Be the first to contribute below!</div>';
+      }
+
+      // Empty data table
+      const tbody = el('salaryTableBody');
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 40px; color: var(--text-muted); font-size: 0.9rem;"><i class="fas fa-folder-open" style="font-size:1.8rem; margin-bottom:8px; display:block; color:var(--accent-secondary);"></i>No compensation data submitted yet. Contribute yours anonymously to build the dashboard!</td></tr>';
+      }
+      return;
+    }
+
+    // Restore canvases if empty placeholders exist
+    const wraps = [
+      { parentId: 'chartRegionWrap', id: 'chartRegion' },
+      { parentId: 'chartLevelWrap', id: 'chartLevel' },
+      { parentId: 'chartTierWrap', id: 'chartTier' },
+      { parentId: 'chartDistWrap', id: 'chartDist' },
+      { parentId: 'chartRegionLevelWrap', id: 'chartRegionLevel' }
+    ];
+    wraps.forEach(w => {
+      const p = el(w.parentId);
+      if (p && p.querySelector('.sal-chart-empty-state')) {
+        p.innerHTML = `<canvas id="${w.id}"></canvas>`;
+      }
+    });
+
+    const usdData = data.map(d => ({ ...d, tc_usd: toUSD(d.total_comp, d.currency) }));
 
     if (totalSubs) totalSubs.textContent = usdData.length;
     if (medianTC) medianTC.textContent = formatK(median(usdData.map(d => d.tc_usd)));
@@ -70,20 +132,20 @@
     const byRegion = groupBy(usdData, 'region');
     let maxRegion = '', maxMed = 0;
     Object.entries(byRegion).forEach(([r, arr]) => { const m = median(arr.map(d=>d.tc_usd)); if (m > maxMed) { maxMed = m; maxRegion = r; }});
-    if (topRegion) topRegion.textContent = maxRegion;
+    if (topRegion) topRegion.textContent = maxRegion || '—';
 
     // Top firm
     const byFirm = groupBy(usdData, 'firm');
     let maxFirmName = '', maxFirmMed = 0;
     Object.entries(byFirm).forEach(([f, arr]) => { if (arr.length >= 2) { const m = median(arr.map(d=>d.tc_usd)); if (m > maxFirmMed) { maxFirmMed = m; maxFirmName = f; }}});
     if (!maxFirmName) { Object.entries(byFirm).forEach(([f, arr]) => { const m = median(arr.map(d=>d.tc_usd)); if (m > maxFirmMed) { maxFirmMed = m; maxFirmName = f; }}); }
-    if (topFirm) topFirm.textContent = maxFirmName;
+    if (topFirm) topFirm.textContent = maxFirmName || '—';
 
     // Top role
     const byRole = groupBy(usdData, 'role');
     let maxRoleName = '', maxRoleCount = 0;
     Object.entries(byRole).forEach(([r, arr]) => { if (arr.length > maxRoleCount) { maxRoleCount = arr.length; maxRoleName = r; }});
-    if (topRole) topRole.textContent = maxRoleName;
+    if (topRole) topRole.textContent = maxRoleName || '—';
 
     // --- Chart 1: Salary by Region (Horizontal Bar) ---
     const regionLabels = Object.keys(byRegion).sort();
@@ -251,7 +313,7 @@
           currency: d.currency || 'USD', education: d.education,
           id: d.id, is_seed: false
         }));
-        allData = [...SEED_DATA, ...mapped];
+        allData = [...mapped];
         renderDashboard(allData);
       }
     } catch (e) { console.warn('Supabase salary fetch failed:', e); }
@@ -312,6 +374,46 @@
 
   // --- Homepage Mini Dashboard ---
   window.renderSalaryWidget = function() {
+    const ws1 = document.getElementById('widgetStatTotal');
+    const ws2 = document.getElementById('widgetStatMedian');
+    const ws3 = document.getElementById('widgetStatRegions');
+
+    if (!allData.length) {
+      if (ws1) ws1.textContent = '0';
+      if (ws2) ws2.textContent = '$0';
+      if (ws3) ws3.textContent = '0';
+
+      const c1Wrap = document.getElementById('widgetChartRegionWrap');
+      const c2Wrap = document.getElementById('widgetChartDistWrap');
+
+      if (c1Wrap) {
+        c1Wrap.innerHTML = `
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; color:var(--text-muted); font-size:0.75rem; border: 1px dashed var(--border-light); border-radius: var(--radius-sm); padding:10px; background:rgba(0,0,0,0.05); min-height:160px;">
+            <i class="fas fa-chart-bar" style="font-size:1.4rem; margin-bottom:6px; color:var(--accent-secondary); opacity:0.6;"></i>
+            <span>No salary data yet.</span>
+          </div>
+        `;
+      }
+      if (c2Wrap) {
+        c2Wrap.innerHTML = `
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; color:var(--text-muted); font-size:0.75rem; border: 1px dashed var(--border-light); border-radius: var(--radius-sm); padding:10px; background:rgba(0,0,0,0.05); min-height:160px;">
+            <i class="fas fa-chart-pie" style="font-size:1.4rem; margin-bottom:6px; color:var(--accent-secondary); opacity:0.6;"></i>
+            <span>No data yet.</span>
+          </div>
+        `;
+      }
+      return;
+    }
+
+    const c1Wrap = document.getElementById('widgetChartRegionWrap');
+    const c2Wrap = document.getElementById('widgetChartDistWrap');
+    if (c1Wrap && !document.getElementById('widgetChartRegion')) {
+      c1Wrap.innerHTML = `<canvas id="widgetChartRegion"></canvas>`;
+    }
+    if (c2Wrap && !document.getElementById('widgetChartDist')) {
+      c2Wrap.innerHTML = `<canvas id="widgetChartDist"></canvas>`;
+    }
+
     const usdData = allData.map(d => ({ ...d, tc_usd: toUSD(d.total_comp, d.currency) }));
     const byRegion = groupBy(usdData, 'region');
     const regionLabels = Object.keys(byRegion).sort();
@@ -333,10 +435,6 @@
       new Chart(c2, { type: 'doughnut', data: { labels: bLabels, datasets: [{ data: hist, backgroundColor: COLORS.slice(0,bLabels.length), borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, font: { size: 11 }}}}}});
     }
 
-    // Widget stats
-    const ws1 = document.getElementById('widgetStatTotal');
-    const ws2 = document.getElementById('widgetStatMedian');
-    const ws3 = document.getElementById('widgetStatRegions');
     if (ws1) ws1.textContent = usdData.length;
     if (ws2) ws2.textContent = formatK(median(usdData.map(d => d.tc_usd)));
     if (ws3) ws3.textContent = regionLabels.length;
