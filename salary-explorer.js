@@ -427,6 +427,20 @@
         if (c) currSel.value = c;
       });
     }
+
+    // Reset local data button
+    const btnReset = document.getElementById('btnResetLocal');
+    if (btnReset) {
+      btnReset.addEventListener('click', () => {
+        if (confirm('Are you sure you want to clear your local testing submissions? This will completely reset the dashboard to a fresh zero-state.')) {
+          localStorage.removeItem('quant_mentor_local_salaries');
+          allData = [];
+          renderDashboard(allData);
+          if (typeof renderSalaryWidget === 'function') renderSalaryWidget();
+          alert('Local submissions cleared successfully!');
+        }
+      });
+    }
   });
 
   // --- Homepage Mini Dashboard ---
