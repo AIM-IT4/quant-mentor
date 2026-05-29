@@ -330,10 +330,22 @@
     }
     renderDashboard(allData);
 
-    // Show success
+    // Show success & redirect if we are on the share-salary page
     form.reset();
     const msg = document.getElementById('salaryFormSuccess');
-    if (msg) { msg.style.display = 'flex'; setTimeout(() => msg.style.display = 'none', 4000); }
+    if (msg) {
+      msg.style.display = 'flex';
+      setTimeout(() => {
+        msg.style.display = 'none';
+        if (window.location.pathname.includes('share-salary')) {
+          window.location.href = 'salary-explorer.html?success=true';
+        }
+      }, 2500);
+    } else {
+      if (window.location.pathname.includes('share-salary')) {
+        window.location.href = 'salary-explorer.html?success=true';
+      }
+    }
   }
 
   // --- Load from Supabase ---
@@ -460,6 +472,58 @@
           alert('Local submissions cleared successfully!');
         }
       });
+    }
+
+    // Success redirect banner / premium toast notification
+    if (window.location.search.includes('success=true')) {
+      const toast = document.createElement('div');
+      toast.style.position = 'fixed';
+      toast.style.bottom = '30px';
+      toast.style.right = '30px';
+      toast.style.background = 'var(--bg-card)';
+      toast.style.border = '1px solid #22c55e';
+      toast.style.borderRadius = 'var(--radius-md)';
+      toast.style.padding = '20px 24px';
+      toast.style.boxShadow = '0 20px 40px rgba(0,0,0,0.4)';
+      toast.style.display = 'flex';
+      toast.style.alignItems = 'center';
+      toast.style.gap = '16px';
+      toast.style.zIndex = '9999';
+      toast.style.animation = 'slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+      toast.innerHTML = `
+        <div style="background: rgba(34, 197, 94, 0.1); color: #22c55e; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div style="text-align: left;">
+          <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">Contribution Added!</h4>
+          <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-muted);">Thank you! Your submission has been updated on the dashboard.</p>
+        </div>
+        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem; margin-left: 12px; transition: color 0.2s;"><i class="fas fa-times"></i></button>
+      `;
+      document.body.appendChild(toast);
+
+      // Add animations if not present
+      if (!document.getElementById('sal-toast-style')) {
+        const style = document.createElement('style');
+        style.id = 'sal-toast-style';
+        style.textContent = `
+          @keyframes slideInUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+          }
+          @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(20px); }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+
+      // Remove after 6 seconds
+      setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.5s ease forwards';
+        setTimeout(() => toast.remove(), 500);
+      }, 6000);
     }
   });
 

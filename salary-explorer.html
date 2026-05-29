@@ -53,6 +53,14 @@
                 <div class="sal-hero-badge"><i class="fas fa-globe"></i> Crowdsourced from Global Quant Professionals</div>
                 <h1 class="sal-hero-title">Quant <span class="gradient-text">Compensation Explorer</span></h1>
                 <p class="sal-hero-sub">Real salary data from quants at the world's top financial hubs. Browse, compare, and contribute anonymously.</p>
+                <div style="display: flex; gap: 16px; justify-content: center; margin-top: 32px; flex-wrap: wrap; margin-bottom: 40px;">
+                    <a href="share-salary.html" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; font-weight: 600;">
+                        <i class="fas fa-plus"></i> Share Your Salary
+                    </a>
+                    <a href="#salaryTable" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                        <i class="fas fa-table"></i> Browse Raw Data
+                    </a>
+                </div>
                 <!-- Quick Stats -->
                 <div class="sal-stats-row">
                     <div class="sal-stat-card">
@@ -187,111 +195,24 @@
             </div>
         </section>
 
-        <!-- Submit Form -->
-        <section class="sal-form-section" id="submit-salary">
+        <!-- Contribute CTA Section -->
+        <section class="sal-cta-section" style="padding: 80px 0; background: linear-gradient(135deg, rgba(244, 63, 94, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%); text-align: center; border-top: 1px solid var(--border-subtle);">
             <div class="section-container">
-                <div class="section-header">
-                    <span class="section-label" style="color:var(--accent-primary);">Contribute</span>
-                    <h2 class="section-headline">Share Your <span class="gradient-text">Compensation</span></h2>
-                    <p class="subheadline">Help fellow quants make informed career decisions. All submissions are anonymous.</p>
-                </div>
-                <div class="sal-form-wrapper">
-                    <form id="salaryForm" class="sal-form">
-                        <div class="sal-form-grid">
-                            <!-- Location -->
-                            <div class="sal-form-section-label"><i class="fas fa-map-marker-alt"></i> Location</div>
-                            <div class="sal-form-group">
-                                <label for="salRegion">Region *</label>
-                                <select id="salRegion" name="salRegion" required>
-                                    <option value="">Select Region</option>
-                                    <option value="US">US</option><option value="UK">UK</option><option value="EU">EU</option><option value="APAC">APAC</option><option value="EMEA">EMEA</option>
-                                </select>
-                            </div>
-                            <div class="sal-form-group">
-                                <label for="salCountry">Country *</label>
-                                <select id="salCountry" name="salCountry" required><option value="">Select Country</option></select>
-                            </div>
-                            <div class="sal-form-group">
-                                <label for="salCity">City *</label>
-                                <select id="salCity" name="salCity" required><option value="">Select City</option></select>
-                            </div>
-
-                            <!-- Role -->
-                            <div class="sal-form-section-label"><i class="fas fa-briefcase"></i> Role Details</div>
-                            <div class="sal-form-group">
-                                <label for="salFirm">Firm Name *</label>
-                                <input type="text" id="salFirm" name="salFirm" required placeholder="e.g. Citadel, Goldman Sachs">
-                            </div>
-                            <div class="sal-form-group">
-                                <label for="salRole">Role *</label>
-                                <select id="salRole" name="salRole" required>
-                                    <option value="">Select Role</option>
-                                    <option>Quant Developer</option><option>Quant Researcher</option><option>Quant Trader</option><option>Risk Quant</option><option>Model Validation</option><option>Algo Trader</option><option>Data Scientist - Quant</option>
-                                </select>
-                            </div>
-                            <div class="sal-form-group">
-                                <label for="salLevel">Seniority *</label>
-                                <select id="salLevel" name="salLevel" required>
-                                    <option value="">Select Level</option>
-                                    <option>Intern</option><option>Junior / Analyst</option><option>Mid / Associate</option><option>Senior / VP</option><option>Lead / Director</option><option>Principal / MD</option>
-                                </select>
-                            </div>
-                            <div class="sal-form-group">
-                                <label for="salYoe">Years of Experience * <span id="yoeDisplay" class="yoe-val">0 years</span></label>
-                                <input type="range" id="salYoe" name="salYoe" min="0" max="30" value="0" required>
-                            </div>
-
-                            <!-- Compensation -->
-                            <div class="sal-form-section-label"><i class="fas fa-money-bill-wave"></i> Compensation (Annual)</div>
-                            <div class="sal-form-group">
-                                <label for="salBase">Base Salary *</label>
-                                <input type="number" id="salBase" name="salBase" required placeholder="e.g. 200000" min="0">
-                            </div>
-                            <div class="sal-form-group">
-                                <label for="salBonus">Bonus</label>
-                                <input type="number" id="salBonus" name="salBonus" placeholder="e.g. 100000" min="0">
-                            </div>
-                            <div class="sal-form-group">
-                                <label for="salEquity">Equity / Stock</label>
-                                <input type="number" id="salEquity" name="salEquity" placeholder="e.g. 50000" min="0">
-                            </div>
-                            <div class="sal-form-group">
-                                <label for="salCurrency">Currency</label>
-                                <select id="salCurrency" name="salCurrency">
-                                    <option value="USD">USD ($)</option><option value="GBP">GBP (£)</option><option value="EUR">EUR (€)</option><option value="INR">INR (₹)</option><option value="SGD">SGD</option><option value="HKD">HKD</option><option value="JPY">JPY (¥)</option><option value="AUD">AUD</option><option value="CHF">CHF</option><option value="AED">AED</option>
-                                </select>
-                            </div>
-
-                            <!-- Optional -->
-                            <div class="sal-form-section-label"><i class="fas fa-user"></i> Optional</div>
-                            <div class="sal-form-group">
-                                <label for="salEducation">Education</label>
-                                <select id="salEducation" name="salEducation">
-                                    <option value="">Select</option><option>PhD</option><option>Masters</option><option>Bachelors</option><option>Self-Taught</option>
-                                </select>
-                            </div>
-                            <div class="sal-form-group">
-                                <label for="salGender">Gender</label>
-                                <select id="salGender" name="salGender">
-                                    <option value="">Prefer not to say</option><option>Male</option><option>Female</option><option>Non-binary</option>
-                                </select>
-                            </div>
-                            <div class="sal-form-group sal-form-full">
-                                <label for="salLinkedin">LinkedIn URL (for verification)</label>
-                                <input type="url" id="salLinkedin" name="salLinkedin" placeholder="https://linkedin.com/in/...">
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-full sal-submit-btn">
-                            <i class="fas fa-paper-plane"></i> Submit Anonymously
-                        </button>
-                        <p class="sal-form-note"><i class="fas fa-lock"></i> Your data is stored anonymously. LinkedIn is optional and only used for verification.</p>
-                    </form>
-
-                    <div class="sal-form-success" id="salaryFormSuccess" style="display:none;">
-                        <i class="fas fa-check-circle"></i>
-                        <h4>Thank you for contributing!</h4>
-                        <p>Your salary data has been submitted successfully and will appear in the dashboard.</p>
+                <div class="sal-cta-card" style="background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 48px; max-width: 800px; margin: 0 auto; box-shadow: 0 20px 50px rgba(0,0,0,0.3); position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: var(--accent-gradient); filter: blur(80px); opacity: 0.15; pointer-events: none;"></div>
+                    <div style="position: absolute; bottom: -50px; left: -50px; width: 150px; height: 150px; background: var(--accent-gradient); filter: blur(80px); opacity: 0.15; pointer-events: none;"></div>
+                    <span class="sal-section-tag" style="background: rgba(244, 63, 94, 0.1); color: var(--accent-primary); padding: 6px 14px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; margin-bottom: 20px;">Contribute Anonymously</span>
+                    <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 16px; letter-spacing: -0.02em;">Are you a working <span class="gradient-text">Quant</span>?</h2>
+                    <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 32px; line-height: 1.6; max-width: 600px; margin-left: auto; margin-right: auto;">
+                        Help build the most accurate database of global quant compensation. Share your salary securely and anonymously in under 1 minute.
+                    </p>
+                    <a href="share-salary.html" class="btn btn-primary btn-lg" style="display: inline-flex; align-items: center; gap: 10px; font-size: 1.05rem; padding: 14px 32px; border-radius: var(--radius-md); font-weight: 600; text-shadow: none;">
+                        <i class="fas fa-plus"></i> Share Your Compensation
+                    </a>
+                    <div style="display: flex; justify-content: center; gap: 24px; margin-top: 32px; font-size: 0.85rem; color: var(--text-muted);">
+                        <span><i class="fas fa-lock" style="color: var(--accent-primary); margin-right: 6px;"></i> 100% Anonymous</span>
+                        <span><i class="fas fa-shield-alt" style="color: var(--accent-secondary); margin-right: 6px;"></i> Fully Encrypted</span>
+                        <span><i class="fas fa-bolt" style="color: #22c55e; margin-right: 6px;"></i> Instantly Visualized</span>
                     </div>
                 </div>
             </div>
