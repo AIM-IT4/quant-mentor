@@ -362,10 +362,23 @@
           id: d.id, is_seed: false
         }));
         
-        // Merge mapped with local submissions, avoiding duplicates by id
+        // Merge mapped with local submissions, avoiding duplicate records by checking contents (since local has 'user-timestamp' ID but DB has UUID)
         const merged = [...localSubmissions];
         mapped.forEach(m => {
-          if (!merged.some(l => l.id === m.id)) {
+          const dupIdx = merged.findIndex(l => 
+            l.firm.toLowerCase() === m.firm.toLowerCase() && 
+            l.role === m.role && 
+            l.base === m.base && 
+            l.bonus === m.bonus && 
+            l.equity === m.equity && 
+            l.yoe === m.yoe && 
+            l.city === m.city && 
+            l.region === m.region
+          );
+          if (dupIdx !== -1) {
+            // Replace the local copy with the official DB record containing the database UUID
+            merged[dupIdx] = m;
+          } else if (!merged.some(l => l.id === m.id)) {
             merged.push(m);
           }
         });
