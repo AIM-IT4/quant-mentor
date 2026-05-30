@@ -1309,6 +1309,59 @@
                             </div>
                         </div>
 
+                        <div class="form-group"
+                            style="margin-top: 20px; background: rgba(20, 184, 166, 0.08); padding: 18px; border-radius: 8px; border: 1px solid rgba(20, 184, 166, 0.22);">
+                            <label style="color: #5eead4; font-weight: 700; margin-bottom: 12px; display: block;">
+                                <i class="fas fa-eye"></i> Product Preview Page Content
+                            </label>
+                            <small style="color: var(--text-muted); display: block; margin-bottom: 16px;">
+                                One item per line. These fields populate the product detail page preview blocks.
+                            </small>
+
+                            <div class="form-group">
+                                <label>Preview Summary</label>
+                                <textarea id="productPreviewSummary" rows="2"
+                                    placeholder="Short conversion-focused summary for the preview section."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Table of Contents</label>
+                                <textarea id="productPreviewToc" rows="5"
+                                    placeholder="Core concepts&#10;Worked examples&#10;Interview questions"></textarea>
+                            </div>
+
+                            <div class="form-row"
+                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                                <div class="form-group">
+                                    <label>Target Audience</label>
+                                    <textarea id="productPreviewAudience" rows="4"
+                                        placeholder="Quant interview candidates&#10;Risk analysts"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Prerequisites</label>
+                                    <textarea id="productPreviewPrerequisites" rows="4"
+                                        placeholder="Basic probability&#10;Python familiarity"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Expected Outcomes</label>
+                                    <textarea id="productPreviewOutcomes" rows="4"
+                                        placeholder="Explain core models clearly&#10;Solve interview-style questions"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Sample Page / Screenshot URLs</label>
+                                <textarea id="productPreviewImages" rows="3"
+                                    placeholder="https://.../sample-page-1.png&#10;https://.../sample-page-2.png"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Sample Extract</label>
+                                <textarea id="productPreviewSampleText" rows="4"
+                                    placeholder="A short sample paragraph or excerpt shown beside sample screenshots."></textarea>
+                            </div>
+                        </div>
+
                         <div class="form-group" id="fileUploadGroup">
                             <label>Upload Resource (PDF, ZIP, RAR, Code files)</label>
                             <input type="file" id="productFile" accept=".pdf,.zip,.rar,.py,.cpp,.h,.js,.ipynb,.txt,.md">
@@ -1972,6 +2025,80 @@ Brief Q&A"></textarea>
 
                     console.log('✅ Brevo email configuration loaded from global scope');
 
+                    const productPreviewColumns = [
+                        'preview_summary',
+                        'preview_table_of_contents',
+                        'preview_target_audience',
+                        'preview_prerequisites',
+                        'preview_expected_outcomes',
+                        'preview_sample_images',
+                        'preview_sample_text'
+                    ];
+
+                    function getTextValue(id) {
+                        return (document.getElementById(id)?.value || '').trim();
+                    }
+
+                    function getMultilineValue(id) {
+                        return getTextValue(id)
+                            .split(/\r?\n/)
+                            .map(item => item.replace(/^[-*]\s*/, '').trim())
+                            .filter(Boolean);
+                    }
+
+                    function setTextValue(id, value) {
+                        const el = document.getElementById(id);
+                        if (el) el.value = value || '';
+                    }
+
+                    function setMultilineValue(id, value) {
+                        const el = document.getElementById(id);
+                        if (!el) return;
+                        if (Array.isArray(value)) {
+                            el.value = value.filter(Boolean).join('\n');
+                        } else {
+                            el.value = value || '';
+                        }
+                    }
+
+                    function getProductPreviewPayload() {
+                        return {
+                            preview_summary: getTextValue('productPreviewSummary') || null,
+                            preview_table_of_contents: getMultilineValue('productPreviewToc'),
+                            preview_target_audience: getMultilineValue('productPreviewAudience'),
+                            preview_prerequisites: getMultilineValue('productPreviewPrerequisites'),
+                            preview_expected_outcomes: getMultilineValue('productPreviewOutcomes'),
+                            preview_sample_images: getMultilineValue('productPreviewImages'),
+                            preview_sample_text: getTextValue('productPreviewSampleText') || null
+                        };
+                    }
+
+                    function removeProductPreviewColumns(payload) {
+                        const legacyPayload = { ...payload };
+                        productPreviewColumns.forEach(column => delete legacyPayload[column]);
+                        return legacyPayload;
+                    }
+
+                    function isMissingPreviewColumnError(error) {
+                        const message = String(error?.message || error?.details || '');
+                        return productPreviewColumns.some(column => message.includes(column)) ||
+                            message.includes('schema cache');
+                    }
+
+                    function populateProductPreviewFields(product) {
+                        setTextValue('productPreviewSummary', product.preview_summary);
+                        setMultilineValue('productPreviewToc', product.preview_table_of_contents);
+                        setMultilineValue('productPreviewAudience', product.preview_target_audience);
+                        setMultilineValue('productPreviewPrerequisites', product.preview_prerequisites);
+                        setMultilineValue('productPreviewOutcomes', product.preview_expected_outcomes);
+                        setMultilineValue('productPreviewImages', product.preview_sample_images);
+                        setTextValue('productPreviewSampleText', product.preview_sample_text);
+                    }
+
+                    function clearProductPreviewFields() {
+                        populateProductPreviewFields({});
+                    }
+
                     // Handle Form Submission
                     document.getElementById('productForm').addEventListener('submit', async (e) => {
                         console.log('Product Form Submit Triggered');
@@ -2074,39 +2201,48 @@ Brief Q&A"></textarea>
                                 sales_count: salesCount
                             };
 
+                            Object.assign(productData, getProductPreviewPayload());
+
                             // Only update URLs if new files were uploaded
                             if (fileUrl) productData.file_url = fileUrl;
                             if (coverUrl) productData.cover_image_url = coverUrl;
 
-                            let dbError;
                             let savedProductId = productId; // Start with existing ID for updates
 
-                            if (productId) {
-                                // Update existing product
-                                const result = await window.supabaseAdminClient
-                                    .from('products')
-                                    .update(productData)
-                                    .eq('id', productId)
-                                    .select();
+                            async function saveProductRecord(payload) {
+                                if (productId) {
+                                    const result = await window.supabaseAdminClient
+                                        .from('products')
+                                        .update(payload)
+                                        .eq('id', productId)
+                                        .select();
 
-                                if (!result.error && result.data && result.data.length === 0) {
-                                    throw new Error('Update failed: ID matched no rows. Refresh and try again.');
+                                    if (!result.error && result.data && result.data.length === 0) {
+                                        throw new Error('Update failed: ID matched no rows. Refresh and try again.');
+                                    }
+                                    return result;
                                 }
-                                dbError = result.error;
-                            } else {
-                                // Insert new product
-                                const result = await window.supabaseAdminClient
-                                    .from('products')
-                                    .insert([productData])
-                                    .select();
 
-                                if (!result.error && result.data && result.data.length > 0) {
-                                    savedProductId = result.data[0].id;
-                                }
-                                dbError = result.error;
+                                return window.supabaseAdminClient
+                                    .from('products')
+                                    .insert([payload])
+                                    .select();
                             }
 
-                            if (dbError) throw dbError;
+                            let previewFieldsSkipped = false;
+                            let saveResult = await saveProductRecord(productData);
+
+                            if (saveResult.error && isMissingPreviewColumnError(saveResult.error)) {
+                                console.warn('Preview columns are not in Supabase yet. Saving legacy product fields only.', saveResult.error);
+                                previewFieldsSkipped = true;
+                                saveResult = await saveProductRecord(removeProductPreviewColumns(productData));
+                            }
+
+                            if (saveResult.error) throw saveResult.error;
+
+                            if (!productId && saveResult.data && saveResult.data.length > 0) {
+                                savedProductId = saveResult.data[0].id;
+                            }
 
                             // Cleanup orphaned files from storage if they were replaced during update
                             if (oldProduct) {
@@ -2129,6 +2265,9 @@ Brief Q&A"></textarea>
 
                             // Success
                             status.textContent = productId ? '✅ Product updated successfully!' : '✅ Product added successfully!';
+                            if (previewFieldsSkipped) {
+                                status.textContent += ' Preview fields were skipped because migration 0003 has not been applied yet.';
+                            }
                             status.classList.add('success');
                             document.getElementById('productForm').reset();
                             if (quill) quill.setText('');
@@ -2225,7 +2364,7 @@ Brief Q&A"></textarea>
 
                     // Helper to copy product link
                     window.copyProductLink = (id) => {
-                        const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
+                        const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'product.html');
                         const shareUrl = `${baseUrl}?id=${id}`;
                         navigator.clipboard.writeText(shareUrl).then(() => {
                             alert('✅ Shareable link copied to clipboard!\n' + shareUrl);
@@ -2275,6 +2414,7 @@ Brief Q&A"></textarea>
                         // Load Rating & Sales Count
                         document.getElementById('productRating').value = data.average_rating || 5;
                         document.getElementById('productSalesCount').value = data.sales_count || 0;
+                        populateProductPreviewFields(data);
 
                         // Load selected reviews for this product
                         await loadProductReviewsSelection(data.id);
@@ -2306,6 +2446,7 @@ Brief Q&A"></textarea>
                         document.getElementById('productDiscount').value = '';
                         document.getElementById('productCouponCode').value = '';
                         document.getElementById('productExternalUrl').value = ''; // Reset external URL
+                        clearProductPreviewFields();
 
                         const freeCheck = document.getElementById('productFree');
                         if (freeCheck) {
