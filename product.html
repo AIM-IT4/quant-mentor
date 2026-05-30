@@ -294,6 +294,68 @@
             margin-bottom: 8px;
         }
 
+        .preview-page-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.96));
+            color: #111827;
+            padding: 22px;
+            min-height: 270px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .preview-page-kicker {
+            color: #4f46e5;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .preview-page-title {
+            color: #111827;
+            font-size: 1.1rem;
+            line-height: 1.35;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .preview-page-lines {
+            display: grid;
+            gap: 8px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .preview-page-lines li {
+            display: grid;
+            grid-template-columns: 14px minmax(0, 1fr);
+            gap: 8px;
+            color: #374151;
+            font-size: 0.88rem;
+            line-height: 1.45;
+        }
+
+        .preview-page-lines li::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4f46e5;
+            margin-top: 8px;
+        }
+
+        .preview-page-note {
+            margin-top: auto;
+            border-top: 1px solid #dbe3ef;
+            padding-top: 12px;
+            color: #475569;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            line-height: 1.55;
+        }
+
         @media (max-width: 768px) {
             .product-page-container {
                 padding: 100px 15px 40px;
@@ -1145,8 +1207,14 @@
                     product.preview_sample_images,
                     product.sample_images,
                     product.preview_screenshots,
-                    product.sample_page_urls,
-                    product.cover_image_url ? [product.cover_image_url] : []
+                    product.sample_page_urls
+                ),
+                samplePages: normalizeSamplePages(
+                    product.preview_sample_pages,
+                    product.sample_pages,
+                    profile.samplePages,
+                    profile,
+                    product
                 ),
                 sampleText: firstNonEmpty(
                     product.preview_sample_text,
@@ -1157,7 +1225,180 @@
         }
 
         function getPreviewProfile(product) {
-            const name = `${product.name || ''} ${stripHtml(product.description || '')}`.toLowerCase();
+            const title = `${product.name || ''}`.toLowerCase();
+            const searchable = `${product.name || ''} ${stripHtml(product.description || '')}`.toLowerCase();
+
+            const specificProfiles = [
+                {
+                    match: ['complete front office', 'professional bundle'],
+                    summary: 'A broad front-office and risk quant bundle covering pricing, asset-class models, coding templates, and desk diagnostics in one package.',
+                    toc: ['Front-office quant roadmap and setup', 'Derivatives pricing foundations', 'IR, FX, credit, and equity model packs', 'Greeks, curves, volatility, MC, and XVA', 'Python, C++, SQL, and R implementation assets', 'Interview and project conversion checklist'],
+                    audience: ['Candidates who want a complete quant prep stack', 'Practitioners moving across pricing, risk, and model validation', 'Learners who prefer one consolidated resource pack'],
+                    prerequisites: ['Probability, calculus, and basic derivatives awareness', 'Some Python or C++ exposure', 'Willingness to work through multiple topic tracks'],
+                    outcomes: ['Build a structured front-office prep plan', 'Connect asset-class models to practical diagnostics', 'Use scripts and PDFs as a reusable interview library'],
+                    samplePages: [
+                        { title: 'Bundle map', lines: ['How PDFs, scripts, and notebooks are organized by role', 'Which modules to study first for QR, QD, risk, and validation paths', 'How to combine products into a 30-day prep plan'], note: 'Start with roadmap, then specialize by role.' },
+                        { title: 'Desk diagnostic page', lines: ['Model input, calibration, and market-data checks', 'What to say when a pricing number looks wrong', 'Typical interviewer follow-ups and recovery prompts'], note: 'Designed for practical desk conversations.' }
+                    ],
+                    sampleText: 'The bundle is organized as a working library: pick the track you need, study the concepts, then use the scripts and prompts to convert that topic into interview-ready explanations.'
+                },
+                {
+                    match: ['quant models for each asset class'],
+                    summary: 'A cross-asset model pack focused on the intuition, assumptions, calibration habits, and interview framing for IR, FX, credit, and equity models.',
+                    toc: ['Interest-rate curve and short-rate model setup', 'FX model intuition and smile dynamics', 'Credit intensity, spread, and default modeling', 'Equity volatility and local/stochastic vol models', 'Cross-asset calibration and diagnostics', 'Interview prompts by asset class'],
+                    audience: ['Candidates targeting front-office quant roles', 'Risk and validation analysts covering multiple desks', 'Students who need model intuition by asset class'],
+                    prerequisites: ['Derivatives pricing basics', 'Probability and stochastic-process familiarity', 'Some exposure to curves, volatility, or credit spreads'],
+                    outcomes: ['Compare models across asset classes', 'Explain calibration choices and model limitations', 'Handle asset-class-specific interview questions'],
+                    samplePages: [
+                        { title: 'Asset-class model comparison', lines: ['When rates need curve dynamics instead of a flat discount factor', 'Why FX smile behavior differs from equity vol intuition', 'How credit default timing changes payoff reasoning'], note: 'The page connects model choice to market behavior.' },
+                        { title: 'Calibration checklist', lines: ['Inputs to validate before calibration', 'Symptoms of unstable parameters', 'How to explain a failed fit in an interview'], note: 'Use this before discussing any model output.' }
+                    ],
+                    sampleText: 'Each asset class is treated separately first, then compared so you can explain why the same pricing idea changes across IR, FX, credit, and equity markets.'
+                },
+                {
+                    match: ['derivatives products', 'derivatives products & pricing'],
+                    summary: 'A derivatives pricing pack organized by product type, payoff behavior, Greeks, model inputs, and practical desk failure modes.',
+                    toc: ['Forward, swap, and option payoff map', 'Pricing setup and no-arbitrage intuition', 'Greeks by product and scenario', 'Volatility, curves, dividends, and funding inputs', 'Numerical methods and Monte Carlo use cases', 'Product-specific interview questions'],
+                    audience: ['Derivatives interview candidates', 'Risk analysts moving into pricing', 'Developers implementing pricing or risk utilities'],
+                    prerequisites: ['Basic options and discounting knowledge', 'Calculus and probability fundamentals', 'Comfort reading formulas and payoff diagrams'],
+                    outcomes: ['Explain product behavior before formulas', 'Choose pricing inputs more defensibly', 'Discuss Greeks and numerical methods with context'],
+                    samplePages: [
+                        { title: 'Payoff-first product page', lines: ['Contract definition before formula', 'Economic intuition for long and short exposure', 'Which Greeks matter most for this payoff'], note: 'The structure starts from the product, not just the equation.' },
+                        { title: 'Pricing input audit', lines: ['Curve, vol, dividend, fixing, and day-count checks', 'Common market-data traps', 'How input errors show up in Greeks'], note: 'Useful for both interviews and desk debugging.' }
+                    ],
+                    sampleText: 'The material keeps products, model assumptions, and risk behavior tied together so pricing does not become a detached formula exercise.'
+                },
+                {
+                    match: ['greek explainer', 'greeks, vols', 'vols, ycurves', 'ycurves'],
+                    summary: 'A Greeks and diagnostics resource focused on how sensitivities move, fail, and explain PnL across pricing setups.',
+                    toc: ['Delta, gamma, vega, theta, and rho intuition', 'Vol surfaces, curves, and scenario shifts', 'Finite difference and bumping choices', 'Numerical Greeks and stability issues', 'PnL attribution from sensitivities', 'Interview traps and desk fixes'],
+                    audience: ['Candidates who need stronger risk intuition', 'Developers implementing pricing diagnostics', 'Risk quants explaining daily moves'],
+                    prerequisites: ['Options basics', 'Comfort with derivatives terminology', 'Some numerical-methods exposure helpful'],
+                    outcomes: ['Interpret Greeks as behavior, not memorized labels', 'Explain sensitivity instability', 'Connect Greeks to PnL and hedging conversations'],
+                    samplePages: [
+                        { title: 'Greek behavior page', lines: ['What the Greek measures locally', 'What breaks when the market move is large', 'How to explain sign and magnitude under stress'], note: 'Each Greek is tied to a desk question.' },
+                        { title: 'Numerical stability page', lines: ['Bump size selection', 'Central versus forward differences', 'Why noisy models create noisy sensitivities'], note: 'Useful for implementation and model validation.' }
+                    ],
+                    sampleText: 'The preview pages focus on the kind of sensitivity reasoning an interviewer expects after asking, "What happens if vol or rates move?"'
+                },
+                {
+                    match: ['stochastic calculus visual lab', 'stochastic calculus for quants'],
+                    summary: 'A stochastic calculus resource built around visual intuition, derivation structure, and finance use cases rather than isolated notation.',
+                    toc: ['Brownian motion and quadratic variation', 'Ito lemma with finance examples', 'SDEs behind common pricing models', 'Risk-neutral measure and numeraire intuition', 'Monte Carlo interpretation', 'Interview derivations and notebook-style practice'],
+                    audience: ['Financial engineering students', 'Quant interview candidates', 'Practitioners revisiting stochastic calculus'],
+                    prerequisites: ['Calculus and probability', 'Basic option pricing awareness', 'Comfort with mathematical notation'],
+                    outcomes: ['Explain Ito lemma without handwaving', 'Connect SDE assumptions to pricing models', 'Handle derivation questions with a repeatable structure'],
+                    samplePages: [
+                        { title: 'Ito lemma walkthrough', lines: ['Start from ordinary Taylor expansion', 'Add the quadratic variation term', 'Translate the result into option-pricing language'], note: 'The derivation is built for explanation under pressure.' },
+                        { title: 'Simulation page', lines: ['Discretize the SDE', 'Track path behavior and convergence', 'Explain what Monte Carlo estimates in pricing'], note: 'Visual intuition connects math to implementation.' }
+                    ],
+                    sampleText: 'The focus is on seeing why the stochastic terms matter, then using that structure in pricing and interview derivations.'
+                },
+                {
+                    match: ['statistics & econometrics', 'probability theory', 'linear algebra', 'differential equations'],
+                    summary: 'A quant math resource focused on the foundations that repeatedly appear in modeling, estimation, risk, and interviews.',
+                    toc: ['Core definitions and intuition', 'Finance-flavored worked examples', 'Estimation, regression, and diagnostics', 'Linear systems and transformations', 'Common interview derivations', 'Practice problems with reasoning prompts'],
+                    audience: ['Students strengthening quant foundations', 'Candidates preparing for math-heavy interviews', 'Practitioners refreshing estimation and modeling basics'],
+                    prerequisites: ['Undergraduate math exposure', 'Willingness to solve exercises manually', 'Basic programming helpful for examples'],
+                    outcomes: ['Build cleaner mathematical explanations', 'Recognize recurring interview patterns', 'Apply foundations to model and risk examples'],
+                    samplePages: [
+                        { title: 'Concept to finance map', lines: ['Definition in plain language', 'Where it appears in quant finance', 'Common interviewer twist'], note: 'Each topic is tied to a practical use case.' },
+                        { title: 'Worked reasoning page', lines: ['Assumptions first', 'Step-by-step derivation', 'Final interpretation and failure cases'], note: 'Written to improve explanation quality, not rote recall.' }
+                    ],
+                    sampleText: 'The pages convert foundations into interview and modeling language so you can explain both the math and its financial use.'
+                },
+                {
+                    match: ['machine learning for quants'],
+                    summary: 'A machine-learning-for-quants playbook covering feature design, validation, leakage, model diagnostics, and interview framing.',
+                    toc: ['ML use cases in quant finance', 'Feature engineering and target construction', 'Train-test splits and leakage traps', 'Model selection and diagnostics', 'Backtesting and validation pitfalls', 'Interview questions and project prompts'],
+                    audience: ['Quant candidates with ML projects', 'Data scientists moving into finance', 'Students building finance ML portfolios'],
+                    prerequisites: ['Basic statistics and Python', 'Familiarity with regression or classification', 'Awareness of time-series data'],
+                    outcomes: ['Avoid common finance ML mistakes', 'Explain validation choices clearly', 'Turn ML projects into quant interview evidence'],
+                    samplePages: [
+                        { title: 'Leakage checklist', lines: ['Look-ahead features', 'Improper cross-validation', 'Target construction and survivorship bias'], note: 'The checklist is meant to catch mistakes before backtesting.' },
+                        { title: 'Model diagnostic page', lines: ['Signal stability', 'Feature importance sanity checks', 'Performance decay and regime shifts'], note: 'Focuses on whether a result can survive scrutiny.' }
+                    ],
+                    sampleText: 'The material is built around model validation and failure modes because that is where finance ML projects are usually challenged.'
+                },
+                {
+                    match: ['credit models'],
+                    summary: 'A credit-model interview playbook focused on default modeling, spreads, intensity, transition risk, and practical credit diagnostics.',
+                    toc: ['Credit product and spread intuition', 'Hazard rates and survival probabilities', 'Default timing and recovery assumptions', 'CDS and risky bond pricing setup', 'Calibration and spread diagnostics', 'Credit interview cases'],
+                    audience: ['Credit quant candidates', 'Risk analysts covering credit products', 'Students learning default modeling'],
+                    prerequisites: ['Discounting and probability basics', 'Some derivatives pricing exposure', 'Basic understanding of bonds helpful'],
+                    outcomes: ['Explain credit spread and default intuition', 'Build pricing logic from survival probabilities', 'Discuss calibration and recovery assumptions'],
+                    samplePages: [
+                        { title: 'Survival curve page', lines: ['Map hazard rate to survival probability', 'Interpret default density', 'Connect assumptions to risky PV'], note: 'Starts from timing of default.' },
+                        { title: 'CDS pricing page', lines: ['Premium leg intuition', 'Protection leg intuition', 'Recovery and discounting effects'], note: 'Useful for credit interview walkthroughs.' }
+                    ],
+                    sampleText: 'Credit topics are framed around default timing, recovery, and spread behavior so the formulas stay economically grounded.'
+                },
+                {
+                    match: ['interest rate models'],
+                    summary: 'An interest-rate model playbook covering curves, short-rate intuition, HJM/LMM framing, calibration, and rates interview questions.',
+                    toc: ['Yield curves and discount factors', 'Forwards, swaps, caps, and swaptions', 'Short-rate model intuition', 'HJM and LMM framing', 'Calibration and curve diagnostics', 'Rates interview questions'],
+                    audience: ['Rates quant candidates', 'Developers working near curve and pricing systems', 'Risk analysts covering IR products'],
+                    prerequisites: ['Discounting and fixed-income basics', 'Calculus and probability', 'Some derivatives pricing exposure'],
+                    outcomes: ['Explain curve construction and model role', 'Discuss rates model assumptions', 'Handle common swaps, caps, and swaptions questions'],
+                    samplePages: [
+                        { title: 'Curve construction page', lines: ['Discount factors versus zero rates', 'Bootstrapping intuition', 'Where interpolation choices matter'], note: 'Curve logic is the base layer for rates pricing.' },
+                        { title: 'Model comparison page', lines: ['Short-rate model tradeoffs', 'HJM drift restriction intuition', 'Why LMM was designed around market rates'], note: 'Built for interview comparisons.' }
+                    ],
+                    sampleText: 'Rates content is organized around curves first, then models, because most practical pricing and interview questions depend on that order.'
+                },
+                {
+                    match: ['fx models'],
+                    summary: 'An FX model playbook covering forwards, carry, smile behavior, quanto effects, calibration, and desk-style FX interview prompts.',
+                    toc: ['FX forwards and interest-rate parity', 'Vanilla options and smile conventions', 'Local and stochastic volatility intuition', 'Barriers and exotic FX behavior', 'Calibration diagnostics', 'FX interview cases'],
+                    audience: ['FX quant candidates', 'Derivatives learners focusing on currency markets', 'Risk analysts covering FX options'],
+                    prerequisites: ['Options basics', 'Rates and discounting awareness', 'Probability and volatility intuition'],
+                    outcomes: ['Explain FX-specific pricing inputs', 'Discuss smile and barrier behavior', 'Handle FX model interview questions'],
+                    samplePages: [
+                        { title: 'FX forward page', lines: ['Domestic versus foreign discounting', 'Interest-rate parity intuition', 'What breaks under funding or basis effects'], note: 'Starts with the FX-specific numeraire setup.' },
+                        { title: 'Smile and barrier page', lines: ['Why smile conventions matter', 'Barrier sensitivity near the trigger', 'Calibration checks before pricing exotics'], note: 'Connects market quotes to model behavior.' }
+                    ],
+                    sampleText: 'The pack highlights where FX differs from equity options: two curves, quote conventions, barriers, and smile behavior.'
+                },
+                {
+                    match: ['equity models'],
+                    summary: 'An equity model playbook covering dividends, volatility smiles, local/stochastic volatility, exotics, and equity interview framing.',
+                    toc: ['Equity forward and dividend setup', 'Vanilla option pricing and Greeks', 'Volatility surface intuition', 'Local volatility and stochastic volatility', 'Exotic payoff behavior', 'Equity model interview prompts'],
+                    audience: ['Equity quant candidates', 'Options learners moving beyond Black-Scholes', 'Risk analysts covering equity derivatives'],
+                    prerequisites: ['Option pricing basics', 'Volatility and Greeks intuition', 'Some stochastic-process exposure helpful'],
+                    outcomes: ['Explain equity model assumptions clearly', 'Connect dividends and vol surfaces to pricing', 'Discuss model limitations in interviews'],
+                    samplePages: [
+                        { title: 'Dividend and forward page', lines: ['Forward price components', 'Discrete versus continuous dividends', 'Impact on options and early exercise intuition'], note: 'Equity pricing starts with the forward.' },
+                        { title: 'Vol model page', lines: ['Local volatility fit versus dynamics', 'Stochastic volatility intuition', 'When each model can mislead'], note: 'Designed for model comparison questions.' }
+                    ],
+                    sampleText: 'Equity models are presented through product behavior and volatility diagnostics so you can move beyond naming models.'
+                },
+                {
+                    match: ['pnl attribution'],
+                    summary: 'A PnL attribution and desk diagnostics guide focused on explaining daily moves, Greeks, residuals, and model/data issues.',
+                    toc: ['PnL explain framework', 'Greeks-based attribution', 'Curve, vol, and spread moves', 'Residual and unexplained PnL analysis', 'Data and model diagnostics', 'Interview case studies'],
+                    audience: ['Risk quants and desk analysts', 'Model validation candidates', 'Front-office candidates who need PnL fluency'],
+                    prerequisites: ['Greeks and risk basics', 'Some derivatives pricing exposure', 'Comfort with market-data scenarios'],
+                    outcomes: ['Explain PnL drivers more clearly', 'Separate market moves from model/data issues', 'Handle practical desk diagnostic questions'],
+                    samplePages: [
+                        { title: 'Daily PnL explain page', lines: ['Start from positions and market moves', 'Use Greeks for first-order explanation', 'Escalate residuals with a diagnostic path'], note: 'A repeatable workflow for desk questions.' },
+                        { title: 'Residual analysis page', lines: ['Model approximation error', 'Stale or bad market data', 'Missing risk factors and cross terms'], note: 'Shows what to check after Greeks do not explain the move.' }
+                    ],
+                    sampleText: 'The guide is built around explaining what happened today, what did not explain, and how to investigate the gap.'
+                },
+                {
+                    match: ['regulatory', 'risk frameworks'],
+                    summary: 'A regulatory and risk frameworks guide covering model risk, controls, capital, validation, and interview-ready governance language.',
+                    toc: ['Risk framework map', 'Model validation and governance', 'Capital and regulatory concepts', 'Stress testing and scenario analysis', 'Controls and documentation', 'Interview case prompts'],
+                    audience: ['Model risk and validation candidates', 'Risk quants preparing for governance questions', 'Front-office candidates needing control awareness'],
+                    prerequisites: ['Basic derivatives and risk concepts', 'Interest in model lifecycle and controls', 'Some exposure to banking terminology helpful'],
+                    outcomes: ['Speak about model governance precisely', 'Connect regulation to desk workflows', 'Handle risk-framework interview questions'],
+                    samplePages: [
+                        { title: 'Model lifecycle page', lines: ['Development, validation, approval, monitoring', 'Documentation expectations', 'When a model change needs escalation'], note: 'Governance described in practical language.' },
+                        { title: 'Stress and control page', lines: ['Scenario design', 'Limit and breach interpretation', 'How controls interact with model output'], note: 'Useful for risk and validation interviews.' }
+                    ],
+                    sampleText: 'The content focuses on saying the right things clearly: model purpose, limits, controls, documentation, and escalation.'
+                }
+            ];
 
             const profiles = [
                 {
@@ -1243,13 +1484,20 @@
                 }
             ];
 
-            const selected = profiles.find(profile => profile.match.some(term => name.includes(term)));
+            const selected =
+                specificProfiles.find(profile => profile.match.some(term => title.includes(term))) ||
+                profiles.find(profile => profile.match.some(term => searchable.includes(term)));
+
             return selected || {
                 summary: 'A structured quant finance resource built to move from concept review to practical interview and desk-style application.',
                 toc: ['Concept map and prerequisites', 'Core formulas and intuition', 'Worked examples', 'Common mistakes and diagnostics', 'Interview-style questions', 'Practice plan and next steps'],
                 audience: ['Quant finance aspirants', 'Students preparing for interviews', 'Practitioners looking for a focused refresher'],
                 prerequisites: ['Basic probability and calculus', 'Some programming exposure is helpful', 'Interest in practical finance applications'],
                 outcomes: ['Understand the topic structure', 'Practice with clearer mental models', 'Apply the material in interviews or project work'],
+                samplePages: [
+                    { title: 'Concept map page', lines: ['Topic overview and dependencies', 'Core formulas with plain-language interpretation', 'Where the topic appears in quant interviews'], note: 'Built for quick orientation before deeper practice.' },
+                    { title: 'Worked example page', lines: ['Problem setup and assumptions', 'Step-by-step solution logic', 'Common mistakes and interviewer follow-ups'], note: 'Designed to move from reading to active recall.' }
+                ],
                 sampleText: 'The resource is designed to be practical: concise explanations, worked structure, and examples that help you apply the topic instead of only reading about it.'
             };
         }
@@ -1270,9 +1518,13 @@
                 sampleCards.push(`
                     <div class="preview-sample-card">
                         <img src="${escapeAttribute(url)}" alt="${escapeAttribute(product.name || 'Product')} sample ${index + 1}">
-                        <div class="preview-sample-caption">${index === 0 && url === product.cover_image_url ? 'Cover preview' : `Sample page ${index + 1}`}</div>
+                        <div class="preview-sample-caption">Sample screenshot ${index + 1}</div>
                     </div>
                 `);
+            });
+
+            preview.samplePages.forEach((page, index) => {
+                sampleCards.push(renderPreviewSamplePage(page, index));
             });
 
             if (preview.sampleText) {
@@ -1287,6 +1539,91 @@
             }
 
             grid.innerHTML = sampleCards.join('');
+        }
+
+        function renderPreviewSamplePage(page, index) {
+            const lines = (page.lines || []).slice(0, 5);
+            return `
+                <div class="preview-sample-card">
+                    <div class="preview-page-card">
+                        <div class="preview-page-kicker">Sample page ${index + 1}</div>
+                        <h4 class="preview-page-title">${escapeHTML(page.title || 'Preview page')}</h4>
+                        <ul class="preview-page-lines">
+                            ${lines.map(line => `<li>${escapeHTML(line)}</li>`).join('')}
+                        </ul>
+                        ${page.note ? `<div class="preview-page-note">${escapeHTML(page.note)}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function normalizeSamplePages(...values) {
+            for (const value of values) {
+                const pages = parseSamplePages(value);
+                if (pages.length) return pages;
+            }
+            const profile = values[values.length - 2] || {};
+            return buildDefaultSamplePages(profile);
+        }
+
+        function parseSamplePages(value) {
+            if (!value) return [];
+
+            if (Array.isArray(value)) {
+                return value.map(page => {
+                    if (typeof page === 'string') {
+                        return { title: page, lines: [] };
+                    }
+                    return {
+                        title: page.title || page.heading || 'Preview page',
+                        lines: normalizePreviewList(page.lines || page.points || page.items || page.body),
+                        note: page.note || page.footer || ''
+                    };
+                }).filter(page => page.title || page.lines.length);
+            }
+
+            if (typeof value === 'string') {
+                const trimmed = value.trim();
+                if (!trimmed) return [];
+
+                try {
+                    return parseSamplePages(JSON.parse(trimmed));
+                } catch (e) {
+                    const blocks = trimmed.split(/\n\s*\n/).map(block => block.trim()).filter(Boolean);
+                    return blocks.map(block => {
+                        const parts = block.split(/\r?\n/).map(part => part.trim()).filter(Boolean);
+                        return {
+                            title: parts[0] || 'Preview page',
+                            lines: parts.slice(1)
+                        };
+                    });
+                }
+            }
+
+            return [];
+        }
+
+        function buildDefaultSamplePages(profile) {
+            return [
+                {
+                    title: (profile.toc && profile.toc[0]) || 'Concept overview',
+                    lines: [
+                        (profile.summary || 'A concise topic overview for quant preparation.'),
+                        (profile.toc && profile.toc[1]) || 'Key intuition and formulas',
+                        (profile.outcomes && profile.outcomes[0]) || 'Practical application checkpoints'
+                    ],
+                    note: 'Representative generated preview. Add screenshot URLs in admin for exact page images.'
+                },
+                {
+                    title: (profile.toc && profile.toc[2]) || 'Worked example',
+                    lines: [
+                        (profile.prerequisites && profile.prerequisites[0]) || 'Assumptions and setup',
+                        (profile.outcomes && profile.outcomes[1]) || 'Step-by-step solution logic',
+                        (profile.toc && profile.toc[profile.toc.length - 1]) || 'Interview follow-ups'
+                    ],
+                    note: 'Use the admin preview fields to replace this with actual product sample pages.'
+                }
+            ];
         }
 
         function firstList(...values) {
