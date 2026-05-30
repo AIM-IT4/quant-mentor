@@ -115,6 +115,185 @@
             gap: 20px;
         }
 
+        .product-preview-section {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            padding: 0 20px 30px;
+        }
+
+        .product-preview-header {
+            margin-bottom: 24px;
+        }
+
+        .product-preview-eyebrow {
+            color: var(--accent-primary);
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .product-preview-title {
+            color: var(--text-primary);
+            font-size: 2rem;
+            line-height: 1.2;
+            margin: 0 0 10px;
+        }
+
+        .product-preview-subtitle {
+            color: var(--text-secondary);
+            max-width: 720px;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .product-preview-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .preview-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16);
+        }
+
+        .preview-panel-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+            font-size: 1.12rem;
+            margin: 0 0 18px;
+        }
+
+        .preview-panel-title i {
+            color: var(--accent-primary);
+        }
+
+        .preview-toc-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            counter-reset: preview-toc;
+            display: grid;
+            gap: 12px;
+        }
+
+        .preview-toc-list li {
+            counter-increment: preview-toc;
+            display: grid;
+            grid-template-columns: 34px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            color: var(--text-secondary);
+            line-height: 1.55;
+        }
+
+        .preview-toc-list li::before {
+            content: counter(preview-toc, decimal-leading-zero);
+            color: var(--text-primary);
+            background: rgba(99, 102, 241, 0.16);
+            border: 1px solid rgba(99, 102, 241, 0.32);
+            border-radius: 8px;
+            width: 34px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .preview-fit-stack {
+            display: grid;
+            gap: 18px;
+        }
+
+        .preview-list-block h3 {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            margin: 0 0 10px;
+        }
+
+        .preview-check-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 9px;
+        }
+
+        .preview-check-list li {
+            color: var(--text-secondary);
+            line-height: 1.55;
+            display: grid;
+            grid-template-columns: 18px minmax(0, 1fr);
+            gap: 9px;
+        }
+
+        .preview-check-list li::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: #22c55e;
+            font-size: 0.78rem;
+            margin-top: 3px;
+        }
+
+        .preview-sample-panel {
+            margin-top: 22px;
+        }
+
+        .preview-sample-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .preview-sample-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            min-height: 180px;
+        }
+
+        .preview-sample-card img {
+            display: block;
+            width: 100%;
+            height: 220px;
+            object-fit: contain;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .preview-sample-caption {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            line-height: 1.5;
+            padding: 14px 16px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .preview-sample-text {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            padding: 18px;
+        }
+
+        .preview-sample-text strong {
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 8px;
+        }
+
         @media (max-width: 768px) {
             .product-page-container {
                 padding: 100px 15px 40px;
@@ -161,6 +340,22 @@
 
             .action-buttons .btn {
                 width: 100%;
+            }
+
+            .product-preview-section {
+                padding: 0 15px 24px;
+            }
+
+            .product-preview-title {
+                font-size: 1.55rem;
+            }
+
+            .product-preview-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-panel {
+                padding: 18px;
             }
 
             .coupon-row {
@@ -460,6 +655,52 @@
         </div>
     </div>
 
+    <!-- Product Preview Section -->
+    <section class="product-preview-section" id="product-preview-section">
+        <div class="product-preview-header">
+            <div class="product-preview-eyebrow">Inside the resource</div>
+            <h2 class="product-preview-title">Preview what you will get</h2>
+            <p class="product-preview-subtitle" id="preview-summary">
+                A practical look at the structure, audience fit, prerequisites, and outcomes before you buy.
+            </p>
+        </div>
+
+        <div class="product-preview-grid">
+            <article class="preview-panel">
+                <h3 class="preview-panel-title">
+                    <i class="fas fa-list-check"></i>
+                    Table of contents
+                </h3>
+                <ol class="preview-toc-list" id="preview-toc-list"></ol>
+            </article>
+
+            <aside class="preview-panel">
+                <div class="preview-fit-stack">
+                    <div class="preview-list-block">
+                        <h3>Target audience</h3>
+                        <ul class="preview-check-list" id="preview-audience-list"></ul>
+                    </div>
+                    <div class="preview-list-block">
+                        <h3>Prerequisites</h3>
+                        <ul class="preview-check-list" id="preview-prerequisites-list"></ul>
+                    </div>
+                    <div class="preview-list-block">
+                        <h3>Expected outcomes</h3>
+                        <ul class="preview-check-list" id="preview-outcomes-list"></ul>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <article class="preview-panel preview-sample-panel">
+            <h3 class="preview-panel-title">
+                <i class="fas fa-file-image"></i>
+                Sample pages and screenshots
+            </h3>
+            <div class="preview-sample-grid" id="preview-sample-grid"></div>
+        </article>
+    </section>
+
     <!-- Reviews Carousel Section -->
     <section class="reviews-carousel-section" id="reviews-section" style="display: none;">
         <h2>What are people saying</h2>
@@ -570,6 +811,8 @@
                 if (product.sales_count !== undefined) {
                     document.getElementById('p-sales').textContent = product.sales_count || 0;
                 }
+
+                renderProductPreview(product);
 
                 // Load Product-Specific Reviews
                 loadProductReviews(id);
@@ -799,6 +1042,263 @@
                 console.error(err);
                 showError();
             }
+        }
+
+        function renderProductPreview(product) {
+            const section = document.getElementById('product-preview-section');
+            if (!section) return;
+
+            const preview = buildProductPreview(product);
+
+            document.getElementById('preview-summary').textContent = preview.summary;
+            renderPreviewList('preview-toc-list', preview.toc, 'ol');
+            renderPreviewList('preview-audience-list', preview.audience, 'ul');
+            renderPreviewList('preview-prerequisites-list', preview.prerequisites, 'ul');
+            renderPreviewList('preview-outcomes-list', preview.outcomes, 'ul');
+            renderPreviewSamples(product, preview);
+
+            section.style.display = 'block';
+        }
+
+        function buildProductPreview(product) {
+            const profile = getPreviewProfile(product);
+            const descriptionText = stripHtml(product.description || '');
+
+            return {
+                summary: firstNonEmpty(
+                    product.preview_summary,
+                    profile.summary,
+                    descriptionText ? descriptionText.substring(0, 190) : ''
+                ),
+                toc: firstList(
+                    product.preview_table_of_contents,
+                    product.table_of_contents,
+                    product.toc,
+                    profile.toc
+                ),
+                audience: firstList(
+                    product.preview_target_audience,
+                    product.target_audience,
+                    profile.audience
+                ),
+                prerequisites: firstList(
+                    product.preview_prerequisites,
+                    product.prerequisites,
+                    profile.prerequisites
+                ),
+                outcomes: firstList(
+                    product.preview_expected_outcomes,
+                    product.expected_outcomes,
+                    profile.outcomes
+                ),
+                sampleImages: firstList(
+                    product.preview_sample_images,
+                    product.sample_images,
+                    product.preview_screenshots,
+                    product.sample_page_urls,
+                    product.cover_image_url ? [product.cover_image_url] : []
+                ),
+                sampleText: firstNonEmpty(
+                    product.preview_sample_text,
+                    profile.sampleText,
+                    descriptionText
+                )
+            };
+        }
+
+        function getPreviewProfile(product) {
+            const name = `${product.name || ''} ${stripHtml(product.description || '')}`.toLowerCase();
+
+            const profiles = [
+                {
+                    match: ['python'],
+                    summary: 'A desk-oriented Python resource focused on numerical workflows, interview drills, and reusable quant finance code patterns.',
+                    toc: ['Python setup for quant workflows', 'NumPy, pandas, and vectorized calculations', 'Pricing and simulation examples', 'Data cleaning and diagnostics', 'Interview-style coding drills', 'Reusable templates and next steps'],
+                    audience: ['Quant aspirants learning production-style Python', 'Analysts moving from Excel or theory into code', 'Candidates preparing for coding-heavy quant interviews'],
+                    prerequisites: ['Basic Python syntax', 'Comfort with probability and statistics', 'A laptop or notebook environment for running examples'],
+                    outcomes: ['Write cleaner numerical Python code', 'Recognize common interview patterns', 'Build reusable notebooks and scripts for practice'],
+                    sampleText: 'Expect worked examples, runnable snippets, and concise explanations that connect the code to pricing, risk, and interview reasoning.'
+                },
+                {
+                    match: ['c++', 'cpp'],
+                    summary: 'A practical C++ resource for candidates who need performance-aware implementation patterns for quant and trading interviews.',
+                    toc: ['Modern C++ refresh', 'STL patterns used in interview problems', 'Memory, references, and object lifetime', 'Numerical routines and pricing skeletons', 'Performance and debugging habits', 'Desk-style coding prompts'],
+                    audience: ['Quant developer candidates', 'Python users adding C++ for interviews', 'Engineers targeting trading systems roles'],
+                    prerequisites: ['Basic C++ syntax', 'Familiarity with arrays, classes, and functions', 'Comfort reading compiler errors'],
+                    outcomes: ['Implement faster numerical routines', 'Discuss performance tradeoffs clearly', 'Prepare for C++ quant developer screens'],
+                    sampleText: 'The material emphasizes implementation choices, failure modes, and the kind of C++ reasoning that comes up in trading and quant developer interviews.'
+                },
+                {
+                    match: ['sql'],
+                    summary: 'A compact SQL interview pack built around finance-style data questions, joins, windows, aggregation, and diagnostics.',
+                    toc: ['SQL foundations for market and trade data', 'Joins, grouping, and filters', 'Window functions and ranking', 'PnL and exposure-style queries', 'Debugging bad data', 'Interview question set with solutions'],
+                    audience: ['Quant, risk, and data candidates', 'Analysts preparing for SQL rounds', 'Candidates who need finance-flavored query practice'],
+                    prerequisites: ['Basic database terminology', 'Familiarity with tables and rows', 'Willingness to practice queries hands-on'],
+                    outcomes: ['Answer SQL screens with structure', 'Work through trading-data query patterns', 'Spot common query mistakes quickly'],
+                    sampleText: 'You will see practical query patterns that map naturally to trades, positions, prices, exposures, and interview-style analytics.'
+                },
+                {
+                    match: ['interview', 'problem', 'mistakes', 'mental math', 'brain'],
+                    summary: 'An interview-focused resource that turns scattered preparation into structured patterns, worked reasoning, and repeatable drills.',
+                    toc: ['Core quant interview map', 'Probability and statistics patterns', 'Mental math and market intuition', 'Pricing and Greeks questions', 'Coding and logic prompts', 'Common traps and desk-ready fixes'],
+                    audience: ['Students targeting quant interviews', 'Career switchers building a prep plan', 'Candidates who want realistic question patterns'],
+                    prerequisites: ['Basic probability and calculus', 'Some programming exposure', 'Willingness to solve before reading solutions'],
+                    outcomes: ['Recognize recurring interview patterns', 'Explain reasoning under pressure', 'Close gaps with a targeted practice plan'],
+                    sampleText: 'The focus is not just answers. Each section is built to help you explain assumptions, defend approximations, and recover when an interviewer pushes back.'
+                },
+                {
+                    match: ['derivative', 'pricing', 'greek', 'vol', 'curve', 'monte carlo', 'numerical'],
+                    summary: 'A pricing-focused preview covering instruments, model intuition, Greeks, numerical methods, and implementation pitfalls.',
+                    toc: ['Product taxonomy and payoff intuition', 'No-arbitrage and pricing setup', 'Greeks and risk sensitivities', 'Volatility, curves, and calibration', 'Monte Carlo and numerical methods', 'Desk diagnostics and failure modes'],
+                    audience: ['Aspiring front-office quants', 'Risk analysts moving closer to pricing', 'Candidates preparing for derivatives interviews'],
+                    prerequisites: ['Calculus and probability basics', 'Some exposure to options or fixed income', 'Basic Python or spreadsheet numerics helpful'],
+                    outcomes: ['Connect formulas to product behavior', 'Explain model assumptions and limitations', 'Use Greeks and diagnostics with more confidence'],
+                    sampleText: 'Expect concise model intuition, desk-relevant caveats, and worked examples around pricing behavior rather than only textbook derivations.'
+                },
+                {
+                    match: ['stochastic', 'ito', 'calculus'],
+                    summary: 'A stochastic calculus resource designed to make the machinery useful for pricing, simulation, and interview explanations.',
+                    toc: ['Brownian motion intuition', 'Stochastic integrals and Ito lemma', 'SDEs used in finance', 'Measure change and risk-neutral pricing', 'Monte Carlo interpretation', 'Interview derivations and visual examples'],
+                    audience: ['Quant interview candidates', 'Financial engineering students', 'Practitioners revisiting stochastic calculus'],
+                    prerequisites: ['Calculus and probability', 'Basic option pricing awareness', 'Comfort with mathematical notation'],
+                    outcomes: ['Explain Ito lemma and SDEs more clearly', 'Connect stochastic calculus to pricing models', 'Handle derivation-style interview questions'],
+                    sampleText: 'The material emphasizes intuition, derivation structure, and examples that connect stochastic calculus to actual quant finance use cases.'
+                },
+                {
+                    match: ['xva', 'credit', 'risk', 'regulatory', 'pnl', 'attribution'],
+                    summary: 'A risk and desk-diagnostics resource focused on model behavior, controls, attribution, and real-world failure modes.',
+                    toc: ['Risk framework and desk context', 'Exposure, sensitivities, and diagnostics', 'Credit and funding adjustments', 'PnL attribution workflow', 'Regulatory and control considerations', 'Interview and case-study prompts'],
+                    audience: ['Risk quants and model validation candidates', 'Front-office candidates who need risk depth', 'Practitioners preparing for desk discussions'],
+                    prerequisites: ['Basic derivatives knowledge', 'Comfort with risk metrics', 'Some market data and pricing familiarity'],
+                    outcomes: ['Discuss model risk with more precision', 'Explain PnL and exposure drivers', 'Prepare for practical risk interview cases'],
+                    sampleText: 'The resource is structured around how models behave, where diagnostics break, and how to communicate risk in a desk-aware way.'
+                },
+                {
+                    match: ['project', 'portfolio'],
+                    summary: 'A project pack designed to turn quant theory into portfolio-ready implementations, explanations, and interview talking points.',
+                    toc: ['Project selection and setup', 'Data inputs and assumptions', 'Model implementation steps', 'Validation and diagnostics', 'Resume bullets and interview prompts', 'Extensions for deeper practice'],
+                    audience: ['Candidates building a quant portfolio', 'Students who need hands-on projects', 'Developers looking for finance-specific implementations'],
+                    prerequisites: ['Basic Python or C++ depending on project', 'Probability and statistics fundamentals', 'Comfort reading project instructions'],
+                    outcomes: ['Build stronger project evidence', 'Explain implementation choices clearly', 'Convert projects into resume and interview stories'],
+                    sampleText: 'Each project is meant to produce more than code: a defensible explanation, validation checks, and interview-ready talking points.'
+                },
+                {
+                    match: ['resume', 'ats', 'cv'],
+                    summary: 'A resume-focused pack for converting quant skills, projects, and coursework into ATS-friendly, interview-ready positioning.',
+                    toc: ['Quant resume structure', 'ATS-friendly formatting', 'Project and internship bullets', 'Skills and keyword mapping', 'Role-specific examples', 'Final checklist before applying'],
+                    audience: ['Students applying to quant roles', 'Career switchers repositioning experience', 'Candidates with projects but weak resume framing'],
+                    prerequisites: ['Existing coursework, projects, or experience to describe', 'Target role shortlist', 'Willingness to rewrite bullets concretely'],
+                    outcomes: ['Improve resume clarity and keyword coverage', 'Frame projects in business and model terms', 'Create stronger interview hooks from your experience'],
+                    sampleText: 'The focus is on specific bullets, measurable framing, and reducing generic claims that do not survive recruiter or interviewer scrutiny.'
+                }
+            ];
+
+            const selected = profiles.find(profile => profile.match.some(term => name.includes(term)));
+            return selected || {
+                summary: 'A structured quant finance resource built to move from concept review to practical interview and desk-style application.',
+                toc: ['Concept map and prerequisites', 'Core formulas and intuition', 'Worked examples', 'Common mistakes and diagnostics', 'Interview-style questions', 'Practice plan and next steps'],
+                audience: ['Quant finance aspirants', 'Students preparing for interviews', 'Practitioners looking for a focused refresher'],
+                prerequisites: ['Basic probability and calculus', 'Some programming exposure is helpful', 'Interest in practical finance applications'],
+                outcomes: ['Understand the topic structure', 'Practice with clearer mental models', 'Apply the material in interviews or project work'],
+                sampleText: 'The resource is designed to be practical: concise explanations, worked structure, and examples that help you apply the topic instead of only reading about it.'
+            };
+        }
+
+        function renderPreviewList(elementId, items) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            element.innerHTML = items.map(item => `<li>${escapeHTML(item)}</li>`).join('');
+        }
+
+        function renderPreviewSamples(product, preview) {
+            const grid = document.getElementById('preview-sample-grid');
+            if (!grid) return;
+
+            const sampleCards = [];
+            preview.sampleImages.forEach((url, index) => {
+                sampleCards.push(`
+                    <div class="preview-sample-card">
+                        <img src="${escapeAttribute(url)}" alt="${escapeAttribute(product.name || 'Product')} sample ${index + 1}">
+                        <div class="preview-sample-caption">${index === 0 && url === product.cover_image_url ? 'Cover preview' : `Sample page ${index + 1}`}</div>
+                    </div>
+                `);
+            });
+
+            if (preview.sampleText) {
+                sampleCards.push(`
+                    <div class="preview-sample-card">
+                        <div class="preview-sample-text">
+                            <strong>Sample extract</strong>
+                            ${escapeHTML(preview.sampleText).substring(0, 520)}
+                        </div>
+                    </div>
+                `);
+            }
+
+            grid.innerHTML = sampleCards.join('');
+        }
+
+        function firstList(...values) {
+            for (const value of values) {
+                const list = normalizePreviewList(value);
+                if (list.length) return list;
+            }
+            return [];
+        }
+
+        function firstNonEmpty(...values) {
+            for (const value of values) {
+                if (typeof value === 'string' && value.trim()) return stripHtml(value).trim();
+            }
+            return '';
+        }
+
+        function normalizePreviewList(value) {
+            if (!value) return [];
+
+            if (Array.isArray(value)) {
+                return value.map(item => String(item).trim()).filter(Boolean);
+            }
+
+            if (typeof value === 'string') {
+                const trimmed = value.trim();
+                if (!trimmed) return [];
+
+                try {
+                    const parsed = JSON.parse(trimmed);
+                    if (Array.isArray(parsed)) return normalizePreviewList(parsed);
+                } catch (e) {
+                    // Plain text list; split below.
+                }
+
+                return trimmed
+                    .split(/\r?\n|;|\|/)
+                    .map(item => item.replace(/^[-*]\s*/, '').trim())
+                    .filter(Boolean);
+            }
+
+            return [];
+        }
+
+        function stripHtml(value) {
+            const div = document.createElement('div');
+            div.innerHTML = value || '';
+            return div.textContent || div.innerText || '';
+        }
+
+        function escapeHTML(value) {
+            return String(value || '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
+        function escapeAttribute(value) {
+            return escapeHTML(value).replace(/`/g, '&#96;');
         }
 
         // Reviews Carousel Variables

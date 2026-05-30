@@ -1218,7 +1218,12 @@ async function displaySupabaseProducts(products) {
                     </div>
                     <div class="product-footer">
                         ${originalPriceDisplay}
-                        <button class="btn btn-product" onclick="openProductModal('${product.id}')" data-price="${product.price}">${btnText}</button>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+                            <a class="btn btn-secondary" href="product.html?id=${product.id}" style="padding:10px 14px; font-size:0.9rem;">
+                                <i class="fas fa-eye"></i> Preview
+                            </a>
+                            <button class="btn btn-product" onclick="openProductModal('${product.id}')" data-price="${product.price}">${btnText}</button>
+                        </div>
                     </div>
                 </div>
             `;
