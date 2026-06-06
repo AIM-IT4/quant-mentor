@@ -45,6 +45,7 @@ export default async function handler(req, res) {
         sent: 0,
         skipped: 0,
         errors: 0,
+        excludedCompleteBundleOnlyBuyers: 0,
         couponExpiryDate: expiryStr,
         details: []
     };
@@ -81,8 +82,13 @@ export default async function handler(req, res) {
 
         // ── 3. Filter: only customers who bought EXACTLY 1 unique product ───
         const singleBuyers = allCustomers.filter(([, products]) => products.size === 1);
-        results.singleBuyerCount = singleBuyers.length;
-        console.log(`🎯 Found ${singleBuyers.length} single-product buyers out of ${allCustomers.length} total customers`);
+        const eligibleSingleBuyers = singleBuyers.filter(([, products]) => {
+            const onlyProductName = [...products][0] || '';
+            return !isCompleteBundleProduct(onlyProductName);
+        });
+        results.excludedCompleteBundleOnlyBuyers = singleBuyers.length - eligibleSingleBuyers.length;
+        results.singleBuyerCount = eligibleSingleBuyers.length;
+        console.log(`🎯 Found ${eligibleSingleBuyers.length} eligible single-product buyers out of ${allCustomers.length} total customers (${results.excludedCompleteBundleOnlyBuyers} complete-bundle-only buyers excluded)`);
 
         // ── 4. Fetch all paid products ──────────────────────────────────────
         const productsResponse = await fetch(
@@ -102,14 +108,13 @@ export default async function handler(req, res) {
 
         // Exclude the Complete Bundle from recommendations
         const recommendableProducts = allProducts.filter(p => {
-            const name = (p.name || '').toLowerCase();
-            return !(name.includes('complete') && (name.includes('bundle') || name.includes('professional')));
+            return !isCompleteBundleProduct(p.name);
         });
 
         console.log(`📦 ${recommendableProducts.length} recommendable products (bundle excluded)`);
 
         // ── 5. For each single-buyer, build recommendations & send ──────────
-        for (const [email, purchasedSet] of singleBuyers) {
+        for (const [email, purchasedSet] of eligibleSingleBuyers) {
             try {
                 const purchasedProductName = [...purchasedSet][0]; // The one product they bought
 
@@ -219,7 +224,7 @@ export default async function handler(req, res) {
         // If test mode, handle case where the test email wasn't a single-buyer
         if (testEmail && results.sent === 0 && results.errors === 0) {
             // Send a demo email with the first single-buyer's data, or generate a sample
-            const sampleBuyer = singleBuyers[0];
+            const sampleBuyer = eligibleSingleBuyers[0];
             if (sampleBuyer) {
                 const [, purchasedSet] = sampleBuyer;
                 const purchasedProductName = [...purchasedSet][0];
@@ -360,6 +365,11 @@ const CATEGORY_AFFINITIES = {
     'fixed_income':  ['derivatives', 'models', 'risk', 'fixed_income', 'stochastic'],
     'ml':            ['programming', 'risk', 'interview', 'ml', 'stochastic'],
 };
+
+function isCompleteBundleProduct(productName) {
+    const name = (productName || '').toLowerCase();
+    return name.includes('complete') && (name.includes('bundle') || name.includes('professional'));
+}
 
 function getProductCategory(productNameLower) {
     for (const [key, category] of Object.entries(PRODUCT_CATEGORIES)) {

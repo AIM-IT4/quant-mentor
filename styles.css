@@ -253,6 +253,7 @@ h6 {
     letter-spacing: 0;
     color: inherit;
     margin-bottom: 24px;
+    min-height: 2.35em;
 }
 
 .typewriter-cursor {
@@ -2397,6 +2398,7 @@ body.light-mode .theme-toggle .fa-moon {
         font-size: 2rem;
         line-height: 1.13;
         max-width: 100%;
+        min-height: 3.45em;
         overflow-wrap: anywhere;
         text-wrap: balance;
     }

@@ -438,7 +438,8 @@
                         <span class="badge-dot"></span>
                         Available for 1-on-1 Sessions
                     </div>
-                    <h1 class="hero-headline" aria-label="Desk-ready quant prep for interviews, pricing, and risk">
+                    <h1 class="hero-headline" id="heroHeadline"
+                        aria-label="Desk-ready quant prep for interviews, pricing, and risk">
                         Desk-ready quant prep for <span class="gradient-text">interviews, pricing, and risk</span>
                     </h1>
                     <p class="subheadline hero-subcopy">
@@ -1303,6 +1304,92 @@
                 console.log('ℹ️ Local configuration (config.js) not found or build-time injection failed. Using environment variables if available.');
             };
             document.head.appendChild(script);
+        })();
+    </script>
+
+    <script>
+        (function () {
+            const headline = document.getElementById('heroHeadline');
+            if (!headline || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            const phrases = [
+                [
+                    { text: 'Desk-ready quant prep for ', gradient: false },
+                    { text: 'interviews, pricing, and risk', gradient: true }
+                ],
+                [
+                    { text: 'Preview products before ', gradient: false },
+                    { text: 'you buy', gradient: true }
+                ],
+                [
+                    { text: 'Build confidence with ', gradient: false },
+                    { text: 'desk-first quant resources', gradient: true }
+                ]
+            ];
+
+            const charsFor = phrase => phrase.flatMap(segment =>
+                [...segment.text].map(ch => ({ ch, gradient: segment.gradient }))
+            );
+
+            let phraseIndex = 0;
+            let chars = charsFor(phrases[phraseIndex]);
+            let charIndex = 0;
+            let deleting = false;
+
+            const typeDelay = 50;
+            const deleteDelay = 30;
+            const pauseEnd = 2400;
+            const pauseStart = 500;
+
+            function render() {
+                let html = '';
+                let inGradient = false;
+
+                for (let i = 0; i < charIndex; i++) {
+                    const item = chars[i];
+                    if (item.gradient && !inGradient) {
+                        html += '<span class="gradient-text">';
+                        inGradient = true;
+                    } else if (!item.gradient && inGradient) {
+                        html += '</span>';
+                        inGradient = false;
+                    }
+                    html += item.ch;
+                }
+
+                if (inGradient) html += '</span>';
+                headline.innerHTML = html + '<span class="typewriter-cursor">|</span>';
+            }
+
+            function tick() {
+                render();
+
+                if (deleting) {
+                    if (charIndex > 0) {
+                        charIndex--;
+                        setTimeout(tick, deleteDelay);
+                        return;
+                    }
+
+                    deleting = false;
+                    phraseIndex = (phraseIndex + 1) % phrases.length;
+                    chars = charsFor(phrases[phraseIndex]);
+                    setTimeout(tick, pauseStart);
+                    return;
+                }
+
+                if (charIndex < chars.length) {
+                    charIndex++;
+                    setTimeout(tick, typeDelay);
+                    return;
+                }
+
+                deleting = true;
+                setTimeout(tick, pauseEnd);
+            }
+
+            render();
+            setTimeout(tick, pauseStart);
         })();
     </script>
 
