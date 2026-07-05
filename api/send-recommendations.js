@@ -1,7 +1,7 @@
 // One-time bulk recommendation email sender
 // Sends personalized product recommendations to all existing customers
 // Trigger: GET /api/send-recommendations?secret=YOUR_CRON_SECRET
-// Each customer gets 3 products they haven't bought (excluding complete bundle)
+// Each customer gets 2 products they haven't bought (excluding complete bundle)
 
 export default async function handler(req, res) {
     if (req.method !== 'GET' && req.method !== 'POST') {
@@ -90,15 +90,15 @@ export default async function handler(req, res) {
                     !purchasedSet.has((p.name || '').toLowerCase().trim())
                 );
 
-                if (available.length < 3) {
+                if (available.length < 2) {
                     console.log(`⏭️ ${email}: only ${available.length} unpurchased products, skipping`);
                     results.skipped++;
                     results.details.push({ email, status: 'skipped', reason: `only ${available.length} products left` });
                     continue;
                 }
 
-                // Pick 3: highest-value first
-                const recommendations = available.slice(0, 3);
+                // Pick 2: highest-value first
+                const recommendations = available.slice(0, 2);
 
                 // Get customer name from most recent purchase
                 const nameEntry = allPurchases.find(p => (p.customer_email || '').toLowerCase().trim() === email);
@@ -121,7 +121,7 @@ export default async function handler(req, res) {
                             <p style="margin:0 0 12px 0; font-size:13px; color:#666; line-height:1.5;">${desc}...</p>
                             <div style="display:flex; align-items:center; justify-content:space-between;">
                                 <span style="font-size:18px; font-weight:bold; color:#1a1a1a;">₹${p.price}</span>
-                                <a href="https://quant-mentor.vercel.app/?id=${p.id}" style="display:inline-block; background:#6366f1; color:#ffffff; font-weight:600; text-decoration:none; padding:8px 20px; border-radius:6px; font-size:14px;">View Product</a>
+                                <a href="https://quant-mentor.vercel.app/product.html?id=${p.id}" style="display:inline-block; background:#6366f1; color:#ffffff; font-weight:600; text-decoration:none; padding:8px 20px; border-radius:6px; font-size:14px;">View Product</a>
                             </div>
                         </div>`;
                 }).join('');
@@ -136,7 +136,7 @@ export default async function handler(req, res) {
                                 <p style="font-size: 16px; margin-bottom: 8px;">Hi ${customerName},</p>
                                 <p style="font-size: 15px; color: #444; margin-bottom: 25px; line-height: 1.6;">
                                     You recently purchased <strong>${escapeHtml(recentProductName)}</strong> from QuantMentor.
-                                    Here are 3 more resources that will accelerate your quant career:
+                                    Here are 2 more resources that will accelerate your quant career:
                                 </p>
                                 ${productCards}
                                 <div style="text-align:center; margin-top:25px;">
@@ -154,7 +154,7 @@ export default async function handler(req, res) {
                     </div>`;
 
                 const recNames = recommendations.map(p => `• ${p.name} — ₹${p.price}`).join('\n');
-                const emailText = `Hi ${customerName},\n\nYou recently purchased "${recentProductName}" from QuantMentor.\n\nHere are 3 more resources you might like:\n\n${recNames}\n\nBrowse all: https://quant-mentor.vercel.app/#products\n\nSent by QuantMentor`;
+                const emailText = `Hi ${customerName},\n\nYou recently purchased "${recentProductName}" from QuantMentor.\n\nHere are 2 more resources you might like:\n\n${recNames}\n\nBrowse all: https://quant-mentor.vercel.app/#products\n\nSent by QuantMentor`;
 
                 // Send via Brevo
                 const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
