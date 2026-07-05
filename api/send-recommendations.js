@@ -54,7 +54,15 @@ export default async function handler(req, res) {
             customerMap[email].add((p.product_name || '').toLowerCase().trim());
         }
 
-        const uniqueCustomers = Object.entries(customerMap);
+        let uniqueCustomers = Object.entries(customerMap);
+        const testEmail = req.query?.test_email;
+        if (testEmail) {
+            uniqueCustomers = uniqueCustomers.filter(([email]) => email === testEmail.toLowerCase().trim());
+            if (uniqueCustomers.length === 0) {
+                uniqueCustomers = [[testEmail.toLowerCase().trim(), new Set()]];
+            }
+        }
+        
         results.totalCustomers = uniqueCustomers.length;
         console.log(`📧 Found ${uniqueCustomers.length} unique customers with purchases`);
 
