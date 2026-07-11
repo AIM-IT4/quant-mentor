@@ -1,0 +1,105 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{charter} % Premium professional font
+
+% Page setup
+\geometry{letterpaper, left=0.55in, right=0.55in, top=0.5in, bottom=0.5in}
+\pdfgentounicode=1 % Ensure PDF is searchable (important for ATS scanners)
+
+% Color variables (Graphite theme)
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue,
+    pdftitle={Quantitative Developer Resume Template},
+    pdfauthor={QuantMentor}
+}
+
+% Style definitions
+\titleformat{\section}{\large\bfseries\scshape}{}{0em}{}[\titlerule]
+\titlespacing{\section}{0pt}{10pt}{6pt}
+\setlist[itemize]{noitemsep, topsep=2pt, leftmargin=15pt}
+
+\begin{document}
+\pagestyle{empty}
+
+% Contact Header
+\begin{center}
+    {\Huge \textbf{AMIT JHA}} \\ \medskip
+    \small
+    \href{mailto:jha.8@alumni.iitj.ac.in}{jha.8@alumni.iitj.ac.in} \ | \ 
+    +91 98765 43210 \ | \ 
+    Mumbai, India \ | \ 
+    \href{https://github.com/iitakjha97}{github.com/iitakjha97} \ | \ 
+    \href{https://linkedin.com/in/amit-jha-quant}{linkedin.com/in/amit-jha-quant}
+\end{center}
+
+% Education Section
+\section{Education}
+\textbf{Indian Institute of Technology (IIT), Jodhpur} \hfill Jodhpur, India \\
+\textit{Bachelor of Technology in Computer Science \& Engineering; GPA: 9.1/10.0} \hfill July 2019 -- May 2023
+\begin{itemize}
+    \item \textbf{Coursework}: Linear Algebra, Probability \& Statistics, Numerical Methods, Data Structures \& Algorithms.
+    \item \textbf{Awards}: Institute Merit-cum-Means Scholarship recipient (Top 5\% of CSE department).
+\end{itemize}
+
+\medskip
+
+\textbf{World Quantitative Academy (WQA)} \hfill Remote \\
+\textit{Advanced Certificate in Quantitative Finance \& Volatility Modeling} \hfill June 2023 -- Nov 2023
+\begin{itemize}
+    \item Intensive coursework in Stochastic Calculus, Black-Scholes PDE discretization, and Monte Carlo methods.
+\end{itemize}
+
+% Professional Experience Section
+\section{Professional Experience}
+\textbf{Model Risk \& Quant Solutions Group} \hfill Mumbai, India \\
+\textit{Quantitative Analyst / Model Validator} \hfill June 2023 -- Present
+\begin{itemize}
+    \item Perform rigorous mathematical validation on sell-side front-office pricing engines (Equity, FX, and Interest Rate).
+    \item Validated Crank-Nicolson finite difference schemes for barrier options, verifying stability bounds under Rannacher time-stepping.
+    \item Audited stochastic volatility models (Heston, SABR) by verifying asymptotic wing behaviors and local vol Dupire mappings.
+    \item Developed independent Python libraries to replicate Monte Carlo paths using the Quadratic Exponential (QE) scheme.
+\end{itemize}
+
+\medskip
+
+\textbf{High Frequency Trading Lab, IIT} \hfill Jodhpur, India \\
+\textit{Quantitative Research Intern} \hfill May 2022 -- July 2022
+\begin{itemize}
+    \item Designed and backtested intraday statistical arbitrage strategies on NSE equities using order book imbalance features.
+    \item Optimized a C++17 trading simulation engine using vectorization (Eigen library), reducing simulation latency by 35\%.
+    \item Evaluated cointegration relationships (Johansen test) and calibrated mean-reversion rates using Ornstein-Uhlenbeck processes.
+\end{itemize}
+
+% Selected Projects Section
+\section{Selected Projects}
+\textbf{High-Performance Equity Options Pricing Engine (C++17)} \hfill \href{https://github.com/iitakjha97/quant-pde-solver}{\textit{GitHub Link}}
+\begin{itemize}
+    \item Developed a modular PDE solver using Finite Difference Methods (Explicit, Implicit, and Crank-Nicolson schemes).
+    \item Implemented SOR (Successive Over-Relaxation) and Thomas algorithms in C++ for tridiagonal matrix inversion.
+    \item Wrote custom Python bindings using pybind11 to visualize options Greeks surface grids in Jupyter notebooks.
+\end{itemize}
+
+\medskip
+
+\textbf{Heston Model Volatility Calibration (Python, SciPy, PyTorch)} \hfill \href{https://github.com/iitakjha97/heston-calibration}{\textit{GitHub Link}}
+\begin{itemize}
+    \item Calibrated Heston model parameters ($v_0, \kappa, \theta, \sigma, \rho$) to market-implied volatility surfaces.
+    \item Implemented the Carr-Madan FFT (Fast Fourier Transform) option pricing methodology using characteristic functions.
+    \item Structured a deep PINN (Physics-Informed Neural Network) solver to compute option values directly from the BS PDE.
+\end{itemize}
+
+% Technical Skills Section
+\section{Technical Skills}
+\begin{itemize}[leftmargin=10pt]
+    \item \textbf{Languages}: C++ (17/20, STL, Template Programming), Python (NumPy, SciPy, Pandas, PyTorch), SQL, Bash, LaTeX.
+    \item \textbf{Quantitative Finance}: Black-Scholes PDE, Stochastic Volatility (SABR, Heston), Finite Differences, Monte Carlo.
+    \item \textbf{Libraries \& Tools}: Eigen, Boost.Asio, Git, Docker, Linux (Ubuntu/CentOS), Visual Studio Code, CMake.
+\end{itemize}
+
+\end{document}
