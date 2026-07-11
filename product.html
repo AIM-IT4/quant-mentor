@@ -1273,20 +1273,20 @@
                 {
                     match: ['stochastic calculus visual lab', 'stochastic calculus for quants'],
                     summary: 'A stochastic calculus resource built around visual intuition, SDE simulations, and step-by-step interview derivations.',
-                    toc: ['Brownian Motion & Quadratic Variation', 'Itô's Lemma & Multi-dimensional Extensions', 'Stochastic Differential Equations (GBM, Vasicek, CIR)', 'Change of Measure & Girsanov Theorem', 'Feynman-Kac Theorem & PDE Connections', 'Martingales & Risk-Neutral Pricing'],
+                    toc: ['Brownian Motion & Quadratic Variation', "Itô's Lemma & Multi-dimensional Extensions", 'Stochastic Differential Equations (GBM, Vasicek, CIR)', 'Change of Measure & Girsanov Theorem', 'Feynman-Kac Theorem & PDE Connections', 'Martingales & Risk-Neutral Pricing'],
                     audience: ['Quant prep candidates', 'MFE students', 'Risk managers updating mathematical skills'],
                     prerequisites: ['Basic probability theory', 'Ordinary differential equations', 'Introductory calculus'],
-                    outcomes: ['Derive option pricing PDEs using Itô's lemma', 'Perform changes of probability measure with Girsanov', 'Simulate asset paths using Euler-Maruyama SDE discretizations'],
+                    outcomes: ["Derive option pricing PDEs using Itô's lemma", 'Perform changes of probability measure with Girsanov', 'Simulate asset paths using Euler-Maruyama SDE discretizations'],
                     samplePages: [
                         {
-                            title: 'Itô's Lemma Derivation',
+                            title: "Itô's Lemma Derivation",
                             content: [
                                 { type: 'paragraph', text: 'Let X_t be an Ito drift-diffusion process: dX_t = mu_t dt + sigma_t dW_t. For any twice continuously differentiable function f(X_t, t), the Taylor expansion in continuous time must keep terms up to second order in dX_t:' },
                                 { type: 'formula', text: 'df(X_t, t) = \\frac{\\partial f}{\\partial t} dt + \\frac{\\partial f}{\\partial X} dX_t + \\frac{1}{2} \\frac{\\partial^2 f}{\\partial X^2} (dX_t)^2' },
                                 { type: 'paragraph', text: 'Using the formal rule (dW_t)^2 = dt, dt * dW_t = 0, and (dt)^2 = 0, the quadratic variation term simplifies to sigma_t^2 dt. Thus we obtain the classic Ito formulation:' },
                                 { type: 'formula', text: 'df = \\left( \\frac{\\partial f}{\\partial t} + \\mu_t \\frac{\\partial f}{\\partial X} + \\frac{1}{2} \\sigma_t^2 \\frac{\\partial^2 f}{\\partial X^2} \\right) dt + \\sigma_t \\frac{\\partial f}{\\partial X} dW_t' }
                             ],
-                            note: 'Excerpt from Section 2: Itô's Calculus'
+                            note: "Excerpt from Section 2: Itô's Calculus"
                         },
                         {
                             title: 'Girsanov Change of Measure',
