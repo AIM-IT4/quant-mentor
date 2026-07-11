@@ -176,8 +176,13 @@ IMPORTANT:
 
         // 2. RESPOND TO CANDIDATE
         if (action === 'respond') {
-            // ... (Repeat cleaning logic for conversation loop)
             console.log('Sending chat context to Groq...');
+            // Prepend system prompt to ensure LLM stays in persona, remembers difficulty and topic constraints
+            const fullHistory = [
+                { role: 'system', content: systemPrompt },
+                ...messages
+            ];
+            
             const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -186,7 +191,7 @@ IMPORTANT:
                 },
                 body: JSON.stringify({
                     model: 'llama-3.3-70b-versatile',
-                    messages: messages,
+                    messages: fullHistory,
                     temperature: 0.7
                 })
             });
