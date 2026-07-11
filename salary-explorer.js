@@ -376,7 +376,7 @@
         }));
         
         // Merge mapped with local submissions, avoiding duplicate records by checking contents (since local has 'user-timestamp' ID but DB has UUID)
-        const merged = [...localSubmissions];
+        const merged = [...seeds, ...localSubmissions];
         mapped.forEach(m => {
           const dupIdx = merged.findIndex(l => 
             l.firm.toLowerCase() === m.firm.toLowerCase() && 
