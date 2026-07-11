@@ -1221,7 +1221,7 @@
                     profile.sampleText,
                     descriptionText
                 ),
-                samplePdfUrl: product.preview_sample_pdf_url || product.sample_pdf_url || profile.samplePdfUrl || null
+                samplePdfUrl: product.preview_sample_pdf_url || product.sample_pdf_url || profile.samplePdfUrl || (product.id ? `assets/samples/${product.id}_sample.pdf` : null)
             };
         }
 
