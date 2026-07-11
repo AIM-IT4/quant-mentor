@@ -1220,7 +1220,8 @@
                     product.preview_sample_text,
                     profile.sampleText,
                     descriptionText
-                )
+                ),
+                samplePdfUrl: product.preview_sample_pdf_url || product.sample_pdf_url || profile.samplePdfUrl || null
             };
         }
 
@@ -1232,6 +1233,7 @@
                 {
                     match: ['numerical methods', 'calibration', 'finite difference', 'finite element'],
                     summary: 'A mathematically rigorous, desk-ready field manual for options pricing, calibration, finite differences, finite elements, and machine learning.',
+                    samplePdfUrl: 'assets/samples/numerical_methods_sample.pdf',
                     toc: ['Root Finding & SABR Volatility Calibration', 'Yield Curve Interpolation & Volatility Surface Parameterization', 'Finite Difference Schemes (Crank-Nicolson, ADI) & Rannacher Smoothing', 'Monte Carlo Schemes (Euler, Milstein, QE) & Variance Reduction', 'Tree & Lattice Methods (Binomial, LR, trinomial)', 'Fourier Option Pricing & the COS Method', 'Dupire Local Volatility & Vol Smile Dynamics', 'Von Neumann Stability, CFL, and Numba JIT', 'Finite Element Weak Formulations & Meshing', 'PINNs & Deep BSDE Solvers'],
                     audience: ['Quant interview candidates', 'Desk pricing developers', 'Validation and risk analysts'],
                     prerequisites: ['Advanced calculus and probability', 'Intermediate linear algebra and PDEs', 'Basic Python/PyTorch programming'],
@@ -1604,6 +1606,17 @@
             const grid = document.getElementById('preview-sample-grid');
             if (!grid) return;
 
+            if (preview.samplePdfUrl) {
+                grid.style.display = 'block';
+                grid.innerHTML = `
+                    <div class="pdf-viewer-container" style="width: 100%; height: 750px; margin-top: 15px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-light); box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);">
+                        <iframe src="${escapeAttribute(preview.samplePdfUrl)}#toolbar=0" width="100%" height="100%" style="border: none;"></iframe>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.style.display = 'grid';
             const sampleCards = [];
             preview.sampleImages.forEach((url, index) => {
                 sampleCards.push(`
