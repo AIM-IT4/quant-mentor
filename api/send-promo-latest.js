@@ -75,7 +75,7 @@ export default async function handler(req, res) {
 
         // ── 2. Fetch ALL unique customer emails from purchases ──────────────
         const purchasesResponse = await fetch(
-            `${SUPABASE_URL}/rest/v1/purchases?select=customer_email&order=created_at.desc`,
+            `${SUPABASE_URL}/rest/v1/purchases?select=customer_email,product_name&order=created_at.desc`,
             {
                 headers: {
                     'apikey': SUPABASE_KEY,
@@ -90,30 +90,41 @@ export default async function handler(req, res) {
 
         const allPurchases = await purchasesResponse.json();
 
-        // De-duplicate emails
-        const uniqueEmails = [...new Set(
-            allPurchases
-                .map(p => (p.customer_email || '').toLowerCase().trim())
-                .filter(e => e && e.includes('@'))
-        )];
+        // Map emails to check if they purchased the complete bundle (ID: 164308cd-e3cd-4026-8fdc-337a5955ffff)
+        const customerMap = {};
+        for (const p of allPurchases) {
+            const email = (p.customer_email || '').toLowerCase().trim();
+            if (!email || !email.includes('@')) continue;
+            if (!customerMap[email]) {
+                customerMap[email] = { hasBundle: false };
+            }
+            if (p.product_name && p.product_name.toLowerCase().includes('complete front office')) {
+                customerMap[email].hasBundle = true;
+            }
+        }
 
+        const uniqueEmails = Object.keys(customerMap);
         results.totalCustomers = uniqueEmails.length;
         console.log(`📧 Found ${uniqueEmails.length} unique customers to email`);
 
-        // ── 3. Build the email content (same for all recipients) ────────────
-        const emailHtml = buildPromoEmail(product);
-        const emailText = buildPromoText(product);
         const emailSubject = `🚀 Just Launched: ${product.name} — Get It Before Everyone Else!`;
 
         // ── 4. Handle TEST MODE ─────────────────────────────────────────────
         if (testEmail) {
+            const testHasBundle = req.query?.test_bundle === 'true';
+            const testCode = testHasBundle ? 'BUNDLE15' : 'NM10';
+            const testPercent = testHasBundle ? 15 : 10;
+            
+            const emailHtml = buildPromoEmail(product, testCode, testPercent);
+            const emailText = buildPromoText(product, testCode, testPercent);
+
             if (isDryRun) {
-                results.details.push({ email: testEmail, status: 'would_send' });
+                results.details.push({ email: testEmail, status: 'would_send', code: testCode, percent: testPercent });
                 results.sent = 1;
                 return res.status(200).json(results);
             }
 
-            console.log(`🧪 TEST MODE — sending only to: ${testEmail}`);
+            console.log(`🧪 TEST MODE — sending only to: ${testEmail} (Code: ${testCode}, Percent: ${testPercent})`);
             const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
                 method: 'POST',
                 headers: {
@@ -141,7 +152,10 @@ export default async function handler(req, res) {
         // ── 5. Handle DRY RUN ───────────────────────────────────────────────
         if (isDryRun) {
             for (const email of uniqueEmails) {
-                results.details.push({ email, status: 'would_send' });
+                const hasBundle = customerMap[email].hasBundle;
+                const code = hasBundle ? 'BUNDLE15' : 'NM10';
+                const percent = hasBundle ? 15 : 10;
+                results.details.push({ email, status: 'would_send', code, percent });
             }
             results.sent = uniqueEmails.length;
             console.log(`🏃 DRY RUN complete — would send to ${uniqueEmails.length} customers`);
@@ -151,6 +165,13 @@ export default async function handler(req, res) {
         // ── 6. BULK SEND ────────────────────────────────────────────────────
         for (const email of uniqueEmails) {
             try {
+                const hasBundle = customerMap[email].hasBundle;
+                const discountCode = hasBundle ? 'BUNDLE15' : 'NM10';
+                const discountPercent = hasBundle ? 15 : 10;
+                
+                const emailHtml = buildPromoEmail(product, discountCode, discountPercent);
+                const emailText = buildPromoText(product, discountCode, discountPercent);
+
                 const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
                     method: 'POST',
                     headers: {
@@ -201,7 +222,7 @@ export default async function handler(req, res) {
 // EMAIL TEMPLATE — Premium Promotional Design
 // ═══════════════════════════════════════════════════════════════════════════════
 
-function buildPromoEmail(product) {
+function buildPromoEmail(product, discountCode, discountPercent) {
     const coverImg = product.cover_image_url
         ? `<img src="${product.cover_image_url}" alt="${escapeHtml(product.name)}" style="width:100%; max-height:320px; object-fit:contain; border-radius:12px; background:#f4f1ec; margin-bottom:20px;">`
         : '';
@@ -264,6 +285,14 @@ function buildPromoEmail(product) {
                     </div>
                 </div>
 
+                <!-- Personalised Coupon Box -->
+                <div style="background:#fef2f2; border:2px dashed #ef4444; border-radius:16px; padding:24px; text-align:center; margin-bottom:25px; box-sizing:border-box;">
+                    <span style="display:inline-block; background:#fee2e2; color:#ef4444; font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px; margin-bottom:10px; letter-spacing:1px; text-transform:uppercase;">🎟️ Exclusive Offer</span>
+                    <h3 style="margin:0 0 6px 0; font-size:18px; color:#991b1b; font-weight:800;">Get ${discountPercent}% OFF</h3>
+                    <p style="margin:0 0 16px 0; font-size:14px; color:#7f1d1d; line-height:1.4;">Use your exclusive customer launch coupon at checkout:</p>
+                    <div style="display:inline-block; background:#ffffff; border:2px solid #ef4444; color:#ef4444; font-family:monospace; font-size:22px; font-weight:800; padding:10px 32px; border-radius:8px; letter-spacing:2px; box-shadow:0 2px 8px rgba(239,68,68,0.1);">${discountCode}</div>
+                </div>
+
                 <!-- Why Buy Section -->
                 <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:20px; margin-bottom:20px;">
                     <h3 style="margin:0 0 12px 0; font-size:16px; color:#92400e; font-weight:700;">Why you'll love this:</h3>
@@ -315,7 +344,7 @@ function buildPromoEmail(product) {
     </div>`;
 }
 
-function buildPromoText(product) {
+function buildPromoText(product, discountCode, discountPercent) {
     const desc = stripHtml(product.description || '').substring(0, 200);
     const productUrl = `https://quant-mentor.vercel.app/product.html?id=${product.id}`;
 
@@ -339,6 +368,8 @@ ${desc}...
 ✅ Practical, interview-ready content — not just theory
 ✅ Lifetime access with free future updates
 ✅ Trusted by 500+ aspiring quants worldwide
+
+🎟️ YOUR LAUNCH DISCOUNT COUPON: ${discountCode} (${discountPercent}% OFF at checkout!)
 
 🛒 Get it now: ${productUrl}
 
