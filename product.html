@@ -1230,6 +1230,97 @@
 
             const specificProfiles = [
                 {
+                    match: ['numerical methods', 'calibration', 'finite difference', 'finite element'],
+                    summary: 'A mathematically rigorous, desk-ready field manual for options pricing, calibration, finite differences, finite elements, and machine learning.',
+                    toc: ['Root Finding & SABR Volatility Calibration', 'Yield Curve Interpolation & Volatility Surface Parameterization', 'Finite Difference Schemes (Crank-Nicolson, ADI) & Rannacher Smoothing', 'Monte Carlo Schemes (Euler, Milstein, QE) & Variance Reduction', 'Tree & Lattice Methods (Binomial, LR, trinomial)', 'Fourier Option Pricing & the COS Method', 'Dupire Local Volatility & Vol Smile Dynamics', 'Von Neumann Stability, CFL, and Numba JIT', 'Finite Element Weak Formulations & Meshing', 'PINNs & Deep BSDE Solvers'],
+                    audience: ['Quant interview candidates', 'Desk pricing developers', 'Validation and risk analysts'],
+                    prerequisites: ['Advanced calculus and probability', 'Intermediate linear algebra and PDEs', 'Basic Python/PyTorch programming'],
+                    outcomes: ['Derive and implement Crank-Nicolson and COS methods', 'Calibrate SABR and SVI models with stability safeguards', 'Build PINNs and Deep BSDE solvers for high dimensions'],
+                    samplePages: [
+                        {
+                            title: 'SABR Volatility Calibration',
+                            content: [
+                                { type: 'paragraph', text: 'Calibration of the SABR model parameters (alpha, beta, rho, nu) to market implied volatility smiles is typically formulated as a non-linear least squares optimization problem. We minimize the difference between the model volatilities and the market quotes:' },
+                                { type: 'formula', text: 'F(alpha, rho, nu) = \\sum_{i=1}^M w_i (\\sigma_{SABR}(K_i, T) - \\sigma_{market}(K_i, T))^2' },
+                                { type: 'paragraph', text: 'To ensure real-time performance on a trading desk, we utilize Levenberg-Marquardt with analytical derivatives for the pricing formula, constraining parameters to preserve the default-free boundary condition (rho^2 + nu^2 < 1).' }
+                            ],
+                            note: 'Excerpt from Module 1: Root Finding & Optimization'
+                        },
+                        {
+                            title: 'Rannacher Smoothing',
+                            content: [
+                                { type: 'paragraph', text: 'Crank-Nicolson (CN) is unconditionally stable and second-order accurate. However, if the initial payoff has discontinuous derivatives (e.g. digital options, barrier options), the CN scheme exhibits spurious oscillations that decay very slowly. To fix this, we use Rannacher smoothing:' },
+                                { type: 'list', items: [
+                                    'Replace the first 2 or 4 time steps of the Crank-Nicolson run with 4 or 8 half-steps of the fully implicit (Backward Euler) scheme.',
+                                    'Backward Euler has strong L-stability properties which damp out the high-frequency numerical noise immediately.',
+                                    'After the initial smoothing steps, revert to standard Crank-Nicolson to preserve the global second-order temporal accuracy.'
+                                ]}
+                            ],
+                            note: 'Excerpt from Module 3: Finite Difference Methods'
+                        },
+                        {
+                            title: 'Fourier COS Option Pricing',
+                            content: [
+                                { type: 'paragraph', text: 'The COS method prices options by expanding the terminal risk-neutral density in terms of a Fourier cosine series. Since the characteristic function phi(u) is the Fourier transform of the density, the expansion coefficients A_k can be directly computed from the characteristic function:' },
+                                { type: 'formula', text: 'V(x, t) \\approx e^{-r \\Delta t} \\sum_{k=0}^{N-1}\' \\text{Re} \\left( \\phi \\left( \\frac{k\\pi}{b-a} \\right) e^{-i k\\pi \\frac{a}{b-a}} \\right) V_k' },
+                                { type: 'code', text: 'def cos_method_price(cf, S0, K, r, T, N, a, b):\n    # Fast pricing code using Cosine series...\n    u = np.arange(N) * np.pi / (b - a)\n    V_k = compute_payoff_coefficients(K, a, b, N)\n    cf_val = cf(u)\n    return S0 * np.sum(cf_val * V_k)' }
+                            ],
+                            note: 'Excerpt from Module 6: Fourier & Spectral Methods'
+                        }
+                    ],
+                    sampleText: 'Expect concise, desk-ready derivations, visual diagrams, and production code blocks that directly map equations to working implementations.'
+                },
+                {
+                    match: ['stochastic calculus visual lab', 'stochastic calculus for quants'],
+                    summary: 'A stochastic calculus resource built around visual intuition, SDE simulations, and step-by-step interview derivations.',
+                    toc: ['Brownian Motion & Quadratic Variation', 'Itô's Lemma & Multi-dimensional Extensions', 'Stochastic Differential Equations (GBM, Vasicek, CIR)', 'Change of Measure & Girsanov Theorem', 'Feynman-Kac Theorem & PDE Connections', 'Martingales & Risk-Neutral Pricing'],
+                    audience: ['Quant prep candidates', 'MFE students', 'Risk managers updating mathematical skills'],
+                    prerequisites: ['Basic probability theory', 'Ordinary differential equations', 'Introductory calculus'],
+                    outcomes: ['Derive option pricing PDEs using Itô's lemma', 'Perform changes of probability measure with Girsanov', 'Simulate asset paths using Euler-Maruyama SDE discretizations'],
+                    samplePages: [
+                        {
+                            title: 'Itô's Lemma Derivation',
+                            content: [
+                                { type: 'paragraph', text: 'Let X_t be an Ito drift-diffusion process: dX_t = mu_t dt + sigma_t dW_t. For any twice continuously differentiable function f(X_t, t), the Taylor expansion in continuous time must keep terms up to second order in dX_t:' },
+                                { type: 'formula', text: 'df(X_t, t) = \\frac{\\partial f}{\\partial t} dt + \\frac{\\partial f}{\\partial X} dX_t + \\frac{1}{2} \\frac{\\partial^2 f}{\\partial X^2} (dX_t)^2' },
+                                { type: 'paragraph', text: 'Using the formal rule (dW_t)^2 = dt, dt * dW_t = 0, and (dt)^2 = 0, the quadratic variation term simplifies to sigma_t^2 dt. Thus we obtain the classic Ito formulation:' },
+                                { type: 'formula', text: 'df = \\left( \\frac{\\partial f}{\\partial t} + \\mu_t \\frac{\\partial f}{\\partial X} + \\frac{1}{2} \\sigma_t^2 \\frac{\\partial^2 f}{\\partial X^2} \\right) dt + \\sigma_t \\frac{\\partial f}{\\partial X} dW_t' }
+                            ],
+                            note: 'Excerpt from Section 2: Itô's Calculus'
+                        },
+                        {
+                            title: 'Girsanov Change of Measure',
+                            content: [
+                                { type: 'paragraph', text: 'The Girsanov Theorem defines how the drift of a stochastic process changes when we transition to an equivalent probability measure. Specifically, let W_t be a P-Brownian motion. If we define the Radon-Nikodym derivative process Z_t by:' },
+                                { type: 'formula', text: 'dZ_t = -\\gamma_t Z_t dW_t \\implies Z_t = \\exp\\left( -\\int_0^t \\gamma_s dW_s - \\frac{1}{2} \\int_0^t \\gamma_s^2 ds \\right)' },
+                                { type: 'paragraph', text: 'Then under the new measure Q defined by dQ = Z_T dP, the process W_t^Q = W_t + \\int_0^t \\gamma_s ds is a standard Brownian motion. In option pricing, we choose \\gamma_t = (mu - r)/sigma to eliminate the real-world drift in favor of the risk-free rate r.' }
+                            ],
+                            note: 'Excerpt from Section 4: Measure Theory'
+                        }
+                    ],
+                    sampleText: 'Combines stochastic calculus derivations with Python code path visualizations to bridge theoretical math with numerical pricing.'
+                },
+                {
+                    match: ['sql for quant interviews', 'sql'],
+                    summary: 'A desk-oriented SQL playbook focusing on point-in-time correctness, bitemporal data schemas, and high-frequency queries.',
+                    toc: ['Relational Database Basics & Grain Definition', 'Join Cardiability & Row Explosion Audits', 'Window Functions (LAG, LEAD, ROW_NUMBER)', 'Point-in-Time (PIT) / As-Of Joins', 'Time-Series Tick-to-Bar Aggregations', 'Reconciliation, PnL & Exposure Rollups'],
+                    audience: ['Quant developers', 'Data engineers', 'Buy-side/Sell-side interview candidates'],
+                    prerequisites: ['Basic SELECT queries', 'Familiarity with SQL joins', 'Basic time-series concepts'],
+                    outcomes: ['Write bulletproof As-Of queries without lookahead leakage', 'Implement performant window aggregates on market feeds', 'Debug query plans and optimize slow index scans'],
+                    samplePages: [
+                        {
+                            title: 'As-Of (Point-in-Time) Join Pattern',
+                            content: [
+                                { type: 'paragraph', text: 'In backtesting, you must join market quotes to trade events at the exact time of the trade, without looking forward in time. This is a Point-in-Time (PIT) or "As-Of" join. In SQL, this is implemented using window functions:' },
+                                { type: 'code', text: 'WITH RankedQuotes AS (\\n  SELECT t.trade_id, q.price,\\n         ROW_NUMBER() OVER (\\n           PARTITION BY t.trade_id\\n           ORDER BY q.quote_time DESC\\n         ) as rnk\\n  FROM Trades t\\n  JOIN Quotes q \\n    ON t.symbol = q.symbol \\n   AND q.quote_time <= t.trade_time\\n)\\nSELECT trade_id, price \\nFROM RankedQuotes \\nWHERE rnk = 1;' },
+                                { type: 'paragraph', text: 'This query matches every trade with the latest quote that occurred at or before the trade time, avoiding future lookahead leakage.' }
+                            ],
+                            note: 'Excerpt from Section 4: Point-in-Time & Bitemporal Data'
+                        }
+                    ],
+                    sampleText: 'Practical, quant-first SQL query patterns designed to handle trades, positions, quotes, and large-scale analytical rollups.'
+                },
+                {
                     match: ['complete front office', 'professional bundle'],
                     summary: 'A broad front-office and risk quant bundle covering pricing, asset-class models, coding templates, and desk diagnostics in one package.',
                     toc: ['Front-office quant roadmap and setup', 'Derivatives pricing foundations', 'IR, FX, credit, and equity model packs', 'Greeks, curves, volatility, MC, and XVA', 'Python, C++, SQL, and R implementation assets', 'Interview and project conversion checklist'],
@@ -1542,16 +1633,40 @@
         }
 
         function renderPreviewSamplePage(page, index) {
-            const lines = (page.lines || []).slice(0, 5);
+            let bodyHTML = '';
+            if (page.content && Array.isArray(page.content)) {
+                page.content.forEach(item => {
+                    if (item.type === 'paragraph') {
+                        bodyHTML += `<p class="preview-page-p" style="margin: 0 0 10px 0; font-size: 0.85rem; line-height: 1.5; color: #374151; text-align: left;">${escapeHTML(item.text)}</p>`;
+                    } else if (item.type === 'code') {
+                        bodyHTML += `<pre class="preview-page-code" style="background: #1e293b; color: #f8fafc; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.72rem; overflow-x: auto; margin: 0 0 10px 0; text-align: left; white-space: pre;"><code>${escapeHTML(item.text)}</code></pre>`;
+                    } else if (item.type === 'formula') {
+                        bodyHTML += `<div class="preview-page-formula" style="text-align: center; font-style: italic; font-weight: 600; font-family: serif; font-size: 0.95rem; margin: 12px 0; color: #111827;">${escapeHTML(item.text)}</div>`;
+                    } else if (item.type === 'list') {
+                        const lis = (item.items || []).map(li => `<li style="display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 8px; color: #374151; font-size: 0.82rem; line-height: 1.45; text-align: left;"><span style="display:inline-block; width: 6px; height: 6px; border-radius: 50%; background: #4f46e5; margin-top: 8px;"></span>${escapeHTML(li)}</li>`).join('');
+                        bodyHTML += `<ul class="preview-page-lines" style="display: grid; gap: 6px; margin: 0 0 10px 0; padding: 0; list-style: none;">${lis}</ul>`;
+                    }
+                });
+            } else {
+                const lines = (page.lines || []).slice(0, 5);
+                const listItems = lines.map(line => `
+                    <li style="display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 8px; color: #374151; font-size: 0.85rem; line-height: 1.45; text-align: left;">
+                        <span style="display:inline-block; width: 6px; height: 6px; border-radius: 50%; background: #4f46e5; margin-top: 8px;"></span>
+                        ${escapeHTML(line)}
+                    </li>
+                `).join('');
+                bodyHTML += `<ul class="preview-page-lines" style="display: grid; gap: 8px; margin: 0; padding: 0; list-style: none;">${listItems}</ul>`;
+            }
+
             return `
                 <div class="preview-sample-card">
-                    <div class="preview-page-card">
-                        <div class="preview-page-kicker">Sample page ${index + 1}</div>
-                        <h4 class="preview-page-title">${escapeHTML(page.title || 'Preview page')}</h4>
-                        <ul class="preview-page-lines">
-                            ${lines.map(line => `<li>${escapeHTML(line)}</li>`).join('')}
-                        </ul>
-                        ${page.note ? `<div class="preview-page-note">${escapeHTML(page.note)}</div>` : ''}
+                    <div class="preview-page-card" style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.96)); color: #111827; padding: 22px; min-height: 270px; display: flex; flex-direction: column; gap: 10px; border-radius: 8px; border: 1px solid #e2e8f0; height: 100%; box-sizing: border-box;">
+                        <div class="preview-page-kicker" style="color: #4f46e5; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; text-align: left;">Sample page ${index + 1}</div>
+                        <h4 class="preview-page-title" style="color: #111827; font-size: 1.05rem; line-height: 1.35; font-weight: 800; margin: 0 0 4px 0; text-align: left;">${escapeHTML(page.title || 'Preview page')}</h4>
+                        <div style="flex-grow: 1;">
+                            ${bodyHTML}
+                        </div>
+                        ${page.note ? `<div class="preview-page-note" style="margin-top: auto; border-top: 1px solid #dbe3ef; padding-top: 8px; color: #475569; font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; line-height: 1.55; text-align: left;">${escapeHTML(page.note)}</div>` : ''}
                     </div>
                 </div>
             `;
