@@ -26,8 +26,8 @@
     return symbol + amt;
   }
 
-  // All data (user submitted)
-  let allData = [];
+  // All data (user submitted + seed data)
+  let allData = (typeof SEED_DATA !== 'undefined' && Array.isArray(SEED_DATA)) ? [...SEED_DATA] : [];
 
   // --- Region/City Cascading Dropdowns ---
   function setupRegionCascade(regionSel, countrySel, citySel) {
@@ -356,7 +356,8 @@
       if (stored) localSubmissions = JSON.parse(stored);
     } catch (e) { console.warn('Failed to load local salaries:', e); }
 
-    allData = [...localSubmissions];
+    const seeds = (typeof SEED_DATA !== 'undefined' && Array.isArray(SEED_DATA)) ? SEED_DATA : [];
+    allData = [...seeds, ...localSubmissions];
     renderDashboard(allData);
     if (typeof renderSalaryWidget === 'function') renderSalaryWidget();
 
