@@ -1692,9 +1692,10 @@
                     return {
                         title: page.title || page.heading || 'Preview page',
                         lines: normalizePreviewList(page.lines || page.points || page.items || page.body),
-                        note: page.note || page.footer || ''
+                        note: page.note || page.footer || '',
+                        content: page.content || null
                     };
-                }).filter(page => page.title || page.lines.length);
+                }).filter(page => page.title || page.lines.length || (page.content && page.content.length));
             }
 
             if (typeof value === 'string') {
