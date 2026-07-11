@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details | QuantMentor</title>
+    <link rel="canonical" href="https://quantmentor.vercel.app/product.html">
+
+    <!-- Favicon and App Icons -->
+    <link rel="icon" type="image/png" href="assets/images/quantmentor-logo-icon-QM-1024.png">
+
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="QuantMentor Premium Resource">
+    <meta property="og:description" content="Premium digital resource for quantitative finance professionals.">
+    <meta property="og:image" content="assets/images/logo.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="stylesheet" href="styles-test.css">
+    <style>
+        .product-page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 20px 60px;
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-detail-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            width: 100%;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-detail-image {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            height: 400px;
+            position: relative;
+        }
+
+        .product-detail-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .product-detail-placeholder {
+            font-size: 5rem;
+            color: var(--text-muted);
+        }
+
+        .product-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .product-price-tag {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .product-description-full {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            /* Fallback */
+            word-break: break-word;
+            max-width: 100%;
+        }
+
+        .product-info {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .product-preview-section {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            padding: 0 20px 30px;
+        }
+
+        .product-preview-header {
+            margin-bottom: 24px;
+        }
+
+        .product-preview-eyebrow {
+            color: var(--accent-primary);
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .product-preview-title {
+            color: var(--text-primary);
+            font-size: 2rem;
+            line-height: 1.2;
+            margin: 0 0 10px;
+        }
+
+        .product-preview-subtitle {
+            color: var(--text-secondary);
+            max-width: 720px;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .product-preview-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .preview-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16);
+        }
+
+        .preview-panel-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+            font-size: 1.12rem;
+            margin: 0 0 18px;
+        }
+
+        .preview-panel-title i {
+            color: var(--accent-primary);
+        }
+
+        .preview-toc-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            counter-reset: preview-toc;
+            display: grid;
+            gap: 12px;
+        }
+
+        .preview-toc-list li {
+            counter-increment: preview-toc;
+            display: grid;
+            grid-template-columns: 34px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            color: var(--text-secondary);
+            line-height: 1.55;
+        }
+
+        .preview-toc-list li::before {
+            content: counter(preview-toc, decimal-leading-zero);
+            color: var(--text-primary);
+            background: rgba(99, 102, 241, 0.16);
+            border: 1px solid rgba(99, 102, 241, 0.32);
+            border-radius: 8px;
+            width: 34px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .preview-fit-stack {
+            display: grid;
+            gap: 18px;
+        }
+
+        .preview-list-block h3 {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            margin: 0 0 10px;
+        }
+
+        .preview-check-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 9px;
+        }
+
+        .preview-check-list li {
+            color: var(--text-secondary);
+            line-height: 1.55;
+            display: grid;
+            grid-template-columns: 18px minmax(0, 1fr);
+            gap: 9px;
+        }
+
+        .preview-check-list li::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: #22c55e;
+            font-size: 0.78rem;
+            margin-top: 3px;
+        }
+
+        .preview-sample-panel {
+            margin-top: 22px;
+        }
+
+        .preview-sample-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .preview-sample-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            min-height: 180px;
+        }
+
+        .preview-sample-card img {
+            display: block;
+            width: 100%;
+            height: 220px;
+            object-fit: contain;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .preview-sample-caption {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            line-height: 1.5;
+            padding: 14px 16px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .preview-sample-text {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            padding: 18px;
+        }
+
+        .preview-sample-text strong {
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .preview-page-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.96));
+            color: #111827;
+            padding: 22px;
+            min-height: 270px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .preview-page-kicker {
+            color: #4f46e5;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .preview-page-title {
+            color: #111827;
+            font-size: 1.1rem;
+            line-height: 1.35;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .preview-page-lines {
+            display: grid;
+            gap: 8px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .preview-page-lines li {
+            display: grid;
+            grid-template-columns: 14px minmax(0, 1fr);
+            gap: 8px;
+            color: #374151;
+            font-size: 0.88rem;
+            line-height: 1.45;
+        }
+
+        .preview-page-lines li::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4f46e5;
+            margin-top: 8px;
+        }
+
+        .preview-page-note {
+            margin-top: auto;
+            border-top: 1px solid #dbe3ef;
+            padding-top: 12px;
+            color: #475569;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            line-height: 1.55;
+        }
+
+        @media (max-width: 768px) {
+            .product-page-container {
+                padding: 100px 15px 40px;
+                overflow-x: hidden;
+            }
+
+            .product-detail-card {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                padding: 20px;
+                border-radius: var(--radius-lg);
+            }
+
+            .product-detail-image {
+                height: 250px;
+            }
+
+            .product-info {
+                position: static;
+                text-align: left;
+            }
+
+            .product-info h1 {
+                font-size: 1.8rem;
+                word-break: break-word;
+                /* Wrap long titles */
+                overflow-wrap: anywhere;
+            }
+
+            .product-price-tag {
+                font-size: 1.5rem;
+                justify-content: flex-start;
+            }
+
+            .product-description-full {
+                font-size: 1rem;
+                margin-bottom: 30px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .action-buttons .btn {
+                width: 100%;
+            }
+
+            .product-preview-section {
+                padding: 0 15px 24px;
+            }
+
+            .product-preview-title {
+                font-size: 1.55rem;
+            }
+
+            .product-preview-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-panel {
+                padding: 18px;
+            }
+
+            .coupon-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .coupon-row input {
+                width: 100%;
+            }
+
+            .product-badges {
+                flex-wrap: wrap;
+            }
+
+            .reviews-carousel-section {
+                padding: 40px 15px;
+            }
+
+            .reviews-carousel-container {
+                padding: 0 40px;
+            }
+
+            .carousel-btn {
+                width: 35px;
+                height: 35px;
+            }
+
+            .carousel-btn.prev {
+                left: 0;
+            }
+
+            .carousel-btn.next {
+                right: 0;
+            }
+
+            .review-slide {
+                min-width: 100%;
+                padding: 20px;
+            }
+        }
+
+        /* Product Badges */
+        .product-badges {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .product-badge-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fef08a;
+            color: #1a1a1a;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .product-badge-item i {
+            font-size: 1rem;
+        }
+
+        .product-badge-item.rating {
+            background: #fef08a;
+        }
+
+        .product-badge-item.rating i {
+            color: #1a1a1a;
+        }
+
+        .product-badge-item.digital {
+            background: #fef08a;
+        }
+
+        .product-badge-item.sales {
+            background: #fef08a;
+        }
+
+        /* Reviews Carousel Section */
+        .reviews-carousel-section {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .reviews-carousel-section h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+        }
+
+        .reviews-carousel-container {
+            position: relative;
+            overflow: hidden;
+            padding: 0 50px;
+        }
+
+        .reviews-carousel-track {
+            display: flex;
+            transition: transform 0.4s ease-in-out;
+        }
+
+        .review-slide {
+            min-width: 100%;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        .review-card {
+            background: #fef3e2;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .review-card .review-text {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #333;
+            margin-bottom: 20px;
+            font-style: normal;
+        }
+
+        .review-card .review-author {
+            font-weight: 700;
+            color: #1a1a1a;
+            font-size: 1rem;
+        }
+
+        .review-card .review-date {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+
+        .carousel-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .carousel-btn.prev {
+            left: 0;
+        }
+
+        .carousel-btn.next {
+            right: 0;
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .carousel-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border-light);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .carousel-dot.active {
+            background: var(--accent-primary);
+            transform: scale(1.2);
+        }
+
+        .no-reviews-message {
+            color: var(--text-muted);
+            padding: 40px;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Setup config for script.js to pick up -->
+    <script>
+        // Load config.js if it exists, otherwise gracefully fallback
+        (function () {
+            var script = document.createElement('script');
+            script.src = 'config.js';
+            script.onerror = function () {
+                console.log('ℹ️ config.js not found. Using fallback configuration from script.js');
+            };
+            document.head.appendChild(script);
+        })();
+    </script>
+    <script src="script.js"></script>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index-test.html" class="logo"
+                style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                <img src="assets/images/quantmentor-logo-icon-QM-1024.png" alt="QuantMentor" class="logo-img"
+                    style="height: 32px; width: auto;">
+                <span class="logo-text"
+                    style="font-weight: 700; font-size: 1.2rem; background: linear-gradient(135deg, white 0%, #a5b4fc 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">QuantMentor</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index-test.html#products">All Products</a></li>
+                <li><a href="index-test.html#contact" class="nav-cta">Book Session</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                </button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="product-page-container">
+        <div id="loading" style="text-align:center;">
+            <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: var(--accent-primary);"></i>
+            <p style="margin-top: 20px; color: var(--text-muted);">Loading product details...</p>
+        </div>
+
+        <div id="product-content" class="product-detail-card" style="display: none;">
+            <div class="product-detail-image">
+                <img id="p-image" src="" alt="Product Cover" style="display: none;">
+                <div id="p-placeholder" class="product-detail-placeholder">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+            </div>
+
+            <div class="product-info">
+                <!-- Product Badges -->
+                <div class="product-badges" id="p-badges">
+                    <span class="product-badge-item rating" id="p-rating-badge">
+                        <i class="fas fa-star"></i> <span id="p-rating">5</span>
+                    </span>
+                    <span class="product-badge-item digital">
+                        <i class="far fa-check-square"></i> Digital Product
+                    </span>
+                    <span class="product-badge-item sales" id="p-sales-badge">
+                        <i class="fas fa-bolt"></i> <span id="p-sales">0</span> Sales
+                    </span>
+                </div>
+                <h1 id="p-title">Product Title</h1>
+                <div class="product-price-tag" id="p-price">₹0</div>
+                <div class="product-description-full" id="p-desc">
+                    Product description...
+                </div>
+
+                <div class="action-buttons">
+                    <button id="buy-btn" class="btn btn-primary" style="padding: 16px 40px; font-size: 1.1rem;">
+                        <i class="fas fa-shopping-cart"></i> Buy Now
+                    </button>
+                    <a href="index-test.html#products" class="btn btn-secondary">
+                        Browse More
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div id="error-content" style="display: none; text-align: center;">
+            <h2 style="color: #ef4444; margin-bottom: 20px;">Product Not Found</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 30px;">The product you are looking for does not exist
+                or has been removed.</p>
+            <a href="index-test.html" class="btn btn-primary">Return Home</a>
+        </div>
+    </div>
+
+    <!-- Product Preview Section -->
+    <section class="product-preview-section" id="product-preview-section">
+        <div class="product-preview-header">
+            <div class="product-preview-eyebrow">Inside the resource</div>
+            <h2 class="product-preview-title">Preview what you will get</h2>
+            <p class="product-preview-subtitle" id="preview-summary">
+                A practical look at the structure, audience fit, prerequisites, and outcomes before you buy.
+            </p>
+        </div>
+
+        <div class="product-preview-grid">
+            <article class="preview-panel">
+                <h3 class="preview-panel-title">
+                    <i class="fas fa-list-check"></i>
+                    Table of contents
+                </h3>
+                <ol class="preview-toc-list" id="preview-toc-list"></ol>
+            </article>
+
+            <aside class="preview-panel">
+                <div class="preview-fit-stack">
+                    <div class="preview-list-block">
+                        <h3>Target audience</h3>
+                        <ul class="preview-check-list" id="preview-audience-list"></ul>
+                    </div>
+                    <div class="preview-list-block">
+                        <h3>Prerequisites</h3>
+                        <ul class="preview-check-list" id="preview-prerequisites-list"></ul>
+                    </div>
+                    <div class="preview-list-block">
+                        <h3>Expected outcomes</h3>
+                        <ul class="preview-check-list" id="preview-outcomes-list"></ul>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <article class="preview-panel preview-sample-panel">
+            <h3 class="preview-panel-title">
+                <i class="fas fa-file-image"></i>
+                Sample pages and screenshots
+            </h3>
+            <div class="preview-sample-grid" id="preview-sample-grid"></div>
+        </article>
+    </section>
+
+    <!-- Reviews Carousel Section -->
+    <section class="reviews-carousel-section" id="reviews-section" style="display: none;">
+        <h2>What are people saying</h2>
+        <div class="reviews-carousel-container">
+            <button class="carousel-btn prev" id="carousel-prev" onclick="moveCarousel(-1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="reviews-carousel-track" id="carousel-track">
+                <!-- Reviews will be loaded dynamically -->
+            </div>
+            <button class="carousel-btn next" id="carousel-next" onclick="moveCarousel(1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="carousel-dots" id="carousel-dots">
+            <!-- Dots will be added dynamically -->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="border-top: 1px solid var(--border-subtle); padding: 40px 0; background: var(--bg-secondary);">
+        <div class="nav-container" style="text-align: center;">
+            <p style="color: var(--text-muted);">&copy; 2026 QuantMentor. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Get Product ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            let productId = urlParams.get('id');
+
+            // Bug fix: If ID has wrapping quotes (e.g. "'123'"), strip them
+            if (productId) {
+                productId = productId.replace(/^['"]|['"]$/g, '');
+            }
+
+            if (!productId) {
+                showError();
+                return;
+            }
+
+            // Initialize Supabase immediately for product page
+            if (window.supabaseClient) {
+                await loadProduct(productId);
+            } else if (window.supabase && typeof window.supabase.createClient === 'function') {
+                const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
+                const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0'; // Hardcoded fallback
+                window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                await loadProduct(productId);
+            } else {
+                // If the SDK script hasn't downloaded yet, retry briefly
+                let attempts = 0;
+                const checkSupabase = setInterval(async () => {
+                    attempts++;
+                    if (window.supabase && typeof window.supabase.createClient === 'function') {
+                        clearInterval(checkSupabase);
+                        const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
+                        const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
+                        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                        await loadProduct(productId);
+                    } else if (attempts > 20) { // Max 2 seconds (20 * 100ms)
+                        clearInterval(checkSupabase);
+                        alert('Failed to load database. Please reload the page.');
+                    }
+                }, 100);
+            }
+        });
+
+        async function loadProduct(id) {
+            try {
+                const { data: product, error } = await window.supabaseClient
+                    .from('products')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (error || !product) {
+                    console.error('Product load error:', error);
+                    showError();
+                    return;
+                }
+
+                // Populate UI
+                document.getElementById('p-title').textContent = product.name;
+
+                // Description
+                const descEl = document.getElementById('p-desc');
+                descEl.innerHTML = product.description || 'No description available.';
+
+                // Image
+                if (product.cover_image_url) {
+                    const img = document.getElementById('p-image');
+                    img.src = product.cover_image_url;
+                    img.style.display = 'block';
+                    document.getElementById('p-placeholder').style.display = 'none';
+                }
+
+                // Update Product Badges (Rating, Sales)
+                if (product.average_rating !== undefined) {
+                    document.getElementById('p-rating').textContent = product.average_rating || 5;
+                }
+                if (product.sales_count !== undefined) {
+                    document.getElementById('p-sales').textContent = product.sales_count || 0;
+                }
+
+                renderProductPreview(product);
+
+                // Load Product-Specific Reviews
+                loadProductReviews(id);
+
+                // Price Setup (Instant Display in INR)
+                const priceEl = document.getElementById('p-price');
+                const buyBtn = document.getElementById('buy-btn');
+
+                let priceText = '₹' + product.price;
+
+                if (product.price === 0) {
+                    priceEl.textContent = 'Free';
+                    priceEl.style.color = '#22c55e';
+                    buyBtn.innerHTML = '<i class="fas fa-download"></i> Download Free';
+                    buyBtn.classList.replace('btn-primary', 'btn-success');
+                    buyBtn.style.background = '#22c55e';
+                } else {
+                    let originalPriceDisplay = '';
+                    if (product.original_price > product.price) {
+                        originalPriceDisplay = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">₹${product.original_price}</span>`;
+                    }
+                    priceEl.innerHTML = `${originalPriceDisplay}${priceText}`;
+                    buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${priceText}`;
+
+                    // Add Coupon UI if price > 0
+                    const couponContainer = document.createElement('div');
+                    // ... coupon structure intact ...
+                    couponContainer.id = 'coupon-section';
+                    couponContainer.style.marginBottom = '24px';
+                    couponContainer.innerHTML = `
+                        <div class="coupon-row">
+                            <input type="text" id="coupon-input" placeholder="Have a coupon code?" />
+                            <button id="apply-coupon-btn" class="btn btn-secondary" type="button">
+                                Apply
+                            </button>
+                        </div>
+                    `;
+                    // Insert coupon before action buttons
+                    const actionButtons = document.querySelector('.action-buttons');
+                    priceEl.parentNode.insertBefore(couponContainer, actionButtons);
+
+                    // Create Feedback Element
+                    const feedbackMsg = document.createElement('div');
+                    feedbackMsg.id = 'coupon-feedback';
+                    feedbackMsg.style.marginTop = '8px';
+                    feedbackMsg.style.fontSize = '0.9rem';
+                    couponContainer.appendChild(feedbackMsg);
+
+                    // Coupon Logic
+                    document.getElementById('apply-coupon-btn').addEventListener('click', async function () {
+                        const codeInput = document.getElementById('coupon-input');
+                        const code = codeInput.value.trim();
+                        feedbackMsg.textContent = ''; // Reset
+                        feedbackMsg.style.color = 'var(--text-muted)';
+
+                        if (!code) return;
+
+                        // Campaign 20% discount codes
+                        const COUPON_MAP_20 = {
+                            'quantitative finance for absolute beginners': 'BEGINNER20',
+                            'common mistakes in quant interviews': 'MISTAKES20',
+                            'quant interview problem book': 'PROBLEMS20',
+                            'greek explainer lab': 'GLAB20',
+                            'quant models for each asset class master pack': 'MODELS20',
+                            'the stochastic calculus visual lab': 'STOCHLAB20',
+                            'complete quant ats friendly resume': 'RESUME20',
+                            'mental math & market intuition for quants': 'MENTALMATH20',
+                            'python for quants': 'PYTHON20',
+                            'derivatives products & pricing master pack': 'DERIVATIVE20',
+                            'statistics & econometrics for quants': 'STATS20',
+                            'pnl attribution & desk diagnostics for quants': 'PNL20',
+                            'equity models': 'EQUITIES20',
+                            'interest rate models': 'RATES20',
+                            'machine learning for quants': 'ML20',
+                            'stochastic calculus for quants': 'STOCHASTIC20',
+                            'linear algebra & differential equations for quants': 'LADE20',
+                            'ultimate industry grade quant project pack': 'PROJECT20',
+                            'greeks,vols,ycurves,numerical meth./mc & xva guide': 'DESK20',
+                            'credit models': 'CREDITS20',
+                            'sql for quant interviews': 'SQL20',
+                            'regulatory & risk frameworks for quants': 'RISK20',
+                            'probability theory for quants': 'PROBABILITY20',
+                            'fx models': 'FXD20',
+                            'c++ for quants': 'CPP20',
+                            'r for risk quants': 'R20',
+                            'fixed income math & bond pricing': 'FIXEDINCOME20',
+                            'exotic options pricing guide': 'EXOTICS20'
+                        };
+
+                        const expected20Code = product.coupon_code ? product.coupon_code.replace('10', '20').toUpperCase() : null;
+                        const productName = (product.name || '').toLowerCase().trim();
+                        const mapKey = Object.keys(COUPON_MAP_20).find(k => productName.includes(k));
+                        const hardcoded20 = mapKey ? COUPON_MAP_20[mapKey].toUpperCase() : null;
+                        
+                        const inputCodeUpper = code.toUpperCase();
+
+                        let appliedDiscount = 0;
+                        let isValid = false;
+
+                        if (inputCodeUpper && product.coupon_code && inputCodeUpper === product.coupon_code.toUpperCase()) {
+                            isValid = true;
+                            appliedDiscount = product.discount_percentage || 0;
+                        } else if (inputCodeUpper && (inputCodeUpper === expected20Code || inputCodeUpper === hardcoded20)) {
+                            isValid = true;
+                            appliedDiscount = 20;
+                        }
+
+                        if (isValid) {
+                            const discount = appliedDiscount;
+                            const originalPrice = parseFloat(buyBtn.dataset.price);
+                            // Calculate new price
+                            const discountedPrice = Math.max(0, Math.round(originalPrice * (100 - discount) / 100));
+
+                            // Update Display
+                            let priceDisplay = '';
+                            const currentCurrency = buyBtn.dataset.currency || 'INR';
+
+                            if (currentCurrency === 'INR') {
+                                priceDisplay = `₹${discountedPrice}`;
+                                priceEl.innerHTML = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">₹${originalPrice}</span> ${priceDisplay}`;
+                            } else {
+                                priceDisplay = `${discountedPrice} ${currentCurrency}`;
+                                priceEl.innerHTML = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">${originalPrice} ${currentCurrency}</span> ${priceDisplay}`;
+                            }
+
+                            // Update Button
+                            buyBtn.dataset.price = discountedPrice;
+                            buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${priceDisplay}`;
+
+                            // Success Feedback
+                            feedbackMsg.textContent = `Coupon '${code}' applied! ${discount}% OFF applied successfully.`;
+                            feedbackMsg.style.color = '#22c55e'; // Success Green
+
+                            // Disable input
+                            codeInput.disabled = true;
+                            this.disabled = true;
+                            this.textContent = 'Applied';
+                        } else {
+                            // Error Feedback
+                            feedbackMsg.textContent = 'Invalid coupon code for this product.';
+                            feedbackMsg.style.color = '#ef4444'; // Error Red
+                        }
+                    });
+                }
+
+                // Set Page Title
+                document.title = `${product.name} | QuantMentor`;
+
+                buyBtn.onclick = function () {
+                    if (typeof window.initRazorpayCheckout === 'function') {
+                        // Calculate checkout parameters
+                        let checkoutPrice = product.price;
+                        let checkoutCurrency = 'INR';
+                        const loggingPrice = product.price;
+
+                        // Pass to Razorpay with simplest defaults for now (relying on script.js globals/logic if needed, but explicit args here)
+                        // If we had local price, we could pass it. But for stability, let's stick to base price or re-fetch locally if needed.
+                        // Actually, let's try to pass the computed local price if available.
+
+                        if (buyBtn.dataset.price) {
+                            checkoutPrice = parseFloat(buyBtn.dataset.price);
+                        }
+                        if (buyBtn.dataset.currency) {
+                            checkoutCurrency = buyBtn.dataset.currency;
+                        }
+
+                        window.initRazorpayCheckout(product.name, checkoutPrice, checkoutCurrency, loggingPrice);
+                    } else {
+                        alert('Payment system loading... please try again.');
+                    }
+                };
+
+                // Show Content IMMEDIATELY (Do not block on currency conversion)
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('product-content').style.display = 'grid';
+
+                // Store base price on button for the handler
+                buyBtn.dataset.price = product.price;
+                buyBtn.dataset.currency = 'INR';
+
+                // Asynchronous currency conversion (Non-blocking)
+                if (window.convertPrice && window.getUserCountry && product.price > 0) {
+                    window.getUserCountry().then(country => {
+                        return window.convertPrice(product.price, country).then(localPrice => {
+                            if (localPrice.currency.code !== 'INR') {
+                                // Update Buy Button Dataset
+                                buyBtn.dataset.price = localPrice.amount;
+                                buyBtn.dataset.currency = localPrice.currency.code;
+
+                                // Update Display Text
+                                let newPriceText = `${localPrice.currency.symbol}${localPrice.amount} ${localPrice.currency.code}`;
+
+                                let newOriginalDisplay = '';
+                                if (product.original_price > product.price) {
+                                    const rate = localPrice.rate || 1;
+                                    let convertedOriginal = product.original_price * rate;
+
+                                    const weakersCurrencies = [
+                                        'PKR', 'BDT', 'LKR', 'NPR', 'NGN', 'EGP', 'KES', 'GHS', 'ZAR',
+                                        'VND', 'IDR', 'PHP', 'MYR', 'THB', 'TRY', 'RUB', 'UAH',
+                                        'BRL', 'MXN', 'ARS', 'COP', 'CLP', 'PEN'
+                                    ];
+
+                                    if (!weakersCurrencies.includes(localPrice.currency.code)) {
+                                        convertedOriginal = convertedOriginal * 1.5;
+                                    }
+
+                                    newOriginalDisplay = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">${localPrice.currency.symbol}${Math.round(convertedOriginal).toLocaleString()}</span>`;
+                                }
+
+                                priceEl.innerHTML = `${newOriginalDisplay}${newPriceText}`;
+                                buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${newPriceText}`;
+                            }
+                        });
+                    }).catch(err => console.warn('Deferred currency conversion failed', err));
+                }
+
+                // --- User Details Modal Logic ---
+                const productUserModal = document.getElementById('user-details-modal');
+                const productUserForm = document.getElementById('user-details-form');
+                const productUserClose = document.getElementById('ud-close');
+
+                // Update Buy Button Handler
+                buyBtn.onclick = function (e) {
+                    e.preventDefault();
+                    if (productUserModal) {
+                        productUserModal.style.display = 'flex';
+                    }
+                };
+
+                // Close Modal Handler
+                if (productUserClose) {
+                    productUserClose.onclick = function () {
+                        productUserModal.style.display = 'none';
+                    };
+                }
+
+                // Form Submit Handler
+                if (productUserForm) {
+                    productUserForm.onsubmit = function (e) {
+                        e.preventDefault();
+
+                        const name = document.getElementById('ud-name').value.trim();
+                        const email = document.getElementById('ud-email').value.trim();
+                        const phone = document.getElementById('ud-phone').value.trim();
+
+                        if (name && email) {
+                            if (typeof window.initRazorpayCheckout === 'function') {
+                                productUserModal.style.display = 'none';
+
+                                // Calculate checkout parameters
+                                let checkoutPrice = product.price;
+                                let checkoutCurrency = 'INR';
+                                const loggingPrice = product.price;
+
+                                if (buyBtn.dataset.price) {
+                                    checkoutPrice = parseFloat(buyBtn.dataset.price);
+                                }
+                                if (buyBtn.dataset.currency) {
+                                    checkoutCurrency = buyBtn.dataset.currency;
+                                }
+
+                                // Pass User Details to Init
+                                window.initRazorpayCheckout(product.name, checkoutPrice, checkoutCurrency, loggingPrice, {
+                                    name: name,
+                                    email: email,
+                                    phone: phone // Optional, can be empty
+                                });
+                            } else {
+                                alert('Payment system loading... please try again.');
+                            }
+                        }
+                    };
+                }
+
+            } catch (err) {
+                console.error(err);
+                showError();
+            }
+        }
+
+        function renderProductPreview(product) {
+            const section = document.getElementById('product-preview-section');
+            if (!section) return;
+
+            const preview = buildProductPreview(product);
+
+            document.getElementById('preview-summary').textContent = preview.summary;
+            renderPreviewList('preview-toc-list', preview.toc, 'ol');
+            renderPreviewList('preview-audience-list', preview.audience, 'ul');
+            renderPreviewList('preview-prerequisites-list', preview.prerequisites, 'ul');
+            renderPreviewList('preview-outcomes-list', preview.outcomes, 'ul');
+            renderPreviewSamples(product, preview);
+
+            section.style.display = 'block';
+        }
+
+        function buildProductPreview(product) {
+            const profile = getPreviewProfile(product);
+            const descriptionText = stripHtml(product.description || '');
+
+            return {
+                summary: firstNonEmpty(
+                    product.preview_summary,
+                    profile.summary,
+                    descriptionText ? descriptionText.substring(0, 190) : ''
+                ),
+                toc: firstList(
+                    product.preview_table_of_contents,
+                    product.table_of_contents,
+                    product.toc,
+                    profile.toc
+                ),
+                audience: firstList(
+                    product.preview_target_audience,
+                    product.target_audience,
+                    profile.audience
+                ),
+                prerequisites: firstList(
+                    product.preview_prerequisites,
+                    product.prerequisites,
+                    profile.prerequisites
+                ),
+                outcomes: firstList(
+                    product.preview_expected_outcomes,
+                    product.expected_outcomes,
+                    profile.outcomes
+                ),
+                sampleImages: firstList(
+                    product.preview_sample_images,
+                    product.sample_images,
+                    product.preview_screenshots,
+                    product.sample_page_urls
+                ),
+                samplePages: normalizeSamplePages(
+                    product.preview_sample_pages,
+                    product.sample_pages,
+                    profile.samplePages,
+                    profile,
+                    product
+                ),
+                sampleText: firstNonEmpty(
+                    product.preview_sample_text,
+                    profile.sampleText,
+                    descriptionText
+                ),
+                samplePdfUrl: product.preview_sample_pdf_url || product.sample_pdf_url || profile.samplePdfUrl || (product.id ? `assets/samples/${product.id}_sample.pdf` : null)
+            };
+        }
+
+        function getPreviewProfile(product) {
+            const title = `${product.name || ''}`.toLowerCase();
+            const searchable = `${product.name || ''} ${stripHtml(product.description || '')}`.toLowerCase();
+
+            const specificProfiles = [
+                {
+                    match: ['numerical methods', 'calibration', 'finite difference', 'finite element'],
+                    summary: 'A mathematically rigorous, desk-ready field manual for options pricing, calibration, finite differences, finite elements, and machine learning.',
+                    samplePdfUrl: 'assets/samples/numerical_methods_sample.pdf',
+                    toc: ['Root Finding & SABR Volatility Calibration', 'Yield Curve Interpolation & Volatility Surface Parameterization', 'Finite Difference Schemes (Crank-Nicolson, ADI) & Rannacher Smoothing', 'Monte Carlo Schemes (Euler, Milstein, QE) & Variance Reduction', 'Tree & Lattice Methods (Binomial, LR, trinomial)', 'Fourier Option Pricing & the COS Method', 'Dupire Local Volatility & Vol Smile Dynamics', 'Von Neumann Stability, CFL, and Numba JIT', 'Finite Element Weak Formulations & Meshing', 'PINNs & Deep BSDE Solvers'],
+                    audience: ['Quant interview candidates', 'Desk pricing developers', 'Validation and risk analysts'],
+                    prerequisites: ['Advanced calculus and probability', 'Intermediate linear algebra and PDEs', 'Basic Python/PyTorch programming'],
+                    outcomes: ['Derive and implement Crank-Nicolson and COS methods', 'Calibrate SABR and SVI models with stability safeguards', 'Build PINNs and Deep BSDE solvers for high dimensions'],
+                    samplePages: [
+                        {
+                            title: 'SABR Volatility Calibration',
+                            content: [
+                                { type: 'paragraph', text: 'Calibration of the SABR model parameters (alpha, beta, rho, nu) to market implied volatility smiles is typically formulated as a non-linear least squares optimization problem. We minimize the difference between the model volatilities and the market quotes:' },
+                                { type: 'formula', text: 'F(alpha, rho, nu) = \\sum_{i=1}^M w_i (\\sigma_{SABR}(K_i, T) - \\sigma_{market}(K_i, T))^2' },
+                                { type: 'paragraph', text: 'To ensure real-time performance on a trading desk, we utilize Levenberg-Marquardt with analytical derivatives for the pricing formula, constraining parameters to preserve the default-free boundary condition (rho^2 + nu^2 < 1).' }
+                            ],
+                            note: 'Excerpt from Module 1: Root Finding & Optimization'
+                        },
+                        {
+                            title: 'Rannacher Smoothing',
+                            content: [
+                                { type: 'paragraph', text: 'Crank-Nicolson (CN) is unconditionally stable and second-order accurate. However, if the initial payoff has discontinuous derivatives (e.g. digital options, barrier options), the CN scheme exhibits spurious oscillations that decay very slowly. To fix this, we use Rannacher smoothing:' },
+                                { type: 'list', items: [
+                                    'Replace the first 2 or 4 time steps of the Crank-Nicolson run with 4 or 8 half-steps of the fully implicit (Backward Euler) scheme.',
+                                    'Backward Euler has strong L-stability properties which damp out the high-frequency numerical noise immediately.',
+                                    'After the initial smoothing steps, revert to standard Crank-Nicolson to preserve the global second-order temporal accuracy.'
+                                ]}
+                            ],
+                            note: 'Excerpt from Module 3: Finite Difference Methods'
+                        },
+                        {
+                            title: 'Fourier COS Option Pricing',
+                            content: [
+                                { type: 'paragraph', text: 'The COS method prices options by expanding the terminal risk-neutral density in terms of a Fourier cosine series. Since the characteristic function phi(u) is the Fourier transform of the density, the expansion coefficients A_k can be directly computed from the characteristic function:' },
+                                { type: 'formula', text: 'V(x, t) \\approx e^{-r \\Delta t} \\sum_{k=0}^{N-1}\' \\text{Re} \\left( \\phi \\left( \\frac{k\\pi}{b-a} \\right) e^{-i k\\pi \\frac{a}{b-a}} \\right) V_k' },
+                                { type: 'code', text: 'def cos_method_price(cf, S0, K, r, T, N, a, b):\n    # Fast pricing code using Cosine series...\n    u = np.arange(N) * np.pi / (b - a)\n    V_k = compute_payoff_coefficients(K, a, b, N)\n    cf_val = cf(u)\n    return S0 * np.sum(cf_val * V_k)' }
+                            ],
+                            note: 'Excerpt from Module 6: Fourier & Spectral Methods'
+                        }
+                    ],
+                    sampleText: 'Expect concise, desk-ready derivations, visual diagrams, and production code blocks that directly map equations to working implementations.'
+                },
+                {
+                    match: ['stochastic calculus visual lab', 'stochastic calculus for quants'],
+                    summary: 'A stochastic calculus resource built around visual intuition, SDE simulations, and step-by-step interview derivations.',
+                    toc: ['Brownian Motion & Quadratic Variation', "Itô's Lemma & Multi-dimensional Extensions", 'Stochastic Differential Equations (GBM, Vasicek, CIR)', 'Change of Measure & Girsanov Theorem', 'Feynman-Kac Theorem & PDE Connections', 'Martingales & Risk-Neutral Pricing'],
+                    audience: ['Quant prep candidates', 'MFE students', 'Risk managers updating mathematical skills'],
+                    prerequisites: ['Basic probability theory', 'Ordinary differential equations', 'Introductory calculus'],
+                    outcomes: ["Derive option pricing PDEs using Itô's lemma", 'Perform changes of probability measure with Girsanov', 'Simulate asset paths using Euler-Maruyama SDE discretizations'],
+                    samplePages: [
+                        {
+                            title: "Itô's Lemma Derivation",
+                            content: [
+                                { type: 'paragraph', text: 'Let X_t be an Ito drift-diffusion process: dX_t = mu_t dt + sigma_t dW_t. For any twice continuously differentiable function f(X_t, t), the Taylor expansion in continuous time must keep terms up to second order in dX_t:' },
+                                { type: 'formula', text: 'df(X_t, t) = \\frac{\\partial f}{\\partial t} dt + \\frac{\\partial f}{\\partial X} dX_t + \\frac{1}{2} \\frac{\\partial^2 f}{\\partial X^2} (dX_t)^2' },
+                                { type: 'paragraph', text: 'Using the formal rule (dW_t)^2 = dt, dt * dW_t = 0, and (dt)^2 = 0, the quadratic variation term simplifies to sigma_t^2 dt. Thus we obtain the classic Ito formulation:' },
+                                { type: 'formula', text: 'df = \\left( \\frac{\\partial f}{\\partial t} + \\mu_t \\frac{\\partial f}{\\partial X} + \\frac{1}{2} \\sigma_t^2 \\frac{\\partial^2 f}{\\partial X^2} \\right) dt + \\sigma_t \\frac{\\partial f}{\\partial X} dW_t' }
+                            ],
+                            note: "Excerpt from Section 2: Itô's Calculus"
+                        },
+                        {
+                            title: 'Girsanov Change of Measure',
+                            content: [
+                                { type: 'paragraph', text: 'The Girsanov Theorem defines how the drift of a stochastic process changes when we transition to an equivalent probability measure. Specifically, let W_t be a P-Brownian motion. If we define the Radon-Nikodym derivative process Z_t by:' },
+                                { type: 'formula', text: 'dZ_t = -\\gamma_t Z_t dW_t \\implies Z_t = \\exp\\left( -\\int_0^t \\gamma_s dW_s - \\frac{1}{2} \\int_0^t \\gamma_s^2 ds \\right)' },
+                                { type: 'paragraph', text: 'Then under the new measure Q defined by dQ = Z_T dP, the process W_t^Q = W_t + \\int_0^t \\gamma_s ds is a standard Brownian motion. In option pricing, we choose \\gamma_t = (mu - r)/sigma to eliminate the real-world drift in favor of the risk-free rate r.' }
+                            ],
+                            note: 'Excerpt from Section 4: Measure Theory'
+                        }
+                    ],
+                    sampleText: 'Combines stochastic calculus derivations with Python code path visualizations to bridge theoretical math with numerical pricing.'
+                },
+                {
+                    match: ['sql for quant interviews', 'sql'],
+                    summary: 'A desk-oriented SQL playbook focusing on point-in-time correctness, bitemporal data schemas, and high-frequency queries.',
+                    toc: ['Relational Database Basics & Grain Definition', 'Join Cardiability & Row Explosion Audits', 'Window Functions (LAG, LEAD, ROW_NUMBER)', 'Point-in-Time (PIT) / As-Of Joins', 'Time-Series Tick-to-Bar Aggregations', 'Reconciliation, PnL & Exposure Rollups'],
+                    audience: ['Quant developers', 'Data engineers', 'Buy-side/Sell-side interview candidates'],
+                    prerequisites: ['Basic SELECT queries', 'Familiarity with SQL joins', 'Basic time-series concepts'],
+                    outcomes: ['Write bulletproof As-Of queries without lookahead leakage', 'Implement performant window aggregates on market feeds', 'Debug query plans and optimize slow index scans'],
+                    samplePages: [
+                        {
+                            title: 'As-Of (Point-in-Time) Join Pattern',
+                            content: [
+                                { type: 'paragraph', text: 'In backtesting, you must join market quotes to trade events at the exact time of the trade, without looking forward in time. This is a Point-in-Time (PIT) or "As-Of" join. In SQL, this is implemented using window functions:' },
+                                { type: 'code', text: 'WITH RankedQuotes AS (\\n  SELECT t.trade_id, q.price,\\n         ROW_NUMBER() OVER (\\n           PARTITION BY t.trade_id\\n           ORDER BY q.quote_time DESC\\n         ) as rnk\\n  FROM Trades t\\n  JOIN Quotes q \\n    ON t.symbol = q.symbol \\n   AND q.quote_time <= t.trade_time\\n)\\nSELECT trade_id, price \\nFROM RankedQuotes \\nWHERE rnk = 1;' },
+                                { type: 'paragraph', text: 'This query matches every trade with the latest quote that occurred at or before the trade time, avoiding future lookahead leakage.' }
+                            ],
+                            note: 'Excerpt from Section 4: Point-in-Time & Bitemporal Data'
+                        }
+                    ],
+                    sampleText: 'Practical, quant-first SQL query patterns designed to handle trades, positions, quotes, and large-scale analytical rollups.'
+                },
+                {
+                    match: ['complete front office', 'professional bundle'],
+                    summary: 'A broad front-office and risk quant bundle covering pricing, asset-class models, coding templates, and desk diagnostics in one package.',
+                    toc: ['Front-office quant roadmap and setup', 'Derivatives pricing foundations', 'IR, FX, credit, and equity model packs', 'Greeks, curves, volatility, MC, and XVA', 'Python, C++, SQL, and R implementation assets', 'Interview and project conversion checklist'],
+                    audience: ['Candidates who want a complete quant prep stack', 'Practitioners moving across pricing, risk, and model validation', 'Learners who prefer one consolidated resource pack'],
+                    prerequisites: ['Probability, calculus, and basic derivatives awareness', 'Some Python or C++ exposure', 'Willingness to work through multiple topic tracks'],
+                    outcomes: ['Build a structured front-office prep plan', 'Connect asset-class models to practical diagnostics', 'Use scripts and PDFs as a reusable interview library'],
+                    samplePages: [
+                        { title: 'Bundle map', lines: ['How PDFs, scripts, and notebooks are organized by role', 'Which modules to study first for QR, QD, risk, and validation paths', 'How to combine products into a 30-day prep plan'], note: 'Start with roadmap, then specialize by role.' },
+                        { title: 'Desk diagnostic page', lines: ['Model input, calibration, and market-data checks', 'What to say when a pricing number looks wrong', 'Typical interviewer follow-ups and recovery prompts'], note: 'Designed for practical desk conversations.' }
+                    ],
+                    sampleText: 'The bundle is organized as a working library: pick the track you need, study the concepts, then use the scripts and prompts to convert that topic into interview-ready explanations.'
+                },
+                {
+                    match: ['quant models for each asset class'],
+                    summary: 'A cross-asset model pack focused on the intuition, assumptions, calibration habits, and interview framing for IR, FX, credit, and equity models.',
+                    toc: ['Interest-rate curve and short-rate model setup', 'FX model intuition and smile dynamics', 'Credit intensity, spread, and default modeling', 'Equity volatility and local/stochastic vol models', 'Cross-asset calibration and diagnostics', 'Interview prompts by asset class'],
+                    audience: ['Candidates targeting front-office quant roles', 'Risk and validation analysts covering multiple desks', 'Students who need model intuition by asset class'],
+                    prerequisites: ['Derivatives pricing basics', 'Probability and stochastic-process familiarity', 'Some exposure to curves, volatility, or credit spreads'],
+                    outcomes: ['Compare models across asset classes', 'Explain calibration choices and model limitations', 'Handle asset-class-specific interview questions'],
+                    samplePages: [
+                        { title: 'Asset-class model comparison', lines: ['When rates need curve dynamics instead of a flat discount factor', 'Why FX smile behavior differs from equity vol intuition', 'How credit default timing changes payoff reasoning'], note: 'The page connects model choice to market behavior.' },
+                        { title: 'Calibration checklist', lines: ['Inputs to validate before calibration', 'Symptoms of unstable parameters', 'How to explain a failed fit in an interview'], note: 'Use this before discussing any model output.' }
+                    ],
+                    sampleText: 'Each asset class is treated separately first, then compared so you can explain why the same pricing idea changes across IR, FX, credit, and equity markets.'
+                },
+                {
+                    match: ['derivatives products', 'derivatives products & pricing'],
+                    summary: 'A derivatives pricing pack organized by product type, payoff behavior, Greeks, model inputs, and practical desk failure modes.',
+                    toc: ['Forward, swap, and option payoff map', 'Pricing setup and no-arbitrage intuition', 'Greeks by product and scenario', 'Volatility, curves, dividends, and funding inputs', 'Numerical methods and Monte Carlo use cases', 'Product-specific interview questions'],
+                    audience: ['Derivatives interview candidates', 'Risk analysts moving into pricing', 'Developers implementing pricing or risk utilities'],
+                    prerequisites: ['Basic options and discounting knowledge', 'Calculus and probability fundamentals', 'Comfort reading formulas and payoff diagrams'],
+                    outcomes: ['Explain product behavior before formulas', 'Choose pricing inputs more defensibly', 'Discuss Greeks and numerical methods with context'],
+                    samplePages: [
+                        { title: 'Payoff-first product page', lines: ['Contract definition before formula', 'Economic intuition for long and short exposure', 'Which Greeks matter most for this payoff'], note: 'The structure starts from the product, not just the equation.' },
+                        { title: 'Pricing input audit', lines: ['Curve, vol, dividend, fixing, and day-count checks', 'Common market-data traps', 'How input errors show up in Greeks'], note: 'Useful for both interviews and desk debugging.' }
+                    ],
+                    sampleText: 'The material keeps products, model assumptions, and risk behavior tied together so pricing does not become a detached formula exercise.'
+                },
+                {
+                    match: ['greek explainer', 'greeks, vols', 'vols, ycurves', 'ycurves'],
+                    summary: 'A Greeks and diagnostics resource focused on how sensitivities move, fail, and explain PnL across pricing setups.',
+                    toc: ['Delta, gamma, vega, theta, and rho intuition', 'Vol surfaces, curves, and scenario shifts', 'Finite difference and bumping choices', 'Numerical Greeks and stability issues', 'PnL attribution from sensitivities', 'Interview traps and desk fixes'],
+                    audience: ['Candidates who need stronger risk intuition', 'Developers implementing pricing diagnostics', 'Risk quants explaining daily moves'],
+                    prerequisites: ['Options basics', 'Comfort with derivatives terminology', 'Some numerical-methods exposure helpful'],
+                    outcomes: ['Interpret Greeks as behavior, not memorized labels', 'Explain sensitivity instability', 'Connect Greeks to PnL and hedging conversations'],
+                    samplePages: [
+                        { title: 'Greek behavior page', lines: ['What the Greek measures locally', 'What breaks when the market move is large', 'How to explain sign and magnitude under stress'], note: 'Each Greek is tied to a desk question.' },
+                        { title: 'Numerical stability page', lines: ['Bump size selection', 'Central versus forward differences', 'Why noisy models create noisy sensitivities'], note: 'Useful for implementation and model validation.' }
+                    ],
+                    sampleText: 'The preview pages focus on the kind of sensitivity reasoning an interviewer expects after asking, "What happens if vol or rates move?"'
+                },
+                {
+                    match: ['stochastic calculus visual lab', 'stochastic calculus for quants'],
+                    summary: 'A stochastic calculus resource built around visual intuition, derivation structure, and finance use cases rather than isolated notation.',
+                    toc: ['Brownian motion and quadratic variation', 'Ito lemma with finance examples', 'SDEs behind common pricing models', 'Risk-neutral measure and numeraire intuition', 'Monte Carlo interpretation', 'Interview derivations and notebook-style practice'],
+                    audience: ['Financial engineering students', 'Quant interview candidates', 'Practitioners revisiting stochastic calculus'],
+                    prerequisites: ['Calculus and probability', 'Basic option pricing awareness', 'Comfort with mathematical notation'],
+                    outcomes: ['Explain Ito lemma without handwaving', 'Connect SDE assumptions to pricing models', 'Handle derivation questions with a repeatable structure'],
+                    samplePages: [
+                        { title: 'Ito lemma walkthrough', lines: ['Start from ordinary Taylor expansion', 'Add the quadratic variation term', 'Translate the result into option-pricing language'], note: 'The derivation is built for explanation under pressure.' },
+                        { title: 'Simulation page', lines: ['Discretize the SDE', 'Track path behavior and convergence', 'Explain what Monte Carlo estimates in pricing'], note: 'Visual intuition connects math to implementation.' }
+                    ],
+                    sampleText: 'The focus is on seeing why the stochastic terms matter, then using that structure in pricing and interview derivations.'
+                },
+                {
+                    match: ['statistics & econometrics', 'probability theory', 'linear algebra', 'differential equations'],
+                    summary: 'A quant math resource focused on the foundations that repeatedly appear in modeling, estimation, risk, and interviews.',
+                    toc: ['Core definitions and intuition', 'Finance-flavored worked examples', 'Estimation, regression, and diagnostics', 'Linear systems and transformations', 'Common interview derivations', 'Practice problems with reasoning prompts'],
+                    audience: ['Students strengthening quant foundations', 'Candidates preparing for math-heavy interviews', 'Practitioners refreshing estimation and modeling basics'],
+                    prerequisites: ['Undergraduate math exposure', 'Willingness to solve exercises manually', 'Basic programming helpful for examples'],
+                    outcomes: ['Build cleaner mathematical explanations', 'Recognize recurring interview patterns', 'Apply foundations to model and risk examples'],
+                    samplePages: [
+                        { title: 'Concept to finance map', lines: ['Definition in plain language', 'Where it appears in quant finance', 'Common interviewer twist'], note: 'Each topic is tied to a practical use case.' },
+                        { title: 'Worked reasoning page', lines: ['Assumptions first', 'Step-by-step derivation', 'Final interpretation and failure cases'], note: 'Written to improve explanation quality, not rote recall.' }
+                    ],
+                    sampleText: 'The pages convert foundations into interview and modeling language so you can explain both the math and its financial use.'
+                },
+                {
+                    match: ['machine learning for quants'],
+                    summary: 'A machine-learning-for-quants playbook covering feature design, validation, leakage, model diagnostics, and interview framing.',
+                    toc: ['ML use cases in quant finance', 'Feature engineering and target construction', 'Train-test splits and leakage traps', 'Model selection and diagnostics', 'Backtesting and validation pitfalls', 'Interview questions and project prompts'],
+                    audience: ['Quant candidates with ML projects', 'Data scientists moving into finance', 'Students building finance ML portfolios'],
+                    prerequisites: ['Basic statistics and Python', 'Familiarity with regression or classification', 'Awareness of time-series data'],
+                    outcomes: ['Avoid common finance ML mistakes', 'Explain validation choices clearly', 'Turn ML projects into quant interview evidence'],
+                    samplePages: [
+                        { title: 'Leakage checklist', lines: ['Look-ahead features', 'Improper cross-validation', 'Target construction and survivorship bias'], note: 'The checklist is meant to catch mistakes before backtesting.' },
+                        { title: 'Model diagnostic page', lines: ['Signal stability', 'Feature importance sanity checks', 'Performance decay and regime shifts'], note: 'Focuses on whether a result can survive scrutiny.' }
+                    ],
+                    sampleText: 'The material is built around model validation and failure modes because that is where finance ML projects are usually challenged.'
+                },
+                {
+                    match: ['credit models'],
+                    summary: 'A credit-model interview playbook focused on default modeling, spreads, intensity, transition risk, and practical credit diagnostics.',
+                    toc: ['Credit product and spread intuition', 'Hazard rates and survival probabilities', 'Default timing and recovery assumptions', 'CDS and risky bond pricing setup', 'Calibration and spread diagnostics', 'Credit interview cases'],
+                    audience: ['Credit quant candidates', 'Risk analysts covering credit products', 'Students learning default modeling'],
+                    prerequisites: ['Discounting and probability basics', 'Some derivatives pricing exposure', 'Basic understanding of bonds helpful'],
+                    outcomes: ['Explain credit spread and default intuition', 'Build pricing logic from survival probabilities', 'Discuss calibration and recovery assumptions'],
+                    samplePages: [
+                        { title: 'Survival curve page', lines: ['Map hazard rate to survival probability', 'Interpret default density', 'Connect assumptions to risky PV'], note: 'Starts from timing of default.' },
+                        { title: 'CDS pricing page', lines: ['Premium leg intuition', 'Protection leg intuition', 'Recovery and discounting effects'], note: 'Useful for credit interview walkthroughs.' }
+                    ],
+                    sampleText: 'Credit topics are framed around default timing, recovery, and spread behavior so the formulas stay economically grounded.'
+                },
+                {
+                    match: ['interest rate models'],
+                    summary: 'An interest-rate model playbook covering curves, short-rate intuition, HJM/LMM framing, calibration, and rates interview questions.',
+                    toc: ['Yield curves and discount factors', 'Forwards, swaps, caps, and swaptions', 'Short-rate model intuition', 'HJM and LMM framing', 'Calibration and curve diagnostics', 'Rates interview questions'],
+                    audience: ['Rates quant candidates', 'Developers working near curve and pricing systems', 'Risk analysts covering IR products'],
+                    prerequisites: ['Discounting and fixed-income basics', 'Calculus and probability', 'Some derivatives pricing exposure'],
+                    outcomes: ['Explain curve construction and model role', 'Discuss rates model assumptions', 'Handle common swaps, caps, and swaptions questions'],
+                    samplePages: [
+                        { title: 'Curve construction page', lines: ['Discount factors versus zero rates', 'Bootstrapping intuition', 'Where interpolation choices matter'], note: 'Curve logic is the base layer for rates pricing.' },
+                        { title: 'Model comparison page', lines: ['Short-rate model tradeoffs', 'HJM drift restriction intuition', 'Why LMM was designed around market rates'], note: 'Built for interview comparisons.' }
+                    ],
+                    sampleText: 'Rates content is organized around curves first, then models, because most practical pricing and interview questions depend on that order.'
+                },
+                {
+                    match: ['fx models'],
+                    summary: 'An FX model playbook covering forwards, carry, smile behavior, quanto effects, calibration, and desk-style FX interview prompts.',
+                    toc: ['FX forwards and interest-rate parity', 'Vanilla options and smile conventions', 'Local and stochastic volatility intuition', 'Barriers and exotic FX behavior', 'Calibration diagnostics', 'FX interview cases'],
+                    audience: ['FX quant candidates', 'Derivatives learners focusing on currency markets', 'Risk analysts covering FX options'],
+                    prerequisites: ['Options basics', 'Rates and discounting awareness', 'Probability and volatility intuition'],
+                    outcomes: ['Explain FX-specific pricing inputs', 'Discuss smile and barrier behavior', 'Handle FX model interview questions'],
+                    samplePages: [
+                        { title: 'FX forward page', lines: ['Domestic versus foreign discounting', 'Interest-rate parity intuition', 'What breaks under funding or basis effects'], note: 'Starts with the FX-specific numeraire setup.' },
+                        { title: 'Smile and barrier page', lines: ['Why smile conventions matter', 'Barrier sensitivity near the trigger', 'Calibration checks before pricing exotics'], note: 'Connects market quotes to model behavior.' }
+                    ],
+                    sampleText: 'The pack highlights where FX differs from equity options: two curves, quote conventions, barriers, and smile behavior.'
+                },
+                {
+                    match: ['equity models'],
+                    summary: 'An equity model playbook covering dividends, volatility smiles, local/stochastic volatility, exotics, and equity interview framing.',
+                    toc: ['Equity forward and dividend setup', 'Vanilla option pricing and Greeks', 'Volatility surface intuition', 'Local volatility and stochastic volatility', 'Exotic payoff behavior', 'Equity model interview prompts'],
+                    audience: ['Equity quant candidates', 'Options learners moving beyond Black-Scholes', 'Risk analysts covering equity derivatives'],
+                    prerequisites: ['Option pricing basics', 'Volatility and Greeks intuition', 'Some stochastic-process exposure helpful'],
+                    outcomes: ['Explain equity model assumptions clearly', 'Connect dividends and vol surfaces to pricing', 'Discuss model limitations in interviews'],
+                    samplePages: [
+                        { title: 'Dividend and forward page', lines: ['Forward price components', 'Discrete versus continuous dividends', 'Impact on options and early exercise intuition'], note: 'Equity pricing starts with the forward.' },
+                        { title: 'Vol model page', lines: ['Local volatility fit versus dynamics', 'Stochastic volatility intuition', 'When each model can mislead'], note: 'Designed for model comparison questions.' }
+                    ],
+                    sampleText: 'Equity models are presented through product behavior and volatility diagnostics so you can move beyond naming models.'
+                },
+                {
+                    match: ['pnl attribution'],
+                    summary: 'A PnL attribution and desk diagnostics guide focused on explaining daily moves, Greeks, residuals, and model/data issues.',
+                    toc: ['PnL explain framework', 'Greeks-based attribution', 'Curve, vol, and spread moves', 'Residual and unexplained PnL analysis', 'Data and model diagnostics', 'Interview case studies'],
+                    audience: ['Risk quants and desk analysts', 'Model validation candidates', 'Front-office candidates who need PnL fluency'],
+                    prerequisites: ['Greeks and risk basics', 'Some derivatives pricing exposure', 'Comfort with market-data scenarios'],
+                    outcomes: ['Explain PnL drivers more clearly', 'Separate market moves from model/data issues', 'Handle practical desk diagnostic questions'],
+                    samplePages: [
+                        { title: 'Daily PnL explain page', lines: ['Start from positions and market moves', 'Use Greeks for first-order explanation', 'Escalate residuals with a diagnostic path'], note: 'A repeatable workflow for desk questions.' },
+                        { title: 'Residual analysis page', lines: ['Model approximation error', 'Stale or bad market data', 'Missing risk factors and cross terms'], note: 'Shows what to check after Greeks do not explain the move.' }
+                    ],
+                    sampleText: 'The guide is built around explaining what happened today, what did not explain, and how to investigate the gap.'
+                },
+                {
+                    match: ['regulatory', 'risk frameworks'],
+                    summary: 'A regulatory and risk frameworks guide covering model risk, controls, capital, validation, and interview-ready governance language.',
+                    toc: ['Risk framework map', 'Model validation and governance', 'Capital and regulatory concepts', 'Stress testing and scenario analysis', 'Controls and documentation', 'Interview case prompts'],
+                    audience: ['Model risk and validation candidates', 'Risk quants preparing for governance questions', 'Front-office candidates needing control awareness'],
+                    prerequisites: ['Basic derivatives and risk concepts', 'Interest in model lifecycle and controls', 'Some exposure to banking terminology helpful'],
+                    outcomes: ['Speak about model governance precisely', 'Connect regulation to desk workflows', 'Handle risk-framework interview questions'],
+                    samplePages: [
+                        { title: 'Model lifecycle page', lines: ['Development, validation, approval, monitoring', 'Documentation expectations', 'When a model change needs escalation'], note: 'Governance described in practical language.' },
+                        { title: 'Stress and control page', lines: ['Scenario design', 'Limit and breach interpretation', 'How controls interact with model output'], note: 'Useful for risk and validation interviews.' }
+                    ],
+                    sampleText: 'The content focuses on saying the right things clearly: model purpose, limits, controls, documentation, and escalation.'
+                }
+            ];
+
+            const profiles = [
+                {
+                    match: ['python'],
+                    summary: 'A desk-oriented Python resource focused on numerical workflows, interview drills, and reusable quant finance code patterns.',
+                    toc: ['Python setup for quant workflows', 'NumPy, pandas, and vectorized calculations', 'Pricing and simulation examples', 'Data cleaning and diagnostics', 'Interview-style coding drills', 'Reusable templates and next steps'],
+                    audience: ['Quant aspirants learning production-style Python', 'Analysts moving from Excel or theory into code', 'Candidates preparing for coding-heavy quant interviews'],
+                    prerequisites: ['Basic Python syntax', 'Comfort with probability and statistics', 'A laptop or notebook environment for running examples'],
+                    outcomes: ['Write cleaner numerical Python code', 'Recognize common interview patterns', 'Build reusable notebooks and scripts for practice'],
+                    sampleText: 'Expect worked examples, runnable snippets, and concise explanations that connect the code to pricing, risk, and interview reasoning.'
+                },
+                {
+                    match: ['c++', 'cpp'],
+                    summary: 'A practical C++ resource for candidates who need performance-aware implementation patterns for quant and trading interviews.',
+                    toc: ['Modern C++ refresh', 'STL patterns used in interview problems', 'Memory, references, and object lifetime', 'Numerical routines and pricing skeletons', 'Performance and debugging habits', 'Desk-style coding prompts'],
+                    audience: ['Quant developer candidates', 'Python users adding C++ for interviews', 'Engineers targeting trading systems roles'],
+                    prerequisites: ['Basic C++ syntax', 'Familiarity with arrays, classes, and functions', 'Comfort reading compiler errors'],
+                    outcomes: ['Implement faster numerical routines', 'Discuss performance tradeoffs clearly', 'Prepare for C++ quant developer screens'],
+                    sampleText: 'The material emphasizes implementation choices, failure modes, and the kind of C++ reasoning that comes up in trading and quant developer interviews.'
+                },
+                {
+                    match: ['sql'],
+                    summary: 'A compact SQL interview pack built around finance-style data questions, joins, windows, aggregation, and diagnostics.',
+                    toc: ['SQL foundations for market and trade data', 'Joins, grouping, and filters', 'Window functions and ranking', 'PnL and exposure-style queries', 'Debugging bad data', 'Interview question set with solutions'],
+                    audience: ['Quant, risk, and data candidates', 'Analysts preparing for SQL rounds', 'Candidates who need finance-flavored query practice'],
+                    prerequisites: ['Basic database terminology', 'Familiarity with tables and rows', 'Willingness to practice queries hands-on'],
+                    outcomes: ['Answer SQL screens with structure', 'Work through trading-data query patterns', 'Spot common query mistakes quickly'],
+                    sampleText: 'You will see practical query patterns that map naturally to trades, positions, prices, exposures, and interview-style analytics.'
+                },
+                {
+                    match: ['interview', 'problem', 'mistakes', 'mental math', 'brain'],
+                    summary: 'An interview-focused resource that turns scattered preparation into structured patterns, worked reasoning, and repeatable drills.',
+                    toc: ['Core quant interview map', 'Probability and statistics patterns', 'Mental math and market intuition', 'Pricing and Greeks questions', 'Coding and logic prompts', 'Common traps and desk-ready fixes'],
+                    audience: ['Students targeting quant interviews', 'Career switchers building a prep plan', 'Candidates who want realistic question patterns'],
+                    prerequisites: ['Basic probability and calculus', 'Some programming exposure', 'Willingness to solve before reading solutions'],
+                    outcomes: ['Recognize recurring interview patterns', 'Explain reasoning under pressure', 'Close gaps with a targeted practice plan'],
+                    sampleText: 'The focus is not just answers. Each section is built to help you explain assumptions, defend approximations, and recover when an interviewer pushes back.'
+                },
+                {
+                    match: ['derivative', 'pricing', 'greek', 'vol', 'curve', 'monte carlo', 'numerical'],
+                    summary: 'A pricing-focused preview covering instruments, model intuition, Greeks, numerical methods, and implementation pitfalls.',
+                    toc: ['Product taxonomy and payoff intuition', 'No-arbitrage and pricing setup', 'Greeks and risk sensitivities', 'Volatility, curves, and calibration', 'Monte Carlo and numerical methods', 'Desk diagnostics and failure modes'],
+                    audience: ['Aspiring front-office quants', 'Risk analysts moving closer to pricing', 'Candidates preparing for derivatives interviews'],
+                    prerequisites: ['Calculus and probability basics', 'Some exposure to options or fixed income', 'Basic Python or spreadsheet numerics helpful'],
+                    outcomes: ['Connect formulas to product behavior', 'Explain model assumptions and limitations', 'Use Greeks and diagnostics with more confidence'],
+                    sampleText: 'Expect concise model intuition, desk-relevant caveats, and worked examples around pricing behavior rather than only textbook derivations.'
+                },
+                {
+                    match: ['stochastic', 'ito', 'calculus'],
+                    summary: 'A stochastic calculus resource designed to make the machinery useful for pricing, simulation, and interview explanations.',
+                    toc: ['Brownian motion intuition', 'Stochastic integrals and Ito lemma', 'SDEs used in finance', 'Measure change and risk-neutral pricing', 'Monte Carlo interpretation', 'Interview derivations and visual examples'],
+                    audience: ['Quant interview candidates', 'Financial engineering students', 'Practitioners revisiting stochastic calculus'],
+                    prerequisites: ['Calculus and probability', 'Basic option pricing awareness', 'Comfort with mathematical notation'],
+                    outcomes: ['Explain Ito lemma and SDEs more clearly', 'Connect stochastic calculus to pricing models', 'Handle derivation-style interview questions'],
+                    sampleText: 'The material emphasizes intuition, derivation structure, and examples that connect stochastic calculus to actual quant finance use cases.'
+                },
+                {
+                    match: ['xva', 'credit', 'risk', 'regulatory', 'pnl', 'attribution'],
+                    summary: 'A risk and desk-diagnostics resource focused on model behavior, controls, attribution, and real-world failure modes.',
+                    toc: ['Risk framework and desk context', 'Exposure, sensitivities, and diagnostics', 'Credit and funding adjustments', 'PnL attribution workflow', 'Regulatory and control considerations', 'Interview and case-study prompts'],
+                    audience: ['Risk quants and model validation candidates', 'Front-office candidates who need risk depth', 'Practitioners preparing for desk discussions'],
+                    prerequisites: ['Basic derivatives knowledge', 'Comfort with risk metrics', 'Some market data and pricing familiarity'],
+                    outcomes: ['Discuss model risk with more precision', 'Explain PnL and exposure drivers', 'Prepare for practical risk interview cases'],
+                    sampleText: 'The resource is structured around how models behave, where diagnostics break, and how to communicate risk in a desk-aware way.'
+                },
+                {
+                    match: ['project', 'portfolio'],
+                    summary: 'A project pack designed to turn quant theory into portfolio-ready implementations, explanations, and interview talking points.',
+                    toc: ['Project selection and setup', 'Data inputs and assumptions', 'Model implementation steps', 'Validation and diagnostics', 'Resume bullets and interview prompts', 'Extensions for deeper practice'],
+                    audience: ['Candidates building a quant portfolio', 'Students who need hands-on projects', 'Developers looking for finance-specific implementations'],
+                    prerequisites: ['Basic Python or C++ depending on project', 'Probability and statistics fundamentals', 'Comfort reading project instructions'],
+                    outcomes: ['Build stronger project evidence', 'Explain implementation choices clearly', 'Convert projects into resume and interview stories'],
+                    sampleText: 'Each project is meant to produce more than code: a defensible explanation, validation checks, and interview-ready talking points.'
+                },
+                {
+                    match: ['resume', 'ats', 'cv'],
+                    summary: 'A resume-focused pack for converting quant skills, projects, and coursework into ATS-friendly, interview-ready positioning.',
+                    toc: ['Quant resume structure', 'ATS-friendly formatting', 'Project and internship bullets', 'Skills and keyword mapping', 'Role-specific examples', 'Final checklist before applying'],
+                    audience: ['Students applying to quant roles', 'Career switchers repositioning experience', 'Candidates with projects but weak resume framing'],
+                    prerequisites: ['Existing coursework, projects, or experience to describe', 'Target role shortlist', 'Willingness to rewrite bullets concretely'],
+                    outcomes: ['Improve resume clarity and keyword coverage', 'Frame projects in business and model terms', 'Create stronger interview hooks from your experience'],
+                    sampleText: 'The focus is on specific bullets, measurable framing, and reducing generic claims that do not survive recruiter or interviewer scrutiny.'
+                }
+            ];
+
+            const selected =
+                specificProfiles.find(profile => profile.match.some(term => title.includes(term))) ||
+                profiles.find(profile => profile.match.some(term => searchable.includes(term)));
+
+            return selected || {
+                summary: 'A structured quant finance resource built to move from concept review to practical interview and desk-style application.',
+                toc: ['Concept map and prerequisites', 'Core formulas and intuition', 'Worked examples', 'Common mistakes and diagnostics', 'Interview-style questions', 'Practice plan and next steps'],
+                audience: ['Quant finance aspirants', 'Students preparing for interviews', 'Practitioners looking for a focused refresher'],
+                prerequisites: ['Basic probability and calculus', 'Some programming exposure is helpful', 'Interest in practical finance applications'],
+                outcomes: ['Understand the topic structure', 'Practice with clearer mental models', 'Apply the material in interviews or project work'],
+                samplePages: [
+                    { title: 'Concept map page', lines: ['Topic overview and dependencies', 'Core formulas with plain-language interpretation', 'Where the topic appears in quant interviews'], note: 'Built for quick orientation before deeper practice.' },
+                    { title: 'Worked example page', lines: ['Problem setup and assumptions', 'Step-by-step solution logic', 'Common mistakes and interviewer follow-ups'], note: 'Designed to move from reading to active recall.' }
+                ],
+                sampleText: 'The resource is designed to be practical: concise explanations, worked structure, and examples that help you apply the topic instead of only reading about it.'
+            };
+        }
+
+        function renderPreviewList(elementId, items) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            element.innerHTML = items.map(item => `<li>${escapeHTML(item)}</li>`).join('');
+        }
+
+        function renderPreviewSamples(product, preview) {
+            const grid = document.getElementById('preview-sample-grid');
+            if (!grid) return;
+
+            if (preview.samplePdfUrl) {
+                grid.style.display = 'block';
+                grid.innerHTML = `
+                    <div class="pdf-viewer-container" style="width: 100%; height: 750px; margin-top: 15px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-light); box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);">
+                        <iframe src="${escapeAttribute(preview.samplePdfUrl)}#toolbar=0" width="100%" height="100%" style="border: none;"></iframe>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.style.display = 'grid';
+            const sampleCards = [];
+            preview.sampleImages.forEach((url, index) => {
+                sampleCards.push(`
+                    <div class="preview-sample-card">
+                        <img src="${escapeAttribute(url)}" alt="${escapeAttribute(product.name || 'Product')} sample ${index + 1}">
+                        <div class="preview-sample-caption">Sample screenshot ${index + 1}</div>
+                    </div>
+                `);
+            });
+
+            preview.samplePages.forEach((page, index) => {
+                sampleCards.push(renderPreviewSamplePage(page, index));
+            });
+
+            if (preview.sampleText) {
+                sampleCards.push(`
+                    <div class="preview-sample-card">
+                        <div class="preview-sample-text">
+                            <strong>Sample extract</strong>
+                            ${escapeHTML(preview.sampleText).substring(0, 520)}
+                        </div>
+                    </div>
+                `);
+            }
+
+            grid.innerHTML = sampleCards.join('');
+        }
+
+        function renderPreviewSamplePage(page, index) {
+            let bodyHTML = '';
+            if (page.content && Array.isArray(page.content)) {
+                page.content.forEach(item => {
+                    if (item.type === 'paragraph') {
+                        bodyHTML += `<p class="preview-page-p" style="margin: 0 0 10px 0; font-size: 0.85rem; line-height: 1.5; color: #374151; text-align: left;">${escapeHTML(item.text)}</p>`;
+                    } else if (item.type === 'code') {
+                        bodyHTML += `<pre class="preview-page-code" style="background: #1e293b; color: #f8fafc; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.72rem; overflow-x: auto; margin: 0 0 10px 0; text-align: left; white-space: pre;"><code>${escapeHTML(item.text)}</code></pre>`;
+                    } else if (item.type === 'formula') {
+                        bodyHTML += `<div class="preview-page-formula" style="text-align: center; font-style: italic; font-weight: 600; font-family: serif; font-size: 0.95rem; margin: 12px 0; color: #111827;">${escapeHTML(item.text)}</div>`;
+                    } else if (item.type === 'list') {
+                        const lis = (item.items || []).map(li => `<li style="display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 8px; color: #374151; font-size: 0.82rem; line-height: 1.45; text-align: left;"><span style="display:inline-block; width: 6px; height: 6px; border-radius: 50%; background: #4f46e5; margin-top: 8px;"></span>${escapeHTML(li)}</li>`).join('');
+                        bodyHTML += `<ul class="preview-page-lines" style="display: grid; gap: 6px; margin: 0 0 10px 0; padding: 0; list-style: none;">${lis}</ul>`;
+                    }
+                });
+            } else {
+                const lines = (page.lines || []).slice(0, 5);
+                const listItems = lines.map(line => `
+                    <li style="display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 8px; color: #374151; font-size: 0.85rem; line-height: 1.45; text-align: left;">
+                        <span style="display:inline-block; width: 6px; height: 6px; border-radius: 50%; background: #4f46e5; margin-top: 8px;"></span>
+                        ${escapeHTML(line)}
+                    </li>
+                `).join('');
+                bodyHTML += `<ul class="preview-page-lines" style="display: grid; gap: 8px; margin: 0; padding: 0; list-style: none;">${listItems}</ul>`;
+            }
+
+            return `
+                <div class="preview-sample-card">
+                    <div class="preview-page-card" style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.96)); color: #111827; padding: 22px; min-height: 270px; display: flex; flex-direction: column; gap: 10px; border-radius: 8px; border: 1px solid #e2e8f0; height: 100%; box-sizing: border-box;">
+                        <div class="preview-page-kicker" style="color: #4f46e5; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; text-align: left;">Sample page ${index + 1}</div>
+                        <h4 class="preview-page-title" style="color: #111827; font-size: 1.05rem; line-height: 1.35; font-weight: 800; margin: 0 0 4px 0; text-align: left;">${escapeHTML(page.title || 'Preview page')}</h4>
+                        <div style="flex-grow: 1;">
+                            ${bodyHTML}
+                        </div>
+                        ${page.note ? `<div class="preview-page-note" style="margin-top: auto; border-top: 1px solid #dbe3ef; padding-top: 8px; color: #475569; font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; line-height: 1.55; text-align: left;">${escapeHTML(page.note)}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function normalizeSamplePages(...values) {
+            for (const value of values) {
+                const pages = parseSamplePages(value);
+                if (pages.length) return pages;
+            }
+            const profile = values[values.length - 2] || {};
+            return buildDefaultSamplePages(profile);
+        }
+
+        function parseSamplePages(value) {
+            if (!value) return [];
+
+            if (Array.isArray(value)) {
+                return value.map(page => {
+                    if (typeof page === 'string') {
+                        return { title: page, lines: [] };
+                    }
+                    return {
+                        title: page.title || page.heading || 'Preview page',
+                        lines: normalizePreviewList(page.lines || page.points || page.items || page.body),
+                        note: page.note || page.footer || '',
+                        content: page.content || null
+                    };
+                }).filter(page => page.title || page.lines.length || (page.content && page.content.length));
+            }
+
+            if (typeof value === 'string') {
+                const trimmed = value.trim();
+                if (!trimmed) return [];
+
+                try {
+                    return parseSamplePages(JSON.parse(trimmed));
+                } catch (e) {
+                    const blocks = trimmed.split(/\n\s*\n/).map(block => block.trim()).filter(Boolean);
+                    return blocks.map(block => {
+                        const parts = block.split(/\r?\n/).map(part => part.trim()).filter(Boolean);
+                        return {
+                            title: parts[0] || 'Preview page',
+                            lines: parts.slice(1)
+                        };
+                    });
+                }
+            }
+
+            return [];
+        }
+
+        function buildDefaultSamplePages(profile) {
+            return [
+                {
+                    title: (profile.toc && profile.toc[0]) || 'Concept overview',
+                    lines: [
+                        (profile.summary || 'A concise topic overview for quant preparation.'),
+                        (profile.toc && profile.toc[1]) || 'Key intuition and formulas',
+                        (profile.outcomes && profile.outcomes[0]) || 'Practical application checkpoints'
+                    ],
+                    note: 'Representative generated preview. Add screenshot URLs in admin for exact page images.'
+                },
+                {
+                    title: (profile.toc && profile.toc[2]) || 'Worked example',
+                    lines: [
+                        (profile.prerequisites && profile.prerequisites[0]) || 'Assumptions and setup',
+                        (profile.outcomes && profile.outcomes[1]) || 'Step-by-step solution logic',
+                        (profile.toc && profile.toc[profile.toc.length - 1]) || 'Interview follow-ups'
+                    ],
+                    note: 'Use the admin preview fields to replace this with actual product sample pages.'
+                }
+            ];
+        }
+
+        function firstList(...values) {
+            for (const value of values) {
+                const list = normalizePreviewList(value);
+                if (list.length) return list;
+            }
+            return [];
+        }
+
+        function firstNonEmpty(...values) {
+            for (const value of values) {
+                if (typeof value === 'string' && value.trim()) return stripHtml(value).trim();
+            }
+            return '';
+        }
+
+        function normalizePreviewList(value) {
+            if (!value) return [];
+
+            if (Array.isArray(value)) {
+                return value.map(item => String(item).trim()).filter(Boolean);
+            }
+
+            if (typeof value === 'string') {
+                const trimmed = value.trim();
+                if (!trimmed) return [];
+
+                try {
+                    const parsed = JSON.parse(trimmed);
+                    if (Array.isArray(parsed)) return normalizePreviewList(parsed);
+                } catch (e) {
+                    // Plain text list; split below.
+                }
+
+                return trimmed
+                    .split(/\r?\n|;|\|/)
+                    .map(item => item.replace(/^[-*]\s*/, '').trim())
+                    .filter(Boolean);
+            }
+
+            return [];
+        }
+
+        function stripHtml(value) {
+            const div = document.createElement('div');
+            div.innerHTML = value || '';
+            return div.textContent || div.innerText || '';
+        }
+
+        function escapeHTML(value) {
+            return String(value || '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
+        function escapeAttribute(value) {
+            return escapeHTML(value).replace(/`/g, '&#96;');
+        }
+
+        // Reviews Carousel Variables
+        let currentSlide = 0;
+        let totalSlides = 0;
+
+        // Load product-specific reviews from junction table
+        async function loadProductReviews(productId) {
+            try {
+                // Fetch reviews linked to this product
+                const { data: linkedReviews, error: linkError } = await window.supabaseClient
+                    .from('product_reviews')
+                    .select(`
+                        display_order,
+                        testimonials (
+                            id,
+                            name,
+                            review,
+                            rating,
+                            created_at
+                        )
+                    `)
+                    .eq('product_id', productId)
+                    .order('display_order', { ascending: true });
+
+                if (linkError) {
+                    console.log('No product_reviews table or error:', linkError);
+                    // Fallback: load some published testimonials
+                    return loadFallbackReviews();
+                }
+
+                if (!linkedReviews || linkedReviews.length === 0) {
+                    // Fallback: load published testimonials as carousel
+                    return loadFallbackReviews();
+                }
+
+                // Extract testimonials data
+                const reviews = linkedReviews
+                    .filter(r => r.testimonials)
+                    .map(r => r.testimonials);
+
+                if (reviews.length > 0) {
+                    renderReviewsCarousel(reviews);
+                }
+            } catch (e) {
+                console.error('Error loading product reviews:', e);
+                loadFallbackReviews();
+            }
+        }
+
+        // Fallback: Load published testimonials if no product_reviews linked
+        async function loadFallbackReviews() {
+            try {
+                const { data: reviews, error } = await window.supabaseClient
+                    .from('testimonials')
+                    .select('*')
+                    .eq('is_published', true)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+
+                if (!error && reviews && reviews.length > 0) {
+                    renderReviewsCarousel(reviews);
+                }
+            } catch (e) {
+                console.error('Fallback reviews load error:', e);
+            }
+        }
+
+        // Render reviews into carousel
+        function renderReviewsCarousel(reviews) {
+            const track = document.getElementById('carousel-track');
+            const dotsContainer = document.getElementById('carousel-dots');
+            const section = document.getElementById('reviews-section');
+
+            if (!track || !reviews || reviews.length === 0) return;
+
+            totalSlides = reviews.length;
+            currentSlide = 0;
+
+            // Build slides
+            track.innerHTML = reviews.map((r, index) => {
+                const date = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                const escapedReview = r.review.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const escapedName = r.name.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return `
+                    <div class="review-slide">
+                        <div class="review-card">
+                            <p class="review-text">"${escapedReview}"</p>
+                            <p class="review-author">— ${escapedName}</p>
+                            <p class="review-date">${date}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Build dots
+            if (dotsContainer && totalSlides > 1) {
+                dotsContainer.innerHTML = reviews.map((_, i) =>
+                    `<button class="carousel-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></button>`
+                ).join('');
+            }
+
+            // Show section
+            section.style.display = 'block';
+
+            // Hide arrows if only 1 review
+            if (totalSlides <= 1) {
+                document.getElementById('carousel-prev').style.display = 'none';
+                document.getElementById('carousel-next').style.display = 'none';
+            }
+        }
+
+        // Move carousel by direction (-1 or +1)
+        function moveCarousel(direction) {
+            currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+            updateCarousel();
+        }
+
+        // Go to specific slide
+        function goToSlide(index) {
+            currentSlide = index;
+            updateCarousel();
+        }
+
+        // Update carousel position
+        function updateCarousel() {
+            const track = document.getElementById('carousel-track');
+            if (track) {
+                track.style.transform = `translateX(-${currentSlide * 100}%)`;
+            }
+
+            // Update dots
+            const dots = document.querySelectorAll('.carousel-dot');
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+        }
+
+        function showError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error-content').style.display = 'block';
+        }
+    </script>
+
+    <!-- User Details Modal (Product Page) -->
+    <div id="user-details-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center; backdrop-filter:blur(5px);">
+        <div
+            style="background: var(--bg-card); padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; border: 1px solid var(--border-light); box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <h3 style="margin-bottom: 20px; font-size: 1.5rem; text-align: center; color: var(--text-primary);">Enter
+                Your Details</h3>
+            <p style="color:var(--text-muted); text-align:center; margin-bottom: 24px;">Please provide via secure form
+                so we can send your resource via email.</p>
+
+            <form id="user-details-form" style="display: flex; flex-direction: column; gap: 16px;">
+                <div>
+                    <label style="display:block; color:var(--text-muted); margin-bottom:8px; font-size:0.9rem;">Full
+                        Name *</label>
+                    <input type="text" id="ud-name" required placeholder="John Doe"
+                        style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
+                </div>
+                <div>
+                    <label style="display:block; color:var(--text-muted); margin-bottom:8px; font-size:0.9rem;">Email
+                        Address *</label>
+                    <input type="email" id="ud-email" required placeholder="john@example.com"
+                        style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
+                </div>
+                <div>
+                    <label style="display:block; color:var(--text-muted); margin-bottom:8px; font-size:0.9rem;">Phone
+                        Number (Optional)</label>
+                    <input type="tel" id="ud-phone" placeholder="+91 9876543210"
+                        style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
+                </div>
+
+                <button type="submit" class="btn btn-primary"
+                    style="width:100%; padding:14px; margin-top:10px; font-size:1.1rem;">
+                    Proceed to Payment <i class="fas fa-arrow-right" style="margin-left:8px;"></i>
+                </button>
+                <button type="button" id="ud-close"
+                    style="background:none; border:none; color:var(--text-muted); padding:10px; cursor:pointer; width:100%; text-align:center;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>

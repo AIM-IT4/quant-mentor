@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<!-- Restore Point: 2026-02-19 -->
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Expert Quant Mentorship & Mathematics - Master Stochastic Calculus, Python, C++, XVA Models, and Interview Prep with industry guidance.">
+    <meta name="keywords"
+        content="quant, quantitative finance, mathematics, stochastic calculus, algo trading, mentorship, Python, C++, XVA, derivatives, interview prep">
+    <title>QuantMentor | Expert Quant Mentorship, Math & Digital Resources</title>
+    <link rel="canonical" href="https://quantmentor.vercel.app/">
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      "name": "QuantMentor",
+      "image": "https://quantmentor.vercel.app/assets/images/quantmentor-logo-icon-QM-1024.png",
+      "@id": "https://quantmentor.vercel.app/",
+      "url": "https://quantmentor.vercel.app/",
+      "telephone": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "",
+        "addressLocality": "London",
+        "addressRegion": "",
+        "postalCode": "",
+        "addressCountry": "UK"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 51.5074,
+        "longitude": -0.1278
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "opens": "09:00",
+        "closes": "18:00"
+      },
+      "sameAs": [
+        "https://www.linkedin.com/in/akjha002/",
+        "https://github.com/AIM-IT4",
+        "https://x.com/Akjha2023"
+      ],
+      "priceRange": "$$"
+    }
+    </script>
+
+    <!-- Product Catalog Structured Data for SEO, LLMs, and Crawlers -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "QuantMentor Digital Products",
+      "description": "Premium digital products for quantitative finance professionals — study materials, coding scripts, interview guides, and desk-ready playbooks.",
+      "url": "https://quant-mentor.vercel.app/#products",
+      "numberOfItems": 28,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "item": {
+            "@type": "Product",
+            "name": "Common Mistakes in Quant Interviews — Desk Fixes Edition",
+            "description": "106 pages covering 29 interview-critical chapters — probability, stochastic calculus, XVA, AAD, Wrong-Way Risk, rough volatility, volatility surfaces. Drill format: Wrong answer → Trap → Correction → Practitioner insight → 3-Second Answer.",
+            "offers": { "@type": "Offer", "price": "799", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "item": {
+            "@type": "Product",
+            "name": "R for Risk Quants — Desk-Ready Notes + Runnable Templates (28 Modules, 29 Scripts)",
+            "description": "65-page PDF with 28 modules, 29 runnable R scripts, 200+ quickfire questions, 20 mini-cases. Covers VaR/ES, Monte Carlo, PCA, EVT, FRTB, CVA/XVA, covariance estimation.",
+            "offers": { "@type": "Offer", "price": "599", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "item": {
+            "@type": "Product",
+            "name": "Quant Interview Problem Book (1000+ Problems with solutions)",
+            "description": "1000+ unique problems with full solutions covering Linear Algebra, Probability, Stochastic Calculus, Black-Scholes, Monte Carlo, Statistics, Risk Management, Python & C++.",
+            "offers": { "@type": "Offer", "price": "899", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "item": {
+            "@type": "Product",
+            "name": "Greek Explainer Lab – The Production Quant Edition",
+            "description": "16 interactive Jupyter modules from Delta/Gamma basics to Vanna, Charm, Volga, Color. 3D visualizations, quant interview multipliers, delta hedging simulation.",
+            "offers": { "@type": "Offer", "price": "799", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "item": {
+            "@type": "Product",
+            "name": "Quant Models for Each Asset Class Master Pack: IR, FX, Credits, Equity",
+            "description": "4 focused playbooks covering Interest Rate, FX, Credit, and Equity models. Model intuition, calibration mindset, interview-style explanations, and failure modes.",
+            "offers": { "@type": "Offer", "price": "1999", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "item": {
+            "@type": "Product",
+            "name": "The Stochastic Calculus Visual Lab (20 Jupyter Notebooks)",
+            "description": "20 interactive notebooks: Brownian motion, Ito's Lemma, Girsanov, Feynman-Kac, delta hedging, jump diffusion, Heston, barrier options, variance reduction.",
+            "offers": { "@type": "Offer", "price": "599", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 7,
+          "item": {
+            "@type": "Product",
+            "name": "Complete Quant ATS Friendly Resume LaTeX + DOCX Template Pack",
+            "description": "Junior, experienced, and senior quant resume templates in LaTeX + DOCX. ATS keyword sheet, cover letter template, and how-to-use guide.",
+            "offers": { "@type": "Offer", "price": "399", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 8,
+          "item": {
+            "@type": "Product",
+            "name": "Mental Math & Market Intuition for Quants: Interview Playbook",
+            "description": "Mental math speed drills, market intuition frameworks, 50+ timed problems, WRAPS trade analysis model, daily training plans, and interview survival techniques.",
+            "offers": { "@type": "Offer", "price": "499", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 9,
+          "item": {
+            "@type": "Product",
+            "name": "Python for Quants: Complete Interview Guide",
+            "description": "60-page PDF, 19 Python scripts, cheat sheet, Jupyter notebook, mock interview transcript. Covers NumPy, Pandas, GIL, vectorization, system design, desk-specific patterns.",
+            "offers": { "@type": "Offer", "price": "599", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 10,
+          "item": {
+            "@type": "Product",
+            "name": "Derivatives Products & Pricing Master Pack (6 PDFs): IR, FX, Equity, Credit, Inflation & Commodities",
+            "description": "6-PDF multi-asset derivatives bundle. Product taxonomy, payoff logic, pricing foundations, market conventions, volatility smiles, and risk sensitivities per asset class.",
+            "offers": { "@type": "Offer", "price": "1999", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 11,
+          "item": {
+            "@type": "Product",
+            "name": "Statistics & Econometrics For Quants: Interview & Desk Playbook",
+            "description": "Desk-first guide: estimation error, regression misuse, time series, volatility modeling, correlation breakdowns, hypothesis testing, VaR vs ES, Bayesian thinking, PnL attribution.",
+            "offers": { "@type": "Offer", "price": "499", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 12,
+          "item": {
+            "@type": "Product",
+            "name": "PnL Attribution & Desk Diagnostics for Quants",
+            "description": "Forensic PnL analysis: clean vs dirty decomposition, hedge-slippage triage, correlation diagnostics, residual PnL testing, stress-event sequencing, governance and reserves.",
+            "offers": { "@type": "Offer", "price": "499", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 13,
+          "item": {
+            "@type": "Product",
+            "name": "Equity Models: Quant Interview Playbook",
+            "description": "Black-Scholes, Local Vol, Heston, Jump models, LSV. PnL attribution, model failure signatures, desk case studies, interview-ready language.",
+            "offers": { "@type": "Offer", "price": "499", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 14,
+          "item": {
+            "@type": "Product",
+            "name": "Interest Rate Models: Quant Interview Playbook",
+            "description": "Hull-White, LMM, SABR, HJM. 8 modules with cheat sheets, model selection decision trees, calibration algorithms, PnL attribution, 20+ interview questions.",
+            "offers": { "@type": "Offer", "price": "499", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 15,
+          "item": {
+            "@type": "Product",
+            "name": "Machine Learning for Quants: Interview Playbook",
+            "description": "Desk-first ML: non-stationarity, feature engineering without leakage, model drift detection, crisis behavior, why ML has no Greeks, kill-switch logic.",
+            "offers": { "@type": "Offer", "price": "499", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 16,
+          "item": {
+            "@type": "Product",
+            "name": "Stochastic Calculus for Quants: Interview Playbook",
+            "description": "Brownian motion, quadratic variation, Ito's Lemma, core SDEs (GBM, OU, CIR, Heston), risk-neutral pricing, delta-hedging, PDE formulation, martingales.",
+            "offers": { "@type": "Offer", "price": "499", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 17,
+          "item": {
+            "@type": "Product",
+            "name": "Linear Algebra & Differential Equations for Quants: Interview Playbook",
+            "description": "Vectors as exposures, eigenvalues as regimes, PCA failures, PDE as no-arbitrage constraints, free boundaries, numerical stability, condition numbers.",
+            "offers": { "@type": "Offer", "price": "499", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 18,
+          "item": {
+            "@type": "Product",
+            "name": "Ultimate Industry Grade Quant Project Pack (45 Projects)",
+            "description": "45 desk-level projects: Derivatives, Risk, XVA, Credit, FX, Equity, Inflation. Python + C++, SDE/PDE formulations, calibration, interview prep, resume bullets. 600+ pages.",
+            "offers": { "@type": "Offer", "price": "799", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 19,
+          "item": {
+            "@type": "Product",
+            "name": "Greeks, Vols, YCurves, Numerical Methods, MC & XVA Guide",
+            "description": "Desk playbook: Greeks with PnL recipes, vol surface intuition, SABR/SVI, Monte Carlo variance reduction, GARCH, CVA estimation, 100+ exercises, Python code.",
+            "offers": { "@type": "Offer", "price": "499", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 20,
+          "item": {
+            "@type": "Product",
+            "name": "Credit Models: Quant Interview Playbook",
+            "description": "Intensity models, structural models, CDS pricing, credit spread dynamics, copulas, CDO tranches, JTD risk, PnL/hedging, 30+ interview questions.",
+            "offers": { "@type": "Offer", "price": "499", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 21,
+          "item": {
+            "@type": "Product",
+            "name": "SQL for Quant Interviews: Premium Pack",
+            "description": "74-page guide, 32 runnable SQL scripts, interview playbook. Grain-first thinking, point-in-time correctness, as-of joins, performance engineering, financial datasets.",
+            "offers": { "@type": "Offer", "price": "499", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 22,
+          "item": {
+            "@type": "Product",
+            "name": "Regulatory & Risk Frameworks for Quants",
+            "description": "Basel III, FRTB, SA-CCR, CVA capital, model validation (SR 11-7), stress testing, capital-driven model choice. 50+ interview questions.",
+            "offers": { "@type": "Offer", "price": "499", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 23,
+          "item": {
+            "@type": "Product",
+            "name": "Probability Theory for Quants: Desk-First",
+            "description": "Risk geometry, VaR/CVaR, distributions as market regimes, martingales, Girsanov, copulas, EVT, Malliavin calculus. 80-problem exam pack included.",
+            "offers": { "@type": "Offer", "price": "499", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 24,
+          "item": {
+            "@type": "Product",
+            "name": "FX Models: Quant Interview Playbook",
+            "description": "Garman-Kohlhagen, FX smile, local vol vs stochastic vol, jumps, quanto/hybrid models, FX PnL attribution. 25+ desk-level interview questions.",
+            "offers": { "@type": "Offer", "price": "499", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 25,
+          "item": {
+            "@type": "Product",
+            "name": "C++ for Quants: Desk-Ready Notes",
+            "description": "59-page PDF, 22 modules, 16 C++ programs, cheat sheet, interactive notebook. RAII, STL, numerics, Monte Carlo, threading, cache locality, move semantics.",
+            "offers": { "@type": "Offer", "price": "549", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 26,
+          "item": {
+            "@type": "Product",
+            "name": "Complete Front Office & Risk Quant Professional Bundle (40+ PDFs & 60+ scripts)",
+            "description": "Full quant library: Derivatives, Models, Playbooks, Programming (Python+C+++SQL), Projects, 1000+ Interview Problems, Resume Pack. 40+ PDFs and 60+ executable scripts.",
+            "offers": { "@type": "Offer", "price": "9499", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#products" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 27,
+          "item": {
+            "@type": "Product",
+            "name": "Quant Formula Sheet",
+            "description": "Free downloadable quant formula reference sheet.",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#resources" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 28,
+          "item": {
+            "@type": "Product",
+            "name": "Resources Map",
+            "description": "Free downloadable guide to getting started in quantitative finance.",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR", "url": "https://quant-mentor.vercel.app/#resources" }
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Favicon and App Icons -->
+    <link rel="icon" type="image/png" href="assets/images/quantmentor-logo-icon-QM-1024.png">
+    <link rel="apple-touch-icon" href="assets/images/quantmentor-logo-icon-QM-1024.png">
+    <link rel="shortcut icon" href="assets/images/quantmentor-logo-icon-QM-1024.png">
+
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://quantmentor.vercel.app/">
+    <meta property="og:title" content="QuantMentor | Expert Quant Mentorship & Digital Resources">
+    <meta property="og:description"
+        content="1-on-1 mentorship from industry expert. Master quantitative finance, derivatives pricing, XVA models, and crack quant interviews.">
+    <meta property="og:image" content="https://quantmentor.vercel.app/assets/images/quantmentor-logo-icon-QM-1024.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://quantmentor.vercel.app/">
+    <meta property="twitter:title" content="QuantMentor | Expert Quant Mentorship">
+    <meta property="twitter:description"
+        content="1-on-1 mentorship from industry expert. Master quantitative finance and crack quant interviews.">
+    <meta property="twitter:image"
+        content="https://quantmentor.vercel.app/assets/images/quantmentor-logo-icon-QM-1024.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome Icons (preloaded for faster rendering) -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+
+    <!-- MathJax removed from index.html for performance (~1MB). Load only on pages that render LaTeX. -->
+
+    <link rel="stylesheet" href="styles-test.css">
+    <link rel="stylesheet" href="salary-styles.css">
+</head>
+
+<body>
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <img src="assets/images/quantmentor-logo-icon-QM-1024.png" alt="QuantMentor" class="logo-img"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                <span class="logo-icon" style="display:none;">📊</span>
+                <span class="logo-text">QuantMentor</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#services">Sessions</a></li>
+                <li><a href="#products">Products</a></li>
+                <li><a href="#testimonials">Reviews</a></li>
+                <li><a href="interview.html"><i class="fas fa-brain"></i> AI Interview</a></li>
+                <li><a href="code-playground.html"><i class="fas fa-code"></i> Playground</a></li>
+                <li><a href="salary-explorer.html"><i class="fas fa-chart-line"></i> Salaries</a></li>
+                <li><a href="#contact" class="nav-cta">Book Now</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                </button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Wrapper for SEO -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero" id="hero">
+            <div class="hero-bg-effects">
+                <canvas id="heroParticles" class="hero-particles"></canvas>
+                <div class="grid-overlay"></div>
+            </div>
+            <div class="hero-container">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span class="badge-dot"></span>
+                        Available for 1-on-1 Sessions
+                    </div>
+                    <h1 class="hero-headline" id="heroHeadline"
+                        aria-label="Desk-ready quant prep for interviews, pricing, and risk">
+                        Desk-ready quant prep for <span class="gradient-text">interviews, pricing, and risk</span>
+                    </h1>
+                    <p class="subheadline hero-subcopy">
+                        Pick a path, preview the material, and practice with resources built around pricing,
+                        risk, model validation, Python, C++, and quant interviews.
+                    </p>
+                    <div class="hero-proof-row" aria-label="QuantMentor highlights">
+                        <span><i class="fas fa-file-lines"></i> Preview before buying</span>
+                        <span><i class="fas fa-terminal"></i> Scripts and playbooks</span>
+                        <span><i class="fas fa-user-check"></i> Desk-first guidance</span>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <span class="stat-value" id="stat-students">50+</span>
+                            <span class="stat-label">Students Mentored</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="stat-experience">4+</span>
+                            <span class="stat-label">Years Experience</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="stat-products">15+</span>
+                            <span class="stat-label">Digital Products</span>
+                        </div>
+                    </div>
+                    <div class="hero-cta reveal-up delay-200">
+                        <a href="#products" class="btn btn-primary">Explore Products <i
+                                class="fas fa-arrow-right"></i></a>
+                        <a href="#services" class="btn btn-secondary">Book a Session</a>
+                    </div>
+                </div>
+                <div class="hero-visual reveal-up delay-300">
+                    <div class="profile-card">
+                        <div class="profile-glow"></div>
+                        <div class="profile-image">
+                            <img src="assets/images/me_img.png" alt="Amit Kumar Jha" loading="lazy"
+                                onerror="this.src='assets/images/profile-placeholder.svg'; this.onerror=null;">
+                            <div class="profile-placeholder" style="display:none;">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                        </div>
+                        <h3 class="profile-name">Amit Kumar Jha</h3>
+                        <p class="profile-title">Quant Developer | Model Risk Quant | Mentor</p>
+                        <div class="profile-tags">
+                            <span class="tag">XVA</span>
+                            <span class="tag">Derivatives</span>
+                            <span class="tag">Python</span>
+                            <span class="tag">C++</span>
+                            <span class="tag">Mathematics</span>
+                        </div>
+                        <div class="social-links">
+                            <a href="https://www.linkedin.com/in/akjha002/" target="_blank" class="social-link"
+                                title="LinkedIn" aria-label="Connect on LinkedIn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="https://github.com/AIM-IT4" target="_blank" class="social-link" title="GitHub"
+                                aria-label="View GitHub Profile">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="https://x.com/Akjha2023" target="_blank" class="social-link" title="X (Twitter)"
+                                aria-label="Follow on X (Twitter)">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="home-flow" aria-label="How to use QuantMentor">
+            <div class="section-container">
+                <div class="flow-grid reveal-up">
+                    <a class="flow-card" href="#products">
+                        <span class="flow-step">01</span>
+                        <div class="flow-icon"><i class="fas fa-magnifying-glass-chart"></i></div>
+                        <h3>Preview a product</h3>
+                        <p>Check the contents, sample pages, prerequisites, and outcomes before you buy.</p>
+                    </a>
+                    <a class="flow-card" href="#services">
+                        <span class="flow-step">02</span>
+                        <div class="flow-icon"><i class="fas fa-route"></i></div>
+                        <h3>Choose your track</h3>
+                        <p>Use sessions for a personal roadmap, interview gaps, model validation, or pricing depth.</p>
+                    </a>
+                    <a class="flow-card" href="interview.html">
+                        <span class="flow-step">03</span>
+                        <div class="flow-icon"><i class="fas fa-brain"></i></div>
+                        <h3>Practice and refine</h3>
+                        <p>Convert concepts into answers, code, diagnostics, and project talking points.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section class="services" id="services">
+            <div class="section-container">
+                <div class="section-header reveal-up">
+                    <span class="section-label" style="color: var(--accent-primary);">Mentorship</span>
+                    <h2 class="section-headline">Personalized <span class="gradient-text">1-on-1 Sessions</span></h2>
+                    <p class="subheadline">Practical, practitioner-led sessions designed to bridge the gap between
+                        theory and the desk.</p>
+                </div>
+
+                <div class="services-grid">
+                    <!-- Skeleton loading cards (replaced by JS) -->
+                    <div class="skeleton-service">
+                        <div class="skeleton-icon"></div>
+                        <div class="skeleton-line title"></div>
+                        <div class="skeleton-line short"></div>
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-line"></div>
+                    </div>
+                    <div class="skeleton-service">
+                        <div class="skeleton-icon"></div>
+                        <div class="skeleton-line title"></div>
+                        <div class="skeleton-line short"></div>
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-line"></div>
+                    </div>
+                    <div class="skeleton-service">
+                        <div class="skeleton-icon"></div>
+                        <div class="skeleton-line title"></div>
+                        <div class="skeleton-line short"></div>
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-line"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section class="products-section" id="products">
+            <div class="section-container">
+                <div class="section-header reveal-up">
+                    <span class="section-label" style="color: var(--accent-secondary);">Resources</span>
+                    <h2 class="section-headline">Premium <span class="gradient-text">Digital Products</span></h2>
+                    <p class="subheadline">Curated study materials, coding scripts, and interview guides from years
+                        of experience.</p>
+                </div>
+
+                <div class="products-filter">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="notes">Notes & PDFs</button>
+                    <button class="filter-btn" data-filter="code">Code & Scripts</button>
+                    <button class="filter-btn" data-filter="bundle">Bundles</button>
+                </div>
+
+                <div class="products-grid">
+                    <!-- Skeleton loading cards (replaced by JS) -->
+                    <div class="skeleton-card">
+                        <div class="skeleton-image"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-line medium"></div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line short"></div>
+                            <div class="skeleton-btn"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton-image"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-line medium"></div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line short"></div>
+                            <div class="skeleton-btn"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton-image"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-line medium"></div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line short"></div>
+                            <div class="skeleton-btn"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Machine-readable product data for bots, crawlers, and LLMs -->
+                <!-- PRODUCT DATA API: All products are available as JSON at https://quant-mentor.vercel.app/api/products -->
+                <noscript>
+                    <div style="padding: 20px; background: #1a1a2e; border-radius: 8px; margin-top: 20px;">
+                        <h3>Our Digital Products</h3>
+                        <p>Products are loaded dynamically. To view the full product catalog as structured data, visit:
+                            <a
+                                href="https://quant-mentor.vercel.app/api/products">https://quant-mentor.vercel.app/api/products</a>
+                        </p>
+                        <p>We offer 26+ premium paid products and free resources for quantitative finance professionals,
+                            including:</p>
+                        <ul>
+                            <li>Quant Interview Problem Book (1000+ Problems with solutions) - ₹899</li>
+                            <li>Complete Front Office &amp; Risk Quant Professional Bundle (40+ PDFs &amp; 60+ scripts) - ₹9,499
+                            </li>
+                            <li>Greek Explainer Lab – The Production Quant Edition - ₹799</li>
+                            <li>Quant Models for Each Asset Class Master Pack: IR, FX, Credits, Equity - ₹1999</li>
+                            <li>Derivatives Products & Pricing Master Pack (6 PDFs) - ₹1999</li>
+                            <li>The Stochastic Calculus Visual Lab (20 Jupyter Notebooks) - ₹599</li>
+                            <li>Python for Quants: Complete Interview Guide - ₹599</li>
+                            <li>C++ for Quants: Desk-Ready Notes - ₹549</li>
+                            <li>SQL for Quant Interviews: Premium Pack - ₹499</li>
+                            <li>Statistics & Econometrics For Quants - ₹499</li>
+                            <li>Stochastic Calculus for Quants: Interview Playbook - ₹499</li>
+                            <li>Mental Math & Market Intuition for Quants - ₹499</li>
+                            <li>Machine Learning for Quants: Interview Playbook - ₹499</li>
+                            <li>Credit Models: Quant Interview Playbook - ₹499</li>
+                            <li>Interest Rate Models: Quant Interview Playbook - ₹499</li>
+                            <li>FX Models: Quant Interview Playbook - ₹499</li>
+                            <li>Equity Models: Quant Interview Playbook - ₹499</li>
+                            <li>PnL Attribution & Desk Diagnostics for Quants - ₹499</li>
+                            <li>Regulatory & Risk Frameworks for Quants - ₹499</li>
+                            <li>Probability Theory for Quants: Desk-First - ₹499</li>
+                            <li>Linear Algebra & Differential Equations for Quants - ₹499</li>
+                            <li>Greeks, Vols, YCurves, Numerical Methods, MC & XVA Guide - ₹499</li>
+                            <li>Ultimate Industry Grade Quant Project Pack (45 Projects) - ₹799</li>
+                            <li>Complete Quant ATS Friendly Resume Pack - ₹399</li>
+                            <li>Common Mistakes in Quant Interviews – Desk Fixes Edition - ₹799</li>
+                            <li>R for Risk Quants – Desk-Ready Notes + Runnable Templates - ₹599</li>
+                        </ul>
+                        <p>Free Resources: Quant Formula Sheet, Resources Map</p>
+                        <p>Visit <a href="https://quant-mentor.vercel.app/#products">quantmentor.in</a> to browse and
+                            purchase.</p>
+                    </div>
+                </noscript>
+            </div>
+        </section>
+
+        <!-- Free Resources Section -->
+        <section class="products" id="resources" style="background: var(--bg-card); padding: 80px 0;">
+            <div class="section-container">
+                <div class="section-header reveal-up">
+                    <span class="section-label" style="color: var(--accent-secondary);">Free content</span>
+                    <h2 class="section-headline">Free <span class="gradient-text">Resources</span></h2>
+                    <p class="subheadline">High-quality guides and tools to kickstart your quant journey.</p>
+                </div>
+                <div class="products-grid" id="resources-grid">
+                    <!-- Skeleton loading cards (replaced by JS) -->
+                    <div class="skeleton-card">
+                        <div class="skeleton-image"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-line medium"></div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line short"></div>
+                            <div class="skeleton-btn"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton-image"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-line medium"></div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line short"></div>
+                            <div class="skeleton-btn"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section class="testimonials" id="testimonials">
+            <div class="section-container">
+                <div class="section-header reveal-up">
+                    <span class="section-label" style="color: var(--accent-tertiary);">Testimonials</span>
+                    <h2 class="section-headline">What <span class="gradient-text">Aspirants Say</span></h2>
+                    <p class="subheadline">Real feedback from mentees who've accelerated their quant careers</p>
+                </div>
+
+                <!-- Ratings Summary -->
+                <div class="ratings-summary-container">
+                    <div class="ratings-summary-card illustration-card">
+                        <i class="fas fa-envelope-open-text highlight-icon"></i>
+                        <i class="fas fa-pen highlight-icon-secondary"></i>
+                    </div>
+                    <div class="ratings-summary-card">
+                        <h3 class="summary-value"><span id="average-rating-display">5.0</span><span
+                                style="font-size: 0.6em; color: var(--text-muted);">/5</span></h3>
+                        <p class="summary-label"><span id="total-ratings-display">0</span> ratings</p>
+                    </div>
+                    <div class="ratings-summary-card">
+                        <h3 class="summary-value" id="total-testimonials-display">0</h3>
+                        <p class="summary-label">Testimonials</p>
+                    </div>
+                </div>
+
+                <div class="testimonials-grid" id="approved-testimonials-grid">
+                    <!-- Static testimonials will be shown, dynamic ones loaded via JS -->
+
+                    <!-- Testimonial 1 -->
+                    <div class="testimonial-card reveal-up">
+                        <div class="testimonial-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "Amit is a powerhouse of knowledge. More importantly, he is thorough and precise with his
+                            guidance. I reached out for advice on breaking into derivative pricing and left with an
+                            articulated plan. He tells you what happens in the industry—that helped me chalk out a
+                            practical
+                            plan."
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="author-info">
+                                <span class="author-name">Verified Mentee</span>
+                                <span class="author-role">Aspiring Quant Developer</span>
+                            </div>
+                        </div>
+                        <div class="verified-badge">
+                            <i class="fas fa-check-circle"></i> Verified Session • Dec 2025
+                        </div>
+                    </div>
+
+                    <!-- Testimonial 2 -->
+                    <div class="testimonial-card reveal-up">
+                        <div class="testimonial-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "I completed my Financial Engineering at WorldQuant University. What Amit does exceptionally
+                            well is bridge the gap between theory and practice. He distills front-desk experience into
+                            material focusing not just on what models are, but why they exist, how they behave, and
+                            where
+                            they fail."
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <div class="author-info">
+                                <span class="author-name">Anubhab De</span>
+                                <span class="author-role">Financial Engineering Graduate</span>
+                            </div>
+                        </div>
+                        <div class="verified-badge">
+                            <i class="fas fa-check-circle"></i> Verified Purchase • Dec 2025
+                        </div>
+                    </div>
+
+                    <!-- Testimonial 3 -->
+                    <div class="testimonial-card reveal-up">
+                        <div class="testimonial-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "Your Quant Project Pack is the bridge between academic theory and trading desk reality. The
+                            'Resume Bullets' and 'Interview Questions' for every project make this not just a code
+                            repository, but a complete career toolkit."
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="author-info">
+                                <span class="author-name">Harshvardhan Singh</span>
+                                <span class="author-role">Quantitative Analyst</span>
+                            </div>
+                        </div>
+                        <div class="verified-badge">
+                            <i class="fas fa-check-circle"></i> Verified Purchase • Dec 2025
+                        </div>
+                    </div>
+
+                    <!-- Testimonial 4 -->
+                    <div class="testimonial-card reveal-up">
+                        <div class="testimonial-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "Amit clarified all my doubts efficiently and gave me clear direction on how to move forward
+                            toward my goals. His guidance was practical, focused, and extremely helpful."
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="author-info">
+                                <span class="author-name">Verified Mentee</span>
+                                <span class="author-role">Career Transition</span>
+                            </div>
+                        </div>
+                        <div class="verified-badge">
+                            <i class="fas fa-check-circle"></i> Verified Session • Jan 2026
+                        </div>
+                    </div>
+
+                    <!-- Testimonial 5 -->
+                    <div class="testimonial-card reveal-up">
+                        <div class="testimonial-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "This content focuses on practical failure modes—correlation collapse, calibration
+                            instability,
+                            numerical blow-ups—insights that come from practitioner experience, not textbooks. For
+                            quants
+                            who want to develop correct intuition and interview-ready reasoning."
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div class="author-info">
+                                <span class="author-name">Anubhab De</span>
+                                <span class="author-role">Quant Practitioner</span>
+                            </div>
+                        </div>
+                        <div class="verified-badge">
+                            <i class="fas fa-check-circle"></i> Verified Purchase • Jan 2026
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 50px;">
+                    <a href="testimonials.html" class="btn btn-secondary">
+                        <i class="fas fa-comments"></i> View All 25+ Reviews
+                    </a>
+                </div>
+
+                <!-- Review Form Section -->
+                <div class="review-section" id="review-form">
+                    <div class="section-container">
+                        <div class="section-header reveal-up">
+                            <span class="section-tag">Feedback</span>
+                            <h2 class="section-title">Share Your <span class="gradient-text">Experience</span></h2>
+                            <p class="section-subtitle">Had a session or purchased a product? We'd love to hear from
+                                you!
+                            </p>
+                        </div>
+
+                        <div class="review-form-wrapper">
+                            <form class="review-form" id="reviewForm">
+                                <h3>Write a Review</h3>
+                                <p>Your feedback helps others make informed decisions.</p>
+
+                                <div class="form-group">
+                                    <label for="reviewName">Your Name *</label>
+                                    <input type="text" id="reviewName" name="name" required placeholder="John Doe">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="reviewTitle">Review Title *</label>
+                                    <input type="text" id="reviewTitle" name="title" required
+                                        placeholder="Summarize your experience">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Rating *</label>
+                                    <div class="star-rating-input">
+                                        <input type="radio" id="star5" name="rating" value="5" required><label
+                                            for="star5" title="Excellent"><i class="fas fa-star"></i></label>
+                                        <input type="radio" id="star4" name="rating" value="4"><label for="star4"
+                                            title="Good"><i class="fas fa-star"></i></label>
+                                        <input type="radio" id="star3" name="rating" value="3"><label for="star3"
+                                            title="Average"><i class="fas fa-star"></i></label>
+                                        <input type="radio" id="star2" name="rating" value="2"><label for="star2"
+                                            title="Poor"><i class="fas fa-star"></i></label>
+                                        <input type="radio" id="star1" name="rating" value="1"><label for="star1"
+                                            title="Very Poor"><i class="fas fa-star"></i></label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="reviewText">Your Review *</label>
+                                    <textarea id="reviewText" name="review" rows="5" required
+                                        placeholder="Share your experience working with Amit..."></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="reviewProduct">What did you use? (Optional)</label>
+                                    <select id="reviewProduct" name="product">
+                                        <option value="">Select a product or service...</option>
+                                        <option value="consultation">Quick Consultation (30 min)</option>
+                                        <option value="mentorship">Mentorship Session (1 hour)</option>
+                                        <option value="deep-dive">Deep Dive Session (2 hours)</option>
+                                        <option value="resume-review">Resume Review</option>
+                                        <option value="career-counseling">Career Counseling</option>
+                                        <option value="quant-pack">Quant Project Pack</option>
+                                        <option value="interview-prep">Interview Preparation Kit</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Submit Review
+                                </button>
+                            </form>
+
+                            <div class="review-success-message" id="reviewSuccess">
+                                <i class="fas fa-check-circle"></i>
+                                <h4>Thank You for Your Review!</h4>
+                                <p>Your feedback has been submitted successfully and will be published after moderation.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Salary Insights Widget -->
+        <section class="sal-widget-section" id="salary-insights" style="background: var(--bg-secondary);">
+            <div class="section-container">
+                <div class="section-header reveal-up">
+                    <span class="section-label" style="color: var(--accent-secondary);">Compensation Data</span>
+                    <h2 class="section-headline">Quant <span class="gradient-text">Salary Insights</span></h2>
+                    <p class="subheadline">Crowdsourced compensation data from quants at the world's top financial hubs.</p>
+                </div>
+                <div class="sal-widget-stats">
+                    <div class="sal-widget-stat"><div class="sal-widget-stat-val" id="widgetStatTotal">—</div><div class="sal-widget-stat-label">Submissions</div></div>
+                    <div class="sal-widget-stat"><div class="sal-widget-stat-val" id="widgetStatMedian">—</div><div class="sal-widget-stat-label">Median TC</div></div>
+                    <div class="sal-widget-stat"><div class="sal-widget-stat-val" id="widgetStatRegions">—</div><div class="sal-widget-stat-label">Regions</div></div>
+                </div>
+                <div class="sal-widget-grid">
+                    <div class="sal-widget-card reveal-up">
+                        <h4><i class="fas fa-chart-bar"></i> Median TC by Region</h4>
+                        <div class="sal-widget-chart" id="widgetChartRegionWrap"><canvas id="widgetChartRegion"></canvas></div>
+                    </div>
+                    <div class="sal-widget-card reveal-up delay-100">
+                        <h4><i class="fas fa-chart-pie"></i> TC Distribution</h4>
+                        <div class="sal-widget-chart" id="widgetChartDistWrap"><canvas id="widgetChartDist"></canvas></div>
+                    </div>
+                </div>
+                <div style="text-align:center; margin-top: 40px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;" class="reveal-up delay-200">
+                    <a href="salary-explorer.html" class="btn btn-primary"><i class="fas fa-chart-line"></i> Explore Full Salary Data</a>
+                    <a href="share-salary.html" class="btn btn-secondary" style="border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff;"><i class="fas fa-plus"></i> Share Your Salary</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Section -->
+        <section class="blog" id="blog" style="padding: 80px 0;">
+            <div class="section-container">
+                <div class="section-header reveal-up">
+                    <span class="section-tag">Insights</span>
+                    <h2 class="section-title">Latest <span class="gradient-text">Articles</span></h2>
+                    <p class="section-subtitle">Deep dives into quantitative finance, algorithms, and market
+                        microstructure.
+                    </p>
+                </div>
+                <div class="products-grid" id="blog-grid"
+                    style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+                    <p style="text-align:center; color:var(--text-muted); grid-column:1/-1;">Loading articles...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Modal -->
+        <div class="modal" id="blogModal">
+            <div class="modal-overlay"></div>
+            <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+                <button class="modal-close" id="blogModalClose"><i class="fas fa-times"></i></button>
+                <div class="modal-header">
+                    <h3 id="blogModalTitle" style="font-size: 1.5em; margin: 0;">Article Title</h3>
+                    <p id="blogModalMeta" style="color:var(--text-muted); font-size:0.9em; margin-top:5px;"></p>
+                </div>
+                <div class="modal-body">
+                    <div id="blogModalCover"
+                        style="margin-bottom:20px; border-radius:8px; overflow:hidden; display:none;">
+                        <img src="" style="width:100%; height:auto; display:block;">
+                    </div>
+                    <div id="blogModalContent" style="line-height:1.6; color:var(--text-muted);"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact/Booking Section -->
+        <section class="contact" id="contact">
+            <div class="section-container">
+                <div class="contact-wrapper">
+                    <div class="contact-info">
+                        <span class="section-tag reveal-up">Get Started</span>
+                        <h2 class="section-title reveal-up delay-100">Ready to <span class="gradient-text">Level
+                                Up?</span></h2>
+                        <p class="contact-description">
+                            Book a session or reach out with any questions. I typically respond within 24 hours.
+                        </p>
+
+                        <div class="contact-methods reveal-up delay-200">
+                            <div class="contact-method">
+                                <div class="method-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="method-details">
+                                    <span class="method-label">Email</span>
+                                    <a href="mailto:jha.8@alumni.iitj.ac.in">jha.8@alumni.iitj.ac.in</a>
+                                </div>
+                            </div>
+                            <div class="contact-method">
+                                <div class="method-icon">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </div>
+                                <div class="method-details">
+                                    <span class="method-label">LinkedIn</span>
+                                    <a href="https://www.linkedin.com/in/akjha002/" target="_blank">Connect on
+                                        LinkedIn</a>
+                                </div>
+                            </div>
+                            <div class="contact-method">
+                                <div class="method-icon">
+                                    <i class="fab fa-twitter"></i>
+                                </div>
+                                <div class="method-details">
+                                    <span class="method-label">X (Twitter)</span>
+                                    <a href="https://x.com/Akjha2023" target="_blank">Follow @Akjha2023</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contact-form-wrapper reveal-up delay-300">
+                        <form class="contact-form" id="bookingForm">
+                            <h3>Book a Session</h3>
+                            <div class="form-group">
+                                <label for="bookingName">Full Name *</label>
+                                <input type="text" id="bookingName" name="name" required placeholder="Your name">
+                            </div>
+                            <div class="form-group">
+                                <label for="bookingEmail">Email Address *</label>
+                                <input type="email" id="bookingEmail" name="email" required
+                                    placeholder="you@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="bookingPhone">Phone Number</label>
+                                <input type="tel" id="bookingPhone" name="phone" placeholder="+91 98765 43210">
+                            </div>
+                            <div class="form-group">
+                                <label for="bookingService">Select Session *</label>
+                                <select id="bookingService" name="service" required>
+                                    <option value="">Choose a session type</option>
+                                    <option value="free|0|15" style="color: #22c55e;">🆓 Free Test Session (15 min) -
+                                        FREE
+                                    </option>
+                                    <option value="quick|499|30">Quick Consultation (30 min) - ₹499</option>
+                                    <option value="deep|999|60">Deep Dive Session (60 min) - ₹999</option>
+                                    <option value="interview|1499|90">Interview Prep (90 min) - ₹1,499</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="bookingDate">Preferred Date *</label>
+                                    <input type="date" id="bookingDate" name="date" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bookingTime">Preferred Time *</label>
+                                    <select id="bookingTime" name="time" required>
+                                        <option value="">Select time slot</option>
+                                        <option value="10:00 AM">10:00 AM</option>
+                                        <option value="11:00 AM">11:00 AM</option>
+                                        <option value="12:00 PM">12:00 PM</option>
+                                        <option value="2:00 PM">2:00 PM</option>
+                                        <option value="3:00 PM">3:00 PM</option>
+                                        <option value="4:00 PM">4:00 PM</option>
+                                        <option value="5:00 PM">5:00 PM</option>
+                                        <option value="6:00 PM">6:00 PM</option>
+                                        <option value="7:00 PM">7:00 PM</option>
+                                        <option value="8:00 PM">8:00 PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookingMessage">What do you want to discuss?</label>
+                                <textarea id="bookingMessage" name="message" rows="3"
+                                    placeholder="Tell me about your goals, topics you want to cover..."></textarea>
+                            </div>
+                            <div class="booking-price" id="bookingPrice" style="display: none;">
+                                <span>Session Fee:</span>
+                                <strong id="priceDisplay">₹0</strong>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-full" id="bookingSubmitBtn">
+                                <i class="fas fa-credit-card"></i>
+                                Pay & Book Session
+                            </button>
+                            <p class="form-note">
+                                <i class="fas fa-video"></i> Google Meet link will be shared after payment confirmation
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-main">
+                <div class="footer-brand">
+                    <a href="#" class="logo">
+                        <img src="assets/images/quantmentor-logo-icon-QM-1024.png"" alt=" QuantMentor" class="logo-img"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                        <span class="logo-icon" style="display:none;">📊</span>
+                        <span class="logo-text">QuantMentor</span>
+                    </a>
+                    <p class="footer-tagline">Expert quant mentorship for the next generation of traders and risk
+                        professionals.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="#services">Sessions</a></li>
+                            <li><a href="#products">Products</a></li>
+                            <li><a href="my-bookings.html">My Bookings</a></li>
+                            <li><a href="#contact">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="resources.html">Free Resources</a></li>
+                            <li><a href="salary-explorer.html">Salary Explorer</a></li>
+                            <li><a href="blog.html">Blog & Articles</a></li>
+                            <li><a href="faq.html">FAQs</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <ul>
+                            <li><a href="privacy.html">Privacy Policy</a></li>
+                            <li><a href="terms.html">Terms of Service</a></li>
+                            <li><a href="refund.html">Refund Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 QuantMentor. All rights reserved.</p>
+                <div class="footer-social">
+                    <a href="https://www.linkedin.com/in/akjha002/" target="_blank" title="LinkedIn"
+                        aria-label="LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://github.com/AIM-IT4" target="_blank" title="GitHub" aria-label="GitHub">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://x.com/Akjha2023" target="_blank" title="X (Twitter)" aria-label="X (Twitter)">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" title="YouTube" aria-label="YouTube">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Product Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-header">
+                <h3 id="modalTitle">Product Name</h3>
+            </div>
+            <div class="modal-body">
+                <div id="modalDescription" class="modal-description-text">Product description goes here.</div>
+                <div class="modal-price" id="modalPrice">₹499</div>
+                <div id="pppInfo" style="margin-top:8px; font-size:0.9em; color:var(--text-muted); display:none;">
+                    <i class="fas fa-globe"></i> <span id="pppText"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="coupon-row" style="margin-bottom: 12px;">
+                    <input id="couponInput" placeholder="Have a coupon code?" />
+                    <button id="applyCouponBtn" class="btn btn-secondary" type="button">Apply</button>
+                </div>
+                <!-- Inline Feedback Area -->
+                <div id="modalCouponFeedback" style="margin-bottom: 12px;"></div>
+
+                <p class="modal-note">
+                    <i class="fas fa-lock"></i>
+                    Secure payment via Razorpay. Instant download after payment.
+                </p>
+                <a href="#" class="btn btn-primary btn-full" id="modalPayBtn">
+                    <i class="fas fa-credit-card"></i>
+                    Pay Now
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Details Modal (Main Page) -->
+    <div id="user-details-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center; backdrop-filter:blur(5px);">
+        <div
+            style="background: var(--bg-card); padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; border: 1px solid var(--border-light); box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <h3 style="margin-bottom: 20px; font-size: 1.5rem; text-align: center; color: var(--text-primary);">Enter
+                Your Details</h3>
+            <p style="color:var(--text-muted); text-align:center; margin-bottom: 24px;">Please provide via secure form
+                so we can send your resource via email.</p>
+
+            <form id="main-user-details-form" style="display: flex; flex-direction: column; gap: 16px;">
+                <div>
+                    <label style="display:block; color:var(--text-muted); margin-bottom:8px; font-size:0.9rem;">Full
+                        Name *</label>
+                    <input type="text" id="main-ud-name" required placeholder="John Doe"
+                        style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
+                </div>
+                <div>
+                    <label style="display:block; color:var(--text-muted); margin-bottom:8px; font-size:0.9rem;">Email
+                        Address *</label>
+                    <input type="email" id="main-ud-email" required placeholder="john@example.com"
+                        style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
+                </div>
+                <div>
+                    <label style="display:block; color:var(--text-muted); margin-bottom:8px; font-size:0.9rem;">Phone
+                        Number (Optional)</label>
+                    <input type="tel" id="main-ud-phone" placeholder="+91 9876543210"
+                        style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border-light); background:var(--bg-tertiary); color:var(--text-primary);">
+                </div>
+
+                <button type="submit" class="btn btn-primary"
+                    style="width:100%; padding:14px; margin-top:10px; font-size:1.1rem;">
+                    Proceed to Payment <i class="fas fa-arrow-right" style="margin-left:8px;"></i>
+                </button>
+                <button type="button" id="main-ud-close"
+                    style="background:none; border:none; color:var(--text-muted); padding:10px; cursor:pointer;">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Razorpay Checkout Script (Secure - loaded from Razorpay CDN) -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <!-- Config file (contains API keys - not tracked by git, auto-generated on Vercel) -->
+    <script>
+        // Load config.js if it exists, otherwise gracefully fallback
+        (function () {
+            const script = document.createElement('script');
+            script.src = 'config.js';
+            script.onload = function () {
+                console.log('✅ Configuration loaded successfully');
+            };
+            script.onerror = function () {
+                console.log('ℹ️ Local configuration (config.js) not found or build-time injection failed. Using environment variables if available.');
+            };
+            document.head.appendChild(script);
+        })();
+    </script>
+
+    <script>
+        (function () {
+            const headline = document.getElementById('heroHeadline');
+            if (!headline || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            const phrases = [
+                [
+                    { text: 'Desk-ready quant prep for ', gradient: false },
+                    { text: 'interviews, pricing, and risk', gradient: true }
+                ],
+                [
+                    { text: 'Preview products before ', gradient: false },
+                    { text: 'you buy', gradient: true }
+                ],
+                [
+                    { text: 'Build confidence with ', gradient: false },
+                    { text: 'desk-first quant resources', gradient: true }
+                ]
+            ];
+
+            const charsFor = phrase => phrase.flatMap(segment =>
+                [...segment.text].map(ch => ({ ch, gradient: segment.gradient }))
+            );
+
+            let phraseIndex = 0;
+            let chars = charsFor(phrases[phraseIndex]);
+            let charIndex = 0;
+            let deleting = false;
+
+            const typeDelay = 50;
+            const deleteDelay = 30;
+            const pauseEnd = 2400;
+            const pauseStart = 500;
+
+            function render() {
+                let html = '';
+                let inGradient = false;
+
+                for (let i = 0; i < charIndex; i++) {
+                    const item = chars[i];
+                    if (item.gradient && !inGradient) {
+                        html += '<span class="gradient-text">';
+                        inGradient = true;
+                    } else if (!item.gradient && inGradient) {
+                        html += '</span>';
+                        inGradient = false;
+                    }
+                    html += item.ch;
+                }
+
+                if (inGradient) html += '</span>';
+                headline.innerHTML = html + '<span class="typewriter-cursor">|</span>';
+            }
+
+            function tick() {
+                render();
+
+                if (deleting) {
+                    if (charIndex > 0) {
+                        charIndex--;
+                        setTimeout(tick, deleteDelay);
+                        return;
+                    }
+
+                    deleting = false;
+                    phraseIndex = (phraseIndex + 1) % phrases.length;
+                    chars = charsFor(phrases[phraseIndex]);
+                    setTimeout(tick, pauseStart);
+                    return;
+                }
+
+                if (charIndex < chars.length) {
+                    charIndex++;
+                    setTimeout(tick, typeDelay);
+                    return;
+                }
+
+                deleting = true;
+                setTimeout(tick, pauseEnd);
+            }
+
+            render();
+            setTimeout(tick, pauseStart);
+        })();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script src="salary-seed.js" defer></script>
+    <script src="salary-explorer.js" defer></script>
+    <script src="script.js?v=2" defer></script>
+    <script>document.addEventListener('DOMContentLoaded', function(){ if(typeof renderSalaryWidget==='function') setTimeout(renderSalaryWidget, 800); });</script>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top-btn" id="scrollTopBtn" title="Back to top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+</body>
+
+</html>
