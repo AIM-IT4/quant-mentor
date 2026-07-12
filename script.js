@@ -738,34 +738,47 @@ if (!initSupabaseAndLoad()) {
 // Fetched country cache
 let userCountryCode = null;
 const COUNTRY_CACHE_KEY = 'qm_country_code';
-const COUNTRY_CACHE_TTL = 86400000; // 24 hours in ms
+const COUNTRY_CACHE_TTL = 86400000;
 
-// Try to get user country (with localStorage caching for 24h)
 async function getUserCountry() {
-    if (userCountryCode) return userCountryCode;
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlCountry = urlParams.get('country');
+        if (urlCountry && urlCountry.length === 2) {
+            userCountryCode = urlCountry.toUpperCase();
+            window.userCountryCode = userCountryCode;
+            console.log('Using country from URL override:', userCountryCode);
+            return userCountryCode;
+        }
+    } catch (e) {
+        console.warn('URL country override parse failed:', e);
+    }
 
-    // Check localStorage first to avoid redundant API calls
+    if (userCountryCode) {
+        window.userCountryCode = userCountryCode;
+        return userCountryCode;
+    }
+
     try {
         const cached = JSON.parse(localStorage.getItem(COUNTRY_CACHE_KEY));
         if (cached && cached.code && (Date.now() - cached.ts) < COUNTRY_CACHE_TTL) {
             userCountryCode = cached.code;
-            console.log('🌍 Using cached country:', userCountryCode);
+            window.userCountryCode = userCountryCode;
+            console.log('Using cached country:', userCountryCode);
             return userCountryCode;
         }
-    } catch (_) { /* ignore parse errors */ }
+    } catch (_) {}
 
-    // Helper to fetch with timeout
     const fetchWithTimeout = async (url, timeout = 5000) => {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
         const response = await fetch(url, { signal: controller.signal });
         clearTimeout(id);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) throw new Error('HTTP status ' + response.status);
         return response.json();
     };
 
     try {
-        // Try multiple IP services
         const services = [
             { url: 'https://ipinfo.io/json', parse: (d) => d.country },
             { url: 'https://ipapi.co/json/', parse: (d) => d.country_code },
@@ -774,42 +787,74 @@ async function getUserCountry() {
 
         for (const svc of services) {
             try {
-                console.log('🔄 Trying IP service:', svc.url);
+                console.log('Trying IP service:', svc.url);
                 const resp = await fetchWithTimeout(svc.url, 5000);
                 const code = svc.parse(resp);
                 if (code) {
                     userCountryCode = code;
+                    window.userCountryCode = userCountryCode;
                     break;
                 }
             } catch (e) {
-                console.warn('⚠️ Failed:', svc.url, e.message);
+                console.warn('Failed:', svc.url, e.message);
             }
         }
 
         if (!userCountryCode) throw new Error('All IP services failed');
     } catch (e) {
-        // Fallback: try browser timezone
-        console.warn('⚠️ IP lookup failed, trying timezone fallback:', e);
+        console.warn('IP lookup failed, trying timezone fallback:', e);
         const timezoneToCountry = {
-            'Asia/Kolkata': 'IN', 'Asia/Dubai': 'AE', 'Asia/Singapore': 'SG',
-            'Europe/London': 'GB', 'Europe/Paris': 'FR', 'Europe/Berlin': 'DE',
+            'Asia/Kolkata': 'IN', 'Asia/Calcutta': 'IN',
+            'Asia/Dubai': 'AE',
+            'Asia/Singapore': 'SG',
+            'Europe/London': 'GB',
+            'Europe/Paris': 'FR',
+            'Europe/Berlin': 'DE',
+            'Europe/Zurich': 'CH',
             'America/New_York': 'US', 'America/Los_Angeles': 'US', 'America/Chicago': 'US',
-            'Australia/Sydney': 'AU', 'Asia/Tokyo': 'JP', 'Asia/Seoul': 'KR',
+            'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU',
+            'Asia/Tokyo': 'JP',
+            'Asia/Seoul': 'KR',
+            'America/Toronto': 'CA', 'America/Vancouver': 'CA',
+            'Asia/Bangkok': 'TH',
+            'Asia/Kuala_Lumpur': 'MY',
+            'Europe/Warsaw': 'PL',
+            'America/Bogota': 'CO',
+            'Europe/Amsterdam': 'NL',
+            'Europe/Stockholm': 'SE',
+            'Europe/Oslo': 'NO',
+            'Europe/Copenhagen': 'DK',
+            'Asia/Hong_Kong': 'HK',
+            'Pacific/Auckland': 'NZ',
+            'Asia/Jakarta': 'ID',
+            'Asia/Manila': 'PH',
+            'Asia/Karachi': 'PK',
+            'Asia/Dhaka': 'BD',
+            'Asia/Colombo': 'LK',
+            'Asia/Qatar': 'QA',
+            'Asia/Riyadh': 'SA',
+            'Europe/Istanbul': 'TR',
+            'America/Mexico_City': 'MX',
+            'Africa/Cairo': 'EG',
+            'Africa/Lagos': 'NG',
+            'Africa/Johannesburg': 'ZA'
         };
         try {
             const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
             userCountryCode = timezoneToCountry[tz] || 'IN';
+            window.userCountryCode = userCountryCode;
         } catch {
             userCountryCode = 'IN';
+            window.userCountryCode = userCountryCode;
         }
     }
 
-    // Persist to localStorage for future visits
     try {
         localStorage.setItem(COUNTRY_CACHE_KEY, JSON.stringify({ code: userCountryCode, ts: Date.now() }));
-    } catch (_) { /* quota exceeded or private mode */ }
+    } catch (_) {}
 
-    console.log('🌍 User country detected:', userCountryCode);
+    console.log('User country detected:', userCountryCode);
+    window.userCountryCode = userCountryCode;
     return userCountryCode;
 }
 
