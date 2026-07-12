@@ -3398,6 +3398,11 @@ QuantMentor
                     }
                     document.getElementById('adminContainer').style.display = 'block';
 
+                    // IMPORTANT: Force-reset the select to 'all' on every init
+                    // Browser can cache the previously selected value, causing stale filters on load
+                    const rangeEl = document.getElementById('revenueRange');
+                    if (rangeEl) rangeEl.value = 'all';
+
                     // Load components in parallel
                     await Promise.all([
                         updateDashboardStats(),
@@ -3417,11 +3422,14 @@ QuantMentor
                         const days = document.getElementById('revenueRange')?.value || 'all';
                         const isAllTime = (days === 'all');
                         
-                        // 1. Active Bookings (Upcoming + Confirmed)
+                        // 1. Active Bookings (all non-terminal statuses)
+                        const ACTIVE_STATUSES = ['confirmed', 'upcoming', 'admin_reschedule_pending', 'pending'];
+                        const REVENUE_STATUSES = ['confirmed', 'completed', 'upcoming', 'admin_reschedule_pending', 'pending'];
+
                         const { count: activeBookingsCount } = await window.supabaseAdminClient
                             .from('bookings')
                             .select('*', { count: 'exact', head: true })
-                            .in('status', ['confirmed', 'upcoming']);
+                            .in('status', ACTIVE_STATUSES);
 
                         // 2. Completed Bookings (Total)
                         const { count: completedBookingsCount } = await window.supabaseAdminClient
@@ -3438,7 +3446,7 @@ QuantMentor
                         let currentBookingsQuery = window.supabaseAdminClient
                             .from('bookings')
                             .select('service_price, status')
-                            .in('status', ['confirmed', 'completed', 'upcoming']);
+                            .in('status', REVENUE_STATUSES);
 
                         let currentPurchasesQuery = window.supabaseAdminClient
                             .from('purchases')
@@ -3463,7 +3471,7 @@ QuantMentor
                                 .select('service_price, status')
                                 .gte('created_at', startOfPrevious)
                                 .lte('created_at', endOfPrevious)
-                                .in('status', ['confirmed', 'completed', 'upcoming']);
+                                .in('status', REVENUE_STATUSES);
 
                             previousPurchasesQuery = window.supabaseAdminClient
                                 .from('purchases')
@@ -3537,19 +3545,24 @@ QuantMentor
                         const periodBreakdown = calcRevenueBreakdown(currentPeriodBookings, cleanCurrentPurchases);
 
                         // Growth % (Using Normalized Values)
-                        let growthHtml = '<span style="color: var(--text-muted);">Lifetime cumulative data</span>';
+                        let growthHtml;
                         if (!isAllTime) {
-                            if (previousTotalNorm > 0) {
+                            if (currentTotalNorm === 0 && currentPeriodPurchases?.length === 0) {
+                                // No purchases in this period — explain clearly rather than showing 0% growth
+                                growthHtml = `<span style="color:var(--text-muted)">No new sales in this period</span>`;
+                            } else if (previousTotalNorm > 0) {
                                 const growth = ((currentTotalNorm - previousTotalNorm) / previousTotalNorm) * 100;
                                 const isPositive = growth >= 0;
                                 const color = isPositive ? '#22c55e' : '#ef4444';
                                 const icon = isPositive ? '↗' : '↘';
-                                growthHtml = `<span style="color: ${color}; font-weight: 500;">${icon} ${Math.abs(growth).toFixed(1)}%</span> <span style="color: var(--text-muted);">vs prior ${days}d</span>`;
+                                growthHtml = `<span style="color:${color};font-weight:500">${icon} ${Math.abs(growth).toFixed(1)}%</span> <span style="color:var(--text-muted)">vs prior ${days}d</span>`;
                             } else if (currentTotalNorm > 0) {
-                                growthHtml = `<span style="color: #22c55e; font-weight: 500;">↗ 100%</span> <span style="color: var(--text-muted);">new growth</span>`;
+                                growthHtml = `<span style="color:#22c55e;font-weight:500">↗ New</span> <span style="color:var(--text-muted)">first sales in window</span>`;
+                            } else {
+                                growthHtml = `<span style="color:var(--text-muted)">No sales in either period</span>`;
                             }
                         } else {
-                            growthHtml = `<span style="color: #22c55e; font-weight: 500;"><i class="fas fa-chart-bar"></i> Total aggregate</span>`;
+                            growthHtml = `<span style="color:#22c55e;font-weight:500"><i class="fas fa-chart-bar"></i> Total aggregate</span>`;
                         }
 
                         // --- DISPLAY: use lifetime totals when All Time is selected ---
