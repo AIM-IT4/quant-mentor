@@ -378,7 +378,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@1,500&family=Playfair+Display:ital,wght@1,500&display=swap"
         rel="stylesheet">
 
     <!-- Font Awesome Icons (preloaded for faster rendering) -->
@@ -1334,21 +1334,25 @@
 
             const phrases = [
                 [
-                    { text: 'Desk-ready quant prep for ', gradient: false },
-                    { text: 'interviews, pricing, and risk', gradient: true }
+                    { text: 'Desk-ready quant prep for ', gradient: false, curly: false },
+                    { text: 'interviews, pricing, and risk', gradient: false, curly: true }
                 ],
                 [
-                    { text: 'Preview products before ', gradient: false },
-                    { text: 'you buy', gradient: true }
+                    { text: 'Preview products before ', gradient: false, curly: false },
+                    { text: 'you buy', gradient: false, curly: true }
                 ],
                 [
-                    { text: 'Build confidence with ', gradient: false },
-                    { text: 'desk-first quant resources', gradient: true }
+                    { text: 'Build confidence with ', gradient: false, curly: false },
+                    { text: 'desk-first quant resources', gradient: false, curly: true }
                 ]
             ];
 
             const charsFor = phrase => phrase.flatMap(segment =>
-                [...segment.text].map(ch => ({ ch, gradient: segment.gradient }))
+                [...segment.text].map(ch => ({ 
+                    ch, 
+                    gradient: segment.gradient,
+                    curly: segment.curly 
+                }))
             );
 
             let phraseIndex = 0;
@@ -1364,9 +1368,11 @@
             function render() {
                 let html = '';
                 let inGradient = false;
+                let inCurly = false;
 
                 for (let i = 0; i < charIndex; i++) {
                     const item = chars[i];
+                    
                     if (item.gradient && !inGradient) {
                         html += '<span class="gradient-text">';
                         inGradient = true;
@@ -1374,10 +1380,20 @@
                         html += '</span>';
                         inGradient = false;
                     }
+
+                    if (item.curly && !inCurly) {
+                        html += '<span class="curly-text">';
+                        inCurly = true;
+                    } else if (!item.curly && inCurly) {
+                        html += '</span>';
+                        inCurly = false;
+                    }
+                    
                     html += item.ch;
                 }
 
                 if (inGradient) html += '</span>';
+                if (inCurly) html += '</span>';
                 headline.innerHTML = html + '<span class="typewriter-cursor">|</span>';
             }
 

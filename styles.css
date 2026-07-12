@@ -3356,3 +3356,14 @@ body.light-mode .hero-bg-effects {
     font-weight: 600;
     border-radius: 6px;
 }
+
+
+/* Curly Italic Serif text style (as requested by user) */
+.curly-text {
+    font-family: 'Playfair Display', 'Lora', 'Georgia', serif;
+    font-style: italic;
+    font-weight: 500;
+    text-transform: none;
+    color: #f97316; /* Beautiful orange-gold accent */
+    text-shadow: 0 0 30px rgba(249, 115, 22, 0.15);
+}

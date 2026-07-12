@@ -3618,3 +3618,13 @@ input:focus, textarea:focus, select:focus {
 #purchaseSuccessModal .cross-sell-footer {
     border-top: 1px dashed #e2e2df;
 }
+
+
+/* Curly Italic Serif text style for Academic Light Mode */
+.curly-text {
+    font-family: 'Playfair Display', 'Lora', 'Georgia', serif;
+    font-style: italic;
+    font-weight: 500;
+    text-transform: none;
+    color: #ea580c; /* Deeper contrast orange-gold for light mode */
+}
