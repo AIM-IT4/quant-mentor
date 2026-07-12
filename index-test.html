@@ -1463,6 +1463,38 @@
             </div>
         </div>
     </div>
+
+    <!-- Purchase Success & Recommendation Modal -->
+    <div id="purchaseSuccessModal" class="success-modal">
+        <div class="success-modal-overlay" onclick="closeSuccessModal()"></div>
+        <div class="success-modal-card">
+            <button class="success-modal-close" onclick="closeSuccessModal()">&times;</button>
+            
+            <div class="success-modal-header">
+                <div class="success-icon-wrapper">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>Payment Successful!</h2>
+                <p class="success-subtitle">We have sent the download details to your email (please check your spam/junk folder as well).</p>
+            </div>
+            
+            <div class="download-action-box">
+                <a id="successDownloadBtn" href="#" target="_blank" class="btn btn-primary btn-success-download">
+                    <i class="fas fa-download"></i> Download Your Product
+                </a>
+            </div>
+            
+            <div class="success-modal-divider"></div>
+            
+            <div class="cross-sell-section">
+                <h3>Complete Your Arsenal</h3>
+                <p class="cross-sell-subtitle">Frequently bought together with your purchase:</p>
+                <div id="crossSellGrid" class="cross-sell-grid">
+                    <!-- Recommendations injected here dynamically by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

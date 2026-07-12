@@ -1163,6 +1163,7 @@ async function loadProductsFromSupabase(prefetchPromise) {
 
         if (data && data.length > 0) {
             console.log('📦 Loading ' + data.length + ' products from Supabase');
+            window.allProducts = data;
             await displaySupabaseProducts(data);
         }
     } catch (err) {
@@ -1752,8 +1753,9 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
 
             if (customerEmail && customerEmail.includes('@')) {
                 sendProductEmail(customerEmail, productName, 'FREE', downloadLink, customerName);
-                alert('🎉 Free Download!\n\nCheck your email for the download link.\n\n📩 IMPORTANT: Please check your Spam/Junk folder if you don\'t see the email in your Inbox.\n\nClick OK to also open it now.');
-                window.open(downloadLink, '_blank');
+            }
+            if (typeof window.showSuccessModal === 'function') {
+                window.showSuccessModal(productName, downloadLink);
             } else {
                 alert('🎉 Free Download!\n\nClick OK to download.');
                 window.open(downloadLink, '_blank');
@@ -1877,8 +1879,12 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
             }
 
             if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
-                alert('🎉 Payment Successful!\n\nCheck your email for the download link.\n\n📩 IMPORTANT: Please check your Spam/Junk folder.\n\nClick OK to also open it now.');
-                window.open(downloadLink, '_blank');
+                if (typeof window.showSuccessModal === 'function') {
+                    window.showSuccessModal(productName, downloadLink);
+                } else {
+                    alert('🎉 Payment Successful!\n\nCheck your email for the download link.\n\n📩 IMPORTANT: Please check your Spam/Junk folder.\n\nClick OK to also open it now.');
+                    window.open(downloadLink, '_blank');
+                }
             } else {
                 alert('🎉 Payment Successful!\n\n⚠️ Download link not configured. Please contact support.');
             }
@@ -3451,4 +3457,157 @@ window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
             });
         }
     });
+})();
+
+
+// --- PURCHASE SUCCESS & CROSS-SELL RECOMMENDATION SYSTEM ---
+(function() {
+    console.log('🛍️ Initializing Purchase Success & Cross-Sell Recommendation System...');
+
+    // Mapping for product categories to recommend complements
+    const CROSS_SELL_STRATEGY = {
+        'python': {
+            keys: ['python'],
+            recs: [
+                {
+                    name: 'C++ for Quants',
+                    valueProp: 'Modern quants are expected to be bilingual. Step up from Python to low-latency C++ to design high-frequency pricing engines.'
+                },
+                {
+                    name: 'Numerical Methods for Quants',
+                    valueProp: 'Implement advanced mathematical solvers, PDEs, and Monte Carlo methods directly in your Python/C++ code.'
+                }
+            ]
+        },
+        'numerical': {
+            keys: ['numerical', 'methods'],
+            recs: [
+                {
+                    name: 'Stochastic Calculus for Quants',
+                    valueProp: 'Understand the continuous-time stochastic models (SDEs, Itô’s Lemma) that underpin the numerical PDE and Monte Carlo solvers.'
+                },
+                {
+                    name: 'Complete Front Office & Risk Quant Professional Bundle',
+                    valueProp: 'Get all notes, codebases, and playbooks at a heavily discounted price to master both modeling and coding.'
+                }
+            ]
+        },
+        'stochastic': {
+            keys: ['stochastic', 'calculus'],
+            recs: [
+                {
+                    name: 'Numerical Methods for Quants',
+                    valueProp: 'Translate abstract stochastic differential equations (SDEs) into concrete finite difference schemes and Monte Carlo paths.'
+                },
+                {
+                    name: 'Greeks & Risk Management Guide',
+                    valueProp: 'Master how to hedge and manage derivative risk exposures derived from stochastic models.'
+                }
+            ]
+        },
+        'cpp': {
+            keys: ['c++', 'cpp'],
+            recs: [
+                {
+                    name: 'Python for Quants',
+                    valueProp: 'Master prototyping, backtesting, and analysis in Python, then port your core execution code to low-latency C++.'
+                },
+                {
+                    name: 'Numerical Methods for Quants',
+                    valueProp: 'Implement advanced pricing and simulation algorithms in low-latency C++ structures.'
+                }
+            ]
+        },
+        'default': {
+            keys: [],
+            recs: [
+                {
+                    name: 'Numerical Methods for Quants',
+                    valueProp: 'Our latest master playbook with TikZ diagrams and Python codes — essential for all desks.'
+                },
+                {
+                    name: 'Complete Front Office & Risk Quant Professional Bundle',
+                    valueProp: 'Get the complete library of quant manuals, resume templates, and playbooks at a massive discount.'
+                }
+            ]
+        }
+    };
+
+    window.closeSuccessModal = function() {
+        const modal = document.getElementById('purchaseSuccessModal');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    };
+
+    window.showSuccessModal = async function(purchasedName, downloadLink) {
+        console.log('🏆 Triggering Purchase Success Modal for:', purchasedName);
+        
+        // 1. Set the main download button
+        const dlBtn = document.getElementById('successDownloadBtn');
+        if (dlBtn) {
+            dlBtn.href = downloadLink;
+        }
+
+        // 2. Identify the strategy keys
+        const nameLower = purchasedName.toLowerCase();
+        let strategy = CROSS_SELL_STRATEGY['default'];
+        
+        for (const [key, config] of Object.entries(CROSS_SELL_STRATEGY)) {
+            if (key === 'default') continue;
+            if (config.keys.some(k => nameLower.includes(k))) {
+                strategy = config;
+                break;
+            }
+        }
+
+        // 3. Render recommendations
+        const grid = document.getElementById('crossSellGrid');
+        if (grid) {
+            grid.innerHTML = '';
+            
+            // Loop through the 2 target recommendations
+            for (const rec of strategy.recs) {
+                // Find matching product in globally loaded window.allProducts
+                let matchingProduct = null;
+                if (window.allProducts) {
+                    matchingProduct = window.allProducts.find(p => 
+                        p.name.toLowerCase().includes(rec.name.toLowerCase()) || 
+                        rec.name.toLowerCase().includes(p.name.toLowerCase())
+                    );
+                }
+                
+                // If not found in dynamic products, use default mock config or search by parts
+                const prodName = matchingProduct ? matchingProduct.name : rec.name;
+                const prodPrice = matchingProduct ? matchingProduct.price : 799;
+                const prodId = matchingProduct ? matchingProduct.id : '';
+
+                // Convert price to local currency
+                const localPrice = await convertPrice(prodPrice, window.userCountryCode || 'IN');
+                const priceFormatted = formatPrice(localPrice);
+
+                const card = document.createElement('div');
+                card.className = 'cross-sell-card';
+                card.innerHTML = `
+                    <div class="cross-sell-card-header">
+                        <h4 class="cross-sell-card-title">${prodName}</h4>
+                        <p class="cross-sell-value-prop">${rec.valueProp}</p>
+                    </div>
+                    <div class="cross-sell-footer">
+                        <span class="cross-sell-price">${priceFormatted}</span>
+                        ${prodId ? `<button class="btn btn-primary btn-cross-sell-buy" onclick="window.closeSuccessModal(); window.openProductModal('${prodId}');">Buy Now</button>` : ''}
+                    </div>
+                `;
+                grid.appendChild(card);
+            }
+        }
+
+        // 4. Open the modal
+        const modal = document.getElementById('purchaseSuccessModal');
+        if (modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    };
 })();
