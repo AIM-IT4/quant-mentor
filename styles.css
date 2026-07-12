@@ -58,7 +58,7 @@
     --small-size: 0.875rem;
 
     /* Spacing */
-    --section-padding: 140px 0;
+    --section-padding: 70px 0;
     --container-width: 1200px;
     --container-padding: 0 24px;
 
@@ -916,7 +916,7 @@ h6 {
    Guided Home Flow
    -------------------------------- */
 .home-flow {
-    padding: 36px 0 76px;
+    padding: 36px 0 40px;
     background: var(--bg-secondary);
 }
 
@@ -2280,7 +2280,7 @@ body.light-mode .theme-toggle .fa-moon {
 /* Responsive adjustment: Bulletproof Mobile Menu */
 @media (max-width: 768px) {
     :root {
-        --section-padding: 60px 0;
+        --section-padding: 40px 0;
     }
 
     .nav-container {
