@@ -1229,6 +1229,16 @@ async function displaySupabaseProducts(products) {
         { items: freeProducts, container: resourcesGrid, isFree: true }
     ];
 
+    // Expose a reference local price globally so the launch popup can convert prices
+    // Use a dummy price of 1000 INR to get the rate/currency for the current user
+    try {
+        const refPrice = await convertPrice(1000, userCountryCode, false);
+        window.userLocalPrice = refPrice;
+        window.formatPrice = formatPrice; // expose formatter too
+    } catch(e) {
+        console.warn('Could not set userLocalPrice:', e);
+    }
+
     for (const { items, container, isFree } of renderList) {
         if (!container) continue;
         if (items.length === 0 && isFree) {
@@ -3400,10 +3410,29 @@ window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
 
     window.triggerPromoModal = function() {
         const modal = document.getElementById('launchPromoModal');
-        if (modal) {
-            modal.classList.add('active');
-            sessionStorage.setItem('launch_promo_shown', 'true');
+        if (!modal) return;
+
+        // Convert prices to local currency if available
+        const originalInr = 1299;
+        const discountedInr = 679;
+        const origEl = document.getElementById('launchOriginalPrice');
+        const discEl = document.getElementById('launchDiscountedPrice');
+
+        const localPrice = window.userLocalPrice;
+        if (localPrice && localPrice.rate && localPrice.currency && localPrice.currency.code !== 'INR' && typeof window.formatPrice === 'function') {
+            const rate = localPrice.rate;
+            const convertedOrig = { amount: Math.round(originalInr * rate), currency: localPrice.currency };
+            const convertedDisc = { amount: Math.round(discountedInr * rate), currency: localPrice.currency };
+            if (origEl) origEl.textContent = window.formatPrice(convertedOrig);
+            if (discEl) discEl.textContent = window.formatPrice(convertedDisc);
+        } else {
+            // Fallback: keep INR
+            if (origEl) origEl.textContent = '\u20b91,299';
+            if (discEl) discEl.textContent = '\u20b9679';
         }
+
+        modal.classList.add('active');
+        sessionStorage.setItem('launch_promo_shown', 'true');
     };
 
     window.closePromoModal = function() {
