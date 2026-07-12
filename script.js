@@ -737,8 +737,6 @@ if (!initSupabaseAndLoad()) {
 
 // Fetched country cache
 let userCountryCode = null;
-const COUNTRY_CACHE_KEY = 'qm_country_code';
-const COUNTRY_CACHE_TTL = 86400000;
 
 async function getUserCountry() {
     try {
@@ -759,16 +757,6 @@ async function getUserCountry() {
         return userCountryCode;
     }
 
-    try {
-        const cached = JSON.parse(localStorage.getItem(COUNTRY_CACHE_KEY));
-        if (cached && cached.code && (Date.now() - cached.ts) < COUNTRY_CACHE_TTL) {
-            userCountryCode = cached.code;
-            window.userCountryCode = userCountryCode;
-            console.log('Using cached country:', userCountryCode);
-            return userCountryCode;
-        }
-    } catch (_) {}
-
     const fetchWithTimeout = async (url, timeout = 5000) => {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
@@ -780,9 +768,10 @@ async function getUserCountry() {
 
     try {
         const services = [
-            { url: 'https://ipinfo.io/json', parse: (d) => d.country },
-            { url: 'https://ipapi.co/json/', parse: (d) => d.country_code },
+            { url: 'https://freeipapi.com/api/json', parse: (d) => d.countryCode },
             { url: 'https://ipwho.is/', parse: (d) => d.success ? d.country_code : null },
+            { url: 'https://ipinfo.io/json', parse: (d) => d.country },
+            { url: 'https://ipapi.co/json/', parse: (d) => d.country_code }
         ];
 
         for (const svc of services) {
@@ -848,10 +837,6 @@ async function getUserCountry() {
             window.userCountryCode = userCountryCode;
         }
     }
-
-    try {
-        localStorage.setItem(COUNTRY_CACHE_KEY, JSON.stringify({ code: userCountryCode, ts: Date.now() }));
-    } catch (_) {}
 
     console.log('User country detected:', userCountryCode);
     window.userCountryCode = userCountryCode;
@@ -954,8 +939,8 @@ async function fetchExchangeRates() {
 
         for (const apiUrl of apis) {
             try {
-                console.log('💱 Trying exchange rate API:', apiUrl);
-                const response = await fetch(apiUrl, { timeout: 5000 });
+                console.log('Trying exchange rate API:', apiUrl);
+                const response = await fetch(apiUrl);
 
                 if (!response.ok) {
                     console.warn('⚠️ API returned status:', response.status, apiUrl);
