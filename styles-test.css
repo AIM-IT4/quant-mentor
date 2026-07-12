@@ -3082,3 +3082,327 @@ input:focus, textarea:focus, select:focus {
 .product-price {
     color: var(--text-primary) !important;
 }
+
+
+/* --- PROMOTION STYLES (LAUNCH EVENT) --- */
+.promo-announcement-bar {
+    position: relative;
+    width: 100%;
+    background: linear-gradient(90deg, #090d16 0%, #1e1b4b 35%, #311042 70%, #090d16 100%);
+    border-bottom: 1px solid rgba(234, 179, 8, 0.2);
+    color: #f1f5f9;
+    padding: 12px 48px 12px 24px;
+    font-size: 0.9rem;
+    z-index: 1001;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s ease, margin-top 0.3s ease;
+    box-sizing: border-box;
+}
+.promo-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.promo-tag {
+    background: linear-gradient(135deg, #eab308, #ca8a04);
+    color: #000;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+.promo-text {
+    color: #e2e8f0;
+}
+.promo-coupon {
+    font-weight: 500;
+    color: #fbbf24;
+}
+.promo-code-box {
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px dashed rgba(251, 191, 36, 0.4);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+    color: #fbbf24;
+}
+.btn-promo-cta {
+    background: #eab308;
+    color: #000;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(234, 179, 8, 0.2);
+}
+.btn-promo-cta:hover {
+    background: #f59e0b;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(234, 179, 8, 0.3);
+}
+.promo-close-btn {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.4rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+.promo-close-btn:hover {
+    color: #fff;
+}
+
+/* Exit-Intent Popup */
+.promo-popup-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.promo-popup-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.promo-popup-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(4, 6, 12, 0.8);
+    backdrop-filter: blur(8px);
+}
+.promo-popup-card {
+    position: relative;
+    background: #0f172a;
+    border: 1px solid rgba(234, 179, 8, 0.25);
+    border-radius: 24px;
+    max-width: 780px;
+    width: 90%;
+    overflow: hidden;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 40px rgba(234, 179, 8, 0.1);
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 10001;
+}
+.promo-popup-modal.active .promo-popup-card {
+    transform: scale(1) translateY(0);
+}
+.promo-popup-close {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 10;
+}
+.promo-popup-close:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+.promo-popup-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+}
+@media (max-width: 640px) {
+    .promo-popup-grid {
+        grid-template-columns: 1fr;
+    }
+    .promo-popup-image-side {
+        display: none;
+    }
+}
+.promo-popup-image-side {
+    background: #090d16;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+.promo-popup-image-side img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+}
+.promo-popup-info-side {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.popup-tag-new {
+    display: inline-block;
+    width: fit-content;
+    background: rgba(234, 179, 8, 0.1);
+    color: #fbbf24;
+    border: 1px solid rgba(234, 179, 8, 0.2);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+}
+.promo-popup-info-side h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 12px;
+    line-height: 1.2;
+}
+.popup-desc {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+.popup-offer-box {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.popup-prices {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.popup-original-price {
+    text-decoration: line-through;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+.popup-discounted-price {
+    color: #22c55e;
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+.popup-coupon-code {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.coupon-label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+.coupon-display-wrapper {
+    display: flex;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.coupon-code-txt {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding-left: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: #fbbf24;
+    letter-spacing: 0.05em;
+    font-size: 1.05rem;
+}
+.btn-copy-coupon {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+    border: none;
+    border-left: 1px solid rgba(251, 191, 36, 0.2);
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-copy-coupon:hover {
+    background: rgba(251, 191, 36, 0.25);
+    color: #fff;
+}
+.popup-action-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+.btn-popup-buy {
+    flex: 1.2;
+    padding: 12px 20px;
+    font-weight: 700;
+    border-radius: 10px;
+    min-width: 160px;
+}
+.btn-popup-preview {
+    flex: 1;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+    border-radius: 10px;
+    min-width: 140px;
+}
+.btn-popup-preview:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+.popup-footer-note {
+    font-size: 0.75rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.popup-footer-note i {
+    color: #fbbf24;
+}
+
+/* Card highlight and pulse glow */
+.product-card.highlighted-product {
+    position: relative;
+    border: 1.5px solid rgba(234, 179, 8, 0.35) !important;
+    animation: goldGlowPulse 4s infinite alternate;
+}
+@keyframes goldGlowPulse {
+    0% {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 10px rgba(234, 179, 8, 0.05);
+    }
+    100% {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(234, 179, 8, 0.25);
+    }
+}

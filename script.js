@@ -1200,7 +1200,8 @@ async function displaySupabaseProducts(products) {
 
         for (const product of items) {
             const productCard = document.createElement('div');
-            productCard.className = 'product-card reveal-up';
+            const isTargetLaunch = product.id === '6b78550d-e130-41d1-9409-92335ce82a6c';
+            productCard.className = isTargetLaunch ? 'product-card reveal-up highlighted-product' : 'product-card reveal-up';
             productCard.dataset.category = 'notes';
 
             // Convert price to local currency (async)
@@ -1215,12 +1216,16 @@ async function displaySupabaseProducts(products) {
 
             const btnText = isFree ? 'Download' : 'Buy Now';
 
+            const badgeHtml = isTargetLaunch 
+                ? `<div class="product-badge" style="background:linear-gradient(135deg,#fbbf24,#d97706); color:#000; font-weight:800; font-size:0.75rem; letter-spacing:0.05em; border-radius:4px; box-shadow:0 4px 12px rgba(217, 119, 6, 0.4);"><i class="fas fa-fire" style="margin-right:4px;"></i> NEW RELEASE</div>`
+                : `<div class="product-badge">${isFree ? 'FREE' : 'PDF'}</div>`;
+
             const imageSection = product.cover_image_url ?
                 `<div class="product-image" style="padding:0; height:240px; background:rgba(255,255,255,0.02); display:flex; align-items:center; justify-content:center; overflow:hidden;">
                     <img src="${product.cover_image_url}" style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; transition:transform 0.5s ease;">
-                    <div class="product-badge">${isFree ? 'FREE' : 'PDF'}</div>
+                    ${badgeHtml}
                  </div>` :
-                `<div class="product-image"><div class="product-placeholder pdf"><i class="fas fa-file-pdf"></i></div><div class="product-badge">${isFree ? 'FREE' : 'PDF'}</div></div>`;
+                `<div class="product-image"><div class="product-placeholder pdf"><i class="fas fa-file-pdf"></i></div>${badgeHtml}</div>`;
 
             // Handle sanitized description
             const rawDesc = product.description || '';
@@ -3333,3 +3338,117 @@ ${BUSINESS_NAME}`;
 // Make it available globally so admin.html can use it
 window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
 
+
+
+// --- LAUNCH PROMOTION CAMPAIGN LOGIC ---
+(function() {
+    console.log('🎉 Initializing Launch Promotion Campaign for Numerical Methods...');
+
+    // Expose promo functions globally so inline HTML onclick handlers can trigger them
+    window.dismissPromoBanner = function(e) {
+        if (e) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+        const banner = document.getElementById('launchPromoBanner');
+        if (banner) {
+            banner.style.transform = 'translateY(-100%)';
+            banner.style.marginTop = '-' + banner.offsetHeight + 'px';
+            setTimeout(() => banner.remove(), 300);
+        }
+        localStorage.setItem('launch_promo_banner_dismissed', 'true');
+    };
+
+    window.triggerPromoModal = function() {
+        const modal = document.getElementById('launchPromoModal');
+        if (modal) {
+            modal.classList.add('active');
+            sessionStorage.setItem('launch_promo_shown', 'true');
+        }
+    };
+
+    window.closePromoModal = function() {
+        const modal = document.getElementById('launchPromoModal');
+        if (modal) {
+            modal.classList.remove('active');
+        }
+    };
+
+    window.copyPromoCoupon = function() {
+        const couponText = 'LAUNCH15';
+        navigator.clipboard.writeText(couponText).then(() => {
+            const btnText = document.getElementById('copyCouponBtnText');
+            if (btnText) {
+                btnText.textContent = 'Copied!';
+                setTimeout(() => {
+                    btnText.textContent = 'Copy';
+                }, 2000);
+            }
+        }).catch(err => {
+            console.error('Failed to copy coupon code:', err);
+        });
+    };
+
+    window.buyLaunchProduct = function() {
+        window.closePromoModal();
+        
+        // Scroll to products section
+        const productsSec = document.getElementById('products');
+        if (productsSec) {
+            productsSec.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Open the product checkout modal
+        setTimeout(() => {
+            if (typeof window.openProductModal === 'function') {
+                window.openProductModal('6b78550d-e130-41d1-9409-92335ce82a6c');
+                
+                // Auto-fill and apply LAUNCH15 coupon in the checkout modal
+                setTimeout(() => {
+                    const couponInput = document.getElementById('couponInput');
+                    const applyBtn = document.getElementById('applyCouponBtn');
+                    if (couponInput && applyBtn) {
+                        couponInput.value = 'LAUNCH15';
+                        applyBtn.click();
+                    }
+                }, 800);
+            }
+        }, 500);
+    };
+
+    window.previewLaunchProduct = function() {
+        window.closePromoModal();
+        const isTest = window.location.pathname.includes('-test');
+        window.location.href = (isTest ? 'product-test.html' : 'product.html') + '?id=6b78550d-e130-41d1-9409-92335ce82a6c';
+    };
+
+    // Setup Triggers
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. Check banner dismissal
+        const bannerDismissed = localStorage.getItem('launch_promo_banner_dismissed');
+        const banner = document.getElementById('launchPromoBanner');
+        if (bannerDismissed === 'true' && banner) {
+            banner.remove();
+        }
+
+        // 2. Setup Popup Triggers (Only if not already shown in this session)
+        const promoShown = sessionStorage.getItem('launch_promo_shown');
+        if (promoShown !== 'true') {
+            // Trigger 2a: Time-delay (20 seconds)
+            setTimeout(() => {
+                if (sessionStorage.getItem('launch_promo_shown') !== 'true') {
+                    window.triggerPromoModal();
+                }
+            }, 20000);
+
+            // Trigger 2b: Exit Intent (mouse moves out of top viewport)
+            document.addEventListener('mouseleave', (e) => {
+                if (e.clientY < 20) { // mouse moved out towards address bar
+                    if (sessionStorage.getItem('launch_promo_shown') !== 'true') {
+                        window.triggerPromoModal();
+                    }
+                }
+            });
+        }
+    });
+})();

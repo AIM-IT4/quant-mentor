@@ -397,6 +397,17 @@
 </head>
 
 <body>
+    <!-- Launch Promotion Announcement Bar -->
+    <div id="launchPromoBanner" class="promo-announcement-bar">
+        <div class="promo-content">
+            <span class="promo-tag">NEW RELEASE</span>
+            <span class="promo-text">🔥 <strong>Numerical Methods for Quants: The Master Field Manual</strong> is now live! Spanning 93 pages with TikZ vector diagrams & codes.</span>
+            <span class="promo-coupon">Use code <strong class="promo-code-box">LAUNCH15</strong> at checkout for <strong>15% OFF</strong>!</span>
+            <button class="btn btn-promo-cta" onclick="triggerPromoModal()">Claim Discount</button>
+        </div>
+        <button class="promo-close-btn" onclick="dismissPromoBanner(event)">&times;</button>
+    </div>
+
     <!-- Scroll Progress Bar -->
     <div class="scroll-progress" id="scrollProgress"></div>
     <!-- Navigation -->
@@ -1431,6 +1442,46 @@
     <button class="scroll-top-btn" id="scrollTopBtn" title="Back to top">
         <i class="fas fa-chevron-up"></i>
     </button>
+
+    <!-- Launch Promotion Exit-Intent Popup Modal -->
+    <div id="launchPromoModal" class="promo-popup-modal">
+        <div class="promo-popup-overlay" onclick="closePromoModal()"></div>
+        <div class="promo-popup-card">
+            <button class="promo-popup-close" onclick="closePromoModal()">&times;</button>
+            <div class="promo-popup-grid">
+                <div class="promo-popup-image-side">
+                    <img src="https://dntabmyurlrlnoajdnja.supabase.co/storage/v1/object/public/product-covers/numerical_methods_cover_author_1783741116013.png" alt="Numerical Methods for Quants Cover">
+                </div>
+                <div class="promo-popup-info-side">
+                    <span class="popup-tag-new">LAUNCH EVENT</span>
+                    <h2>Master Numerical Methods for Quants</h2>
+                    <p class="popup-desc">Our brand-new 93-page playbook is live. Master root finding, splines, Crank-Nicolson, QE Monte Carlo, COS methods, and Deep BSDE solvers with visual TikZ diagrams and runnable Python scripts.</p>
+                    <div class="popup-offer-box">
+                        <div class="popup-prices">
+                            <span class="popup-original-price">1,299 INR</span>
+                            <span class="popup-discounted-price">679 INR</span>
+                        </div>
+                        <div class="popup-coupon-code">
+                            <span class="coupon-label">COUPON CODE (15% OFF):</span>
+                            <div class="coupon-display-wrapper">
+                                <span id="promoCouponCode" class="coupon-code-txt">LAUNCH15</span>
+                                <button class="btn btn-copy-coupon" onclick="copyPromoCoupon()">
+                                    <i class="fas fa-copy"></i> <span id="copyCouponBtnText">Copy</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="popup-action-buttons">
+                        <button class="btn btn-primary btn-popup-buy" onclick="buyLaunchProduct()">Buy Now with 15% Off</button>
+                        <button class="btn btn-secondary btn-popup-preview" onclick="previewLaunchProduct()">Read Preview & Samples</button>
+                    </div>
+                    <div class="popup-footer-note">
+                        <i class="fas fa-clock"></i> Limited-time launch offer. Applied at checkout.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
