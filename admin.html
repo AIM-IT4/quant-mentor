@@ -1064,16 +1064,32 @@
 
             <!-- Global Sales Map Section -->
             <div class="card map-section"
-                style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 30px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h4 style="margin: 0; color: var(--text-secondary); display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-globe-americas" style="color: #6366f1;"></i> Global Sales Density
+                style="background: var(--surface); padding: 24px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 30px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
+                    <h4 style="margin:0; color:var(--text-secondary); display:flex; align-items:center; gap:10px;">
+                        <i class="fas fa-globe-americas" style="color:#6366f1;"></i> Global Sales Density
                     </h4>
-                    <div id="mapLegend" style="font-size: 0.8em; color: var(--text-muted); display: flex; gap: 15px;">
-                        <!-- Map legend will be injected by JS -->
+                    <div style="display:flex; align-items:center; gap:12px; font-size:0.82em;">
+                        <!-- Heat scale legend -->
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span style="color:var(--text-muted)">Low</span>
+                            <div style="display:flex; gap:2px;">
+                                <div style="width:18px;height:10px;border-radius:2px;background:#1e3a5f;"></div>
+                                <div style="width:18px;height:10px;border-radius:2px;background:#1d6fa4;"></div>
+                                <div style="width:18px;height:10px;border-radius:2px;background:#6366f1;"></div>
+                                <div style="width:18px;height:10px;border-radius:2px;background:#a855f7;"></div>
+                                <div style="width:18px;height:10px;border-radius:2px;background:#ec4899;"></div>
+                            </div>
+                            <span style="color:var(--text-muted)">High</span>
+                        </div>
+                        <div id="mapCountryCount" style="background:rgba(99,102,241,0.15); color:#6366f1; padding:4px 12px; border-radius:20px; font-weight:600; font-size:0.9em;">— Countries</div>
                     </div>
                 </div>
-                <div id="world-map"></div>
+                <!-- Map + Legend side by side -->
+                <div style="display:grid; grid-template-columns:1fr 220px; gap:20px; align-items:start;">
+                    <div id="world-map" style="height:380px; min-height:300px;"></div>
+                    <div id="mapLegend" style="max-height:380px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding-right:4px;"></div>
+                </div>
             </div>
 
             <!-- Insights Row -->
@@ -3629,10 +3645,31 @@ QuantMentor
                 }
 
                 const MAP_COUNTRY_HINTS = {
-                    'USD': 'US', 'EUR': 'DE', 'GBP': 'GB', 'CHF': 'CH',
-                    'ZAR': 'ZA', 'NGN': 'NG', 'CAD': 'CA', 'AUD': 'AU',
-                    'KRW': 'KR', 'INR': 'IN', 'JPY': 'JP', 'SGD': 'SG',
-                    'AED': 'AE', 'BRL': 'BR'
+                    'USD':'US','EUR':'DE','GBP':'GB','CHF':'CH','ZAR':'ZA','NGN':'NG',
+                    'CAD':'CA','AUD':'AU','KRW':'KR','INR':'IN','JPY':'JP','SGD':'SG',
+                    'AED':'AE','BRL':'BR','THB':'TH','MYR':'MY','COP':'CO','PLN':'PL',
+                    'SEK':'SE','NOK':'NO','DKK':'DK','HKD':'HK','NZD':'NZ','TWD':'TW',
+                    'IDR':'ID','PHP':'PH','PKR':'PK','BDT':'BD','LKR':'LK','QAR':'QA',
+                    'SAR':'SA','KWD':'KW','TRY':'TR','MXN':'MX','PEN':'PE','ARS':'AR',
+                    'CZK':'CZ','HUF':'HU','RON':'RO','EGP':'EG','MAD':'MA'
+                };
+
+                const ALL_COUNTRY_NAMES = {
+                    'IN':'India 🇮🇳','US':'USA 🇺🇸','GB':'UK 🇬🇧','DE':'Germany 🇩🇪',
+                    'CH':'Switzerland 🇨🇭','CA':'Canada 🇨🇦','AU':'Australia 🇦🇺','SG':'Singapore 🇸🇬',
+                    'TH':'Thailand 🇹🇭','MY':'Malaysia 🇲🇾','GB':'UK 🇬🇧','ZA':'South Africa 🇿🇦',
+                    'NG':'Nigeria 🇳🇬','KR':'S.Korea 🇰🇷','JP':'Japan 🇯🇵','AE':'UAE 🇦🇪',
+                    'BR':'Brazil 🇧🇷','FR':'France 🇫🇷','IT':'Italy 🇮🇹','ES':'Spain 🇪🇸',
+                    'PL':'Poland 🇵🇱','CO':'Colombia 🇨🇴','NL':'Netherlands 🇳🇱','SE':'Sweden 🇸🇪',
+                    'NO':'Norway 🇳🇴','DK':'Denmark 🇩🇰','HK':'Hong Kong 🇭🇰','NZ':'New Zealand 🇳🇿',
+                    'ID':'Indonesia 🇮🇩','PH':'Philippines 🇵🇭','PK':'Pakistan 🇵🇰','BD':'Bangladesh 🇧🇩',
+                    'LK':'Sri Lanka 🇱🇰','QA':'Qatar 🇶🇦','SA':'Saudi Arabia 🇸🇦','KW':'Kuwait 🇰🇼',
+                    'TR':'Turkey 🇹🇷','MX':'Mexico 🇲🇽','PE':'Peru 🇵🇪','AR':'Argentina 🇦🇷',
+                    'EG':'Egypt 🇪🇬','MA':'Morocco 🇲🇦','TW':'Taiwan 🇹🇼','CZ':'Czech Rep. 🇨🇿',
+                    'HU':'Hungary 🇭🇺','RO':'Romania 🇷🇴','GR':'Greece 🇬🇷','PT':'Portugal 🇵🇹',
+                    'UA':'Ukraine 🇺🇦','IL':'Israel 🇮🇱','KE':'Kenya 🇰🇪','GH':'Ghana 🇬🇭',
+                    'BE':'Belgium 🇧🇪','AT':'Austria 🇦🇹','FI':'Finland 🇫🇮','IE':'Ireland 🇮🇪',
+                    'RU':'Russia 🇷🇺','CN':'China 🇨🇳'
                 };
 
                 let salesMap = null;
@@ -3645,57 +3682,67 @@ QuantMentor
 
                         if (error || !purchases) return;
 
+                        // Build country sales count
                         const countryData = {};
-                        const countryNames = {
-                            'US': 'USA', 'DE': 'Germany', 'GB': 'UK', 'CH': 'Switzerland',
-                            'ZA': 'South Africa', 'NG': 'Nigeria', 'CA': 'Canada', 'AU': 'Australia',
-                            'KR': 'S. Korea', 'IN': 'India', 'JP': 'Japan', 'SG': 'Singapore',
-                            'AE': 'UAE', 'BR': 'Brazil'
-                        };
-
                         purchases.forEach(p => {
                             let country = p.customer_country;
-
-                            // SMART FALLBACK: If country is missing, guess from currency for the map
                             if (!country || country === 'Unknown') {
                                 country = MAP_COUNTRY_HINTS[p.currency?.toUpperCase()];
                             }
-
-                            if (country && country !== 'Unknown') {
+                            if (country && country !== 'Unknown' && country.length === 2) {
                                 countryData[country] = (countryData[country] || 0) + 1;
                             }
                         });
 
-                        const mapElement = document.getElementById('world-map');
-                        if (!mapElement) return;
+                        const sortedCountries = Object.entries(countryData)
+                            .sort((a, b) => b[1] - a[1]);
+                        const maxSales = sortedCountries[0]?.[1] || 1;
+                        const totalCountries = sortedCountries.length;
+                        const totalSales = sortedCountries.reduce((s, [,c]) => s + c, 0);
 
-                        // Update Legend with actual counts
-                        const countryCount = Object.keys(countryData).length;
-                        const legendHtml = countryCount > 0
-                            ? `<div style="display:flex; flex-direction:column; gap:4px; font-size:0.7em; color:var(--text-muted);">
-                                ${Object.entries(countryData).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([code, count]) => `
-                                    <div style="display:flex; justify-content:space-between; gap:10px;">
-                                        <span>${countryNames[code] || code}:</span>
-                                        <span style="color:var(--primary);">${count}</span>
-                                    </div>
-                                `).join('')}
-                                ${countryCount > 5 ? '<span>...and more</span>' : ''}
-                               </div>`
-                            : 'No geographic data';
+                        // ── Update country count badge ──
+                        const badge = document.getElementById('mapCountryCount');
+                        if (badge) badge.textContent = `${totalCountries} Countries`;
 
-                        const legendElement = document.getElementById('mapLegend');
-                        if (legendElement) {
-                            legendElement.innerHTML =
-                                `<div style="display:flex; align-items:center; gap:15px;">
-                                    ${legendHtml}
-                                    <span class="text-xs text-muted" style="border-left:1px solid rgba(255,255,255,0.1); padding-left:15px; display: flex; align-items: center;">${countryCount} Countries</span>
-                                 </div>`;
+                        // ── Build rich sidebar legend ──
+                        const legendEl = document.getElementById('mapLegend');
+                        if (legendEl) {
+                            legendEl.innerHTML = [
+                                `<div style="font-size:0.72em;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.08)">Top Markets</div>`,
+                                ...sortedCountries.slice(0, 20).map(([code, count], i) => {
+                                    const pct = Math.round((count / maxSales) * 100);
+                                    const sharePct = ((count / totalSales) * 100).toFixed(1);
+                                    // Color tier
+                                    const color = pct >= 80 ? '#ec4899'
+                                        : pct >= 55 ? '#a855f7'
+                                        : pct >= 35 ? '#6366f1'
+                                        : pct >= 15 ? '#1d6fa4'
+                                        : '#1e3a5f';
+                                    const name = ALL_COUNTRY_NAMES[code] || code;
+                                    return `
+                                    <div style="display:flex;flex-direction:column;gap:3px;">
+                                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                                            <span style="font-size:0.78em;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">${name}</span>
+                                            <span style="font-size:0.75em;color:var(--text-muted);margin-left:6px;white-space:nowrap">${count} (${sharePct}%)</span>
+                                        </div>
+                                        <div style="height:4px;border-radius:4px;background:rgba(255,255,255,0.07);overflow:hidden;">
+                                            <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width 0.6s ease;"></div>
+                                        </div>
+                                    </div>`;
+                                }),
+                                totalCountries > 20
+                                    ? `<div style="font-size:0.72em;color:var(--text-muted);text-align:center;padding-top:4px">+${totalCountries - 20} more countries</div>`
+                                    : ''
+                            ].join('');
                         }
 
-                        if (salesMap) {
-                            salesMap.destroy();
-                        }
+                        // ── Destroy old map instance ──
+                        if (salesMap) { try { salesMap.destroy(); } catch(e){} salesMap = null; }
+                        const mapEl = document.getElementById('world-map');
+                        if (!mapEl) return;
+                        mapEl.innerHTML = '';
 
+                        // ── Render jsvectormap ──
                         salesMap = new jsVectorMap({
                             selector: '#world-map',
                             map: 'world_merc',
@@ -3706,46 +3753,55 @@ QuantMentor
                             bindTouchEvents: true,
                             regionStyle: {
                                 initial: {
-                                    fill: '#2a2a3a',
-                                    stroke: 'rgba(255, 255, 255, 0.1)',
-                                    strokeWidth: 0.5,
+                                    fill: '#1a1a2e',
+                                    stroke: 'rgba(255,255,255,0.08)',
+                                    strokeWidth: 0.4,
                                     fillOpacity: 1
                                 },
                                 hover: {
-                                    fill: '#6366f1',
-                                    fillOpacity: 1
+                                    fillOpacity: 0.8,
+                                    cursor: 'pointer'
                                 },
-                                selected: {
-                                    fill: '#6366f1'
-                                }
+                                selected: { fillOpacity: 1 }
                             },
                             series: {
                                 regions: [{
                                     attribute: 'fill',
-                                    legend: {
-                                        title: 'Sales Density',
-                                        vertical: false,
+                                    scale: {
+                                        // 5-tier heat: dark navy → steel → indigo → violet → pink
+                                        '1':  '#1e3a5f',
+                                        '2':  '#1d6fa4',
+                                        '3':  '#6366f1',
+                                        '4':  '#a855f7',
+                                        '5':  '#ec4899'
                                     },
-                                    scale: ['#312e81', '#6366f1', '#a855f7'],
-                                    values: countryData
+                                    values: Object.fromEntries(
+                                        sortedCountries.map(([code, count]) => [
+                                            code,
+                                            count >= maxSales * 0.8 ? 5
+                                            : count >= maxSales * 0.5 ? 4
+                                            : count >= maxSales * 0.3 ? 3
+                                            : count >= maxSales * 0.1 ? 2
+                                            : 1
+                                        ])
+                                    ),
+                                    legend: { title: '', vertical: false }
                                 }]
                             },
                             onRegionTooltipShow(event, tooltip, code) {
                                 const count = countryData[code] || 0;
-                                const name = countryNames[code] || code;
-                                tooltip.text(
-                                    `<strong>${name}</strong><br><span style="font-size:0.9em;opacity:0.8">Sales: ${count}</span>`,
-                                    true
-                                );
+                                const name = (ALL_COUNTRY_NAMES[code] || code).replace(/ \p{Emoji_Presentation}+$/u, '');
+                                if (count > 0) {
+                                    const sharePct = ((count / totalSales) * 100).toFixed(1);
+                                    tooltip.text(
+                                        `<strong>${name}</strong><br><span style="font-size:0.9em;opacity:0.85">${count} sale${count !== 1 ? 's' : ''} &bull; ${sharePct}% of total</span>`,
+                                        true
+                                    );
+                                } else {
+                                    tooltip.text(`<strong>${name}</strong><br><span style="font-size:0.85em;opacity:0.6">No sales yet</span>`, true);
+                                }
                             }
                         });
-
-                        // Inject legend
-                        const legend = document.getElementById('mapLegend');
-                        if (legend) {
-                            const totalCountries = Object.keys(countryData).length;
-                            legend.innerHTML = `<span><strong>${totalCountries}</strong> Countries</span>`;
-                        }
 
                     } catch (err) {
                         console.error('Error updating Sales Map:', err);
