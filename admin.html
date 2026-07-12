@@ -3552,33 +3552,43 @@ QuantMentor
                             growthHtml = `<span style="color: #22c55e; font-weight: 500;"><i class="fas fa-chart-bar"></i> Total aggregate</span>`;
                         }
 
-                        // AOV (Average Order Value) - Keep Normalized for AOV as it's an average
-                        const totaltransactions = (currentPeriodBookings?.length || 0) + (cleanCurrentPurchases.length || 0);
-                        const aov = totaltransactions > 0 ? Math.round(currentTotalNorm / totaltransactions) : 0;
+                        // --- DISPLAY: use lifetime totals when All Time is selected ---
+                        const displayTotal = isAllTime ? totalLifetimeRevenueNorm : currentTotalNorm;
+                        const displayBookingsLen = isAllTime ? (allBookingsRev?.length || 0) : (currentPeriodBookings?.length || 0);
+                        const displayPurchasesLen = isAllTime ? cleanLifetimePurchases.length : cleanCurrentPurchases.length;
 
-                        // Update DOM with Breakdown - PROFESSIONAL VIEW
-                        const primaryTotal = `₹${Math.round(currentTotalNorm).toLocaleString()}`;
+                        // AOV (Average Order Value)
+                        const totaltransactions = displayBookingsLen + displayPurchasesLen;
+                        const aov = totaltransactions > 0 ? Math.round(displayTotal / totaltransactions) : 0;
+
+                        // Build currency breakdown tooltip from lifetime data when all-time
+                        const breakdownSource = isAllTime ? lifetimeBreakdown : periodBreakdown;
                         let rawBreakdown = [];
-                        if (periodBreakdown._raw) {
-                            rawBreakdown = Object.entries(periodBreakdown._raw)
+                        if (breakdownSource._raw) {
+                            rawBreakdown = Object.entries(breakdownSource._raw)
                                 .sort((a, b) => b[1] - a[1])
-                                .map(([c, amt]) => `<div style="display: flex; justify-content: space-between; gap: 20px;"><span>${c}:</span> <span>${formatCurrency(amt, c)}</span></div>`);
+                                .map(([c, amt]) => `<div style="display:flex;justify-content:space-between;gap:20px"><span>${c}:</span><span>${formatCurrency(amt, c)}</span></div>`);
                         }
 
-                        let breakdownHtml = rawBreakdown.length > 0 ? rawBreakdown.join('') : '<div style="color: var(--text-muted);">All period revenue in INR</div>';
-                        breakdownHtml += `<div style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px; font-weight: bold;">Lifetime Total: ₹${Math.round(totalLifetimeRevenueNorm).toLocaleString()}</div>`;
+                        let breakdownHtml = rawBreakdown.length > 0 ? rawBreakdown.join('') : '<div style="color:var(--text-muted)">All revenue converted to INR</div>';
+                        if (!isAllTime) {
+                            breakdownHtml += `<div style="margin-top:10px;border-top:1px solid rgba(255,255,255,0.1);padding-top:5px;font-weight:bold">Lifetime Total: ₹${Math.round(totalLifetimeRevenueNorm).toLocaleString()}</div>`;
+                        }
+
+                        const primaryTotal = `₹${Math.round(displayTotal).toLocaleString()}`;
+                        const subLabel = isAllTime ? 'Lifetime total (all currencies → ₹)' : 'Period total (approx. conversion)';
 
                         const finalHtml = `
-                                    <div style="display: flex; align-items: baseline; gap: 8px;">
+                                    <div style="display:flex;align-items:baseline;gap:8px">
                                         <span>${primaryTotal}</span>
                                         <div class="tooltip-container">
-                                            <i class="fas fa-info-circle" style="font-size: 0.6em; color: var(--text-muted);"></i>
+                                            <i class="fas fa-info-circle" style="font-size:0.6em;color:var(--text-muted)"></i>
                                             <div class="tooltip-content">
                                                 ${breakdownHtml}
                                             </div>
                                         </div>
                                     </div>
-                                    <div style="font-size: 0.75em; color: var(--text-muted); margin-top: 4px;">Approx. total conversion</div>
+                                    <div style="font-size:0.75em;color:var(--text-muted);margin-top:4px">${subLabel}</div>
                                 `;
 
                         document.getElementById('totalRevenue').innerHTML = finalHtml;
@@ -3587,15 +3597,15 @@ QuantMentor
                         document.getElementById('completedBookingsCount').textContent = completedBookingsCount;
                         document.getElementById('totalSales').textContent = isAllTime ? totalSalesCount : currentSalesCount;
 
-                        let salesGrowthHtml = '<span style="color: var(--text-muted);">Period sales</span>';
+                        let salesGrowthHtml = '<span style="color:var(--text-muted)">Period sales</span>';
                         if (!isAllTime) {
                             if (previousSalesCount > 0) {
                                 const sGrowth = ((currentSalesCount - previousSalesCount) / previousSalesCount) * 100;
                                 const sIsPos = sGrowth >= 0;
-                                salesGrowthHtml = `<span style="color: ${sIsPos ? '#22c55e' : '#ef4444'}; font-weight: 500;">${sIsPos ? '↗' : '↘'} ${Math.abs(sGrowth).toFixed(0)}%</span> <span style="color: var(--text-muted);">vs prior ${days}d</span>`;
+                                salesGrowthHtml = `<span style="color:${sIsPos ? '#22c55e' : '#ef4444'};font-weight:500">${sIsPos ? '↗' : '↘'} ${Math.abs(sGrowth).toFixed(0)}%</span> <span style="color:var(--text-muted)">vs prior ${days}d</span>`;
                             }
                         } else {
-                            salesGrowthHtml = `<span style="color: var(--text-muted);">Lifetime total sales</span>`;
+                            salesGrowthHtml = `<span style="color:var(--text-muted)">Lifetime total sales</span>`;
                         }
                         document.getElementById('salesGrowth').innerHTML = salesGrowthHtml;
                         document.getElementById('avgOrderValue').textContent = `₹${aov.toLocaleString()}`;
@@ -3709,9 +3719,10 @@ QuantMentor
                             },
                             onRegionTooltipShow(event, tooltip, code) {
                                 const count = countryData[code] || 0;
+                                const name = countryNames[code] || code;
                                 tooltip.text(
-                                    `<h5>${tooltip.text()}</h5>` +
-                                    `<p style="margin:0; font-size:0.9em; opacity:0.8;">Total Sales: ${count}</p>`
+                                    `<strong>${name}</strong><br><span style="font-size:0.9em;opacity:0.8">Sales: ${count}</span>`,
+                                    true
                                 );
                             }
                         });
@@ -3762,15 +3773,22 @@ QuantMentor
                             return;
                         }
 
-                        list.innerHTML = sortedProducts.map(p => `
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                        <td style="padding: 12px; font-weight: 500;">${p.name}</td>
-                                        <td style="padding: 12px; text-align: center;">${p.count}</td>
-                                        <td style="padding: 12px; text-align: right; color: #22c55e;">
-                                            ${Object.entries(p.revenue).map(([c, amt]) => formatCurrency(amt, c)).join('<br>')}
+                        list.innerHTML = sortedProducts.map((p, i) => {
+                                    // Show normalized INR total with small raw breakdown on hover
+                                    const rawLines = Object.entries(p.revenue)
+                                        .filter(([c]) => c !== 'INR')
+                                        .map(([c, amt]) => `${c}: ${formatCurrency(amt, c)}`).join(' | ');
+                                    const tooltip = rawLines ? ` title="Original: ${rawLines}"` : '';
+                                    const badge = i === 0 ? ' 🏆' : i === 1 ? ' 🥈' : i === 2 ? ' 🥉' : '';
+                                    return `
+                                    <tr style="border-bottom:1px solid rgba(255,255,255,0.05);transition:background 0.2s" onmouseover="this.style.background='rgba(99,102,241,0.07)'" onmouseout="this.style.background='transparent'">
+                                        <td style="padding:12px;font-weight:500">${p.name}${badge}</td>
+                                        <td style="padding:12px;text-align:center">${p.count}</td>
+                                        <td style="padding:12px;text-align:right;color:#22c55e;font-weight:600"${tooltip}>
+                                            ₹${Math.round(p.totalNorm).toLocaleString()}
                                         </td>
-                                    </tr>
-                                `).join('');
+                                    </tr>`;
+                                }).join('');
 
                     } catch (error) {
                         console.error('Error loading top products:', error);
