@@ -1307,16 +1307,6 @@ async function displaySupabaseProducts(products) {
                 originalPriceDisplay = priceDisplay;
             }
 
-            // PPP badge display on card
-            let pppBadgeHtml = '';
-            if (product.enable_ppp && userCountryCode !== 'IN' && !isFree) {
-                if (localPrice.isWeaker) {
-                    pppBadgeHtml = `<span style="background:rgba(34,197,94,0.12); color:#22c55e; border:1px solid rgba(34,197,94,0.2); padding:2px 6px; border-radius:4px; font-size:0.72em; font-weight:600; display:inline-flex; align-items:center; gap:3px;"><i class="fas fa-globe-asia"></i> Region Price Applied</span>`;
-                } else {
-                    pppBadgeHtml = `<span style="background:rgba(99,102,241,0.12); color:#818cf8; border:1px solid rgba(99,102,241,0.2); padding:2px 6px; border-radius:4px; font-size:0.72em; font-weight:600; display:inline-flex; align-items:center; gap:3px;"><i class="fas fa-globe"></i> PPP Adjusted</span>`;
-                }
-            }
-
             productCard.innerHTML = `
                 ${imageSection}
                 <div class="product-content">
@@ -1330,7 +1320,6 @@ async function displaySupabaseProducts(products) {
                     <div class="product-meta">
                         <span><i class="fas fa-file-alt"></i> ${isFree ? 'Resource' : 'Premium Note'}</span>
                         <span><i class="fas fa-download"></i> Instant Access</span>
-                        ${pppBadgeHtml}
                     </div>
                     <div class="product-footer">
                         ${originalPriceDisplay}
@@ -1407,18 +1396,7 @@ window.openProductModal = async function (id) {
             if (isLocalCurrency) {
                 // Show local currency only
                 priceElement.innerHTML = `<span style="font-size:1.3em;font-weight:600;">${formatPrice(localPrice)}</span>`;
-                
-                // Show PPP text if enable_ppp is true
-                if (product.enable_ppp && pppInfoElement && pppTextElement) {
-                    pppInfoElement.style.display = 'block';
-                    if (localPrice.isWeaker) {
-                        pppTextElement.innerHTML = `Purchasing Power Parity (PPP) pricing applied. Price adjusted for <strong>${localPrice.currency.code}</strong>.`;
-                    } else {
-                        pppTextElement.innerHTML = `Standard international pricing adjusted for your country's purchasing power (<strong>${localPrice.currency.code}</strong>).`;
-                    }
-                } else if (pppInfoElement) {
-                    pppInfoElement.style.display = 'none';
-                }
+                if (pppInfoElement) pppInfoElement.style.display = 'none';
             } else {
                 // Show INR for Indian users
                 priceElement.textContent = '₹' + product.price;

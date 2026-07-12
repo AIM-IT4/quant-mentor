@@ -1091,15 +1091,7 @@
 
                                 // Display PPP info text if enable_ppp is active
                                 const pppInfoEl = document.getElementById('p-ppp-info');
-                                const pppTextEl = document.getElementById('p-ppp-text');
-                                if (product.enable_ppp && pppInfoEl && pppTextEl) {
-                                    pppInfoEl.style.display = 'block';
-                                    if (localPrice.isWeaker) {
-                                        pppTextEl.innerHTML = `Purchasing Power Parity (PPP) pricing applied. Price adjusted for <strong>${localPrice.currency.code}</strong>.`;
-                                    } else {
-                                        pppTextEl.innerHTML = `Standard international pricing adjusted for your country's purchasing power (<strong>${localPrice.currency.code}</strong>).`;
-                                    }
-                                }
+                                if (pppInfoEl) pppInfoEl.style.display = 'none';
                             }
                         });
                     }).catch(err => console.warn('Deferred currency conversion failed', err));
