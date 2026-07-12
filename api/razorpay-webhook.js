@@ -37,7 +37,7 @@ export default async function handler(req, res) {
     // Configuration
     const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET;
     const SUPABASE_URL = process.env.SUPABASE_URL || 'https://dntabmyurlrlnoajdnja.supabase.co';
-    const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
+    const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDEyNjUsImV4cCI6MjA4NTY3NzI2NX0.PYpNd_t_px09zi2d5WGjFVOB23sjb3ZPuAnxagYshe0';
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
     const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'jha.8@alumni.iitj.ac.in';
     const SENDER_EMAIL = process.env.SENDER_EMAIL || 'jha.8@alumni.iitj.ac.in';
@@ -263,7 +263,7 @@ async function handleProductPurchase(data) {
 
     if (!frontendAlreadyProcessed) {
         try {
-            await fetch(`${SUPABASE_URL}/rest/v1/purchases`, {
+            const insertResp = await fetch(`${SUPABASE_URL}/rest/v1/purchases`, {
                 method: 'POST',
                 headers: {
                     'apikey': SUPABASE_KEY,
@@ -283,9 +283,14 @@ async function handleProductPurchase(data) {
                     download_link: downloadLink
                 })
             });
-            console.log('Purchase logged to Supabase by webhook');
+            if (insertResp.ok) {
+                console.log('✅ Purchase logged to Supabase by webhook. PaymentId:', paymentId);
+            } else {
+                const errBody = await insertResp.text();
+                console.error('❌ SUPABASE INSERT FAILED. Status:', insertResp.status, '| Body:', errBody, '| PaymentId:', paymentId);
+            }
         } catch (err) {
-            console.error('Error logging to Supabase:', err);
+            console.error('❌ Error logging to Supabase (network):', err.message, '| PaymentId:', paymentId);
         }
     }
 
