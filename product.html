@@ -696,6 +696,9 @@
                 </div>
                 <h1 id="p-title">Product Title</h1>
                 <div class="product-price-tag" id="p-price">₹0</div>
+                <div id="p-ppp-info" style="display:none; margin-top:10px; font-size:0.9em; color:var(--text-muted); background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.05); max-width:fit-content;">
+                    <i class="fas fa-globe" style="color:#6366f1; margin-right:5px;"></i> <span id="p-ppp-text"></span>
+                </div>
                 <div class="product-description-full" id="p-desc">
                     Product description...
                 </div>
@@ -1062,7 +1065,7 @@
                 // Asynchronous currency conversion (Non-blocking)
                 if (window.convertPrice && window.getUserCountry && product.price > 0) {
                     window.getUserCountry().then(country => {
-                        return window.convertPrice(product.price, country).then(localPrice => {
+                        return window.convertPrice(product.price, country, product.enable_ppp).then(localPrice => {
                             if (localPrice.currency.code !== 'INR') {
                                 // Update Buy Button Dataset
                                 buyBtn.dataset.price = localPrice.amount;
@@ -1076,13 +1079,7 @@
                                     const rate = localPrice.rate || 1;
                                     let convertedOriginal = product.original_price * rate;
 
-                                    const weakersCurrencies = [
-                                        'PKR', 'BDT', 'LKR', 'NPR', 'NGN', 'EGP', 'KES', 'GHS', 'ZAR',
-                                        'VND', 'IDR', 'PHP', 'MYR', 'THB', 'TRY', 'RUB', 'UAH',
-                                        'BRL', 'MXN', 'ARS', 'COP', 'CLP', 'PEN'
-                                    ];
-
-                                    if (!weakersCurrencies.includes(localPrice.currency.code)) {
+                                    if (product.enable_ppp && !localPrice.isWeaker) {
                                         convertedOriginal = convertedOriginal * 1.5;
                                     }
 
@@ -1091,6 +1088,18 @@
 
                                 priceEl.innerHTML = `${newOriginalDisplay}${newPriceText}`;
                                 buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${newPriceText}`;
+
+                                // Display PPP info text if enable_ppp is active
+                                const pppInfoEl = document.getElementById('p-ppp-info');
+                                const pppTextEl = document.getElementById('p-ppp-text');
+                                if (product.enable_ppp && pppInfoEl && pppTextEl) {
+                                    pppInfoEl.style.display = 'block';
+                                    if (localPrice.isWeaker) {
+                                        pppTextEl.innerHTML = `Purchasing Power Parity (PPP) pricing applied. Price adjusted for <strong>${localPrice.currency.code}</strong>.`;
+                                    } else {
+                                        pppTextEl.innerHTML = `Standard international pricing adjusted for your country's purchasing power (<strong>${localPrice.currency.code}</strong>).`;
+                                    }
+                                }
                             }
                         });
                     }).catch(err => console.warn('Deferred currency conversion failed', err));

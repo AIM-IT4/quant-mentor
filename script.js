@@ -1008,7 +1008,7 @@ function getCurrencyForCountry(countryCode) {
 }
 
 // Convert INR price to local currency using live rates
-async function convertPrice(inrPrice, countryCode) {
+async function convertPrice(inrPrice, countryCode, enablePPP = false) {
     if (!inrPrice || inrPrice <= 0) return { amount: 0, currency: CURRENCY_MAP['IN'] };
 
     const currency = getCurrencyForCountry(countryCode);
@@ -1019,6 +1019,7 @@ async function convertPrice(inrPrice, countryCode) {
     let convertedAmount = inrPrice * rate;
 
     // PPP Adjustment: Apply 1.5x multiplier for stronger currencies (Developed Markets)
+    // ONLY if PPP pricing is explicitly enabled for this product.
     // We EXCLUDE weaker currencies to ensure fair pricing for developing nations.
     // List includes: South Asia, SE Asia, Africa, Latin America, etc.
     const weakersCurrencies = [
@@ -1029,10 +1030,17 @@ async function convertPrice(inrPrice, countryCode) {
         'BRL', 'MXN', 'ARS', 'COP', 'CLP', 'PEN' // Latin America
     ];
 
-    if (currency.code !== 'INR' && !weakersCurrencies.includes(currency.code)) {
-        // console.log(`📈 Applying PPP Multiplier (1.5x) for ${currency.code}`);
-        convertedAmount = convertedAmount * 1.5;
-        // Round to nice numbers (e.g. 9.00 instead of 9.13) if possible, but for now standard rounding
+    let pppApplied = false;
+    let isWeaker = weakersCurrencies.includes(currency.code);
+
+    if (enablePPP && currency.code !== 'INR') {
+        if (!isWeaker) {
+            // console.log(`📈 Applying PPP Multiplier (1.5x) for ${currency.code}`);
+            convertedAmount = convertedAmount * 1.5;
+            pppApplied = true;
+        } else {
+            pppApplied = true; // Still PPP active, but regional discount pricing applied
+        }
     }
 
     convertedAmount = Math.round(convertedAmount);
@@ -1041,7 +1049,10 @@ async function convertPrice(inrPrice, countryCode) {
         amount: convertedAmount,
         currency: currency,
         originalInr: inrPrice,
-        rate: rate
+        rate: rate,
+        pppApplied: pppApplied,
+        isWeaker: isWeaker,
+        enablePPP: enablePPP
     };
 }
 
@@ -1206,7 +1217,7 @@ async function displaySupabaseProducts(products) {
             productCard.dataset.category = 'notes';
 
             // Convert price to local currency (async)
-            const localPrice = await convertPrice(product.price, userCountryCode);
+            const localPrice = await convertPrice(product.price, userCountryCode, product.enable_ppp);
             const isLocalCurrency = localPrice.currency.code !== 'INR';
 
             const priceDisplay = isFree
@@ -1250,15 +1261,7 @@ async function displaySupabaseProducts(products) {
                     const rate = localPrice.rate || 1;
                     let convertedOriginal = product.original_price * rate;
 
-                    const weakersCurrencies = [
-                        'PKR', 'BDT', 'LKR', 'NPR',
-                        'NGN', 'EGP', 'KES', 'GHS', 'ZAR',
-                        'VND', 'IDR', 'PHP', 'MYR', 'THB',
-                        'TRY', 'RUB', 'UAH',
-                        'BRL', 'MXN', 'ARS', 'COP', 'CLP', 'PEN'
-                    ];
-
-                    if (!weakersCurrencies.includes(localPrice.currency.code)) {
+                    if (product.enable_ppp && !localPrice.isWeaker) {
                         convertedOriginal = convertedOriginal * 1.5;
                     }
 
@@ -1274,6 +1277,16 @@ async function displaySupabaseProducts(products) {
                 originalPriceDisplay = priceDisplay;
             }
 
+            // PPP badge display on card
+            let pppBadgeHtml = '';
+            if (product.enable_ppp && userCountryCode !== 'IN' && !isFree) {
+                if (localPrice.isWeaker) {
+                    pppBadgeHtml = `<span style="background:rgba(34,197,94,0.12); color:#22c55e; border:1px solid rgba(34,197,94,0.2); padding:2px 6px; border-radius:4px; font-size:0.72em; font-weight:600; display:inline-flex; align-items:center; gap:3px;"><i class="fas fa-globe-asia"></i> Region Price Applied</span>`;
+                } else {
+                    pppBadgeHtml = `<span style="background:rgba(99,102,241,0.12); color:#818cf8; border:1px solid rgba(99,102,241,0.2); padding:2px 6px; border-radius:4px; font-size:0.72em; font-weight:600; display:inline-flex; align-items:center; gap:3px;"><i class="fas fa-globe"></i> PPP Adjusted</span>`;
+                }
+            }
+
             productCard.innerHTML = `
                 ${imageSection}
                 <div class="product-content">
@@ -1287,6 +1300,7 @@ async function displaySupabaseProducts(products) {
                     <div class="product-meta">
                         <span><i class="fas fa-file-alt"></i> ${isFree ? 'Resource' : 'Premium Note'}</span>
                         <span><i class="fas fa-download"></i> Instant Access</span>
+                        ${pppBadgeHtml}
                     </div>
                     <div class="product-footer">
                         ${originalPriceDisplay}
@@ -1316,7 +1330,7 @@ window.openProductModal = async function (id) {
         if (!modal) return;
 
         // Convert price to local currency
-        const localPrice = await convertPrice(product.price, userCountryCode);
+        const localPrice = await convertPrice(product.price, userCountryCode, product.enable_ppp);
         const isLocalCurrency = localPrice.currency.code !== 'INR';
 
         // Store price info for calculations
@@ -1363,7 +1377,18 @@ window.openProductModal = async function (id) {
             if (isLocalCurrency) {
                 // Show local currency only
                 priceElement.innerHTML = `<span style="font-size:1.3em;font-weight:600;">${formatPrice(localPrice)}</span>`;
-                if (pppInfoElement) pppInfoElement.style.display = 'none';
+                
+                // Show PPP text if enable_ppp is true
+                if (product.enable_ppp && pppInfoElement && pppTextElement) {
+                    pppInfoElement.style.display = 'block';
+                    if (localPrice.isWeaker) {
+                        pppTextElement.innerHTML = `Purchasing Power Parity (PPP) pricing applied. Price adjusted for <strong>${localPrice.currency.code}</strong>.`;
+                    } else {
+                        pppTextElement.innerHTML = `Standard international pricing adjusted for your country's purchasing power (<strong>${localPrice.currency.code}</strong>).`;
+                    }
+                } else if (pppInfoElement) {
+                    pppInfoElement.style.display = 'none';
+                }
             } else {
                 // Show INR for Indian users
                 priceElement.textContent = '₹' + product.price;
