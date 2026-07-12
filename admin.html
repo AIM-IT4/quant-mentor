@@ -949,10 +949,11 @@
                         <div class="date-filter">
                             <select id="revenueRange" onchange="updateDashboardStats(); updateDashboardCharts();"
                                 style="background: var(--surface); border: 1px solid var(--border); color: var(--text-primary); padding: 8px 16px; border-radius: 8px; cursor: pointer;">
-                                <option value="7">Last 7 Days</option>
-                                <option value="30" selected>Last 30 Days</option>
-                                <option value="90">Last 3 Months</option>
+                                <option value="all" selected>All Time</option>
                                 <option value="365">Last Year</option>
+                                <option value="90">Last 3 Months</option>
+                                <option value="30">Last 30 Days</option>
+                                <option value="7">Last 7 Days</option>
                             </select>
                         </div>
                     </div>
@@ -1042,8 +1043,7 @@
                     </div>
 
                     <!-- Charts Row -->
-                    <div class="charts-container"
-                        style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px;">
+                    <div class="charts-container">
                         <div class="chart-wrapper"
                             style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); height: 350px;">
                             <h4 style="margin: 0 0 20px 0; color: var(--text-secondary);">Revenue Trends</h4>
@@ -1077,7 +1077,7 @@
             </div>
 
             <!-- Insights Row -->
-            <div class="insights-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="insights-container">
                 <!-- Top Products -->
                 <div
                     style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
@@ -3414,9 +3414,9 @@ QuantMentor
                     // Note: We no longer ignore ghosts, we auto-correct them in normalizeToINR
                     const isGhost = (p) => false;
                     try {
-                        const days = document.getElementById('revenueRange')?.value || '30';
-                        const { startOfPeriod, endOfPeriod, startOfPrevious, endOfPrevious } = getDynamicDateRanges(days);
-
+                        const days = document.getElementById('revenueRange')?.value || 'all';
+                        const isAllTime = (days === 'all');
+                        
                         // 1. Active Bookings (Upcoming + Confirmed)
                         const { count: activeBookingsCount } = await window.supabaseAdminClient
                             .from('bookings')
@@ -3435,32 +3435,48 @@ QuantMentor
                             .select('*', { count: 'exact', head: true });
 
                         // 4. Financials (Current Period vs Previous Period)
-                        const { data: currentPeriodBookings } = await window.supabaseAdminClient
+                        let currentBookingsQuery = window.supabaseAdminClient
                             .from('bookings')
                             .select('service_price, status')
-                            .gte('created_at', startOfPeriod)
-                            .lte('created_at', endOfPeriod)
                             .in('status', ['confirmed', 'completed', 'upcoming']);
 
-                        let { data: currentPeriodPurchases } = await window.supabaseAdminClient
+                        let currentPurchasesQuery = window.supabaseAdminClient
                             .from('purchases')
-                            .select('amount, currency, payment_id, inr_amount, customer_country')
-                            .gte('created_at', startOfPeriod)
-                            .lte('created_at', endOfPeriod);
+                            .select('amount, currency, payment_id, inr_amount, customer_country');
 
-                        const { data: previousPeriodBookings } = await window.supabaseAdminClient
-                            .from('bookings')
-                            .select('service_price, status')
-                            .gte('created_at', startOfPrevious)
-                            .lte('created_at', endOfPrevious)
-                            .in('status', ['confirmed', 'completed', 'upcoming']);
+                        let previousBookingsQuery = null;
+                        let previousPurchasesQuery = null;
 
-                        let { data: previousPeriodPurchases } = await window.supabaseAdminClient
-                            .from('purchases')
-                            .select('amount, currency, payment_id, inr_amount, customer_country')
-                            .gte('created_at', startOfPrevious)
-                            .lte('created_at', endOfPrevious);
+                        if (!isAllTime) {
+                            const { startOfPeriod, endOfPeriod, startOfPrevious, endOfPrevious } = getDynamicDateRanges(days);
+                            
+                            currentBookingsQuery = currentBookingsQuery
+                                .gte('created_at', startOfPeriod)
+                                .lte('created_at', endOfPeriod);
+                                
+                            currentPurchasesQuery = currentPurchasesQuery
+                                .gte('created_at', startOfPeriod)
+                                .lte('created_at', endOfPeriod);
 
+                            previousBookingsQuery = window.supabaseAdminClient
+                                .from('bookings')
+                                .select('service_price, status')
+                                .gte('created_at', startOfPrevious)
+                                .lte('created_at', endOfPrevious)
+                                .in('status', ['confirmed', 'completed', 'upcoming']);
+
+                            previousPurchasesQuery = window.supabaseAdminClient
+                                .from('purchases')
+                                .select('amount, currency, payment_id, inr_amount, customer_country')
+                                .gte('created_at', startOfPrevious)
+                                .lte('created_at', endOfPrevious);
+                        }
+
+                        const { data: currentPeriodBookings } = await currentBookingsQuery;
+                        const { data: currentPeriodPurchases } = await currentPurchasesQuery;
+                        
+                        const previousPeriodBookings = previousBookingsQuery ? (await previousBookingsQuery).data : [];
+                        const previousPeriodPurchases = previousPurchasesQuery ? (await previousPurchasesQuery).data : [];
 
                         // 5. Total Lifetime Revenue
                         const { data: allBookingsRev } = await window.supabaseAdminClient
@@ -3505,7 +3521,6 @@ QuantMentor
                             return totals;
                         };
 
-
                         // Period Metrics
                         const currentTotalNorm = (currentPeriodBookings?.reduce((s, b) => s + (b.service_price || 0), 0) || 0) +
                             cleanCurrentPurchases.reduce((s, p) => s + normalizeToINR(p.amount, p.currency, p.inr_amount), 0);
@@ -3515,7 +3530,6 @@ QuantMentor
 
                         const currentSalesCount = cleanCurrentPurchases.length;
                         const previousSalesCount = cleanPreviousPurchases.length;
-                        const currentCompletedBookings = (currentPeriodBookings?.filter(b => b.status === 'completed').length || 0);
 
                         // Lifetime & Period Breakdowns
                         const lifetimeBreakdown = calcRevenueBreakdown(allBookingsRev, cleanLifetimePurchases);
@@ -3523,15 +3537,19 @@ QuantMentor
                         const periodBreakdown = calcRevenueBreakdown(currentPeriodBookings, cleanCurrentPurchases);
 
                         // Growth % (Using Normalized Values)
-                        let growthHtml = '<span style="color: var(--text-muted);">No comparison data</span>';
-                        if (previousTotalNorm > 0) {
-                            const growth = ((currentTotalNorm - previousTotalNorm) / previousTotalNorm) * 100;
-                            const isPositive = growth >= 0;
-                            const color = isPositive ? '#22c55e' : '#ef4444';
-                            const icon = isPositive ? '↗' : '↘';
-                            growthHtml = `<span style="color: ${color}; font-weight: 500;">${icon} ${Math.abs(growth).toFixed(1)}%</span> <span style="color: var(--text-muted);">vs prior ${days}d</span>`;
-                        } else if (currentTotalNorm > 0) {
-                            growthHtml = `<span style="color: #22c55e; font-weight: 500;">↗ 100%</span> <span style="color: var(--text-muted);">new growth</span>`;
+                        let growthHtml = '<span style="color: var(--text-muted);">Lifetime cumulative data</span>';
+                        if (!isAllTime) {
+                            if (previousTotalNorm > 0) {
+                                const growth = ((currentTotalNorm - previousTotalNorm) / previousTotalNorm) * 100;
+                                const isPositive = growth >= 0;
+                                const color = isPositive ? '#22c55e' : '#ef4444';
+                                const icon = isPositive ? '↗' : '↘';
+                                growthHtml = `<span style="color: ${color}; font-weight: 500;">${icon} ${Math.abs(growth).toFixed(1)}%</span> <span style="color: var(--text-muted);">vs prior ${days}d</span>`;
+                            } else if (currentTotalNorm > 0) {
+                                growthHtml = `<span style="color: #22c55e; font-weight: 500;">↗ 100%</span> <span style="color: var(--text-muted);">new growth</span>`;
+                            }
+                        } else {
+                            growthHtml = `<span style="color: #22c55e; font-weight: 500;"><i class="fas fa-chart-bar"></i> Total aggregate</span>`;
                         }
 
                         // AOV (Average Order Value) - Keep Normalized for AOV as it's an average
@@ -3563,18 +3581,21 @@ QuantMentor
                                     <div style="font-size: 0.75em; color: var(--text-muted); margin-top: 4px;">Approx. total conversion</div>
                                 `;
 
-
                         document.getElementById('totalRevenue').innerHTML = finalHtml;
                         document.getElementById('revenueGrowth').innerHTML = growthHtml;
                         document.getElementById('activeBookings').textContent = activeBookingsCount || 0;
-                        document.getElementById('completedBookingsCount').textContent = currentCompletedBookings;
-                        document.getElementById('totalSales').textContent = currentSalesCount;
+                        document.getElementById('completedBookingsCount').textContent = completedBookingsCount;
+                        document.getElementById('totalSales').textContent = isAllTime ? totalSalesCount : currentSalesCount;
 
                         let salesGrowthHtml = '<span style="color: var(--text-muted);">Period sales</span>';
-                        if (previousSalesCount > 0) {
-                            const sGrowth = ((currentSalesCount - previousSalesCount) / previousSalesCount) * 100;
-                            const sIsPos = sGrowth >= 0;
-                            salesGrowthHtml = `<span style="color: ${sIsPos ? '#22c55e' : '#ef4444'}; font-weight: 500;">${sIsPos ? '↗' : '↘'} ${Math.abs(sGrowth).toFixed(0)}%</span> <span style="color: var(--text-muted);">vs prior ${days}d</span>`;
+                        if (!isAllTime) {
+                            if (previousSalesCount > 0) {
+                                const sGrowth = ((currentSalesCount - previousSalesCount) / previousSalesCount) * 100;
+                                const sIsPos = sGrowth >= 0;
+                                salesGrowthHtml = `<span style="color: ${sIsPos ? '#22c55e' : '#ef4444'}; font-weight: 500;">${sIsPos ? '↗' : '↘'} ${Math.abs(sGrowth).toFixed(0)}%</span> <span style="color: var(--text-muted);">vs prior ${days}d</span>`;
+                            }
+                        } else {
+                            salesGrowthHtml = `<span style="color: var(--text-muted);">Lifetime total sales</span>`;
                         }
                         document.getElementById('salesGrowth').innerHTML = salesGrowthHtml;
                         document.getElementById('avgOrderValue').textContent = `₹${aov.toLocaleString()}`;
@@ -3704,6 +3725,399 @@ QuantMentor
 
                     } catch (err) {
                         console.error('Error updating Sales Map:', err);
+                    }
+                }
+
+                async function loadTopProducts() {
+                    try {
+                        const { data, error } = await window.supabaseAdminClient
+                            .from('purchases')
+                            .select('product_name, amount, currency');
+
+                        if (error) throw error;
+
+                        // Group by Product
+                        const productStats = {};
+                        data.forEach(p => {
+                            const name = p.product_name || 'Unknown Product';
+                            if (!productStats[name]) productStats[name] = { count: 0, revenue: {}, totalNorm: 0 };
+
+                            productStats[name].count++;
+
+                            // Track multi-currency revenue
+                            const c = (p.currency || 'INR').toUpperCase();
+                            productStats[name].revenue[c] = (productStats[name].revenue[c] || 0) + (p.amount || 0);
+                            productStats[name].totalNorm += normalizeToINR(p.amount, p.currency);
+                        });
+
+                        // Convert to Array & Sort by Normalized Total
+                        const sortedProducts = Object.entries(productStats)
+                            .map(([name, stats]) => ({ name, ...stats }))
+                            .sort((a, b) => b.totalNorm - a.totalNorm)
+                            .slice(0, 5); // Start with top 5
+
+                        const list = document.getElementById('topProductsList');
+                        if (sortedProducts.length === 0) {
+                            list.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--text-muted);">No sales data yet.</td></tr>';
+                            return;
+                        }
+
+                        list.innerHTML = sortedProducts.map(p => `
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                        <td style="padding: 12px; font-weight: 500;">${p.name}</td>
+                                        <td style="padding: 12px; text-align: center;">${p.count}</td>
+                                        <td style="padding: 12px; text-align: right; color: #22c55e;">
+                                            ${Object.entries(p.revenue).map(([c, amt]) => formatCurrency(amt, c)).join('<br>')}
+                                        </td>
+                                    </tr>
+                                `).join('');
+
+                    } catch (error) {
+                        console.error('Error loading top products:', error);
+                    }
+                }
+
+                async function loadRecentActivity() {
+                    try {
+                        // Fetch latest 5 bookings and 5 purchases to mix
+                        const { data: bookings } = await window.supabaseAdminClient
+                            .from('bookings')
+                            .select('id, name, service_name, booking_date, created_at, service_price')
+                            .order('created_at', { ascending: false })
+                            .order('created_at', { ascending: false })
+                            .limit(20); // Increased limit to ensure mixing works better
+
+                        const { data: purchases } = await window.supabaseAdminClient
+                            .from('purchases')
+                            .select('id, product_name, amount, currency, created_at, customer_email')
+                            .order('created_at', { ascending: false })
+                            .limit(20);
+
+                        // Combine and Sort
+                        const activity = [
+                            ...(bookings || []).map(b => ({ type: 'booking', ...b, date: new Date(b.created_at) })),
+                            ...(purchases || []).map(p => ({ type: 'purchase', ...p, date: new Date(p.created_at) }))
+                        ].sort((a, b) => b.date - a.date).slice(0, 10);
+
+                        const feed = document.getElementById('recentActivityFeed');
+                        if (activity.length === 0) {
+                            feed.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">No recent activity.</div>';
+                            return;
+                        }
+
+                        feed.innerHTML = activity.map(item => {
+                            const timeAgo = getTimeAgo(item.date);
+                            if (item.type === 'booking') {
+                                return `
+                                            <div style="display: flex; gap: 15px; align-items: center; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                                <div style="background: rgba(168, 85, 247, 0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #a855f7;">
+                                                    <i class="fas fa-calendar-alt"></i>
+                                                </div>
+                                                <div style="flex: 1;">
+                                                    <div style="font-size: 0.95em;"><strong>${escapeHtml(item.name)}</strong> booked <strong>${escapeHtml(item.service_name || 'Session')}</strong></div>
+                                                    <div style="font-size: 0.85em; color: var(--text-muted);">${timeAgo} • ₹${item.service_price}</div>
+                                                </div>
+                                            </div>
+                                        `;
+                            } else {
+                                const displayAmount = formatCurrency(item.amount, item.currency);
+                                return `
+                                             <div style="display: flex; gap: 15px; align-items: center; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);" title="${item.date.toLocaleString()}">
+                                                <div style="background: rgba(34, 197, 94, 0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #22c55e;">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                </div>
+                                                <div style="flex: 1;">
+                                                    <div style="font-size: 0.95em;">New purchase of <strong>${escapeHtml(item.product_name)}</strong></div>
+                                                    <div style="font-size: 0.85em; color: var(--text-muted);">${timeAgo} • ${displayAmount}</div>
+                                                </div>
+                                            </div>
+                                        `;
+                            }
+                        }).join('');
+
+                    } catch (error) {
+                        console.error('Error loading activity:', error);
+                    }
+                }
+
+                function getTimeAgo(date) {
+                    const seconds = Math.floor((new Date() - date) / 1000);
+                    let interval = seconds / 31536000;
+                    if (interval > 1) return Math.floor(interval) + "y ago";
+                    interval = seconds / 2592000;
+                    if (interval > 1) return Math.floor(interval) + "mo ago";
+                    interval = seconds / 86400;
+                    if (interval > 1) return Math.floor(interval) + "d ago";
+                    interval = seconds / 3600;
+                    if (interval > 1) return Math.floor(interval) + "h ago";
+                    interval = seconds / 60;
+                    if (interval > 1) return Math.floor(interval) + "m ago";
+                    if (interval > 1) return Math.floor(interval) + "m ago";
+                    if (seconds < 5) return "Just now";
+                    return Math.floor(seconds) + "s ago";
+                }
+
+                async function updateDashboardCharts() {
+                    const rangeVal = document.getElementById('revenueRange').value;
+                    const isAllTime = (rangeVal === 'all');
+                    
+                    let bookingsQuery = window.supabaseAdminClient
+                        .from('bookings')
+                        .select('service_price, created_at, service_name')
+                        .in('status', ['confirmed', 'completed', 'pending', 'upcoming']);
+
+                    let purchasesQuery = window.supabaseAdminClient
+                        .from('purchases')
+                        .select('amount, currency, created_at, product_name');
+
+                    if (!isAllTime) {
+                        const range = parseInt(rangeVal);
+                        const cutoffDate = new Date();
+                        cutoffDate.setDate(cutoffDate.getDate() - range);
+                        
+                        bookingsQuery = bookingsQuery.gte('created_at', cutoffDate.toISOString());
+                        purchasesQuery = purchasesQuery.gte('created_at', cutoffDate.toISOString());
+                    }
+
+                    try {
+                        const { data: bookings } = await bookingsQuery;
+                        const { data: purchases } = await purchasesQuery;
+
+                        // Daily/Weekly/Monthly Data Aggregation
+                        const periodData = {};
+                        const distribution = {};
+
+                        // Determine grouping interval
+                        let interval = 'day';
+                        let startDate = new Date();
+                        if (isAllTime) {
+                            const dates = [...(bookings || []), ...(purchases || [])].map(item => new Date(item.created_at));
+                            if (dates.length > 0) {
+                                startDate = new Date(Math.min(...dates));
+                                const diffDays = Math.ceil((new Date() - startDate) / (1000 * 60 * 60 * 24));
+                                if (diffDays > 120) {
+                                    interval = 'month';
+                                } else if (diffDays > 30) {
+                                    interval = 'week';
+                                }
+                            } else {
+                                startDate.setDate(startDate.getDate() - 30);
+                            }
+                        } else {
+                            const range = parseInt(rangeVal);
+                            startDate.setDate(startDate.getDate() - range);
+                            if (range > 90) interval = 'month';
+                            else if (range > 30) interval = 'week';
+                        }
+
+                        // Helper to get formatted period label
+                        function getPeriodLabel(dateStr, interval) {
+                            const d = new Date(dateStr);
+                            if (interval === 'month') {
+                                return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+                            } else if (interval === 'week') {
+                                const day = d.getDay();
+                                const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+                                const monday = new Date(d.setDate(diff));
+                                return monday.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+                            } else {
+                                return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+                            }
+                        }
+
+                        // Initialize continuous periods with 0
+                        const labels = [];
+                        const currentDate = new Date(startDate);
+                        const today = new Date();
+
+                        if (interval === 'month') {
+                            while (currentDate <= today) {
+                                const lbl = currentDate.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+                                if (!labels.includes(lbl)) {
+                                    labels.push(lbl);
+                                    periodData[lbl] = 0;
+                                }
+                                currentDate.setMonth(currentDate.getMonth() + 1);
+                            }
+                            const lblToday = today.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+                            if (!labels.includes(lblToday)) {
+                                labels.push(lblToday);
+                                periodData[lblToday] = 0;
+                            }
+                        } else if (interval === 'week') {
+                            while (currentDate <= today) {
+                                const lbl = getPeriodLabel(currentDate.toISOString(), 'week');
+                                if (!labels.includes(lbl)) {
+                                    labels.push(lbl);
+                                    periodData[lbl] = 0;
+                                }
+                                currentDate.setDate(currentDate.getDate() + 7);
+                            }
+                            const lblToday = getPeriodLabel(today.toISOString(), 'week');
+                            if (!labels.includes(lblToday)) {
+                                labels.push(lblToday);
+                                periodData[lblToday] = 0;
+                            }
+                        } else {
+                            while (currentDate <= today) {
+                                const lbl = currentDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+                                if (!labels.includes(lbl)) {
+                                    labels.push(lbl);
+                                    periodData[lbl] = 0;
+                                }
+                                currentDate.setDate(currentDate.getDate() + 1);
+                            }
+                        }
+
+                        const aggregate = (items, amountField) => {
+                            (items || []).forEach(item => {
+                                const k = getPeriodLabel(item.created_at, interval);
+
+                                // Calculate normalized amount
+                                let val = 0;
+                                if (amountField === 'service_price') val = item[amountField] || 0;
+                                else val = normalizeToINR(item[amountField], item.currency);
+
+                                if (periodData[k] !== undefined) {
+                                    periodData[k] += val;
+                                } else {
+                                    periodData[k] = val;
+                                    if (!labels.includes(k)) labels.push(k);
+                                }
+
+                                // Distribution Pie
+                                let curr = 'INR';
+                                if (amountField === 'service_price') curr = 'INR';
+                                else curr = (item.currency || 'INR').toUpperCase();
+
+                                let regionName = curr;
+                                if (curr === 'USD') regionName = 'USD (Global/US)';
+                                else if (curr === 'INR') regionName = 'INR (India)';
+                                else if (curr === 'EUR') regionName = 'EUR (Europe)';
+                                else if (curr === 'GBP') regionName = 'GBP (UK)';
+                                else if (curr === 'BRL') regionName = 'BRL (Brazil)';
+                                else if (curr === 'CHF') regionName = 'CHF (Switzerland)';
+                                else if (curr === 'CAD') regionName = 'CAD (Canada)';
+                                else if (curr === 'AUD') regionName = 'AUD (Australia)';
+                                else if (curr === 'SGD') regionName = 'SGD (Singapore)';
+
+                                distribution[regionName] = (distribution[regionName] || 0) + 1;
+                            });
+                        };
+
+                        aggregate(bookings, 'service_price');
+                        aggregate(purchases, 'amount');
+
+                        const values = labels.map(l => Math.round(periodData[l]));
+
+                        // --- CHART 1: REVENUE ---
+                        if (revenueChart) revenueChart.destroy();
+                        const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+
+                        let gradient = ctxRevenue.createLinearGradient(0, 0, 0, 400);
+                        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.5)');
+                        gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
+                        revenueChart = new Chart(ctxRevenue, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Revenue (₹)',
+                                    data: values,
+                                    borderColor: '#6366f1',
+                                    backgroundColor: gradient,
+                                    borderWidth: 2,
+                                    tension: 0.4,
+                                    pointRadius: labels.length > 50 ? 0 : 2,
+                                    pointHoverRadius: 6,
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        mode: 'index',
+                                        intersect: false,
+                                        backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                                        titleColor: '#e2e8f0',
+                                        bodyColor: '#e2e8f0',
+                                        borderColor: 'rgba(255,255,255,0.1)',
+                                        borderWidth: 1
+                                    }
+                                },
+                                interaction: {
+                                    mode: 'nearest',
+                                    axis: 'x',
+                                    intersect: false
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        grid: { color: 'rgba(255,255,255,0.05)' },
+                                        ticks: { 
+                                            color: '#94a3b8',
+                                            callback: function(value) {
+                                                return '₹' + value.toLocaleString();
+                                            }
+                                        }
+                                    },
+                                    x: {
+                                        grid: { display: false },
+                                        ticks: { color: '#94a3b8' }
+                                    }
+                                }
+                            }
+                        });
+
+                        // --- CHART 2: DISTRIBUTION ---
+                        if (distributionChart) distributionChart.destroy();
+                        const ctxDist = document.getElementById('distributionChart').getContext('2d');
+
+                        const sortedDist = Object.entries(distribution).sort((a, b) => b[1] - a[1]);
+                        let distLabels = [], distValues = [];
+
+                        if (sortedDist.length > 5) {
+                            distLabels = sortedDist.slice(0, 4).map(x => x[0]);
+                            distValues = sortedDist.slice(0, 4).map(x => x[1]);
+                            const otherSum = sortedDist.slice(4).reduce((sum, x) => sum + x[1], 0);
+                            distLabels.push('Others');
+                            distValues.push(otherSum);
+                        } else {
+                            distLabels = sortedDist.map(x => x[0]);
+                            distValues = sortedDist.map(x => x[1]);
+                        }
+
+                        const pieColors = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#a855f7', '#6b7280'];
+
+                        distributionChart = new Chart(ctxDist, {
+                            type: 'doughnut',
+                            data: {
+                                labels: distLabels,
+                                datasets: [{
+                                    data: distValues,
+                                    backgroundColor: pieColors.slice(0, distLabels.length),
+                                    borderWidth: 1,
+                                    borderColor: 'rgba(255,255,255,0.05)'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: { color: '#94a3b8', boxWidth: 12 }
+                                    }
+                                }
+                            }
+                        });
+
+                    } catch (err) {
+                        console.error('Error updating dashboard charts:', err);
                     }
                 }
 
