@@ -848,6 +848,7 @@ const CURRENCY_MAP = {
     'IN': { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
     'US': { code: 'USD', symbol: '$', name: 'US Dollar' },
     'GB': { code: 'GBP', symbol: '£', name: 'British Pound' },
+    // Eurozone
     'EU': { code: 'EUR', symbol: '€', name: 'Euro' },
     'DE': { code: 'EUR', symbol: '€', name: 'Euro' },
     'FR': { code: 'EUR', symbol: '€', name: 'Euro' },
@@ -860,6 +861,22 @@ const CURRENCY_MAP = {
     'GR': { code: 'EUR', symbol: '€', name: 'Euro' },
     'IE': { code: 'EUR', symbol: '€', name: 'Euro' },
     'FI': { code: 'EUR', symbol: '€', name: 'Euro' },
+    'HR': { code: 'EUR', symbol: '€', name: 'Euro' },       // Croatia
+    'SK': { code: 'EUR', symbol: '€', name: 'Euro' },       // Slovakia
+    'SI': { code: 'EUR', symbol: '€', name: 'Euro' },       // Slovenia
+    'LT': { code: 'EUR', symbol: '€', name: 'Euro' },       // Lithuania
+    'LV': { code: 'EUR', symbol: '€', name: 'Euro' },       // Latvia
+    'EE': { code: 'EUR', symbol: '€', name: 'Euro' },       // Estonia
+    'MT': { code: 'EUR', symbol: '€', name: 'Euro' },       // Malta
+    'CY': { code: 'EUR', symbol: '€', name: 'Euro' },       // Cyprus
+    'LU': { code: 'EUR', symbol: '€', name: 'Euro' },       // Luxembourg
+    'MC': { code: 'EUR', symbol: '€', name: 'Euro' },       // Monaco
+    'SM': { code: 'EUR', symbol: '€', name: 'Euro' },       // San Marino
+    'VA': { code: 'EUR', symbol: '€', name: 'Euro' },       // Vatican
+    'AD': { code: 'EUR', symbol: '€', name: 'Euro' },       // Andorra
+    'ME': { code: 'EUR', symbol: '€', name: 'Euro' },       // Montenegro
+    'XK': { code: 'EUR', symbol: '€', name: 'Euro' },       // Kosovo
+    // Major economies
     'JP': { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
     'KR': { code: 'KRW', symbol: '₩', name: 'Korean Won' },
     'CN': { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
@@ -872,6 +889,7 @@ const CURRENCY_MAP = {
     'SG': { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar' },
     'HK': { code: 'HKD', symbol: 'HK$', name: 'Hong Kong Dollar' },
     'NZ': { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar' },
+    // Emerging markets
     'BR': { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
     'MX': { code: 'MXN', symbol: 'Mex$', name: 'Mexican Peso' },
     'ZA': { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
@@ -891,7 +909,140 @@ const CURRENCY_MAP = {
     'EG': { code: 'EGP', symbol: '£', name: 'Egyptian Pound' },
     'NG': { code: 'NGN', symbol: '₦', name: 'Nigerian Naira' },
     'KE': { code: 'KES', symbol: 'KSh', name: 'Kenyan Shilling' },
-    'GH': { code: 'GHS', symbol: 'GH₵', name: 'Ghanaian Cedi' }
+    'GH': { code: 'GHS', symbol: 'GH₵', name: 'Ghanaian Cedi' },
+    // Middle East
+    'KW': { code: 'KWD', symbol: 'KD', name: 'Kuwaiti Dinar' },
+    'QA': { code: 'QAR', symbol: 'QR', name: 'Qatari Riyal' },
+    'BH': { code: 'BHD', symbol: 'BD', name: 'Bahraini Dinar' },
+    'OM': { code: 'OMR', symbol: 'ر.ع.', name: 'Omani Rial' },
+    'JO': { code: 'JOD', symbol: 'JD', name: 'Jordanian Dinar' },
+    'IQ': { code: 'IQD', symbol: 'ع.د', name: 'Iraqi Dinar' },
+    'LB': { code: 'LBP', symbol: 'LL', name: 'Lebanese Pound' },
+    'IL': { code: 'ILS', symbol: '₪', name: 'Israeli Shekel' },
+    'IR': { code: 'IRR', symbol: '﷼', name: 'Iranian Rial' },
+    'SY': { code: 'SYP', symbol: '£S', name: 'Syrian Pound' },
+    'YE': { code: 'YER', symbol: '﷼', name: 'Yemeni Rial' },
+    // Europe (non-Euro)
+    'HU': { code: 'HUF', symbol: 'Ft', name: 'Hungarian Forint' },
+    'PL': { code: 'PLN', symbol: 'zł', name: 'Polish Złoty' },
+    'CZ': { code: 'CZK', symbol: 'Kč', name: 'Czech Koruna' },
+    'RO': { code: 'RON', symbol: 'lei', name: 'Romanian Leu' },
+    'RS': { code: 'RSD', symbol: 'дин.', name: 'Serbian Dinar' },
+    'UA': { code: 'UAH', symbol: '₴', name: 'Ukrainian Hryvnia' },
+    'BY': { code: 'BYN', symbol: 'Br', name: 'Belarusian Ruble' },
+    'GE': { code: 'GEL', symbol: '₾', name: 'Georgian Lari' },
+    'AM': { code: 'AMD', symbol: '֏', name: 'Armenian Dram' },
+    'AZ': { code: 'AZN', symbol: '₼', name: 'Azerbaijani Manat' },
+    'IS': { code: 'ISK', symbol: 'kr', name: 'Icelandic Króna' },
+    'MK': { code: 'MKD', symbol: 'ден', name: 'Macedonian Denar' },
+    'BA': { code: 'BAM', symbol: 'KM', name: 'Bosnian Mark' },
+    'AL': { code: 'ALL', symbol: 'L', name: 'Albanian Lek' },
+    'MD': { code: 'MDL', symbol: 'L', name: 'Moldovan Leu' },
+    'BG': { code: 'BGN', symbol: 'лв', name: 'Bulgarian Lev' },
+    'LI': { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },   // Liechtenstein
+    // Asia
+    'TW': { code: 'TWD', symbol: 'NT$', name: 'Taiwan Dollar' },
+    'KZ': { code: 'KZT', symbol: '₸', name: 'Kazakhstani Tenge' },
+    'UZ': { code: 'UZS', symbol: "so'm", name: 'Uzbekistani Som' },
+    'MM': { code: 'MMK', symbol: 'K', name: 'Myanmar Kyat' },
+    'KH': { code: 'KHR', symbol: '៛', name: 'Cambodian Riel' },
+    'LA': { code: 'LAK', symbol: '₭', name: 'Laotian Kip' },
+    'MN': { code: 'MNT', symbol: '₮', name: 'Mongolian Tögrög' },
+    'BT': { code: 'BTN', symbol: 'Nu.', name: 'Bhutanese Ngultrum' },
+    'MV': { code: 'MVR', symbol: 'Rf', name: 'Maldivian Rufiyaa' },
+    'AF': { code: 'AFN', symbol: 'Af', name: 'Afghan Afghani' },
+    'KG': { code: 'KGS', symbol: 'с', name: 'Kyrgyzstani Som' },
+    'TJ': { code: 'TJS', symbol: 'SM', name: 'Tajikistani Somoni' },
+    'TM': { code: 'TMT', symbol: 'T', name: 'Turkmenistani Manat' },
+    // Latin America
+    'CO': { code: 'COP', symbol: '$', name: 'Colombian Peso' },
+    'AR': { code: 'ARS', symbol: '$', name: 'Argentine Peso' },
+    'CL': { code: 'CLP', symbol: '$', name: 'Chilean Peso' },
+    'PE': { code: 'PEN', symbol: 'S/.', name: 'Peruvian Sol' },
+    'VE': { code: 'VES', symbol: 'Bs.S', name: 'Venezuelan Bolívar' },
+    'EC': { code: 'USD', symbol: '$', name: 'US Dollar' },          // Ecuador uses USD
+    'PA': { code: 'USD', symbol: '$', name: 'US Dollar' },          // Panama uses USD
+    'SV': { code: 'USD', symbol: '$', name: 'US Dollar' },          // El Salvador
+    'UY': { code: 'UYU', symbol: '$U', name: 'Uruguayan Peso' },
+    'PY': { code: 'PYG', symbol: '₲', name: 'Paraguayan Guaraní' },
+    'BO': { code: 'BOB', symbol: 'Bs.', name: 'Bolivian Boliviano' },
+    'GT': { code: 'GTQ', symbol: 'Q', name: 'Guatemalan Quetzal' },
+    'HN': { code: 'HNL', symbol: 'L', name: 'Honduran Lempira' },
+    'NI': { code: 'NIO', symbol: 'C$', name: 'Nicaraguan Córdoba' },
+    'CR': { code: 'CRC', symbol: '₡', name: 'Costa Rican Colón' },
+    'CU': { code: 'CUP', symbol: '$', name: 'Cuban Peso' },
+    'DO': { code: 'DOP', symbol: '$', name: 'Dominican Peso' },
+    'JM': { code: 'JMD', symbol: 'J$', name: 'Jamaican Dollar' },
+    'TT': { code: 'TTD', symbol: 'TT$', name: 'Trinidad & Tobago Dollar' },
+    'BB': { code: 'BBD', symbol: '$', name: 'Barbadian Dollar' },
+    'GY': { code: 'GYD', symbol: '$', name: 'Guyanese Dollar' },
+    'SR': { code: 'SRD', symbol: '$', name: 'Surinamese Dollar' },
+    'BZ': { code: 'BZD', symbol: '$', name: 'Belize Dollar' },
+    'HT': { code: 'HTG', symbol: 'G', name: 'Haitian Gourde' },
+    'BS': { code: 'BSD', symbol: '$', name: 'Bahamian Dollar' },
+    // Africa
+    'ET': { code: 'ETB', symbol: 'Br', name: 'Ethiopian Birr' },
+    'TZ': { code: 'TZS', symbol: 'Sh', name: 'Tanzanian Shilling' },
+    'UG': { code: 'UGX', symbol: 'USh', name: 'Ugandan Shilling' },
+    'RW': { code: 'RWF', symbol: 'FRw', name: 'Rwandan Franc' },
+    'SN': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'CI': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'ML': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'BF': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'NE': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'TG': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'BJ': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'GW': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'CM': { code: 'XAF', symbol: 'Fr', name: 'Central African CFA Franc' },
+    'CF': { code: 'XAF', symbol: 'Fr', name: 'Central African CFA Franc' },
+    'CG': { code: 'XAF', symbol: 'Fr', name: 'Central African CFA Franc' },
+    'CD': { code: 'XAF', symbol: 'Fr', name: 'Central African CFA Franc' },
+    'GA': { code: 'XAF', symbol: 'Fr', name: 'Central African CFA Franc' },
+    'GQ': { code: 'XAF', symbol: 'Fr', name: 'Central African CFA Franc' },
+    'TD': { code: 'XAF', symbol: 'Fr', name: 'Central African CFA Franc' },
+    'AO': { code: 'AOA', symbol: 'Kz', name: 'Angolan Kwanza' },
+    'MZ': { code: 'MZN', symbol: 'MT', name: 'Mozambican Metical' },
+    'MG': { code: 'MGA', symbol: 'Ar', name: 'Malagasy Ariary' },
+    'ZM': { code: 'ZMW', symbol: 'ZK', name: 'Zambian Kwacha' },
+    'ZW': { code: 'ZWL', symbol: '$', name: 'Zimbabwean Dollar' },
+    'SD': { code: 'SDG', symbol: 'SDG', name: 'Sudanese Pound' },
+    'SS': { code: 'SSP', symbol: '£', name: 'South Sudanese Pound' },
+    'SO': { code: 'SOS', symbol: 'Sh', name: 'Somali Shilling' },
+    'DZ': { code: 'DZD', symbol: 'دج', name: 'Algerian Dinar' },
+    'MA': { code: 'MAD', symbol: 'DH', name: 'Moroccan Dirham' },
+    'TN': { code: 'TND', symbol: 'DT', name: 'Tunisian Dinar' },
+    'LY': { code: 'LYD', symbol: 'LD', name: 'Libyan Dinar' },
+    'MW': { code: 'MWK', symbol: 'MK', name: 'Malawian Kwacha' },
+    'NA': { code: 'NAD', symbol: '$', name: 'Namibian Dollar' },
+    'BW': { code: 'BWP', symbol: 'P', name: 'Botswana Pula' },
+    'LS': { code: 'LSL', symbol: 'L', name: 'Lesotho Loti' },
+    'SZ': { code: 'SZL', symbol: 'L', name: 'Swazi Lilangeni' },
+    'MU': { code: 'MUR', symbol: '₨', name: 'Mauritian Rupee' },
+    'SC': { code: 'SCR', symbol: '₨', name: 'Seychellois Rupee' },
+    'MR': { code: 'MRU', symbol: 'UM', name: 'Mauritanian Ouguiya' },
+    'GM': { code: 'GMD', symbol: 'D', name: 'Gambian Dalasi' },
+    'SL': { code: 'SLE', symbol: 'Le', name: 'Sierra Leonean Leone' },
+    'LR': { code: 'LRD', symbol: '$', name: 'Liberian Dollar' },
+    'GN': { code: 'GNF', symbol: 'Fr', name: 'Guinean Franc' },
+    'BI': { code: 'BIF', symbol: 'Fr', name: 'Burundian Franc' },
+    'KM': { code: 'KMF', symbol: 'Fr', name: 'Comorian Franc' },
+    'CV': { code: 'CVE', symbol: '$', name: 'Cape Verdean Escudo' },
+    'ST': { code: 'STN', symbol: 'Db', name: 'São Tomé Dobra' },
+    'DJ': { code: 'DJF', symbol: 'Fr', name: 'Djiboutian Franc' },
+    'ER': { code: 'ERN', symbol: 'Nfk', name: 'Eritrean Nakfa' },
+    // Oceania
+    'PG': { code: 'PGK', symbol: 'K', name: 'Papua New Guinean Kina' },
+    'FJ': { code: 'FJD', symbol: '$', name: 'Fijian Dollar' },
+    'SB': { code: 'SBD', symbol: '$', name: 'Solomon Islands Dollar' },
+    'VU': { code: 'VUV', symbol: 'VT', name: 'Vanuatu Vatu' },
+    'WS': { code: 'WST', symbol: 'WS$', name: 'Samoan Tālā' },
+    'TO': { code: 'TOP', symbol: 'T$', name: 'Tongan Paʻanga' },
+    'KI': { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+    'NR': { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+    'TV': { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+    'PW': { code: 'USD', symbol: '$', name: 'US Dollar' },
+    'MH': { code: 'USD', symbol: '$', name: 'US Dollar' },
+    'FM': { code: 'USD', symbol: '$', name: 'US Dollar' },
 };
 
 // Cache for exchange rates (persisted to localStorage)
@@ -988,45 +1139,64 @@ async function fetchExchangeRates() {
     }
 }
 
-// Fallback rates in case API fails
+// Fallback rates in case API fails (INR base)
 function getFallbackRates() {
     return {
         'INR': 1,
-        'USD': 0.012,
-        'GBP': 0.0095,
-        'EUR': 0.011,
-        'JPY': 1.8,
-        'KRW': 16.5,
-        'CNY': 0.087,
-        'AUD': 0.018,
-        'CAD': 0.016,
-        'CHF': 0.010,
-        'SEK': 0.13,
-        'NOK': 0.13,
-        'DKK': 0.084,
-        'SGD': 0.016,
-        'HKD': 0.094,
-        'NZD': 0.020,
-        'BRL': 0.067,
-        'MXN': 0.24,
-        'ZAR': 0.22,
-        'RUB': 1.1,
-        'TRY': 0.42,
-        'AED': 0.044,
-        'SAR': 0.045,
-        'PKR': 3.3,
-        'BDT': 1.4,
-        'LKR': 3.6,
-        'NPR': 1.6,
-        'THB': 0.43,
-        'MYR': 0.056,
-        'IDR': 190,
-        'PHP': 0.70,
-        'VND': 300,
-        'EGP': 0.60,
-        'NGN': 18.5,
-        'KES': 1.6,
-        'GHS': 0.18
+        'USD': 0.012,  'GBP': 0.0095, 'EUR': 0.011,
+        'JPY': 1.8,    'KRW': 16.5,   'CNY': 0.087,
+        'AUD': 0.018,  'CAD': 0.016,  'CHF': 0.010,
+        'SEK': 0.13,   'NOK': 0.13,   'DKK': 0.084,
+        'SGD': 0.016,  'HKD': 0.094,  'NZD': 0.020,
+        'BRL': 0.067,  'MXN': 0.24,   'ZAR': 0.22,
+        'RUB': 1.1,    'TRY': 0.42,   'AED': 0.044,
+        'SAR': 0.045,  'PKR': 3.3,    'BDT': 1.4,
+        'LKR': 3.6,    'NPR': 1.6,    'THB': 0.43,
+        'MYR': 0.056,  'IDR': 190,    'PHP': 0.70,
+        'VND': 300,    'EGP': 0.60,   'NGN': 18.5,
+        'KES': 1.6,    'GHS': 0.18,
+        // Middle East
+        'KWD': 0.0037, 'QAR': 0.044,  'BHD': 0.0045,
+        'OMR': 0.0046, 'JOD': 0.0085, 'IQD': 15.7,
+        'LBP': 180,    'ILS': 0.045,  'IRR': 500,
+        'SYP': 156,    'YER': 3.0,
+        // Europe non-Euro
+        'HUF': 4.35,   'PLN': 0.048,  'CZK': 0.28,
+        'RON': 0.055,  'RSD': 1.29,   'UAH': 0.49,
+        'BYN': 0.039,  'GEL': 0.032,  'AMD': 4.6,
+        'AZN': 0.020,  'ISK': 1.65,   'MKD': 0.68,
+        'BAM': 0.022,  'ALL': 1.1,    'MDL': 0.21,
+        'BGN': 0.022,  'TWD': 0.39,
+        // Asia
+        'KZT': 5.7,    'UZS': 150,    'MMK': 25,
+        'KHR': 49,     'LAK': 250,    'MNT': 41,
+        'BTN': 1.0,    'MVR': 0.18,   'AFN': 0.84,
+        'KGS': 1.05,   'TJS': 0.13,   'TMT': 0.042,
+        // Latin America
+        'COP': 48,     'ARS': 10.8,   'CLP': 11,
+        'PEN': 0.045,  'VES': 0.43,   'UYU': 0.47,
+        'PYG': 88,     'BOB': 0.083,  'GTQ': 0.093,
+        'HNL': 0.30,   'NIO': 0.44,   'CRC': 6.2,
+        'CUP': 0.29,   'DOP': 0.71,   'JMD': 1.85,
+        'TTD': 0.081,  'BBD': 0.024,  'GYD': 2.5,
+        'SRD': 0.42,   'BZD': 0.024,  'HTG': 1.58,
+        'BSD': 0.012,
+        // Africa
+        'ETB': 0.68,   'TZS': 31,     'UGX': 45,
+        'RWF': 15.5,   'XOF': 7.2,    'XAF': 7.2,
+        'AOA': 11,     'MZN': 0.77,   'MGA': 55,
+        'ZMW': 0.31,   'ZWL': 0.037,  'SDG': 7.2,
+        'SSP': 1.56,   'SOS': 6.85,   'DZD': 1.6,
+        'MAD': 0.12,   'TND': 0.037,  'LYD': 0.058,
+        'MWK': 20,     'NAD': 0.22,   'BWP': 0.16,
+        'LSL': 0.22,   'SZL': 0.22,   'MUR': 0.55,
+        'SCR': 0.16,   'MRU': 0.48,   'GMD': 0.84,
+        'SLE': 0.27,   'LRD': 2.3,    'GNF': 103,
+        'BIF': 34,     'KMF': 5.4,    'CVE': 1.2,
+        'STN': 0.27,   'DJF': 2.13,   'ERN': 0.18,
+        // Oceania
+        'PGK': 0.046,  'FJD': 0.027,  'SBD': 0.10,
+        'VUV': 1.42,   'WST': 0.033,  'TOP': 0.028,
     };
 }
 
@@ -1034,7 +1204,9 @@ function getFallbackRates() {
 function getCurrencyForCountry(countryCode) {
     if (!countryCode) return CURRENCY_MAP['IN']; // Default to INR
     const code = countryCode.toUpperCase();
-    return CURRENCY_MAP[code] || CURRENCY_MAP['IN']; // Default to INR if not found
+    if (CURRENCY_MAP[code]) return CURRENCY_MAP[code];
+    // Unknown country — default to USD so user at least sees a meaningful price
+    return CURRENCY_MAP['US'];
 }
 
 // Convert INR price to local currency using live rates
