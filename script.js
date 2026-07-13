@@ -333,18 +333,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 'exotic options pricing guide': 'EXOTICS20'
             };
 
-            const expected20Code = couponInfo.code ? couponInfo.code.replace('10', '20') : null;
+            const expected20Code = couponInfo.code ? couponInfo.code.replace('10', '20').toUpperCase() : null;
             const productName = document.getElementById('modalTitle')?.textContent.toLowerCase().trim() || '';
             const mapKey = Object.keys(COUPON_MAP_20).find(k => productName.includes(k));
-            const hardcoded20 = mapKey ? COUPON_MAP_20[mapKey] : null;
+            const hardcoded20 = mapKey ? COUPON_MAP_20[mapKey].toUpperCase() : null;
+
+            const inputCodeUpper = inputCode.toUpperCase();
 
             let appliedDiscount = 0;
             let isValid = false;
 
-            if (inputCode && couponInfo.code && inputCode === couponInfo.code) {
+            if (inputCodeUpper && couponInfo.code && inputCodeUpper === couponInfo.code.toUpperCase()) {
                 isValid = true;
                 appliedDiscount = parseInt(couponInfo.percent) || 0;
-            } else if (inputCode && (inputCode === expected20Code || inputCode === hardcoded20)) {
+            } else if (inputCodeUpper && (inputCodeUpper === expected20Code || inputCodeUpper === hardcoded20)) {
                 isValid = true;
                 appliedDiscount = 20;
                 window.activeModalCoupon.percent = 20; // Ensure checkout button uses 20%
@@ -676,10 +678,15 @@ function initSupabaseAndLoad() {
                 fetchExchangeRates().catch(e => console.warn('Exchange rates deferred:', e))
             ]);
 
-            // Fire all data loads in parallel — they will await prefetch internally
+            // Trigger price updates once prefetch resolves
+            prefetchPromise.then(() => {
+                updateAllPricesOnPage().catch(e => console.warn('Failed to update local prices:', e));
+            });
+
+            // Fire all data loads in parallel (completely non-blocking)
             fetchProductLinks();
-            loadProductsFromSupabase(prefetchPromise);
-            loadSessionsFromSupabase(prefetchPromise);
+            loadProductsFromSupabase();
+            loadSessionsFromSupabase();
             loadBlogs();
             loadApprovedTestimonials();
 
@@ -719,46 +726,63 @@ if (!initSupabaseAndLoad()) {
 // Fetched country cache
 let userCountryCode = null;
 
-// Try to get user country (simple caching)
+// Try to get user country (with localStorage cache and parallel racing)
 async function getUserCountry() {
     if (userCountryCode) return userCountryCode;
 
+    // Try reading from cache
+    try {
+        const cachedCountry = localStorage.getItem('quant_user_country');
+        const cachedTime = localStorage.getItem('quant_user_country_time');
+        if (cachedCountry && cachedTime && (Date.now() - parseInt(cachedTime) < 86400000)) { // 24-hour cache
+            userCountryCode = cachedCountry;
+            console.log('🌍 User country loaded from cache:', userCountryCode);
+            return userCountryCode;
+        }
+    } catch (e) {
+        console.warn('⚠️ Cache read failed:', e);
+    }
+
     // Helper to fetch with timeout
-    const fetchWithTimeout = async (url, timeout = 5000) => {
+    const fetchWithTimeout = async (url, parseFn, timeout = 1500) => {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
-        const response = await fetch(url, { signal: controller.signal });
-        clearTimeout(id);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.json();
+        try {
+            const response = await fetch(url, { signal: controller.signal });
+            clearTimeout(id);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            const code = parseFn(data);
+            if (!code) throw new Error('Parsing failed');
+            return code;
+        } catch (err) {
+            clearTimeout(id);
+            throw err;
+        }
     };
 
     try {
-        // Try multiple IP services
         const services = [
             { url: 'https://ipinfo.io/json', parse: (d) => d.country },
             { url: 'https://ipapi.co/json/', parse: (d) => d.country_code },
             { url: 'https://ipwho.is/', parse: (d) => d.success ? d.country_code : null },
         ];
 
-        for (const svc of services) {
-            try {
-                console.log('🔄 Trying IP service:', svc.url);
-                const resp = await fetchWithTimeout(svc.url, 5000);
-                const code = svc.parse(resp);
-                if (code) {
-                    userCountryCode = code;
-                    break;
-                }
-            } catch (e) {
-                console.warn('⚠️ Failed:', svc.url, e.message);
-            }
-        }
+        // Race them in parallel
+        userCountryCode = await Promise.any(
+            services.map(svc => fetchWithTimeout(svc.url, svc.parse, 1500))
+        );
 
-        if (!userCountryCode) throw new Error('All IP services failed');
+        // Store to cache
+        try {
+            localStorage.setItem('quant_user_country', userCountryCode);
+            localStorage.setItem('quant_user_country_time', String(Date.now()));
+        } catch (e) {
+            console.warn('⚠️ Cache write failed:', e);
+        }
     } catch (e) {
         // Fallback: try browser timezone
-        console.warn('⚠️ IP lookup failed, trying timezone fallback:', e);
+        console.warn('⚠️ IP lookup failed or timed out, trying timezone fallback:', e);
         const timezoneToCountry = {
             'Asia/Kolkata': 'IN', 'Asia/Dubai': 'AE', 'Asia/Singapore': 'SG',
             'Europe/London': 'GB', 'Europe/Paris': 'FR', 'Europe/Berlin': 'DE',
@@ -794,6 +818,7 @@ const CURRENCY_MAP = {
     'GR': { code: 'EUR', symbol: '€', name: 'Euro' },
     'IE': { code: 'EUR', symbol: '€', name: 'Euro' },
     'FI': { code: 'EUR', symbol: '€', name: 'Euro' },
+    'HR': { code: 'EUR', symbol: '€', name: 'Euro' },
     'JP': { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
     'KR': { code: 'KRW', symbol: '₩', name: 'Korean Won' },
     'CN': { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
@@ -807,6 +832,7 @@ const CURRENCY_MAP = {
     'HK': { code: 'HKD', symbol: 'HK$', name: 'Hong Kong Dollar' },
     'NZ': { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar' },
     'BR': { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
+    'AR': { code: 'ARS', symbol: '$', name: 'Argentine Peso' },
     'MX': { code: 'MXN', symbol: 'Mex$', name: 'Mexican Peso' },
     'ZA': { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
     'RU': { code: 'RUB', symbol: '₽', name: 'Russian Ruble' },
@@ -825,7 +851,142 @@ const CURRENCY_MAP = {
     'EG': { code: 'EGP', symbol: '£', name: 'Egyptian Pound' },
     'NG': { code: 'NGN', symbol: '₦', name: 'Nigerian Naira' },
     'KE': { code: 'KES', symbol: 'KSh', name: 'Kenyan Shilling' },
-    'GH': { code: 'GHS', symbol: 'GH₵', name: 'Ghanaian Cedi' }
+    'GH': { code: 'GHS', symbol: 'GH₵', name: 'Ghanaian Cedi' },
+    'KW': { code: 'KWD', symbol: 'KD', name: 'Kuwaiti Dinar' },
+    'HU': { code: 'HUF', symbol: 'Ft', name: 'Hungarian Forint' },
+    'CO': { code: 'COP', symbol: '$', name: 'Colombian Peso' },
+    'AF': { code: 'AFN', symbol: 'Af', name: 'Afghan Afghani' },
+    'AL': { code: 'ALL', symbol: 'L', name: 'Albanian Lek' },
+    'DZ': { code: 'DZD', symbol: 'دج', name: 'Algerian Dinar' },
+    'AO': { code: 'AOA', symbol: 'Kz', name: 'Angolan Kwanza' },
+    'AG': { code: 'XCD', symbol: '$', name: 'East Caribbean Dollar' },
+    'AM': { code: 'AMD', symbol: '֏', name: 'Armenian Dram' },
+    'AZ': { code: 'AZN', symbol: '₼', name: 'Azerbaijan Manat' },
+    'BS': { code: 'BSD', symbol: '$', name: 'Bahamian Dollar' },
+    'BH': { code: 'BHD', symbol: 'BD', name: 'Bahraini Dinar' },
+    'BB': { code: 'BBD', symbol: '$', name: 'Barbados Dollar' },
+    'BY': { code: 'BYN', symbol: 'Br', name: 'Belarusian Ruble' },
+    'BZ': { code: 'BZD', symbol: '$', name: 'Belize Dollar' },
+    'BJ': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'BT': { code: 'BTN', symbol: 'Nu.', name: 'Bhutanese Ngultrum' },
+    'BO': { code: 'BOB', symbol: 'Bs.', name: 'Bolivian Boliviano' },
+    'BA': { code: 'BAM', symbol: 'KM', name: 'Bosnia convertible mark' },
+    'BW': { code: 'BWP', symbol: 'P', name: 'Botswana Pula' },
+    'BN': { code: 'BND', symbol: '$', name: 'Brunei Dollar' },
+    'BG': { code: 'BGN', symbol: 'лв', name: 'Bulgarian Lev' },
+    'BF': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'BI': { code: 'BIF', symbol: 'Fr', name: 'Burundian Franc' },
+    'CV': { code: 'CVE', symbol: '$', name: 'Cape Verdean Escudo' },
+    'KH': { code: 'KHR', symbol: '៛', name: 'Cambodian Riel' },
+    'CM': { code: 'XAF', symbol: 'Fr', name: 'Central African CFA Franc' },
+    'CF': { code: 'XAF', symbol: 'Fr', name: 'Central African CFA Franc' },
+    'TD': { code: 'XAF', symbol: 'Fr', name: 'Central African CFA Franc' },
+    'CL': { code: 'CLP', symbol: '$', name: 'Chilean Peso' },
+    'KM': { code: 'KMF', symbol: 'Fr', name: 'Comorian Franc' },
+    'CG': { code: 'XAF', symbol: 'Fr', name: 'Central African CFA Franc' },
+    'CR': { code: 'CRC', symbol: '₡', name: 'Costa Rican Colón' },
+    'CI': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'CU': { code: 'CUP', symbol: '$', name: 'Cuban Peso' },
+    'CZ': { code: 'CZK', symbol: 'Kč', name: 'Czech Koruna' },
+    'CD': { code: 'CDF', symbol: 'Fr', name: 'Congolese Franc' },
+    'DJ': { code: 'DJF', symbol: 'Fr', name: 'Djiboutian Franc' },
+    'DM': { code: 'XCD', symbol: '$', name: 'East Caribbean Dollar' },
+    'DO': { code: 'DOP', symbol: '$', name: 'Dominican Peso' },
+    'EC': { code: 'USD', symbol: '$', name: 'US Dollar' },
+    'SV': { code: 'USD', symbol: '$', name: 'US Dollar' },
+    'GQ': { code: 'XAF', symbol: 'Fr', name: 'Central African CFA Franc' },
+    'ER': { code: 'ERN', symbol: 'Nfk', name: 'Eritrean Nakfa' },
+    'SZ': { code: 'SZL', symbol: 'L', name: 'Swazi Lilangeni' },
+    'ET': { code: 'ETB', symbol: 'Br', name: 'Ethiopian Birr' },
+    'FJ': { code: 'FJD', symbol: '$', name: 'Fijian Dollar' },
+    'GA': { code: 'XAF', symbol: 'Fr', name: 'Central African CFA Franc' },
+    'GM': { code: 'GMD', symbol: 'D', name: 'Gambian Dalasi' },
+    'GE': { code: 'GEL', symbol: '₾', name: 'Georgian Lari' },
+    'GD': { code: 'XCD', symbol: '$', name: 'East Caribbean Dollar' },
+    'GT': { code: 'GTQ', symbol: 'Q', name: 'Guatemalan Quetzal' },
+    'GN': { code: 'GNF', symbol: 'Fr', name: 'Guinean Franc' },
+    'GW': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'GY': { code: 'GYD', symbol: '$', name: 'Guyanese Dollar' },
+    'HT': { code: 'HTG', symbol: 'G', name: 'Haitian Gourde' },
+    'HN': { code: 'HNL', symbol: 'L', name: 'Honduran Lempira' },
+    'IS': { code: 'ISK', symbol: 'kr', name: 'Icelandic Króna' },
+    'IR': { code: 'IRR', symbol: '﷼', name: 'Iranian Rial' },
+    'IQ': { code: 'IQD', symbol: 'د.ع', name: 'Iraqi Dinar' },
+    'IL': { code: 'ILS', symbol: '₪', name: 'Israeli Shekel' },
+    'JM': { code: 'JMD', symbol: '$', name: 'Jamaican Dollar' },
+    'JO': { code: 'JOD', symbol: 'JD', name: 'Jordanian Dinar' },
+    'KZ': { code: 'KZT', symbol: '₸', name: 'Kazakhstani Tenge' },
+    'KI': { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+    'KG': { code: 'KGS', symbol: 'сом', name: 'Kyrgyzstani Som' },
+    'LA': { code: 'LAK', symbol: '₭', name: 'Laotian Kip' },
+    'LB': { code: 'LBP', symbol: 'LL', name: 'Lebanese Pound' },
+    'LS': { code: 'LSL', symbol: 'L', name: 'Lesotho Loti' },
+    'LR': { code: 'LRD', symbol: '$', name: 'Liberian Dollar' },
+    'LY': { code: 'LYD', symbol: 'LD', name: 'Libyan Dinar' },
+    'LI': { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
+    'MG': { code: 'MGA', symbol: 'Ar', name: 'Malagasy Ariary' },
+    'MW': { code: 'MWK', symbol: 'MK', name: 'Malawian Kwacha' },
+    'MV': { code: 'MVR', symbol: 'Rf', name: 'Maldivian Rufiyaa' },
+    'ML': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'MH': { code: 'USD', symbol: '$', name: 'US Dollar' },
+    'MR': { code: 'MRU', symbol: 'UM', name: 'Mauritanian Ouguiya' },
+    'MU': { code: 'MUR', symbol: '₨', name: 'Mauritian Rupee' },
+    'FM': { code: 'USD', symbol: '$', name: 'US Dollar' },
+    'MD': { code: 'MDL', symbol: 'L', name: 'Moldovan Leu' },
+    'MN': { code: 'MNT', symbol: '₮', name: 'Mongolian Tögrög' },
+    'MA': { code: 'MAD', symbol: 'DH', name: 'Moroccan Dirham' },
+    'MZ': { code: 'MZN', symbol: 'MT', name: 'Mozambican Metical' },
+    'MM': { code: 'MMK', symbol: 'K', name: 'Burmese Kyat' },
+    'NA': { code: 'NAD', symbol: '$', name: 'Namibian Dollar' },
+    'NR': { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+    'NI': { code: 'NIO', symbol: 'C$', name: 'Nicaraguan Córdoba' },
+    'NE': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'KP': { code: 'KPW', symbol: '₩', name: 'North Korean Won' },
+    'MK': { code: 'MKD', symbol: 'ден', name: 'Macedonian Denar' },
+    'OM': { code: 'OMR', symbol: 'ر.ع.', name: 'Omani Rial' },
+    'PW': { code: 'USD', symbol: '$', name: 'US Dollar' },
+    'PS': { code: 'ILS', symbol: '₪', name: 'Israeli Shekel' },
+    'PA': { code: 'USD', symbol: '$', name: 'US Dollar' },
+    'PG': { code: 'PGK', symbol: 'K', name: 'Papua New Guinean Kina' },
+    'PY': { code: 'PYG', symbol: '₲', name: 'Paraguayan Guaraní' },
+    'PE': { code: 'PEN', symbol: 'S/.', name: 'Peruvian Sol' },
+    'PL': { code: 'PLN', symbol: 'zł', name: 'Polish Złoty' },
+    'QA': { code: 'QAR', symbol: 'QR', name: 'Qatari Riyal' },
+    'RO': { code: 'RON', symbol: 'lei', name: 'Romanian Leu' },
+    'RW': { code: 'RWF', symbol: 'FRw', name: 'Rwandan Franc' },
+    'KN': { code: 'XCD', symbol: '$', name: 'East Caribbean Dollar' },
+    'LC': { code: 'XCD', symbol: '$', name: 'East Caribbean Dollar' },
+    'VC': { code: 'XCD', symbol: '$', name: 'East Caribbean Dollar' },
+    'WS': { code: 'WST', symbol: 'WS$', name: 'Samoan Tālā' },
+    'ST': { code: 'STN', symbol: 'Db', name: 'São Tomé and Príncipe Dobra' },
+    'SN': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'RS': { code: 'RSD', symbol: 'дин.', name: 'Serbian Dinar' },
+    'SC': { code: 'SCR', symbol: '₨', name: 'Seychellois Rupee' },
+    'SL': { code: 'SLE', symbol: 'Le', name: 'Sierra Leonean Leone' },
+    'SB': { code: 'SBD', symbol: '$', name: 'Solomon Islands Dollar' },
+    'SO': { code: 'SOS', symbol: 'Sh.So.', name: 'Somali Shilling' },
+    'SS': { code: 'SSP', symbol: '£', name: 'South Sudanese Pound' },
+    'SD': { code: 'SDG', symbol: 'SDG', name: 'Sudanese Pound' },
+    'SR': { code: 'SRD', symbol: '$', name: 'Surinamese Dollar' },
+    'SY': { code: 'SYP', symbol: '£S', name: 'Syrian Pound' },
+    'TJ': { code: 'TJS', symbol: 'ЅМ', name: 'Tajikistani Somoni' },
+    'TZ': { code: 'TZS', symbol: 'Sh', name: 'Tanzanian Shilling' },
+    'TL': { code: 'USD', symbol: '$', name: 'US Dollar' },
+    'TG': { code: 'XOF', symbol: 'Fr', name: 'West African CFA Franc' },
+    'TO': { code: 'TOP', symbol: 'T$', name: 'Tongan Paʻanga' },
+    'TT': { code: 'TTD', symbol: '$', name: 'Trinidad and Tobago Dollar' },
+    'TN': { code: 'TND', symbol: 'DT', name: 'Tunisian Dinar' },
+    'TM': { code: 'TMT', symbol: 'm', name: 'Turkmenistani Manat' },
+    'TV': { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+    'UG': { code: 'UGX', symbol: 'USh', name: 'Ugandan Shilling' },
+    'UA': { code: 'UAH', symbol: '₴', name: 'Ukrainian Hryvnia' },
+    'UY': { code: 'UYU', symbol: '$U', name: 'Uruguayan Peso' },
+    'UZ': { code: 'UZS', symbol: "so'm", name: 'Uzbekistani Som' },
+    'VU': { code: 'VUV', symbol: 'VT', name: 'Vanuatu Vatu' },
+    'VE': { code: 'VES', symbol: 'Bs.S', name: 'Venezuelan Bolívar' },
+    'YE': { code: 'YER', symbol: '﷼', name: 'Yemenite Rial' },
+    'ZM': { code: 'ZMW', symbol: 'ZK', name: 'Zambian Kwacha' },
+    'ZW': { code: 'ZWG', symbol: '$', name: 'Zimbabwe Gold' }
 };
 
 // Cache for exchange rates
@@ -842,13 +1003,30 @@ function getSubunitMultiplier(currencyCode = 'INR') {
 
 // Fetch real-time exchange rates from API
 async function fetchExchangeRates() {
-    // Check if we have cached rates that are still valid
+    // Check in-memory cache first
     if (exchangeRatesCache && exchangeRatesTimestamp) {
         const age = Date.now() - exchangeRatesTimestamp;
         if (age < RATES_CACHE_DURATION) {
-            console.log('💱 Using cached exchange rates (age:', Math.round(age / 60000), 'minutes)');
+            console.log('💱 Using in-memory exchange rates (age:', Math.round(age / 60000), 'minutes)');
             return exchangeRatesCache;
         }
+    }
+
+    // Try reading from localStorage
+    try {
+        const cachedRates = localStorage.getItem('quant_exchange_rates');
+        const cachedTimestamp = localStorage.getItem('quant_exchange_rates_timestamp');
+        if (cachedRates && cachedTimestamp) {
+            const age = Date.now() - parseInt(cachedTimestamp);
+            if (age < RATES_CACHE_DURATION) {
+                exchangeRatesCache = JSON.parse(cachedRates);
+                exchangeRatesTimestamp = parseInt(cachedTimestamp);
+                console.log('💱 Using localStorage exchange rates (age:', Math.round(age / 60000), 'minutes)');
+                return exchangeRatesCache;
+            }
+        }
+    } catch (e) {
+        console.warn('⚠️ LocalStorage exchange rates read failed:', e);
     }
 
     try {
@@ -862,7 +1040,11 @@ async function fetchExchangeRates() {
         for (const apiUrl of apis) {
             try {
                 console.log('💱 Trying exchange rate API:', apiUrl);
-                const response = await fetch(apiUrl, { timeout: 5000 });
+                // Use a short 2.5s timeout for exchange rates so we don't hang!
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2500);
+                const response = await fetch(apiUrl, { signal: controller.signal });
+                clearTimeout(timeoutId);
 
                 if (!response.ok) {
                     console.warn('⚠️ API returned status:', response.status, apiUrl);
@@ -872,24 +1054,28 @@ async function fetchExchangeRates() {
                 const data = await response.json();
                 console.log('📊 API Response:', apiUrl, data);
 
-                // Different APIs have different response formats
                 let rates = null;
-
                 if (data.rates) {
-                    // Standard format
                     rates = data.rates;
-                } else if (data.rates && data.rates.rates) {
-                    // Nested format
-                    rates = data.rates.rates;
                 } else if (data.conversion_rates) {
-                    // Some APIs use this format
                     rates = data.conversion_rates;
                 }
 
                 if (rates && Object.keys(rates).length > 0) {
+                    // Set INR rate to 1 explicitly
+                    rates['INR'] = 1;
+                    
                     exchangeRatesCache = rates;
                     exchangeRatesTimestamp = Date.now();
                     console.log('💱 Fetched fresh exchange rates from:', apiUrl);
+
+                    // Save to localStorage
+                    try {
+                        localStorage.setItem('quant_exchange_rates', JSON.stringify(rates));
+                        localStorage.setItem('quant_exchange_rates_timestamp', String(exchangeRatesTimestamp));
+                    } catch (e) {
+                        console.warn('⚠️ LocalStorage exchange rates write failed:', e);
+                    }
                     return rates;
                 }
             } catch (apiError) {
@@ -944,15 +1130,131 @@ function getFallbackRates() {
         'EGP': 0.60,
         'NGN': 18.5,
         'KES': 1.6,
-        'GHS': 0.18
+        'GHS': 0.18,
+        'KWD': 0.0037,
+        'HUF': 4.35,
+        'COP': 48.0,
+        'PLN': 0.048,
+        'CZK': 0.28,
+        'RON': 0.055,
+        'QAR': 0.044,
+        'OMR': 0.0046,
+        'BHD': 0.0045,
+        'ILS': 0.045,
+        'CLP': 11.0,
+        'ARS': 10.8,
+        'PEN': 0.045,
+        'TWD': 0.39,
+        'UAH': 0.49,
+        'AFN': 0.84,
+        'ALL': 1.1,
+        'DZD': 1.6,
+        'AOA': 11.0,
+        'XCD': 0.032,
+        'AMD': 4.6,
+        'AZN': 0.020,
+        'BSD': 0.012,
+        'BBD': 0.024,
+        'BYN': 0.039,
+        'BZD': 0.024,
+        'XOF': 7.2,
+        'BTN': 1.0,
+        'BOB': 0.083,
+        'BAM': 0.022,
+        'BWP': 0.16,
+        'BND': 0.016,
+        'BGN': 0.022,
+        'BIF': 34.0,
+        'CVE': 1.2,
+        'KHR': 49.0,
+        'XAF': 7.2,
+        'KMF': 5.4,
+        'CRC': 6.2,
+        'CUP': 0.29,
+        'CDF': 33.0,
+        'DJF': 2.13,
+        'DOP': 0.71,
+        'ERN': 0.18,
+        'SZL': 0.22,
+        'ETB': 0.68,
+        'FJD': 0.027,
+        'GMD': 0.84,
+        'GEL': 0.032,
+        'GTQ': 0.093,
+        'GNF': 103.0,
+        'GYD': 2.5,
+        'HTG': 1.58,
+        'HNL': 0.30,
+        'ISK': 1.65,
+        'IRR': 500.0,
+        'IQD': 15.7,
+        'JMD': 1.85,
+        'JOD': 0.0085,
+        'KZT': 5.7,
+        'KGS': 1.05,
+        'LAK': 250.0,
+        'LBP': 180.0,
+        'LSL': 0.22,
+        'LRD': 2.3,
+        'LYD': 0.058,
+        'MGA': 55.0,
+        'MWK': 20.0,
+        'MVR': 0.18,
+        'MRU': 0.48,
+        'MUR': 0.55,
+        'MDL': 0.21,
+        'MNT': 41.0,
+        'MAD': 0.12,
+        'MZN': 0.77,
+        'MMK': 25.0,
+        'NAD': 0.22,
+        'NIO': 0.44,
+        'KPW': 10.8,
+        'MKD': 0.68,
+        'PGK': 0.046,
+        'PYG': 88.0,
+        'RWF': 15.5,
+        'WST': 0.033,
+        'STN': 0.27,
+        'RSD': 1.29,
+        'SCR': 0.16,
+        'SLE': 0.27,
+        'SBD': 0.10,
+        'SOS': 6.85,
+        'SSP': 1.56,
+        'SDG': 7.2,
+        'SRD': 0.42,
+        'SYP': 156.0,
+        'TJS': 0.13,
+        'TZS': 31.0,
+        'TOP': 0.028,
+        'TTD': 0.081,
+        'TND': 0.037,
+        'TMT': 0.042,
+        'UGX': 45.0,
+        'UYU': 0.47,
+        'UZS': 150.0,
+        'VUV': 1.42,
+        'VES': 0.43,
+        'YER': 3.0,
+        'ZMW': 0.31,
+        'ZWG': 0.16
     };
 }
 
 // Get currency info for a country code
 function getCurrencyForCountry(countryCode) {
-    if (!countryCode) return CURRENCY_MAP['IN']; // Default to INR
+    if (!countryCode) return CURRENCY_MAP['IN']; // Default to INR if no country
     const code = countryCode.toUpperCase();
-    return CURRENCY_MAP[code] || CURRENCY_MAP['IN']; // Default to INR if not found
+    if (code === 'IN') return CURRENCY_MAP['IN'];
+    
+    // Check if it's a Eurozone country that uses EUR (including Croatia HR)
+    const eurozone = ['AT', 'BE', 'CY', 'EE', 'FI', 'FR', 'DE', 'GR', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PT', 'SK', 'SI', 'ES', 'HR', 'ME', 'XK', 'AD', 'MC', 'SM', 'VA'];
+    if (eurozone.includes(code)) {
+        return CURRENCY_MAP['HR'] || CURRENCY_MAP['EU'] || CURRENCY_MAP['DE']; // Map to EUR
+    }
+    
+    return CURRENCY_MAP[code] || CURRENCY_MAP['US']; // Default to USD for all other unknown countries!
 }
 
 // Convert INR price to local currency using live rates
@@ -961,7 +1263,11 @@ async function convertPrice(inrPrice, countryCode) {
 
     const currency = getCurrencyForCountry(countryCode);
     const rates = await fetchExchangeRates();
-    const rate = rates[currency.code] || 1;
+    let rate = rates[currency.code];
+    if (rate === undefined) {
+        const fallbacks = getFallbackRates();
+        rate = fallbacks[currency.code] || 1;
+    }
 
     // Calculate raw conversion
     let convertedAmount = inrPrice * rate;
@@ -1000,9 +1306,12 @@ function formatPrice(priceObj) {
 }
 
 // Load and display blogs from Supabase
+let blogsLoaded = false;
 async function loadBlogsFromSupabase() {
+    if (blogsLoaded) return;
     try {
         if (!window.supabaseClient) return;
+        blogsLoaded = true;
 
         const { data, error } = await window.supabaseClient
             .from('blogs')
@@ -1058,37 +1367,21 @@ async function loadBlogsFromSupabase() {
 }
 
 // Load and display products from Supabase
-async function loadProductsFromSupabase(prefetchPromise) {
+let productsLoaded = false;
+async function loadProductsFromSupabase() {
+    if (productsLoaded) return;
     try {
         if (!window.supabaseClient) {
-            console.error('Supabase client not initialized');
+            console.log('⚠️ Supabase client not initialized');
             return;
         }
+        productsLoaded = true;
 
         // Fire Supabase query immediately
-        const queryPromise = window.supabaseClient
+        const { data, error } = await window.supabaseClient
             .from('products')
             .select('*')
             .order('created_at', { ascending: false });
-
-        // Handle prefetch (country + rates) separately so it doesn't block products if it fails
-        const prefetch = prefetchPromise || Promise.all([
-            getUserCountry().catch(e => console.warn('getUserCountry failed:', e)),
-            fetchExchangeRates().catch(e => console.warn('fetchExchangeRates failed:', e))
-        ]);
-
-        // Wait for both, but process products as soon as we can
-        const [prefetchResult, queryResult] = await Promise.allSettled([
-            prefetch,
-            queryPromise
-        ]);
-
-        if (queryResult.status === 'rejected') {
-            console.error('Error loading products from Supabase:', queryResult.reason);
-            return;
-        }
-
-        const { data, error } = queryResult.value;
 
         if (error) {
             console.error('Error loading products from Supabase:', error);
@@ -1097,7 +1390,7 @@ async function loadProductsFromSupabase(prefetchPromise) {
 
         if (data && data.length > 0) {
             console.log('📦 Loading ' + data.length + ' products from Supabase');
-            await displaySupabaseProducts(data);
+            displaySupabaseProducts(data);
         }
     } catch (err) {
         console.error('Failed to load products:', err);
@@ -1106,7 +1399,7 @@ async function loadProductsFromSupabase(prefetchPromise) {
 
 // Display products from Supabase in the products grid
 // Display products separated by Paid and Free
-async function displaySupabaseProducts(products) {
+function displaySupabaseProducts(products) {
     const productsGrid = document.querySelector('#products .products-grid') || document.querySelector('.products-grid');
     const resourcesGrid = document.getElementById('resources-grid');
 
@@ -1137,15 +1430,15 @@ async function displaySupabaseProducts(products) {
             productCard.className = 'product-card reveal-up';
             productCard.dataset.category = 'notes';
 
-            // Convert price to local currency (async)
-            const localPrice = await convertPrice(product.price, userCountryCode);
-            const isLocalCurrency = localPrice.currency.code !== 'INR';
+            // Store price info on the card for modal/converter use
+            productCard.dataset.inrPrice = product.price;
+            productCard.dataset.originalPrice = product.original_price || '';
+            productCard.dataset.isFree = isFree;
+            productCard.dataset.productId = product.id;
 
             const priceDisplay = isFree
                 ? `<div class="product-price" style="color:#22c55e">Free</div>`
-                : isLocalCurrency
-                    ? `<div class="product-price" style="font-size:1.2em;">${formatPrice(localPrice)}</div>`
-                    : `<div class="product-price">₹${product.price}</div>`;
+                : `<div class="product-price">₹${product.price}</div>`;
 
             const btnText = isFree ? 'Download' : 'Buy Now';
 
@@ -1160,53 +1453,21 @@ async function displaySupabaseProducts(products) {
             const rawDesc = product.description || '';
             const displayDesc = (rawDesc === '<p><br></p>') ? '' : rawDesc;
 
-            // Store price info on the card for modal use
-            productCard.dataset.localPrice = JSON.stringify(localPrice);
-            productCard.dataset.inrPrice = product.price;
-
-            // Currency badge removed - price already shows currency symbol (currency code was redundant)
-            const currencyBadge = '';
-
-            // Handle original price display (fix for INR showing when using other currencies)
+            // Handle original price display initially in INR
             let originalPriceDisplay = '';
             if (product.original_price > product.price) {
-                // Calculate discount percentage
                 const discountPercent = Math.round((1 - product.price / product.original_price) * 100);
                 const discountBadge = `<span style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:0.75em;font-weight:700;padding:2px 8px;border-radius:100px;white-space:nowrap">${discountPercent}% OFF</span>`;
-
-                if (isLocalCurrency) {
-                    const rate = localPrice.rate || 1;
-                    let convertedOriginal = product.original_price * rate;
-
-                    const weakersCurrencies = [
-                        'PKR', 'BDT', 'LKR', 'NPR',
-                        'NGN', 'EGP', 'KES', 'GHS', 'ZAR',
-                        'VND', 'IDR', 'PHP', 'MYR', 'THB',
-                        'TRY', 'RUB', 'UAH',
-                        'BRL', 'MXN', 'ARS', 'COP', 'CLP', 'PEN'
-                    ];
-
-                    if (!weakersCurrencies.includes(localPrice.currency.code)) {
-                        convertedOriginal = convertedOriginal * 1.5;
-                    }
-
-                    const originalObj = {
-                        amount: Math.round(convertedOriginal),
-                        currency: localPrice.currency
-                    };
-                    originalPriceDisplay = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="text-decoration:line-through;color:var(--text-muted);font-size:0.9em">${formatPrice(originalObj)}</span>${priceDisplay}${discountBadge}</div>`;
-                } else {
-                    originalPriceDisplay = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="text-decoration:line-through;color:var(--text-muted);font-size:0.9em">₹${product.original_price}</span>${priceDisplay}${discountBadge}</div>`;
-                }
+                originalPriceDisplay = `<div class="price-container" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="original-price" style="text-decoration:line-through;color:var(--text-muted);font-size:0.9em">₹${product.original_price}</span><span class="local-price">${priceDisplay}</span>${discountBadge}</div>`;
             } else {
-                originalPriceDisplay = priceDisplay;
+                originalPriceDisplay = `<div class="price-container"><span class="local-price">${priceDisplay}</span></div>`;
             }
 
             productCard.innerHTML = `
                 ${imageSection}
                 <div class="product-content">
                     <h3 class="product-title">
-                        ${product.name}${currencyBadge}
+                        ${product.name}
                         <button class="share-btn" onclick="copyProductLink('${product.id}')" title="Copy share link" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.8em; margin-left:10px; transition:color 0.3s ease;">
                             <i class="fas fa-share-alt"></i>
                         </button>
@@ -1315,38 +1576,22 @@ window.openProductModal = async function (id) {
 };
 
 // Load Sessions from Supabase and Update Services Section
-async function loadSessionsFromSupabase(prefetchPromise) {
+let sessionsLoaded = false;
+async function loadSessionsFromSupabase() {
+    if (sessionsLoaded) return;
     try {
         if (!window.supabaseClient) {
             console.error('Supabase client not initialized');
             return;
         }
+        sessionsLoaded = true;
 
         // Fire Supabase query immediately
-        const queryPromise = window.supabaseClient
+        const { data, error } = await window.supabaseClient
             .from('sessions')
             .select('*')
             .eq('is_active', true)
             .order('price', { ascending: true });
-
-        // Handle prefetch (country + rates) separately
-        const prefetch = prefetchPromise || Promise.all([
-            getUserCountry().catch(e => console.warn('getUserCountry failed:', e)),
-            fetchExchangeRates().catch(e => console.warn('fetchExchangeRates failed:', e))
-        ]);
-
-        // Wait for both, but process sessions as soon as we can
-        const [prefetchResult, queryResult] = await Promise.allSettled([
-            prefetch,
-            queryPromise
-        ]);
-
-        if (queryResult.status === 'rejected') {
-            console.error('Error loading sessions from Supabase:', queryResult.reason);
-            return;
-        }
-
-        const { data, error } = queryResult.value;
 
         if (error) {
             console.error('Error loading sessions from Supabase:', error);
@@ -1357,8 +1602,8 @@ async function loadSessionsFromSupabase(prefetchPromise) {
             console.log('🎯 Loading ' + data.length + ' sessions from Supabase');
             // Store sessions globally for booking form reference
             window.dynamicSessions = data;
-            await updateServicesSection(data);
-            await updateBookingForm(data);
+            updateServicesSection(data);
+            updateBookingForm(data);
         }
     } catch (err) {
         console.error('Failed to load sessions:', err);
@@ -1366,14 +1611,13 @@ async function loadSessionsFromSupabase(prefetchPromise) {
 }
 
 // Update Services Section with Dynamic Sessions
-async function updateServicesSection(sessions) {
+function updateServicesSection(sessions) {
     const servicesContainer = document.querySelector('.services-grid');
     if (!servicesContainer) {
-        // console.log('Services container not found (likely on non-index page)');
         return;
     }
 
-    // Clear existing services (except hardcoded structure, we'll replace content)
+    // Clear existing services
     servicesContainer.innerHTML = '';
 
     for (let index = 0; index < sessions.length; index++) {
@@ -1381,20 +1625,18 @@ async function updateServicesSection(sessions) {
         const serviceCard = document.createElement('div');
         serviceCard.className = session.is_popular ? 'service-card popular reveal-up' : 'service-card reveal-up';
 
+        serviceCard.dataset.inrPrice = session.price;
+        serviceCard.dataset.duration = session.duration;
+        serviceCard.dataset.sessionName = session.name;
+
         // Generate features HTML
         const featuresHtml = session.features ? session.features.map(feature =>
             `<li><i class="fas fa-check" style="color: #22c55e; margin-right: 8px;"></i>${feature}</li>`
         ).join('') : '';
 
-        // Convert price to local currency
-        const localPrice = await convertPrice(session.price, userCountryCode);
-        const isLocalCurrency = localPrice.currency.code !== 'INR';
-
         const priceDisplay = session.price === 0
             ? '<span class="price-free">FREE</span>'
-            : isLocalCurrency
-                ? `<span style="font-weight:700;">${formatPrice(localPrice)}</span>`
-                : `₹${session.price}`;
+            : `<span class="price-currency">₹</span><span class="price-value">${session.price}</span>`;
 
         serviceCard.innerHTML = `
             <div class="service-header">
@@ -1419,7 +1661,7 @@ async function updateServicesSection(sessions) {
                     ${session.price === 0 ? '🆓 Book Free Session' : 'Book Session'}
                 </a>
             </div>
-`;
+        `;
 
         servicesContainer.appendChild(serviceCard);
         if (window.revealObserver) window.revealObserver.observe(serviceCard);
@@ -1431,12 +1673,10 @@ async function updateServicesSection(sessions) {
                 const service = this.dataset.service;
                 const serviceSelect = document.getElementById('bookingService');
                 if (serviceSelect) {
-                    // Find the option with matching session name
                     const options = Array.from(serviceSelect.options);
                     const option = options.find(opt => opt.text.includes(service));
                     if (option) {
                         serviceSelect.value = option.value;
-                        // Scroll to booking form
                         document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
                     }
                 }
@@ -1448,7 +1688,7 @@ async function updateServicesSection(sessions) {
 }
 
 // Update Booking Form with Dynamic Sessions
-async function updateBookingForm(sessions) {
+function updateBookingForm(sessions) {
     const bookingSelect = document.getElementById('bookingService');
     const bookingForm = document.getElementById('bookingForm');
     const bookingService = document.getElementById('bookingService');
@@ -1456,13 +1696,10 @@ async function updateBookingForm(sessions) {
     const priceDisplay = document.getElementById('priceDisplay');
     const bookingPrice = document.getElementById('bookingPrice');
 
-    // Check if elements exist (might be missing on admin page)
     if (!bookingForm || !bookingService || !bookingDate || !priceDisplay || !bookingPrice) {
-        // console.log('Booking form elements not found (likely on non-index page). Skipping init.');
         return;
     }
 
-    // Clear existing options (keep placeholder)
     const placeholder = bookingSelect.options[0];
     bookingSelect.innerHTML = '';
     bookingSelect.appendChild(placeholder);
@@ -1471,15 +1708,9 @@ async function updateBookingForm(sessions) {
         const option = document.createElement('option');
         const valueType = session.name.toLowerCase().replace(/\s+/g, '_');
 
-        // Convert price to local currency for display
-        const localPrice = await convertPrice(session.price, userCountryCode);
-        const isLocalCurrency = localPrice.currency.code !== 'INR';
-
         option.value = `${valueType}| ${session.price}| ${session.duration} `;
         if (session.price === 0) {
             option.innerHTML = `🆓 ${session.name} (${session.duration} min) - FREE`;
-        } else if (isLocalCurrency) {
-            option.innerHTML = `${session.name} (${session.duration} min) - ${formatPrice(localPrice)}`;
         } else {
             option.innerHTML = `${session.name} (${session.duration} min) - ₹${session.price}`;
         }
@@ -1489,6 +1720,76 @@ async function updateBookingForm(sessions) {
     }
 
     console.log('✅ Booking form updated with ' + sessions.length + ' sessions');
+}
+
+// Update all prices dynamically once country/rates resolve
+async function updateAllPricesOnPage() {
+    const country = userCountryCode || 'IN';
+    console.log('🔄 updateAllPricesOnPage: Updating prices for country:', country);
+    if (country === 'IN') return;
+
+    // 1. Update Product Cards
+    const productCards = document.querySelectorAll('.product-card');
+    for (const card of productCards) {
+        const inrPrice = parseFloat(card.dataset.inrPrice);
+        if (isNaN(inrPrice) || inrPrice <= 0) continue;
+
+        const originalPriceVal = parseFloat(card.dataset.originalPrice);
+        const isFree = card.dataset.isFree === 'true';
+        if (isFree) continue;
+
+        const localPrice = await convertPrice(inrPrice, country);
+        card.dataset.localPrice = JSON.stringify(localPrice);
+
+        const priceEl = card.querySelector('.local-price .product-price') || card.querySelector('.product-price');
+        if (priceEl) {
+            priceEl.innerHTML = `<div class="product-price" style="font-size:1.2em;">${formatPrice(localPrice)}</div>`;
+        }
+
+        if (originalPriceVal && originalPriceVal > inrPrice) {
+            const localOriginalPrice = await convertPrice(originalPriceVal, country);
+            
+            const origSpan = card.querySelector('.original-price');
+            if (origSpan) {
+                origSpan.innerHTML = formatPrice(localOriginalPrice);
+            }
+        }
+    }
+
+    // 2. Update Session Cards
+    const serviceCards = document.querySelectorAll('.service-card');
+    for (const card of serviceCards) {
+        const inrPrice = parseFloat(card.dataset.inrPrice);
+        if (isNaN(inrPrice) || inrPrice <= 0) continue;
+
+        const localPrice = await convertPrice(inrPrice, country);
+        const priceValEl = card.querySelector('.price-value');
+        const priceCurEl = card.querySelector('.price-currency');
+        if (priceValEl) {
+            priceValEl.textContent = localPrice.amount.toLocaleString();
+        }
+        if (priceCurEl) {
+            priceCurEl.textContent = localPrice.currency.symbol;
+        }
+    }
+
+    // 3. Update Booking Form Options
+    const bookingSelect = document.getElementById('bookingService');
+    if (bookingSelect) {
+        for (let i = 1; i < bookingSelect.options.length; i++) {
+            const option = bookingSelect.options[i];
+            const parts = option.value.split('|');
+            if (parts.length >= 3) {
+                const inrPrice = parseFloat(parts[1].trim());
+                const duration = parts[2].trim();
+                const name = option.innerHTML.split('(')[0].trim();
+                if (inrPrice === 0) continue;
+
+                const localPrice = await convertPrice(inrPrice, country);
+                option.innerHTML = `${name} (${duration} min) - ${formatPrice(localPrice)}`;
+            }
+        }
+    }
 }
 
 // Default links (fallback) - will be updated from Supabase
@@ -2798,11 +3099,13 @@ Thank you for booking!`);
 // --- BLOG & RESOURCES LOGIC ---
 
 async function loadBlogs() {
+    if (blogsLoaded) return;
     console.log('📰 Attempting to load blogs from Supabase...');
     if (!window.supabaseClient) {
         console.error('❌ Supabase client not ready for blogs');
         return;
     }
+    blogsLoaded = true;
     try {
         const { data, error } = await window.supabaseClient.from('blogs').select('*').eq('is_published', true).order('created_at', { ascending: false });
         if (error) {
