@@ -1,9 +1,4 @@
 {
     "buildCommand": "node generate-config.js",
-    "outputDirectory": ".",
-    "functions": {
-        "api/*.js": {
-            "runtime": "nodejs@22.x"
-        }
-    }
+    "outputDirectory": "."
 }
