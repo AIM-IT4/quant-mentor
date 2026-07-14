@@ -659,8 +659,8 @@ document.addEventListener('DOMContentLoaded', function () {
 // ================================
 
 // ⚠️ ADD YOUR CASHFREE APP ID BELOW
-const CASHFREE_APP_ID = 'TEST111398228247115b6b03adb772be22893111';
-const CASHFREE_ENV = 'sandbox'; // 'sandbox' for testing, 'production' for live
+const CASHFREE_APP_ID = '13366050fd9d8d9d73ad3549d135066331';
+const CASHFREE_ENV = 'production'; // 'sandbox' for testing, 'production' for live
 
 // Your business name
 const BUSINESS_NAME = 'QuantMentor';
