@@ -239,6 +239,26 @@ textarea {
 /* --------------------------------
    Focus Indicators (Accessibility)
    -------------------------------- */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 16px;
+    z-index: 10000;
+    padding: 12px 24px;
+    background: var(--accent-secondary);
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+    top: 16px;
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+}
+
 :focus-visible {
     outline: 2px solid var(--accent-secondary);
     outline-offset: 2px;
