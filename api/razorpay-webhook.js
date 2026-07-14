@@ -1,5 +1,5 @@
-// Cashfree Webhook Handler
-// This endpoint is called by Cashfree when payment events occur
+// Razorpay Webhook Handler
+// This endpoint is called by Razorpay when payment events occur
 // Handles product purchases and session bookings
 
 import crypto from 'crypto';
@@ -29,11 +29,13 @@ function normalizeProductName(value) {
 }
 
 export default async function handler(req, res) {
+    // Only accept POST requests
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const CASHFREE_WEBHOOK_SECRET = process.env.CASHFREE_SECRET_KEY; // Cashfree uses secret key for webhook signing
+    // Configuration
+    const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET;
     const SUPABASE_URL = process.env.SUPABASE_URL || 'https://dntabmyurlrlnoajdnja.supabase.co';
     const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDEyNjUsImV4cCI6MjA4NTY3NzI2NX0.PYpNd_t_px09zi2d5WGjFVOB23sjb3ZPuAnxagYshe0';
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
@@ -50,31 +52,23 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'Could not read request body' });
     }
 
-    // 2. Verify Webhook Signature (Cashfree format: HMAC-SHA256(timestamp + rawBody, secretKey) -> base64)
-    if (CASHFREE_WEBHOOK_SECRET) {
-        const signature = req.headers['x-webhook-signature'];
-        const timestamp = req.headers['x-webhook-timestamp'];
+    // 2. Verify Webhook Signature
+    if (RAZORPAY_WEBHOOK_SECRET) {
+        const signature = req.headers['x-razorpay-signature'];
 
-        if (!signature || !timestamp) {
-            console.error('CRITICAL: Missing webhook signature or timestamp headers');
-            return res.status(401).json({ error: 'Missing signature headers' });
-        }
-
-        const signStr = timestamp + rawBody.toString('utf8');
         const expectedSignature = crypto
-            .createHmac('sha256', CASHFREE_WEBHOOK_SECRET)
-            .update(signStr, 'utf8')
-            .digest('base64');
+            .createHmac('sha256', RAZORPAY_WEBHOOK_SECRET)
+            .update(rawBody)
+            .digest('hex');
 
         if (signature !== expectedSignature) {
             console.error('CRITICAL: Webhook signature verification failed');
             console.log('Received signature:', signature);
-            console.log('Expected signature:', expectedSignature);
-            console.log('Timestamp:', timestamp);
-            console.log('Raw body preview (100 chars):', rawBody.toString('utf8').substring(0, 100));
+            console.log('Expected signature (raw_match):', expectedSignature);
+            console.log('Raw body preview (50 chars):', rawBody.toString('utf8').substring(0, 50));
             return res.status(401).json({ error: 'Invalid signature' });
         }
-        console.log('✅ Cashfree signature verified successfully');
+        console.log('✅ Signature verified successfully');
     }
 
     // 3. Parse JSON body for logic
@@ -86,28 +80,23 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Invalid JSON payload' });
     }
 
-    console.log('Cashfree webhook received - type:', event.type, '| order_id:', event.data?.order?.order_id);
+    console.log('Razorpay webhook received:', event.event);
 
     try {
-        // Handle PAYMENT_SUCCESS event (payment completed successfully)
-        if (event.type === 'PAYMENT_SUCCESS') {
-            const paymentData = event.data;
-            const orderData = paymentData.order || {};
-            const payment = paymentData.payment || {};
-
-            const paymentId = payment.cf_payment_id || payment.payment_id || 'unknown';
-            const amount = payment.payment_amount || orderData.order_amount || 0;
-            const currency = payment.payment_currency || orderData.order_currency || 'INR';
-            const customerEmail = orderData.customer_details?.customer_email || payment.payment_customer_email || '';
-            const customerName = orderData.customer_details?.customer_name || 'Customer';
-            const customerPhone = orderData.customer_details?.customer_phone || '';
-            const orderTags = orderData.order_tags || {};
-
-            // Extract metadata from order_tags (similar to Razorpay notes)
-            const productName = orderTags.product_name || orderTags.session_name || '';
-            const productType = orderTags.type || 'product'; // 'product' or 'session'
-            const customerCountry = orderTags.customer_country || 'Unknown';
-            const inrAmount = orderTags.inr_amount ? parseFloat(orderTags.inr_amount) : amount;
+        // Handle payment.captured event (successful payment)
+        if (event.event === 'payment.captured') {
+            const payment = event.payload.payment.entity;
+            const paymentId = payment.id;
+            const currency = payment.currency;
+            const zeroDecimalCurrencies = ['JPY', 'KRW', 'VND', 'IDR', 'CLP', 'PYG', 'UGX'];
+            const amount = zeroDecimalCurrencies.includes(currency) ? payment.amount : payment.amount / 100;
+            const customerEmail = payment.email;
+            const customerName = payment.notes?.customer_name || 'Customer';
+            const customerPhone = payment.notes?.customer_phone || '';
+            const customerCountry = payment.notes?.customer_country || payment.notes?.country || 'Unknown';
+            const inrAmount = payment.notes?.inr_amount ? parseFloat(payment.notes.inr_amount) : amount;
+            const productName = payment.notes?.product_name;
+            const productType = payment.notes?.type || 'product'; // 'product' or 'session'
 
             console.log('Payment captured:', { paymentId, amount, inrAmount, customerEmail, customerCountry, productName, productType });
 
@@ -123,7 +112,7 @@ export default async function handler(req, res) {
                     customerPhone,
                     customerCountry,
                     productName,
-                    downloadLink: orderTags.download_link || '',
+                    downloadLink: payment.notes?.download_link || '',
                     SUPABASE_URL,
                     SUPABASE_KEY,
                     BREVO_API_KEY,
@@ -138,7 +127,7 @@ export default async function handler(req, res) {
                     amount,
                     currency,
                     customerEmail,
-                    notes: orderTags,
+                    notes: payment.notes,
                     SUPABASE_URL,
                     SUPABASE_KEY,
                     BREVO_API_KEY,
@@ -152,8 +141,7 @@ export default async function handler(req, res) {
         }
 
         // Handle other events
-        console.log('Unhandled event type:', event.type);
-        return res.status(200).json({ status: 'acknowledged', event: event.type });
+        return res.status(200).json({ status: 'acknowledged', event: event.event });
 
     } catch (error) {
         console.error('Webhook processing error:', error);
@@ -162,7 +150,6 @@ export default async function handler(req, res) {
 }
 
 // Handle product purchase - send email and log to Supabase
-// (Identical logic to original razorpay-webhook.js)
 async function handleProductPurchase(data) {
     const {
         paymentId, amount, inrAmount, currency, customerEmail, customerName, customerPhone, customerCountry, productName,
@@ -463,10 +450,12 @@ async function handleProductPurchase(data) {
         }
     }
 
-    // Send recommendation email 1 hour after purchase via Brevo scheduledAt
+    // 📧 Send recommendation email 1 hour after purchase via Brevo scheduledAt
+    // Skip if the customer bought the Complete Bundle (nothing more to upsell)
     const isBundle = productName.toLowerCase().includes('complete') && productName.toLowerCase().includes('bundle');
     if (!isBundle && BREVO_API_KEY && customerEmail) {
         try {
+            // Fetch all paid products for recommendations
             const productsResponse = await fetch(
                 `${SUPABASE_URL}/rest/v1/products?select=id,name,description,price,cover_image_url&price=gt.0&order=price.desc`,
                 {
@@ -482,6 +471,7 @@ async function handleProductPurchase(data) {
                 allProducts = await productsResponse.json();
             }
 
+            // Fetch customer's purchase history to exclude already-bought products
             const purchasesResponse = await fetch(
                 `${SUPABASE_URL}/rest/v1/purchases?customer_email=eq.${encodeURIComponent(customerEmail)}&select=product_name`,
                 {
@@ -498,11 +488,13 @@ async function handleProductPurchase(data) {
                 purchasedNames = purchases.map(p => (p.product_name || '').toLowerCase().trim());
             }
 
+            // Filter out already-purchased products
             const available = allProducts.filter(p =>
                 !purchasedNames.includes((p.name || '').toLowerCase().trim())
             );
 
             if (available.length > 0) {
+                // Pick up to 3 recommendations — prioritize bundles, then by price desc
                 const bundles = available.filter(p => (p.name || '').toLowerCase().includes('bundle') || (p.name || '').toLowerCase().includes('pack'));
                 const nonBundles = available.filter(p => !(p.name || '').toLowerCase().includes('bundle') && !(p.name || '').toLowerCase().includes('pack'));
 
@@ -516,6 +508,7 @@ async function handleProductPurchase(data) {
                     recommendations.push(bundles[i]);
                 }
 
+                // Build product cards HTML
                 const productCards = recommendations.map(p => {
                     const desc = (p.description || '').replace(/<[^>]*>/g, '').substring(0, 120);
                     const coverImg = p.cover_image_url
@@ -564,6 +557,7 @@ async function handleProductPurchase(data) {
                     `• ${p.name} — ₹${p.price}\n  View: https://quant-mentor.vercel.app/?id=${p.id}`
                 ).join('\n\n');
 
+                // Schedule via Brevo with 1 hour delay
                 const scheduledAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
 
                 const recEmailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -584,19 +578,20 @@ async function handleProductPurchase(data) {
                 });
 
                 if (recEmailResponse.ok) {
-                    console.log(`Recommendation email scheduled via Brevo for ${customerEmail} at ${scheduledAt}`);
+                    console.log(`📧 Recommendation email scheduled via Brevo for ${customerEmail} at ${scheduledAt}`);
                 } else {
                     const errData = await recEmailResponse.text();
-                    console.error(`Failed to schedule recommendation email:`, errData);
+                    console.error(`❌ Failed to schedule recommendation email:`, errData);
                 }
             } else {
-                console.log('No products to recommend — customer may own everything');
+                console.log('⏭️ No products to recommend — customer may own everything');
             }
         } catch (err) {
             console.error('Error sending recommendation email:', err);
+            // Non-critical — don't fail the webhook
         }
     } else if (isBundle) {
-        console.log('Skipping recommendation for bundle purchase');
+        console.log('⏭️ Skipping recommendation for bundle purchase');
     }
 }
 
@@ -607,14 +602,14 @@ async function handleSessionBooking(data) {
         SUPABASE_URL, SUPABASE_KEY, BREVO_API_KEY, ADMIN_EMAIL, SENDER_EMAIL, SENDER_NAME
     } = data;
 
-    const customerName = notes.customer_name || notes.name || 'Customer';
+    const customerName = notes.customer_name || 'Customer';
     const sessionName = notes.session_name || 'Consultation Session';
     const sessionDate = notes.session_date || 'TBD';
     const sessionTime = notes.session_time || 'TBD';
     const sessionDuration = notes.session_duration || '60';
     const sessionPrice = notes.session_price || amount;
-    const customerPhone = notes.customer_phone || notes.phone || '';
-    const customerMessage = notes.customer_message || notes.message || '';
+    const customerPhone = notes.customer_phone || '';
+    const customerMessage = notes.customer_message || '';
     const meetLink = "https://meet.google.com/hfp-npyq-qho";
 
     let displayTime = sessionTime;
@@ -630,7 +625,7 @@ async function handleSessionBooking(data) {
 
     console.log('Processing session booking via webhook:', { paymentId, customerEmail, sessionName });
 
-    // Check if already processed
+    // 1. Check if already processed (prevent duplicate bookings)
     try {
         const existingResponse = await fetch(
             `${SUPABASE_URL}/rest/v1/bookings?payment_id=eq.${paymentId}&select=id`,
@@ -646,14 +641,14 @@ async function handleSessionBooking(data) {
             const existing = await existingResponse.json();
             if (existing && existing.length > 0) {
                 console.log('Booking already processed:', paymentId);
-                return;
+                return; // Already processed
             }
         }
     } catch (err) {
         console.error('Error checking existing booking:', err);
     }
 
-    // Log to Supabase bookings table
+    // 2. Log to Supabase bookings table
     try {
         const insertResponse = await fetch(`${SUPABASE_URL}/rest/v1/bookings`, {
             method: 'POST',
@@ -676,8 +671,8 @@ async function handleSessionBooking(data) {
                 status: 'upcoming',
                 payment_id: paymentId,
                 meet_link: meetLink,
-                source: 'webhook',
-                customer_country: notes.customer_country || 'Unknown'
+                source: 'webhook', // Mark for debugging
+                customer_country: notes.customer_country || notes.country || 'Unknown'
             })
         });
 
@@ -685,13 +680,13 @@ async function handleSessionBooking(data) {
             const errorText = await insertResponse.text();
             console.error('Supabase booking insert failed:', errorText);
         } else {
-            console.log('Booking logged to Supabase');
+            console.log('✅ Booking logged to Supabase');
         }
     } catch (err) {
         console.error('Error logging booking to Supabase:', err);
     }
 
-    // Send confirmation email to customer via Brevo
+    // 3. Send confirmation email to customer via Brevo
     if (BREVO_API_KEY && customerEmail) {
         const customerHtml = `
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
@@ -766,17 +761,17 @@ async function handleSessionBooking(data) {
             });
 
             if (emailResponse.ok) {
-                console.log(`Customer booking email sent to ${customerEmail}`);
+                console.log(`✅ Customer booking email sent to ${customerEmail}`);
             } else {
                 const errorData = await emailResponse.text();
-                console.error(`Brevo Error (Booking Email): ${emailResponse.status} - ${errorData}`);
+                console.error(`❌ Brevo Error (Booking Email): ${emailResponse.status} - ${errorData}`);
             }
         } catch (err) {
             console.error('Error sending customer booking email:', err);
         }
     }
 
-    // Send admin notification email
+    // 4. Send admin notification email
     if (BREVO_API_KEY) {
         const adminHtml = `
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
@@ -804,7 +799,7 @@ async function handleSessionBooking(data) {
                                 </tr>
                                 <tr>
                                     <td colspan="2" style="padding: 15px 0 5px 0;">
-                                        <a href="${meetLink}" style="color: #e95836; font-weight: bold; text-decoration: none; font-size: 14px;">Join Meeting</a>
+                                        <a href="${meetLink}" style="color: #e95836; font-weight: bold; text-decoration: none; font-size: 14px;">🔗 Join Meeting</a>
                                     </td>
                                 </tr>
                             </table>
@@ -836,17 +831,17 @@ async function handleSessionBooking(data) {
                 body: JSON.stringify({
                     sender: { name: SENDER_NAME, email: SENDER_EMAIL },
                     to: [{ email: ADMIN_EMAIL }],
-                    subject: `New Booking: ${customerName} - ${sessionName}`,
+                    subject: `🆕 New Booking: ${customerName} - ${sessionName}`,
                     htmlContent: adminHtml,
                     textContent: `New Booking Received!\n\n${customerName} just booked a new session.\n\nSession Booked: ${sessionName}\nDate & Time: ${sessionDate} at ${displayTime}\nAmount Received: ₹${sessionPrice}\nLink: ${meetLink}\n\nCustomer Details:\nName: ${customerName}\nEmail: ${customerEmail}\nPhone: ${customerPhone || 'Not provided'}\nMessage: ${customerMessage || 'None'}\nPayment ID: ${paymentId}`
                 })
             });
 
             if (adminEmailResponse.ok) {
-                console.log('Admin booking notification sent');
+                console.log('✅ Admin booking notification sent');
             } else {
                 const errorData = await adminEmailResponse.text();
-                console.error(`Brevo Error (Admin Booking): ${adminEmailResponse.status} - ${errorData}`);
+                console.error(`❌ Brevo Error (Admin Booking): ${adminEmailResponse.status} - ${errorData}`);
             }
         } catch (err) {
             console.error('Error sending admin booking notification:', err);

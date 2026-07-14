@@ -7,7 +7,7 @@ A comprehensive platform for booking 1-on-1 mentorship sessions and purchasing d
 -   **Mentorship Booking System**: Custom 1-on-1 session booking with dynamic time slots (30-min intervals) and conflict detection.
 -   **Digital Product Store**: Purchase crash courses, interview guides, and utility tools directly.
 -   **Free Resources**: Direct access to free study materials and cheat sheets.
--   **Payment Integration**: Secure payments via **Cashfree**.
+-   **Payment Integration**: Secure payments via **Razorpay** (supports international cards & multi-currency).
 -   **Automated Emails**: Instant booking confirmations and product delivery via **Brevo** (formerly Sendinblue).
 -   **Admin Panel**:
     -   View upcoming and past bookings.
@@ -21,7 +21,7 @@ A comprehensive platform for booking 1-on-1 mentorship sessions and purchasing d
 
 -   **Frontend**: HTML5, CSS3 (Custom Variables), JavaScript (Vanilla ES6+).
 -   **Backend / Database**: **Supabase** (PostgreSQL) for booking data, product management, and file storage.
--   **Payments**: **Cashfree** Payment Gateway.
+-   **Payments**: **Razorpay** Payment Gateway (supports international cards & multi-currency).
 -   **Email Service**: **Brevo** (SMTP/API) for transactional emails.
 -   **Hosting**: Vercel (Front-end).
 
@@ -47,11 +47,14 @@ This project uses Supabase for database and storage.
 2.  Run the provided SQL scripts in the SQL Editor to set up tables (`bookings`, `products`, `sessions`).
 3.  Add your Supabase URL and Anon Key to `config.js` or environment variables.
 
-### 2. Cashfree Integration
-1.  Create an account on [Cashfree](https://merchant.cashfree.com).
-2.  Generate Test Mode API Keys (App ID + Secret Key).
-3.  Set `CASHFREE_APP_ID` and `CASHFREE_SECRET_KEY` in Vercel environment variables.
-4.  Set `CASHFREE_ENV=sandbox` for testing, `production` for live.
+### 2. Razorpay Integration
+1.  Create an account on [Razorpay](https://dashboard.razorpay.com).
+2.  Generate API Keys (Key ID + Key Secret) from Settings → API Keys.
+3.  Set `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET` in Vercel environment variables.
+4.  For international payments, enable "International Cards" in Razorpay Dashboard → Settings → Payments.
+5.  Set up the webhook endpoint in Razorpay Dashboard → Settings → Webhooks:
+    - URL: `https://your-domain.vercel.app/api/razorpay-webhook`
+    - Events: `payment.captured`
 
 ### 3. Email Automation (Brevo)
 1.  Sign up on [Brevo](https://brevo.com).
