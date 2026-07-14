@@ -800,7 +800,7 @@
     <!-- Scripts -->
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', async function () {
@@ -1038,7 +1038,7 @@
                         let checkoutCurrency = 'INR';
                         const loggingPrice = product.price;
 
-                        // Pass to Cashfree checkout (relying on script.js globals/logic if needed, but explicit args here)
+                        // Pass to Razorpay checkout (relying on script.js globals/logic if needed, but explicit args here)
                         // If we had local price, we could pass it. But for stability, let's stick to base price or re-fetch locally if needed.
                         // Actually, let's try to pass the computed local price if available.
 

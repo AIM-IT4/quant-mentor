@@ -2251,7 +2251,7 @@ if (modalPayBtn) {
         // CHECK 1: International Currency Mode? (Display only — always pay in INR)
         if (window.currentProductIsLocalCurrency && window.currentProductLocalPrice) {
             console.log(`🌍 International Mode: Displaying ${window.currentProductLocalPrice.currency.code}, paying in INR`);
-            // Keep payAmount=INR and payCurrency=INR — Cashfree account only supports INR
+            // Keep payAmount=INR and payCurrency=INR — Razorpay handles multi-currency conversion inline
         }
 
         // CHECK 2: Coupon Applied?
@@ -2278,7 +2278,7 @@ if (modalPayBtn) {
         }
 
         // Round amounts to 2 decimal places for payment (standard currency precision)
-        // initCashfreeCheckout expects 'amount' in MAJOR units (e.g., 500)
+        // initRazorpayCheckout expects 'amount' in MAJOR units (e.g., 500)
         // which it then converts to subunits (paise/cents).
         // So we keep it as integer or float major units.
 
@@ -2340,8 +2340,8 @@ if (modalPayBtn) {
                     document.getElementById('productModal').classList.remove('active');
                     document.body.style.overflow = '';
 
-                    console.log('Calling initCashfreeCheckout with User Details...');
-                    initCashfreeCheckout(productName, payAmount, payCurrency, logAmountInr, {
+                    console.log('Calling initRazorpayCheckout with User Details...');
+                    initRazorpayCheckout(productName, payAmount, payCurrency, logAmountInr, {
                         name: udName,
                         email: udEmail,
                         phone: udPhone,
@@ -2354,7 +2354,7 @@ if (modalPayBtn) {
             console.error('User details modal not found, falling back to direct checkout');
             document.getElementById('productModal').classList.remove('active');
             document.body.style.overflow = '';
-            initCashfreeCheckout(productName, payAmount, payCurrency, logAmountInr);
+            initRazorpayCheckout(productName, payAmount, payCurrency, logAmountInr);
         }
     });
 } else {
@@ -2690,7 +2690,7 @@ if (bookingForm) {
         let logAmountInr = sessionInfo.price;
 
         // Check for Local Currency (Display only — always pay in INR)
-        // Cashfree account only supports INR, so international conversion is cosmetic
+        // Razorpay handles multi-currency conversion inline at checkout
         try {
             if (userCountryCode && userCountryCode !== 'IN') {
                 const localPrice = await convertPrice(sessionInfo.price, userCountryCode);
@@ -2726,7 +2726,7 @@ if (bookingForm) {
 }
 
 /**
- * Initialize Cashfree for session booking payment
+ * Initialize Razorpay for session booking payment
  */
 async function initSessionPayment(description, amount, customerEmail, currency = 'INR', inrAmountForLogging = null, bookingData = null) {
     // Handle FREE sessions (0 value)
@@ -2735,23 +2735,20 @@ async function initSessionPayment(description, amount, customerEmail, currency =
         return;
     }
 
-    if (CASHFREE_APP_ID === 'YOUR_CASHFREE_APP_ID_HERE') {
+    if (RAZORPAY_KEY_ID === 'YOUR_RAZORPAY_KEY_ID_HERE') {
         alert('⚠️ Payment system not configured. Please contact the admin.');
         return;
     }
 
-    // Initialize Cashfree SDK
-    if (typeof Cashfree === 'undefined') {
-        console.log('❌ Cashfree SDK not loaded');
+    // Initialize Razorpay SDK
+    if (typeof Razorpay === 'undefined') {
+        console.log('❌ Razorpay SDK not loaded');
         alert('❌ Payment system not available. Please refresh the page.');
         return;
     }
 
-    const cashfree = Cashfree({ mode: CASHFREE_ENV });
-
     // Create server-side order with all metadata
-    let paymentSessionId = null;
-    let cashfreeOrderId = null;
+    let orderData = null;
     try {
         const orderNotes = {
             type: 'session',
@@ -2767,70 +2764,53 @@ async function initSessionPayment(description, amount, customerEmail, currency =
             customer_message: bookingData ? bookingData.message : '',
             customer_country: window.userCountryCode || 'Unknown'
         };
-        console.log('📦 Creating Cashfree order for session...');
         const orderRes = await fetch('/api/create-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ amount, currency, notes: orderNotes })
         });
         if (orderRes.ok) {
-            const orderData = await orderRes.json();
-            paymentSessionId = orderData.payment_session_id;
-            cashfreeOrderId = orderData.order_id;
-            console.log('✅ Session order created:', { orderId: cashfreeOrderId, paymentSessionId });
+            orderData = await orderRes.json();
         } else {
             const errText = await orderRes.text();
-            console.warn('⚠️ Session order creation failed:', errText);
-            alert('❌ Failed to create booking. Please try again.');
-            return;
+            console.warn('⚠️ Session order creation failed, proceeding without order_id:', errText);
         }
     } catch (orderErr) {
-        console.error('❌ Could not create session order:', orderErr);
-        alert('❌ Network error. Please check your connection and try again.');
-        return;
+        console.warn('⚠️ Could not create session order (network error), proceeding without order_id:', orderErr);
     }
 
-    if (!paymentSessionId) {
-        alert('❌ Could not initialize payment. Please try again.');
-        return;
-    }
-
-    // Open Cashfree checkout modal
-    try {
-        console.log('Opening Cashfree checkout modal for session...');
-        const result = await cashfree.checkout({
-            paymentSessionId: paymentSessionId,
-            redirectTarget: "_modal"
-        });
-
-        if (result.error) {
-            console.log('User closed session checkout modal');
-            return;
-        }
-
-        if (result.paymentDetails) {
-            console.log('Cashfree session checkout completed');
-
-            // Verify payment status
-            const verifyRes = await fetch(`/api/create-order?order_id=${cashfreeOrderId}`);
-            if (verifyRes.ok) {
-                const verifyData = await verifyRes.json();
-                console.log('Session payment verification:', verifyData);
-
-                if (verifyData.status === 'success') {
-                    const paymentId = verifyData.payment_id || 'CF_' + Date.now();
-                    handleSessionPaymentSuccess({ payment_id: paymentId });
-                } else {
-                    console.warn('Session payment still processing, webhook will handle it');
-                    alert('✅ Payment received! Your booking is being confirmed.\n\nYou will receive the confirmation email shortly.');
-                }
-            } else {
-                console.warn('Could not verify session payment');
-                alert('✅ Payment completed! Your booking is being processed.\n\nYou will receive the confirmation email shortly.');
+    // Open Razorpay checkout
+    const options = {
+        key: RAZORPAY_KEY_ID,
+        amount: orderData ? orderData.amount : Math.round(amount * 100),
+        currency: orderData ? orderData.currency : currency.toUpperCase(),
+        name: 'QuantMentor',
+        description: description || 'Mentorship Session',
+        order_id: orderData ? orderData.order_id : undefined,
+        handler: function (response) {
+            const paymentId = response.razorpay_payment_id;
+            handleSessionPaymentSuccess({ payment_id: paymentId });
+        },
+        modal: {
+            ondismiss: function () {
+                console.log('Razorpay session checkout closed by user');
             }
+        },
+        prefill: {
+            name: bookingData ? bookingData.name : '',
+            email: customerEmail,
+            contact: bookingData ? bookingData.phone : ''
+        },
+        theme: {
+            color: '#e95836'
         }
+    };
+
+    try {
+        const razorpay = new Razorpay(options);
+        razorpay.open();
     } catch (e) {
-        console.error('Cashfree session checkout failed:', e);
+        console.error('Razorpay session checkout failed:', e);
         alert('❌ Payment could not be processed.\n' + e.message + '\n\nPlease try again.');
     }
 }
