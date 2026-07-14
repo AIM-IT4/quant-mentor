@@ -2285,11 +2285,10 @@ if (modalPayBtn) {
         let payCurrency = 'INR';
         let logAmountInr = payAmount; // For database stats
 
-        // CHECK 1: International Currency Mode?
+        // CHECK 1: International Currency Mode? (Display only — always pay in INR)
         if (window.currentProductIsLocalCurrency && window.currentProductLocalPrice) {
-            payCurrency = window.currentProductLocalPrice.currency.code;
-            payAmount = window.currentProductLocalPrice.amount;
-            console.log(`🌍 International Mode: Paying in ${payCurrency}`, payAmount);
+            console.log(`🌍 International Mode: Displaying ${window.currentProductLocalPrice.currency.code}, paying in INR`);
+            // Keep payAmount=INR and payCurrency=INR — Cashfree account only supports INR
         }
 
         // CHECK 2: Coupon Applied?
@@ -2727,19 +2726,13 @@ if (bookingForm) {
         let payCurrency = 'INR';
         let logAmountInr = sessionInfo.price;
 
-        // Check for Local Currency
-        // We need to re-convert because we only have the INR price in sessionInfo
-        // If we already displayed local price, we should re-fetch that conversion or just convert again to be safe
+        // Check for Local Currency (Display only — always pay in INR)
+        // Cashfree account only supports INR, so international conversion is cosmetic
         try {
             if (userCountryCode && userCountryCode !== 'IN') {
-                // We can re-use the convertPrice function
-                // Note: convertPrice is async, so we wrap this block or just call it
-                // But wait, the listener is async!
                 const localPrice = await convertPrice(sessionInfo.price, userCountryCode);
                 if (localPrice.currency.code !== 'INR') {
-                    payAmount = localPrice.amount;
-                    payCurrency = localPrice.currency.code;
-                    console.log(`🌍 Booking International: Paying in ${payCurrency}`, payAmount);
+                    console.log(`🌍 Booking International: Displaying ${localPrice.currency.code}, paying in INR`);
                 }
             }
         } catch (e) {
