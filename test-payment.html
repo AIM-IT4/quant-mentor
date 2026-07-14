@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Payment - QuantMentor</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body { font-family: system-ui, sans-serif; background: #0f0f0f; color: #e5e5e5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 40px; max-width: 420px; width: 90%; text-align: center; }
+        h1 { font-size: 1.5rem; margin: 0 0 8px; }
+        p { color: #888; margin: 0 0 24px; }
+        #pay-btn { background: #e95836; color: #fff; border: none; padding: 14px 32px; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; width: 100%; }
+        #pay-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        #pay-btn:hover:not(:disabled) { background: #d44a2a; }
+        #result { margin-top: 16px; padding: 12px; border-radius: 6px; display: none; word-break: break-all; font-size: 0.85rem; }
+        .success { background: #064e3b; color: #6ee7b7; display: block !important; }
+        .error { background: #450a0a; color: #fca5a5; display: block !important; }
+        .info { background: #1e3a5f; color: #93c5fd; display: block !important; }
+        .amount { font-size: 2.5rem; font-weight: 700; color: #fff; margin: 20px 0; }
+        .currency { font-size: 1rem; color: #888; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🧪 E2E Payment Test</h1>
+        <p>Test Razorpay integration with a real ₹1 charge</p>
+        <div class="amount">₹1 <span class="currency">INR</span></div>
+        <button id="pay-btn" onclick="startPayment()">Pay ₹1 — Test Now</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const RAZORPAY_KEY_ID = 'rzp_live_TDMg5qFcBBSOxf';
+        const resultEl = document.getElementById('result');
+        const btn = document.getElementById('pay-btn');
+
+        function showResult(msg, type) {
+            resultEl.className = type;
+            resultEl.textContent = msg;
+        }
+
+        async function startPayment() {
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+            showResult('Creating order...', 'info');
+
+            try {
+                const orderRes = await fetch('/api/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: 1,
+                        currency: 'INR',
+                        notes: { type: 'product', product_name: 'E2E Test Product', test: 'true' }
+                    })
+                });
+
+                if (!orderRes.ok) {
+                    const err = await orderRes.text();
+                    showResult('Order creation failed: ' + err, 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Pay ₹1 — Test Now';
+                    return;
+                }
+
+                const orderData = await orderRes.json();
+                showResult('Order created: ' + orderData.order_id, 'info');
+
+                const options = {
+                    key: RAZORPAY_KEY_ID,
+                    amount: orderData.amount,
+                    currency: orderData.currency,
+                    name: 'QuantMentor',
+                    description: 'E2E Test - ₹1',
+                    order_id: orderData.order_id,
+                    handler: function (response) {
+                        showResult('✅ Payment successful!\nPayment ID: ' + response.razorpay_payment_id + '\nOrder ID: ' + response.razorpay_order_id, 'success');
+                        btn.textContent = '✅ Done — Test Passed';
+                    },
+                    modal: {
+                        ondismiss: function () {
+                            showResult('⏹ Payment cancelled by user', 'error');
+                            btn.disabled = false;
+                            btn.textContent = 'Pay ₹1 — Test Now';
+                        }
+                    },
+                    theme: { color: '#e95836' }
+                };
+
+                const razorpay = new Razorpay(options);
+                razorpay.open();
+
+            } catch (err) {
+                showResult('Error: ' + err.message, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Pay ₹1 — Test Now';
+            }
+        }
+    </script>
+</body>
+</html>
