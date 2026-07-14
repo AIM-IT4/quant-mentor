@@ -19,7 +19,7 @@
     --text-primary: #ffffff;
     --text-secondary: rgba(255, 255, 255, 0.7);
     --text-tertiary: rgba(255, 255, 255, 0.5);
-    --text-muted: rgba(255, 255, 255, 0.4);
+    --text-muted: rgba(255, 255, 255, 0.55);
 
     /* Accents - Cinematic Multi-Accent System */
     --accent-primary: #f43f5e;
@@ -89,7 +89,12 @@ body.light-mode {
     /* Text Colors */
     --text-primary: #0f172a;
     --text-secondary: #475569;
-    --text-muted: #64748b;
+    --text-muted: #475569;
+
+    /* Accent Overrides for Light Mode (darker versions for 4.5:1+ on white) */
+    --accent-primary: #be123c;
+    --accent-secondary: #2563eb;
+    --success: #166534;
 
     /* Borders */
     --border-subtle: rgba(0, 0, 0, 0.08);
@@ -229,6 +234,34 @@ select,
 textarea {
     font-family: inherit;
     font-size: inherit;
+}
+
+/* --------------------------------
+   Focus Indicators (Accessibility)
+   -------------------------------- */
+:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+}
+
+.btn:focus-visible,
+.filter-btn:focus-visible,
+.scroll-top-btn:focus-visible,
+.theme-toggle:focus-visible,
+.mobile-menu-btn:focus-visible,
+.modal-close:focus-visible,
+.promo-close-btn:focus-visible,
+.promo-popup-close:focus-visible,
+.success-modal-close:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
 }
 
 /* --------------------------------
@@ -751,7 +784,7 @@ h6 {
 }
 
 .avatar-more {
-    background: var(--accent-gradient);
+    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
     color: white;
     display: flex;
     align-items: center;
@@ -958,7 +991,7 @@ h6 {
     display: grid;
     place-items: center;
     color: #ffffff;
-    background: var(--accent-gradient);
+    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
 }
 
 .flow-card h3 {
@@ -1025,7 +1058,7 @@ h6 {
     top: 16px;
     right: 32px;
     padding: 6px 16px;
-    background: var(--accent-gradient);
+    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
     border-radius: 100px;
     font-size: 0.75rem;
     font-weight: 600;
@@ -1040,7 +1073,7 @@ h6 {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent-gradient);
+    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
     border-radius: var(--radius-md);
     font-size: 1.4rem;
     color: white;
@@ -1189,7 +1222,7 @@ h6 {
     top: 16px;
     right: 16px;
     padding: 6px 12px;
-    background: var(--accent-gradient);
+    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
     border-radius: 100px;
     font-size: 0.7rem;
     font-weight: 600;
@@ -1240,7 +1273,7 @@ h6 {
 }
 
 .product-placeholder.bundle {
-    background: var(--accent-gradient);
+    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
 }
 
 .product-badge {
@@ -1461,7 +1494,7 @@ h6 {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: var(--accent-gradient);
+    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1630,7 +1663,7 @@ h6 {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent-gradient);
+    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
     border-radius: var(--radius-sm);
     color: white;
     font-size: 1.2rem;
@@ -1696,9 +1729,10 @@ h6 {
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-    outline: none;
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
 }
 
 .form-group input::placeholder,
@@ -1756,9 +1790,10 @@ h6 {
 }
 
 #couponInput:focus {
-    outline: none;
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
 }
 
 .coupon-row {
@@ -2144,9 +2179,10 @@ h6 {
 }
 
 .coupon-row input:focus {
-    border-color: var(--accent-primary);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.1);
+    border-color: var(--accent-secondary);
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
 }
 
 .coupon-row .btn-secondary {
@@ -2361,7 +2397,7 @@ body.light-mode .theme-toggle .fa-moon {
     }
 
     .nav-cta {
-        background: var(--accent-gradient);
+        background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
         border-radius: 100px;
         margin-top: 10px;
         box-shadow: 0 10px 20px rgba(45, 212, 191, 0.2);
@@ -3073,11 +3109,11 @@ body.light-mode .hero-bg-effects {
 }
 .popup-original-price {
     text-decoration: line-through;
-    color: #64748b;
+    color: #94a3b8;
     font-size: 0.95rem;
 }
 .popup-discounted-price {
-    color: #22c55e;
+    color: var(--success);
     font-size: 1.4rem;
     font-weight: 800;
 }
@@ -3153,7 +3189,7 @@ body.light-mode .hero-bg-effects {
 }
 .popup-footer-note {
     font-size: 0.75rem;
-    color: #64748b;
+    color: #94a3b8;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -3244,7 +3280,7 @@ body.light-mode .hero-bg-effects {
 }
 .success-icon-wrapper {
     font-size: 3.5rem;
-    color: #22c55e;
+    color: var(--success);
     margin-bottom: 15px;
     filter: drop-shadow(0 0 15px rgba(34, 197, 94, 0.3));
     animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -3274,7 +3310,8 @@ body.light-mode .hero-bg-effects {
     padding: 14px 28px;
     font-size: 1rem;
     font-weight: 600;
-    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+    color: #ffffff;
+    background: linear-gradient(135deg, #16a34a, #15803d) !important;
     border: none;
     box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
     transition: all 0.3s ease;
@@ -3348,7 +3385,7 @@ body.light-mode .hero-bg-effects {
 .cross-sell-price {
     font-size: 0.9rem;
     font-weight: 700;
-    color: var(--accent-secondary, #fbbf24);
+    color: var(--accent-secondary, #2563eb);
 }
 .btn-cross-sell-buy {
     padding: 6px 12px;
@@ -3366,4 +3403,51 @@ body.light-mode .hero-bg-effects {
     text-transform: none;
     color: #f97316; /* Beautiful orange-gold accent */
     text-shadow: 0 0 30px rgba(249, 115, 22, 0.15);
+}
+
+/* Light Mode Accessibility Overrides */
+body.light-mode .curly-text {
+    color: #c2410c;
+    text-shadow: none;
+}
+
+body.light-mode .hero-badge {
+    color: #166534;
+}
+
+body.light-mode .verified-badge {
+    color: #166534;
+}
+
+body.light-mode .form-note {
+    color: #166534;
+}
+
+body.light-mode .service-features i {
+    color: #166534;
+}
+
+body.light-mode .popup-original-price {
+    color: #475569;
+}
+
+body.light-mode .popup-footer-note {
+    color: #475569;
+}
+
+body.light-mode .btn-success-download {
+    color: #ffffff;
+}
+
+body.light-mode .popular-badge,
+body.light-mode .featured-badge {
+    background: linear-gradient(135deg, #9f1239 0%, #1e40af 50%, #92400e 100%);
+}
+
+body.light-mode .hero-proof-row i {
+    color: #b45309;
+}
+
+body.light-mode .badge-dot {
+    background: #166534;
 }
