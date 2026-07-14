@@ -1306,7 +1306,7 @@ async function loadBlogsFromSupabase() {
             };
 
             const imageHtml = blog.cover_image_url
-                ? `<div class="product-image" style="height:200px; padding:0; overflow:hidden;"><img src="${blog.cover_image_url}" style="width:100%; height:100%; object-fit:cover; transition:transform 0.5s ease;"></div>`
+                ? `<div class="product-image" style="height:200px; padding:0; overflow:hidden;"><img src="${blog.cover_image_url}" alt="${blog.title || 'Blog post cover image'}" style="width:100%; height:100%; object-fit:cover; transition:transform 0.5s ease;"></div>`
                 : `<div class="product-image" style="height:200px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05);"><i class="fas fa-newspaper" style="font-size:3em; opacity:0.5;"></i></div>`;
 
             card.innerHTML = `
@@ -1446,7 +1446,7 @@ async function displaySupabaseProducts(products) {
 
             const imageSection = product.cover_image_url ?
                 `<div class="product-image" style="padding:0; height:240px; background:rgba(255,255,255,0.02); display:flex; align-items:center; justify-content:center; overflow:hidden;">
-                    <img src="${product.cover_image_url}" style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; transition:transform 0.5s ease;">
+                    <img src="${product.cover_image_url}" alt="${product.name || 'Product cover image'}" style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; transition:transform 0.5s ease;">
                     ${badgeHtml}
                  </div>` :
                 `<div class="product-image"><div class="product-placeholder pdf"><i class="fas fa-file-pdf"></i></div>${badgeHtml}</div>`;
@@ -3133,7 +3133,7 @@ function displayBlogs(blogs) {
 
         div.innerHTML = `
             <div class="product-image" style="padding:0; aspect-ratio:16/9; overflow:hidden; background:#1e293b;">
-                ${blog.cover_image_url ? `<img src="${blog.cover_image_url}" style="width:100%;height:100%;object-fit:cover;">` : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:gray;"><i class="fas fa-newspaper fa-3x"></i></div>`}
+                ${blog.cover_image_url ? `<img src="${blog.cover_image_url}" alt="${blog.title || 'Blog post cover image'}" style="width:100%;height:100%;object-fit:cover;">` : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:gray;"><i class="fas fa-newspaper fa-3x"></i></div>`}
                 <div class="product-badge" style="background:#8b5cf6;">ARTICLE</div>
             </div>
             <div class="product-content" style="display:flex; flex-direction:column;">
@@ -3298,7 +3298,9 @@ window.openBlogModal = async function (id) {
             const cover = document.getElementById('blogModalCover');
             if (data.cover_image_url) {
                 cover.style.display = 'block';
-                cover.querySelector('img').src = data.cover_image_url;
+                const coverImg = cover.querySelector('img');
+                coverImg.src = data.cover_image_url;
+                coverImg.alt = data.title ? data.title + ' cover image' : 'Blog post cover image';
             }
         }
     } catch (e) {
