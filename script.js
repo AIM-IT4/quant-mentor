@@ -655,11 +655,12 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ================================
-// RAZORPAY PAYMENT INTEGRATION
+// CASHFREE PAYMENT INTEGRATION
 // ================================
 
-// ⚠️ ADD YOUR RAZORPAY KEY ID BELOW
-const RAZORPAY_KEY_ID = 'rzp_live_SBbq38M84PSrrG';
+// ⚠️ ADD YOUR CASHFREE APP ID BELOW
+const CASHFREE_APP_ID = 'TEST111398228247115b6b03adb772be22893111';
+const CASHFREE_ENV = 'sandbox'; // 'sandbox' for testing, 'production' for live
 
 // Your business name
 const BUSINESS_NAME = 'QuantMentor';
@@ -1956,13 +1957,12 @@ async function fetchProductLinks() {
 
 async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountForLogging = null, userDetails = null) {
     const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName] || '';
-    console.log('🚀 initRazorpayCheckout called:', { productName, amount, currency, inrAmountForLogging, userDetails });
+    console.log('🚀 initCashfreeCheckout called:', { productName, amount, currency, inrAmountForLogging, userDetails });
 
     // Handle FREE products (0 value) - skip payment, go directly to download
     if (amount <= 0) {
         console.log('🆓 Free product detected');
         if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
-            // Use provided details or prompt if missing
             const customerName = (userDetails && userDetails.name) ? userDetails.name : (prompt('Enter your Name:') || 'Customer');
             const customerEmail = (userDetails && userDetails.email) ? userDetails.email : prompt('Enter your email to receive the free download:');
 
@@ -1982,36 +1982,36 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
     }
 
     // Validate key for paid products
-    if (RAZORPAY_KEY_ID === 'YOUR_RAZORPAY_KEY_ID_HERE') {
-        alert('⚠️ Razorpay not configured!\n\nAdd your Key ID in script.js line 253');
+    if (CASHFREE_APP_ID === 'YOUR_CASHFREE_APP_ID_HERE') {
+        alert('⚠️ Cashfree not configured!\n\nAdd your App ID in script.js');
         return;
     }
 
-    // Check if Razorpay SDK is loaded
-    if (typeof Razorpay === 'undefined') {
-        console.log('❌ Razorpay SDK not loaded, attempting to load...');
+    // Initialize Cashfree SDK
+    if (typeof Cashfree === 'undefined') {
+        console.log('❌ Cashfree SDK not loaded, attempting to load...');
         alert('⏳ Loading payment system...\nPlease wait and try again in 2 seconds.');
 
-        // Try to load Razorpay SDK dynamically
         const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
         script.onload = function () {
-            console.log('✅ Razorpay SDK loaded successfully');
+            console.log('✅ Cashfree SDK loaded successfully');
             alert('✅ Payment system loaded!\nPlease click "Buy Now" again.');
         };
         script.onerror = function () {
-            console.error('❌ Failed to load Razorpay SDK');
+            console.error('❌ Failed to load Cashfree SDK');
             alert('❌ Unable to load payment system.\nPlease refresh the page and try again.');
         };
         document.head.appendChild(script);
         return;
     }
 
-    // Smallest currency sub-unit multiplier (100 for INR/USD/GBP, 1 for JPY)
-    const multiplier = getSubunitMultiplier(currency);
+    const cashfree = Cashfree({ mode: CASHFREE_ENV });
 
-    // 🔥 INSTANT CAPTURE: Create server-side order with payment_capture: 1
-    let orderId = null;
+    // Create server-side order with all metadata
+    let orderData = null;
+    let paymentSessionId = null;
+    let cashfreeOrderId = null;
     try {
         const orderNotes = {
             type: 'product',
@@ -2022,137 +2022,110 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
             customer_phone: userDetails ? userDetails.phone : '',
             inr_amount: String(inrAmountForLogging || amount)
         };
-        console.log('📦 Creating Razorpay order for instant capture...');
+        console.log('📦 Creating Cashfree order...');
         const orderRes = await fetch('/api/create-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ amount, currency, notes: orderNotes })
         });
         if (orderRes.ok) {
-            const orderData = await orderRes.json();
-            orderId = orderData.order_id;
-            console.log('✅ Order created for instant capture:', orderId);
+            orderData = await orderRes.json();
+            paymentSessionId = orderData.payment_session_id;
+            cashfreeOrderId = orderData.order_id;
+            console.log('✅ Cashfree order created:', { orderId: cashfreeOrderId, paymentSessionId });
         } else {
             const errText = await orderRes.text();
-            console.warn('⚠️ Order creation failed, proceeding without order_id:', errText);
+            console.warn('⚠️ Order creation failed:', errText);
+            alert('❌ Failed to create payment order. Please try again.');
+            return;
         }
     } catch (orderErr) {
-        console.warn('⚠️ Could not create order (network error), proceeding without order_id:', orderErr);
+        console.error('❌ Could not create order:', orderErr);
+        alert('❌ Network error. Please check your connection and try again.');
+        return;
     }
 
-    var options = {
-        "key": RAZORPAY_KEY_ID,
-        "amount": Math.round(amount * multiplier), // Convert to subunits (paise/cents)
-        "currency": currency,
-        "name": BUSINESS_NAME,
-        "description": productName,
-        "payment_capture": true, // ✅ Force Auto-Capture
-        "notes": {
-            "type": "product",
-            "product_name": productName,
-            "download_link": downloadLink,
-            "customer_name": userDetails ? userDetails.name : "",
-            "customer_email": userDetails ? userDetails.email : "",
-            "customer_phone": userDetails ? userDetails.phone : "",
-            "inr_amount": inrAmountForLogging || amount
-        },
-        "prefill": {
-            "name": userDetails ? userDetails.name : "",
-            "email": userDetails ? userDetails.email : "",
-            "contact": userDetails ? userDetails.phone : ""
-        },
-        "handler": async function (response) {
-            console.log('Payment success:', response);
-            // ✅ Payment successful! (Instant capture via order_id means payment is already captured)
-            const paymentId = response.razorpay_payment_id;
-            const customerEmail = (userDetails && userDetails.email) ? userDetails.email : prompt('Enter your email to receive the download link:');
-
-            // ✅ FULFILLMENT: Log purchase + Send email with Drive link
-            // Log purchase to Supabase for statistics (metadata only, not files)
-            if (window.supabaseClient) {
-                try {
-                    const loggedAmount = inrAmountForLogging !== null ? inrAmountForLogging : ((currency === 'INR') ? amount : 0);
-                    await window.supabaseClient.from('purchases').insert({
-                        customer_email: customerEmail,
-                        product_name: productName,
-                        amount: Math.round(loggedAmount),
-                        currency: currency || 'INR',
-                        payment_id: paymentId,
-                        source: 'frontend_legacy',
-                        download_link: downloadLink
-                    });
-                    console.log('✅ Purchase logged to Supabase:', { customerEmail, productName, paymentId });
-                } catch (err) {
-                    console.error('❌ Failed to log purchase:', err);
-                    // Continue - don't block user experience
-                }
-            }
-
-            // Send email with download link (CRITICAL - must happen before alert)
-            if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE' && customerEmail) {
-                await sendProductEmail(customerEmail, productName, paymentId, downloadLink, userDetails ? userDetails.name : 'Customer');
-            }
-
-            if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
-                if (typeof window.showSuccessModal === 'function') {
-                    window.showSuccessModal(productName, downloadLink);
-                } else {
-                    alert('🎉 Payment Successful!\n\nCheck your email for the download link.\n\n📩 IMPORTANT: Please check your Spam/Junk folder.\n\nClick OK to also open it now.');
-                    window.open(downloadLink, '_blank');
-                }
-            } else {
-                alert('🎉 Payment Successful!\n\n⚠️ Download link not configured. Please contact support.');
-            }
-        },
-        "theme": {
-            "color": "#6366f1"
-        },
-        "modal": {
-            "ondismiss": function () {
-                console.log('Checkout modal closed');
-            }
-        }
-    };
-
-    // Attach order_id if we successfully created a server-side order (instant capture)
-    if (orderId) {
-        options.order_id = orderId;
-        console.log('✅ Attached order_id for instant capture:', orderId);
+    if (!paymentSessionId) {
+        alert('❌ Could not initialize payment. Please try again.');
+        return;
     }
 
+    // Open Cashfree checkout modal
     try {
-        console.log('Initializing Razorpay with options:', { ...options, key: '***' });
-        var rzp = new Razorpay(options);
-
-        rzp.on('payment.failed', function (response) {
-            console.error('Payment failed:', response.error);
-            alert('❌ Payment Failed\n\n' + response.error.description);
+        console.log('Opening Cashfree checkout modal...');
+        const result = await cashfree.checkout({
+            paymentSessionId: paymentSessionId,
+            redirectTarget: "_modal"
         });
 
-        rzp.open();
-        console.log('Razorpay opened successfully');
-    } catch (e) {
-        console.error('Razorpay init failed:', e);
+        if (result.error) {
+            console.log('User closed checkout modal or payment error occurred');
+            return;
+        }
 
-        // TEST BYPASS: For testing purposes, simulate successful payment
-        if (confirm('❌ Payment initialization failed!\n\nFor testing: Simulate successful payment?\n\nClick OK for test download, Cancel to retry.')) {
-            const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName];
-            if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
-                const customerEmail = prompt('Enter your email for test download:');
-                if (customerEmail && customerEmail.includes('@')) {
-                    sendProductEmail(customerEmail, productName, 'TEST_PAYMENT_' + Date.now(), downloadLink);
-                    alert('🧪 Test Payment Successful!\n\nTest Download link sent to: ' + customerEmail + '\n\nClick OK to download.');
-                    window.open(downloadLink, '_blank');
+        if (result.paymentDetails) {
+            console.log('Cashfree checkout completed:', result.paymentDetails);
+
+            // Verify payment status from server
+            console.log('🔍 Verifying payment with order:', cashfreeOrderId);
+            const verifyRes = await fetch(`/api/verify-order?order_id=${cashfreeOrderId}`);
+            let paymentId = null;
+
+            if (verifyRes.ok) {
+                const verifyData = await verifyRes.json();
+                console.log('Verification result:', verifyData);
+
+                if (verifyData.status === 'success') {
+                    paymentId = verifyData.payment_id || 'CF_' + Date.now();
+                    const customerEmail = (userDetails && userDetails.email) ? userDetails.email : prompt('Enter your email to receive the download link:');
+
+                    // Log purchase to Supabase
+                    if (window.supabaseClient) {
+                        try {
+                            const loggedAmount = inrAmountForLogging !== null ? inrAmountForLogging : ((currency === 'INR') ? amount : 0);
+                            await window.supabaseClient.from('purchases').insert({
+                                customer_email: customerEmail,
+                                product_name: productName,
+                                amount: Math.round(loggedAmount),
+                                currency: currency || 'INR',
+                                payment_id: paymentId,
+                                source: 'frontend',
+                                download_link: downloadLink
+                            });
+                            console.log('✅ Purchase logged to Supabase:', { customerEmail, productName, paymentId });
+                        } catch (err) {
+                            console.error('❌ Failed to log purchase:', err);
+                        }
+                    }
+
+                    // Send email with download link
+                    if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE' && customerEmail) {
+                        await sendProductEmail(customerEmail, productName, paymentId, downloadLink, userDetails ? userDetails.name : 'Customer');
+                    }
+
+                    // Show success
+                    if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
+                        if (typeof window.showSuccessModal === 'function') {
+                            window.showSuccessModal(productName, downloadLink);
+                        } else {
+                            alert('🎉 Payment Successful!\n\nCheck your email for the download link.\n\nIMPORTANT: Please check your Spam/Junk folder.\n\nClick OK to also open it now.');
+                            window.open(downloadLink, '_blank');
+                        }
+                    } else {
+                        alert('🎉 Payment Successful!\n\nDownload link not configured. Please contact support.');
+                    }
                 } else {
-                    alert('🧪 Test Download!\n\nClick OK to download test product.');
-                    window.open(downloadLink, '_blank');
+                    console.warn('Payment verification not confirmed yet, webhook will process it');
+                    alert('✅ Payment received! We are processing your order.\n\nYou will receive the download link via email shortly.\n\nPlease check your inbox (and Spam folder).');
                 }
             } else {
-                alert('⚠️ Download link not configured for testing.');
+                console.warn('Could not verify payment, showing generic success');
+                alert('✅ Payment completed! Your order is being processed.\n\nYou will receive the download link via email shortly.');
             }
-        } else {
-            alert('❌ Critical Error: Could not initialize payment gateway.\n' + e.message + '\n\nPlease refresh the page and try again.');
         }
+    } catch (e) {
+        console.error('Cashfree checkout failed:', e);
+        alert('❌ Payment could not be processed.\n' + e.message + '\n\nPlease try again.');
     }
 }
 
@@ -2343,8 +2316,8 @@ if (modalPayBtn) {
         }
 
         // Round amounts to 2 decimal places for payment (standard currency precision)
-        // However, Razorpay expects 'amount' argument to be in MAJOR units (e.g., Doctors Fees 500)
-        // which it then multiplies by 100 in initRazorpayCheckout.
+        // initRazorpayCheckout expects 'amount' in MAJOR units (e.g., 500)
+        // which it then converts to subunits (paise/cents).
         // So we keep it as integer or float major units.
 
         // Ensure we don't send crazy floats
@@ -2746,7 +2719,7 @@ if (bookingForm) {
             day: 'numeric'
         });
 
-        // Create session description for Razorpay
+        // Create session description for payment
         const sessionDescription = `${sessionInfo.name} on ${formattedDate} at ${time}`;
 
         // Prepare Payment Details
@@ -2791,32 +2764,38 @@ if (bookingForm) {
             localStorage.setItem('pendingBooking', JSON.stringify(window.pendingBooking));
         } catch (e) { console.warn('Could not persist booking to localStorage:', e); }
 
-        // Open Razorpay for session payment
+        // Initiate session payment
         initSessionPayment(sessionDescription, payAmount, email, payCurrency, logAmountInr, window.pendingBooking);
     });
 }
 
 /**
- * Initialize Razorpay for session booking payment
+ * Initialize Cashfree for session booking payment
  */
-// Initialize Razorpay for session booking payment
 async function initSessionPayment(description, amount, customerEmail, currency = 'INR', inrAmountForLogging = null, bookingData = null) {
     // Handle FREE sessions (0 value)
     if (amount <= 0) {
-        handleSessionPaymentSuccess({ razorpay_payment_id: 'FREE_SESSION_' + Date.now() });
+        handleSessionPaymentSuccess({ payment_id: 'FREE_SESSION_' + Date.now() });
         return;
     }
 
-    if (RAZORPAY_KEY_ID === 'YOUR_RAZORPAY_KEY_ID_HERE') {
+    if (CASHFREE_APP_ID === 'YOUR_CASHFREE_APP_ID_HERE') {
         alert('⚠️ Payment system not configured. Please contact the admin.');
         return;
     }
 
-    // Smallest currency sub-unit multiplier (100 for INR/USD/GBP, 1 for JPY)
-    const multiplier = getSubunitMultiplier(currency);
+    // Initialize Cashfree SDK
+    if (typeof Cashfree === 'undefined') {
+        console.log('❌ Cashfree SDK not loaded');
+        alert('❌ Payment system not available. Please refresh the page.');
+        return;
+    }
 
-    // 🔥 INSTANT CAPTURE: Create server-side order with payment_capture: 1
-    let orderId = null;
+    const cashfree = Cashfree({ mode: CASHFREE_ENV });
+
+    // Create server-side order with all metadata
+    let paymentSessionId = null;
+    let cashfreeOrderId = null;
     try {
         const orderNotes = {
             type: 'session',
@@ -2832,7 +2811,7 @@ async function initSessionPayment(description, amount, customerEmail, currency =
             customer_message: bookingData ? bookingData.message : '',
             customer_country: window.userCountryCode || 'Unknown'
         };
-        console.log('📦 Creating Razorpay order for session instant capture...');
+        console.log('📦 Creating Cashfree order for session...');
         const orderRes = await fetch('/api/create-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -2840,66 +2819,71 @@ async function initSessionPayment(description, amount, customerEmail, currency =
         });
         if (orderRes.ok) {
             const orderData = await orderRes.json();
-            orderId = orderData.order_id;
-            console.log('✅ Session order created for instant capture:', orderId);
+            paymentSessionId = orderData.payment_session_id;
+            cashfreeOrderId = orderData.order_id;
+            console.log('✅ Session order created:', { orderId: cashfreeOrderId, paymentSessionId });
         } else {
             const errText = await orderRes.text();
-            console.warn('⚠️ Session order creation failed, proceeding without order_id:', errText);
+            console.warn('⚠️ Session order creation failed:', errText);
+            alert('❌ Failed to create booking. Please try again.');
+            return;
         }
     } catch (orderErr) {
-        console.warn('⚠️ Could not create session order (network error), proceeding without order_id:', orderErr);
+        console.error('❌ Could not create session order:', orderErr);
+        alert('❌ Network error. Please check your connection and try again.');
+        return;
     }
 
-    var options = {
-        "key": RAZORPAY_KEY_ID,
-        "amount": Math.round(amount * multiplier),
-        "currency": currency,
-        "name": BUSINESS_NAME,
-        "description": description,
-        "payment_capture": true, // ✅ Force Auto-Capture
-        "handler": function (response) {
-            handleSessionPaymentSuccess(response);
-        },
-        "prefill": {
-            "email": customerEmail,
-        },
-        "notes": {
-            "type": "session",
-            "customer_name": bookingData ? bookingData.name : "",
-            "customer_email": customerEmail,
-            "session_name": bookingData ? bookingData.sessionType : "",
-            "session_date": bookingData ? bookingData.date : "",
-            "session_time": bookingData ? bookingData.time : "",
-            "session_duration": bookingData ? bookingData.duration : "",
-            "session_price": inrAmountForLogging || amount,
-            "customer_phone": bookingData ? bookingData.phone : "",
-            "customer_message": bookingData ? bookingData.message : ""
-        },
-        "theme": {
-            "color": "#6366f1"
+    if (!paymentSessionId) {
+        alert('❌ Could not initialize payment. Please try again.');
+        return;
+    }
+
+    // Open Cashfree checkout modal
+    try {
+        console.log('Opening Cashfree checkout modal for session...');
+        const result = await cashfree.checkout({
+            paymentSessionId: paymentSessionId,
+            redirectTarget: "_modal"
+        });
+
+        if (result.error) {
+            console.log('User closed session checkout modal');
+            return;
         }
-    };
 
-    // Attach order_id if we successfully created a server-side order (instant capture)
-    if (orderId) {
-        options.order_id = orderId;
-        console.log('✅ Attached order_id for session instant capture:', orderId);
+        if (result.paymentDetails) {
+            console.log('Cashfree session checkout completed');
+
+            // Verify payment status
+            const verifyRes = await fetch(`/api/verify-order?order_id=${cashfreeOrderId}`);
+            if (verifyRes.ok) {
+                const verifyData = await verifyRes.json();
+                console.log('Session payment verification:', verifyData);
+
+                if (verifyData.status === 'success') {
+                    const paymentId = verifyData.payment_id || 'CF_' + Date.now();
+                    handleSessionPaymentSuccess({ payment_id: paymentId });
+                } else {
+                    console.warn('Session payment still processing, webhook will handle it');
+                    alert('✅ Payment received! Your booking is being confirmed.\n\nYou will receive the confirmation email shortly.');
+                }
+            } else {
+                console.warn('Could not verify session payment');
+                alert('✅ Payment completed! Your booking is being processed.\n\nYou will receive the confirmation email shortly.');
+            }
+        }
+    } catch (e) {
+        console.error('Cashfree session checkout failed:', e);
+        alert('❌ Payment could not be processed.\n' + e.message + '\n\nPlease try again.');
     }
-
-    var rzp = new Razorpay(options);
-
-    rzp.on('payment.failed', function (response) {
-        alert('❌ Payment Failed\n\n' + response.error.description);
-    });
-
-    rzp.open();
 }
 
 /**
  * Handle successful session payment - send email notification
  */
 async function handleSessionPaymentSuccess(response) {
-    const paymentId = response.razorpay_payment_id;
+    const paymentId = response.payment_id || response.razorpay_payment_id;
 
     // Try to get booking from window, fallback to localStorage
     let booking = window.pendingBooking;
