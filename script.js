@@ -1955,7 +1955,7 @@ async function fetchProductLinks() {
     }
 }
 
-async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAmountForLogging = null, userDetails = null) {
+async function initCashfreeCheckout(productName, amount, currency = 'INR', inrAmountForLogging = null, userDetails = null) {
     const downloadLink = PRODUCT_DOWNLOAD_LINKS[productName] || '';
     console.log('🚀 initCashfreeCheckout called:', { productName, amount, currency, inrAmountForLogging, userDetails });
 
@@ -2316,7 +2316,7 @@ if (modalPayBtn) {
         }
 
         // Round amounts to 2 decimal places for payment (standard currency precision)
-        // initRazorpayCheckout expects 'amount' in MAJOR units (e.g., 500)
+        // initCashfreeCheckout expects 'amount' in MAJOR units (e.g., 500)
         // which it then converts to subunits (paise/cents).
         // So we keep it as integer or float major units.
 
@@ -2378,8 +2378,8 @@ if (modalPayBtn) {
                     document.getElementById('productModal').classList.remove('active');
                     document.body.style.overflow = '';
 
-                    console.log('Calling initRazorpayCheckout with User Details...');
-                    initRazorpayCheckout(productName, payAmount, payCurrency, logAmountInr, {
+                    console.log('Calling initCashfreeCheckout with User Details...');
+                    initCashfreeCheckout(productName, payAmount, payCurrency, logAmountInr, {
                         name: udName,
                         email: udEmail,
                         phone: udPhone,
@@ -2392,7 +2392,7 @@ if (modalPayBtn) {
             console.error('User details modal not found, falling back to direct checkout');
             document.getElementById('productModal').classList.remove('active');
             document.body.style.overflow = '';
-            initRazorpayCheckout(productName, payAmount, payCurrency, logAmountInr);
+            initCashfreeCheckout(productName, payAmount, payCurrency, logAmountInr);
         }
     });
 } else {
@@ -2883,7 +2883,7 @@ async function initSessionPayment(description, amount, customerEmail, currency =
  * Handle successful session payment - send email notification
  */
 async function handleSessionPaymentSuccess(response) {
-    const paymentId = response.payment_id || response.razorpay_payment_id;
+    const paymentId = response.payment_id;
 
     // Try to get booking from window, fallback to localStorage
     let booking = window.pendingBooking;
