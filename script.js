@@ -2068,7 +2068,7 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
 
             // Verify payment status from server
             console.log('🔍 Verifying payment with order:', cashfreeOrderId);
-            const verifyRes = await fetch(`/api/verify-order?order_id=${cashfreeOrderId}`);
+            const verifyRes = await fetch(`/api/create-order?order_id=${cashfreeOrderId}`);
             let paymentId = null;
 
             if (verifyRes.ok) {
@@ -2856,7 +2856,7 @@ async function initSessionPayment(description, amount, customerEmail, currency =
             console.log('Cashfree session checkout completed');
 
             // Verify payment status
-            const verifyRes = await fetch(`/api/verify-order?order_id=${cashfreeOrderId}`);
+            const verifyRes = await fetch(`/api/create-order?order_id=${cashfreeOrderId}`);
             if (verifyRes.ok) {
                 const verifyData = await verifyRes.json();
                 console.log('Session payment verification:', verifyData);
