@@ -2248,10 +2248,11 @@ if (modalPayBtn) {
         let payCurrency = 'INR';
         let logAmountInr = payAmount; // For database stats
 
-        // CHECK 1: International Currency Mode? (Display only — always pay in INR)
+        // CHECK 1: International Currency Mode? Use local price for Razorpay checkout
         if (window.currentProductIsLocalCurrency && window.currentProductLocalPrice) {
-            console.log(`🌍 International Mode: Displaying ${window.currentProductLocalPrice.currency.code}, paying in INR`);
-            // Keep payAmount=INR and payCurrency=INR — Razorpay handles multi-currency conversion inline
+            payAmount = window.currentProductLocalPrice.amount;
+            payCurrency = window.currentProductLocalPrice.currency.code;
+            console.log(`🌍 International Mode: Paying ${payCurrency} ${payAmount} (INR ${logAmountInr} tracked in backend)`);
         }
 
         // CHECK 2: Coupon Applied?
@@ -2689,13 +2690,14 @@ if (bookingForm) {
         let payCurrency = 'INR';
         let logAmountInr = sessionInfo.price;
 
-        // Check for Local Currency (Display only — always pay in INR)
-        // Razorpay handles multi-currency conversion inline at checkout
+        // Check for Local Currency (use local price for Razorpay checkout)
         try {
             if (userCountryCode && userCountryCode !== 'IN') {
                 const localPrice = await convertPrice(sessionInfo.price, userCountryCode);
                 if (localPrice.currency.code !== 'INR') {
-                    console.log(`🌍 Booking International: Displaying ${localPrice.currency.code}, paying in INR`);
+                    payAmount = localPrice.amount;
+                    payCurrency = localPrice.currency.code;
+                    console.log(`🌍 Booking International: Paying ${payCurrency} ${payAmount} (INR ${logAmountInr} tracked in backend)`);
                 }
             }
         } catch (e) {
