@@ -719,6 +719,15 @@ function initSupabaseAndLoad() {
     }
 }
 
+// Fetched country cache — MUST be declared before initSupabaseAndLoad (TDZ guard)
+let userCountryCode = null;
+
+// Cache for exchange rates (persisted to localStorage) — TDZ guard
+let exchangeRatesCache = null;
+let exchangeRatesTimestamp = null;
+const RATES_CACHE_DURATION = 3600000; // 1 hour in milliseconds
+const RATES_CACHE_KEY = 'qm_exchange_rates';
+
 // Try immediately, retry briefly if SDK not yet loaded (e.g. slow network)
 if (!initSupabaseAndLoad()) {
     let retries = 0;
@@ -733,9 +742,6 @@ if (!initSupabaseAndLoad()) {
         }
     }, 50);
 }
-
-// Fetched country cache
-let userCountryCode = null;
 
 async function getUserCountry() {
     try {
@@ -1043,12 +1049,6 @@ const CURRENCY_MAP = {
     'MH': { code: 'USD', symbol: '$', name: 'US Dollar' },
     'FM': { code: 'USD', symbol: '$', name: 'US Dollar' },
 };
-
-// Cache for exchange rates (persisted to localStorage)
-let exchangeRatesCache = null;
-let exchangeRatesTimestamp = null;
-const RATES_CACHE_DURATION = 3600000; // 1 hour in milliseconds
-const RATES_CACHE_KEY = 'qm_exchange_rates';
 
 // Currencies with no fractional subunits for payment gateways
 const ZERO_DECIMAL_CURRENCIES = new Set(['JPY', 'KRW', 'VND']);
