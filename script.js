@@ -305,9 +305,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const couponInfo = window.activeModalCoupon || { code: '', percent: 0 };
             const modalPriceEl = document.getElementById('modalPrice');
             const feedbackEl = document.getElementById('modalCouponFeedback'); // Get feedback element
-            const basePrice = (window.currentProductInrPrice !== undefined && window.currentProductInrPrice !== null)
-                ? window.currentProductInrPrice
-                : parseInt((modalPriceEl?.textContent || '₹0').replace(/[^0-9]/g, ''));
+            const basePriceText = modalPriceEl?.textContent || '₹0';
+            const basePriceMatch = basePriceText.match(/[\d.]+/);
+            const basePrice = basePriceMatch ? parseFloat(basePriceMatch[0]) : 0;
+            const currencySymbolMatch = basePriceText.match(/^[^\d]+/);
+            const currencySymbol = currencySymbolMatch ? currencySymbolMatch[0].trim() : '₹';
 
 
             // Clear previous feedback
@@ -373,15 +375,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (isValid) {
                 const discount = appliedDiscount;
-                const discounted = Math.max(0, Math.round(basePrice * (100 - discount) / 100));
+                let discounted = Math.max(0, basePrice * (100 - discount) / 100);
+                let displayPrice = '';
 
-                const isLocal = window.currentProductIsLocalCurrency;
-                let displayPrice = '₹' + discounted;
-                if (isLocal) {
-                    try {
-                        const localDiscounted = await convertPrice(discounted, window.userCountryCode || userCountryCode);
-                        displayPrice = formatPrice(localDiscounted);
-                    } catch (e) { /* fallback to INR */ }
+                if (currencySymbol === '₹' || currencySymbol === 'INR') {
+                    discounted = Math.round(discounted);
+                    displayPrice = currencySymbol + discounted;
+                } else {
+                    discounted = parseFloat(discounted.toFixed(2));
+                    displayPrice = currencySymbol + discounted.toFixed(2);
                 }
 
                 modalPriceEl.innerHTML = '🎯 <span style="color:#f43f5e;font-size:2rem;font-weight:800;">' + displayPrice + '</span>';

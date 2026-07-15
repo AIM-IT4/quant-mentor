@@ -992,23 +992,24 @@
                         if (isValid) {
                             const discount = appliedDiscount;
                             const originalPrice = parseFloat(buyBtn.dataset.price);
+                            const currentCurrency = buyBtn.dataset.currency || 'INR';
                             // Calculate new price
-                            const discountedPrice = Math.max(0, Math.round(originalPrice * (100 - discount) / 100));
+                            const discountedPrice = Math.max(0, originalPrice * (100 - discount) / 100);
 
                             // Update Display
                             let priceDisplay = '';
-                            const currentCurrency = buyBtn.dataset.currency || 'INR';
 
                             if (currentCurrency === 'INR') {
-                                priceDisplay = `₹${discountedPrice}`;
+                                priceDisplay = `₹${Math.round(discountedPrice)}`;
                                 priceEl.innerHTML = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">₹${originalPrice}</span> ${priceDisplay}`;
+                                buyBtn.dataset.price = Math.round(discountedPrice);
                             } else {
-                                priceDisplay = `${discountedPrice} ${currentCurrency}`;
-                                priceEl.innerHTML = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">${originalPrice} ${currentCurrency}</span> ${priceDisplay}`;
+                                priceDisplay = `${discountedPrice.toFixed(2)} ${currentCurrency}`;
+                                priceEl.innerHTML = `<span style="text-decoration:line-through; color:var(--text-muted); font-size:0.8em; margin-right:10px;">${originalPrice.toFixed(2)} ${currentCurrency}</span> ${priceDisplay}`;
+                                buyBtn.dataset.price = parseFloat(discountedPrice.toFixed(2));
                             }
 
                             // Update Button
-                            buyBtn.dataset.price = discountedPrice;
                             buyBtn.innerHTML = `<i class="fas fa-credit-card"></i> Buy Now - ${priceDisplay}`;
 
                             // Success Feedback
