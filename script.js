@@ -275,6 +275,10 @@ document.addEventListener('DOMContentLoaded', function () {
             modalTitle.textContent = product;
             modalDescription.textContent = productDescriptions[product] || 'Premium digital product for quant professionals.';
             modalPrice.textContent = '₹' + price;
+            modalPrice.style.background = '';
+            modalPrice.style.webkitTextFillColor = '';
+            modalPrice.style.color = '';
+            window.currentProductInrPrice = parseInt(price);
             // Reset any previous discount state for a new product
             window.currentDiscountedPrice = undefined;
             // Keep track of product-specific coupon for this modal
@@ -286,8 +290,6 @@ document.addEventListener('DOMContentLoaded', function () {
             // Clear coupon input
             const couponInput = document.getElementById('couponInput');
             if (couponInput) couponInput.value = '';
-            // Clear any previously applied discount price shown
-            // (the price text will be used if discount is not applied)
 
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -303,8 +305,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const couponInfo = window.activeModalCoupon || { code: '', percent: 0 };
             const modalPriceEl = document.getElementById('modalPrice');
             const feedbackEl = document.getElementById('modalCouponFeedback'); // Get feedback element
-            const basePriceText = modalPriceEl?.textContent || '₹0';
-            const basePrice = parseInt(basePriceText.replace(/[^0-9]/g, ''));
+            const basePrice = (window.currentProductInrPrice !== undefined && window.currentProductInrPrice !== null)
+                ? window.currentProductInrPrice
+                : parseInt((modalPriceEl?.textContent || '₹0').replace(/[^0-9]/g, ''));
+
 
             // Clear previous feedback
             if (feedbackEl) {
@@ -370,14 +374,16 @@ document.addEventListener('DOMContentLoaded', function () {
             if (isValid) {
                 const discount = appliedDiscount;
                 const discounted = Math.max(0, Math.round(basePrice * (100 - discount) / 100));
-                modalPriceEl.textContent = '₹' + discounted;
+                modalPriceEl.innerHTML = '🎯 <span style="color:#f43f5e;font-size:2rem;font-weight:800;">₹' + discounted + '</span>';
+                modalPriceEl.style.background = 'none';
+                modalPriceEl.style.webkitTextFillColor = 'initial';
+                modalPriceEl.style.color = '';
                 window.currentDiscountedPrice = discounted;
                 window.isCouponApplied = true;
 
-                // Success Feedback
                 if (feedbackEl) {
-                    feedbackEl.textContent = `Coupon applied! ${discount}% OFF`;
-                    feedbackEl.style.color = '#22c55e'; // Green
+                    feedbackEl.textContent = `Coupon applied! ${discount}% OFF — ₹${discounted}`;
+                    feedbackEl.style.color = '#22c55e';
                 } else {
                     alert('Coupon applied: ' + discount + '% off');
                 }
@@ -402,7 +408,6 @@ document.addEventListener('DOMContentLoaded', function () {
         window.isCouponApplied = false;
         document.body.style.overflow = '';
 
-        // Reset coupon input and feedback
         const couponInput = document.getElementById('couponInput');
         const feedbackEl = document.getElementById('modalCouponFeedback');
         if (couponInput) couponInput.value = '';
@@ -1571,8 +1576,12 @@ window.openProductModal = async function (id) {
 
             if (modalPayBtn) {
                 modalPayBtn.innerHTML = '<i class="fas fa-credit-card"></i> Pay Now';
-                modalPayBtn.style.background = ''; // Reset to default primary color
+                modalPayBtn.style.background = '';
             }
+
+            priceElement.style.background = '';
+            priceElement.style.webkitTextFillColor = '';
+            priceElement.style.color = '';
 
             if (isLocalCurrency) {
                 // Show local currency only
