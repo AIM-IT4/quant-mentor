@@ -301,6 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const applyCouponBtn = document.getElementById('applyCouponBtn');
     if (applyCouponBtn) {
         applyCouponBtn.addEventListener('click', async function () {
+            if (window.isCouponApplied || this.disabled) return;
             const inputCode = document.getElementById('couponInput')?.value.trim() || '';
             const couponInfo = window.activeModalCoupon || { code: '', percent: 0 };
             const modalPriceEl = document.getElementById('modalPrice');
@@ -399,6 +400,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     alert('Coupon applied: ' + discount + '% off');
                 }
+
+                // Disable input and button
+                const couponInput = document.getElementById('couponInput');
+                if (couponInput) couponInput.disabled = true;
+                this.disabled = true;
+                this.textContent = 'Applied';
             } else {
                 // Error Feedback
                 if (feedbackEl) {
@@ -422,8 +429,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const couponInput = document.getElementById('couponInput');
         const feedbackEl = document.getElementById('modalCouponFeedback');
-        if (couponInput) couponInput.value = '';
+        if (couponInput) {
+            couponInput.value = '';
+            couponInput.disabled = false;
+        }
         if (feedbackEl) feedbackEl.textContent = '';
+        
+        const applyBtn = document.getElementById('applyCouponBtn');
+        if (applyBtn) {
+            applyBtn.disabled = false;
+            applyBtn.textContent = 'Apply';
+        }
     }
 
     if (modalClose) modalClose.addEventListener('click', closeModal);

@@ -932,6 +932,7 @@
 
                     // Coupon Logic
                     document.getElementById('apply-coupon-btn').addEventListener('click', async function () {
+                        if (this.disabled) return;
                         const codeInput = document.getElementById('coupon-input');
                         const code = codeInput.value.trim();
                         feedbackMsg.textContent = ''; // Reset
