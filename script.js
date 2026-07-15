@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Apply coupon for the current product in modal
     const applyCouponBtn = document.getElementById('applyCouponBtn');
     if (applyCouponBtn) {
-        applyCouponBtn.addEventListener('click', function () {
+        applyCouponBtn.addEventListener('click', async function () {
             const inputCode = document.getElementById('couponInput')?.value.trim() || '';
             const couponInfo = window.activeModalCoupon || { code: '', percent: 0 };
             const modalPriceEl = document.getElementById('modalPrice');
@@ -374,7 +374,17 @@ document.addEventListener('DOMContentLoaded', function () {
             if (isValid) {
                 const discount = appliedDiscount;
                 const discounted = Math.max(0, Math.round(basePrice * (100 - discount) / 100));
-                modalPriceEl.innerHTML = '🎯 <span style="color:#f43f5e;font-size:2rem;font-weight:800;">₹' + discounted + '</span>';
+
+                const isLocal = window.currentProductIsLocalCurrency;
+                let displayPrice = '₹' + discounted;
+                if (isLocal) {
+                    try {
+                        const localDiscounted = await convertPrice(discounted, window.userCountryCode || userCountryCode);
+                        displayPrice = formatPrice(localDiscounted);
+                    } catch (e) { /* fallback to INR */ }
+                }
+
+                modalPriceEl.innerHTML = '🎯 <span style="color:#f43f5e;font-size:2rem;font-weight:800;">' + displayPrice + '</span>';
                 modalPriceEl.style.background = 'none';
                 modalPriceEl.style.webkitTextFillColor = 'initial';
                 modalPriceEl.style.color = '';
@@ -382,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.isCouponApplied = true;
 
                 if (feedbackEl) {
-                    feedbackEl.textContent = `Coupon applied! ${discount}% OFF — ₹${discounted}`;
+                    feedbackEl.textContent = `Coupon applied! ${discount}% OFF — ${displayPrice}`;
                     feedbackEl.style.color = '#22c55e';
                 } else {
                     alert('Coupon applied: ' + discount + '% off');
