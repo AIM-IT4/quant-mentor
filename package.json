@@ -10,7 +10,8 @@
   "author": "Amit Kumar Jha",
   "license": "ISC",
   "dependencies": {
-    "@supabase/supabase-js": "^2.95.3"
+    "@supabase/supabase-js": "^2.95.3",
+    "@vercel/analytics": "^2.0.1"
   },
   "engines": {
     "node": "22.x"

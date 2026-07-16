@@ -1129,6 +1129,12 @@
             color: white;
         }
     </style>
+
+    <!-- Vercel Web Analytics -->
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
 </head>
 
 <body>
@@ -1867,7 +1873,7 @@
 
             } catch (err) {
                 document.getElementById('typing').style.display = 'none';
-                addMessage('ai', '⚠️ Sorry, I encountered an error. Please try again or rephrase your answer.');
+                addMessage('ai', '⚠��� Sorry, I encountered an error. Please try again or rephrase your answer.');
                 console.error('API error:', err);
             }
 
