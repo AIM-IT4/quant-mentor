@@ -1247,7 +1247,20 @@ body.d2q-reference .reference-cover::before { content: ""; position: absolute; w
 body.d2q-reference .product-content { min-height: 250px; padding: 20px; display: flex; flex: 1; flex-direction: column; }
 body.d2q-reference .product-title { margin: 0 0 8px; color: var(--d2q-navy); font-size: 16px; line-height: 1.35; }
 body.d2q-reference .product-description { margin: 0; color: var(--d2q-muted); font-size: 13px; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
-body.d2q-reference .product-footer { margin-top: auto; padding-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 0; }
+body.d2q-reference .product-footer { margin-top: auto; padding-top: 18px; display: grid; gap: 12px; border: 0; }
+.product-card-price-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.product-buy-button {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 14px;
+    color: #fff;
+    background: var(--d2q-navy);
+    border: 1px solid var(--d2q-navy);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 800;
+}
+.product-buy-button:hover { color: #fff; background: #0a3476; transform: translateY(-1px); }
 body.d2q-reference .product-price { color: var(--d2q-navy); font-size: 18px !important; font-weight: 800; }
 .product-price-action { min-width: 0; cursor: pointer; }
 .product-price-action:focus-visible { outline: 2px solid var(--d2q-teal); outline-offset: 4px; border-radius: 4px; }.product-reference-tag { flex: 0 0 auto; padding: 5px 8px; color: var(--d2q-teal-dark); background: var(--d2q-teal-soft); border-radius: 999px; font-size: 11px; font-weight: 800; }
@@ -1256,7 +1269,39 @@ body.d2q-reference .mentor-band { padding: 82px 0; background: #fff; }
 body.d2q-reference .mentor-band-inner { padding: 48px; grid-template-columns: 1.1fr .9fr; border-radius: 30px; }
 body.d2q-reference .mentor-copy h2 { color: #fff; }
 body.d2q-reference .mentor-checks span::before { content: "✓"; margin-right: 8px; color: #6ee7df; font-weight: 900; }
-body.d2q-reference .mentor-profile { display: block; min-height: 240px; align-self: stretch; padding: 24px; }
+body.d2q-reference .mentor-profile {
+    position: relative;
+    min-height: 300px;
+    align-self: stretch;
+    padding: 30px;
+    display: block;
+    overflow: hidden;
+}
+.mentor-profile-copy { position: relative; z-index: 2; width: 62%; }
+body.d2q-reference .mentor-profile > img.mentor-cutout {
+    width: 55% !important;
+    height: auto !important;
+    max-height: 360px !important;
+    margin: 0 !important;
+    object-fit: contain !important;
+    object-position: bottom right !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+}.mentor-cutout {
+    position: absolute;
+    z-index: 1;
+    right: -18px;
+    bottom: -54px;
+    width: 55%;
+    height: auto;
+    max-height: 360px;
+    object-fit: contain;
+    object-position: bottom right;
+    opacity: .96;
+    filter: saturate(.9) contrast(1.04);
+    -webkit-mask-image: radial-gradient(ellipse 52% 64% at 52% 48%, #000 48%, rgba(0,0,0,.92) 60%, rgba(0,0,0,.35) 72%, transparent 84%);
+    mask-image: radial-gradient(ellipse 52% 64% at 52% 48%, #000 48%, rgba(0,0,0,.92) 60%, rgba(0,0,0,.35) 72%, transparent 84%);
+}
 body.d2q-reference .mentor-profile h3 { font-size: 24px; }
 body.d2q-reference .mentor-profile p { margin-bottom: 18px; }
 
@@ -1276,7 +1321,7 @@ body.d2q-reference .sessions-section { background: #fff; }
 body.d2q-reference .services-grid { margin-top: 18px; display: grid; grid-template-columns: 1fr; gap: 12px; }
 body.d2q-reference .service-card,
 .session-skeleton {
-    min-height: 78px;
+    min-height: 110px;
     padding: 18px;
     display: flex;
     align-items: center;
@@ -1288,7 +1333,9 @@ body.d2q-reference .service-card,
     border-radius: 15px;
 }
 body.d2q-reference .service-card:hover { transform: none; border-color: var(--d2q-teal); box-shadow: none; }
-.session-row-copy { min-width: 0; display: grid; gap: 3px; }
+.session-row-copy { min-width: 0; display: grid; gap: 4px; }
+.session-duration { color: var(--d2q-muted); font-size: 13px; }
+.session-purpose { max-width: 410px; margin: 4px 0 0; color: var(--d2q-muted); font-size: 12px; line-height: 1.5; }
 body.d2q-reference .service-title { color: var(--d2q-navy); font-size: 15px; }
 .session-row-copy small { color: var(--d2q-muted); }
 body.d2q-reference .service-price { flex: 0 0 auto; color: var(--d2q-teal); font-size: 16px; font-weight: 900; }
@@ -1364,12 +1411,25 @@ body.d2q-reference .form-note { color: var(--d2q-muted); }
     body.d2q-reference .stat-label { white-space: normal; }
     body.d2q-reference .terminal-frame { padding: 16px; }
     body.d2q-reference .terminal-code { font-size: 10px; overflow-x: auto; }
+    body.d2q-reference .practice-score { right: 8px !important; }
     body.d2q-reference .interview-framework { left: 8px !important; max-width: calc(100% - 36px); }
     body.d2q-reference .hero-trust-grid,
     body.d2q-reference .products-grid { grid-template-columns: 1fr; }
     .reference-section-head { align-items: flex-start; flex-direction: column; }
     .reference-section-head .btn { width: 100%; }
     body.d2q-reference .mentor-band-inner { padding: 28px; }
+    body.d2q-reference .mentor-profile { min-height: 420px; padding: 24px; }
+    .mentor-profile-copy { width: 100%; }
+    body.d2q-reference .mentor-profile > img.mentor-cutout {
+    width: 55% !important;
+    height: auto !important;
+    max-height: 360px !important;
+    margin: 0 !important;
+    object-fit: contain !important;
+    object-position: bottom right !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+}body.d2q-reference .mentor-profile > img.mentor-cutout { right: 50%; bottom: -50px; width: 82% !important; max-height: 300px !important; transform: translateX(50%); opacity: .8; }
     body.d2q-reference .mentor-checks,
     body.d2q-reference .form-row { grid-template-columns: 1fr; }
     .footer-links { grid-template-columns: 1fr; }

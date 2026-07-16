@@ -1561,8 +1561,11 @@ async function displaySupabaseProducts(products) {
                     <h3 class="product-title">${product.name}</h3>
                     <div class="product-description">${displayDesc.replace(/<[^>]*>?/gm, '').substring(0, 170)}</div>
                     <div class="product-footer">
-                        <div class="product-price-action" role="button" tabindex="0" title="Buy now" onclick="event.stopPropagation(); openProductModal('${product.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openProductModal('${product.id}')}">${originalPriceDisplay}</div>
-                        <span class="product-reference-tag">${isFree ? 'Free resource' : visual.tag}</span>
+                        <div class="product-card-price-row">
+                            <div class="product-price-action">${originalPriceDisplay}</div>
+                            <span class="product-reference-tag">${isFree ? 'Free resource' : visual.tag}</span>
+                        </div>
+                        <button class="btn product-buy-button" type="button" onclick="event.stopPropagation(); openProductModal('${product.id}')" aria-label="${btnText} ${product.name}">${btnText}</button>
                     </div>
                 </div>
             `;
@@ -1708,6 +1711,18 @@ async function loadSessionsFromSupabase(prefetchPromise) {
     }
 }
 
+function getSessionPurpose(session) {
+    const name = (session.name || '').toLowerCase();
+    const supplied = session.short_description || session.description || (Array.isArray(session.features) ? session.features[0] : '');
+    const plain = String(supplied || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (plain) return plain.length > 135 ? `${plain.substring(0, 132).trim()}...` : plain;
+    if (name.includes('resume')) return 'Best for resume positioning, project bullets, role targeting, and focused career feedback.';
+    if (name.includes('front office') || name.includes('risk quant')) return 'Best for understanding desk roles, daily workflows, required skills, and a practical preparation roadmap.';
+    if (name.includes('interview')) return 'Best for mock questions, answer structure, technical gaps, and interview-ready communication.';
+    if ((session.duration || 0) <= 15) return 'Best for one focused doubt, a quick decision, or clarity on your immediate next step.';
+    if ((session.duration || 0) <= 30) return 'Best for targeted guidance on resume, projects, interviews, or a specific quant topic.';
+    return 'Best for deeper technical discussion, personalized planning, and detailed practitioner feedback.';
+}
 // Update Services Section with Dynamic Sessions
 async function updateServicesSection(sessions) {
     const servicesContainer = document.querySelector('.services-grid');
@@ -1745,7 +1760,8 @@ async function updateServicesSection(sessions) {
         serviceCard.innerHTML = `
             <div class="session-row-copy">
                 <strong class="service-title">${session.name}</strong>
-                <small>${session.duration} minutes</small>
+                <small class="session-duration">${session.duration} minutes</small>
+                <p class="session-purpose">${getSessionPurpose(session)}</p>
             </div>
             <span class="service-price">${priceDisplay}</span>
         `;
