@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
     const SENDER_EMAIL = process.env.SENDER_EMAIL || 'jha.8@alumni.iitj.ac.in';
-    const SENDER_NAME = process.env.SENDER_NAME || 'QuantMentor';
+    const SENDER_NAME = process.env.SENDER_NAME || 'Desk2Quant';
 
     const isDryRun = req.query?.dry_run === 'true';
     const testEmail = req.query?.test_email;
@@ -520,7 +520,7 @@ function buildCampaignEmail(purchasedProductName, recommendations, expiryStr) {
 
             <!-- Header -->
             <div style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%); border-radius:16px 16px 0 0; padding:40px 30px; text-align:center;">
-                <div style="font-size:28px; font-weight:800; color:#ffffff; letter-spacing:1px; margin-bottom:6px;">QuantMentor</div>
+                <div style="font-size:28px; font-weight:800; color:#ffffff; letter-spacing:1px; margin-bottom:6px;">Desk2Quant</div>
                 <div style="font-size:13px; color:#a0aec0; letter-spacing:2px; text-transform:uppercase;">Exclusive Offer</div>
             </div>
 
@@ -560,7 +560,7 @@ function buildCampaignEmail(purchasedProductName, recommendations, expiryStr) {
             <!-- Footer -->
             <div style="background:#1a1a2e; border-radius:0 0 16px 16px; padding:25px; text-align:center;">
                 <p style="color:#888; font-size:12px; margin:0 0 8px 0; line-height:1.6;">
-                    You're receiving this because you previously purchased from QuantMentor.<br>
+                    You're receiving this because you previously purchased from Desk2Quant.<br>
                     Questions? Simply reply to this email.
                 </p>
                 <p style="margin:0;">
@@ -581,7 +581,7 @@ function buildCampaignText(purchasedProductName, recommendations, expiryStr) {
 
 Hi there,
 
-Thank you for purchasing "${purchasedProductName}" from QuantMentor!
+Thank you for purchasing "${purchasedProductName}" from Desk2Quant!
 
 Based on your purchase, here are 3 handpicked resources with an exclusive 20% discount — just for you:
 
@@ -592,8 +592,8 @@ ${recList}
 Browse all products: https://quant-mentor.vercel.app/#products
 
 ---
-Sent by QuantMentor • quant-mentor.vercel.app
-You're receiving this because you previously purchased from QuantMentor.`;
+Sent by Desk2Quant • quant-mentor.vercel.app
+You're receiving this because you previously purchased from Desk2Quant.`;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────

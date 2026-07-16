@@ -1,7 +1,7 @@
 {
   "name": "quant-mentor-website",
   "version": "1.0.0",
-  "description": "QuantMentor Portfolio Website",
+  "description": "Desk2Quant Portfolio Website",
   "main": "script.js",
   "scripts": {
     "build": "node generate-config.js"

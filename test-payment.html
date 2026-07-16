@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Payment - QuantMentor</title>
+    <title>Test Payment - Desk2Quant</title>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         body { font-family: system-ui, sans-serif; background: #0f0f0f; color: #e5e5e5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
@@ -20,8 +20,11 @@
         .amount { font-size: 2.5rem; font-weight: 700; color: #fff; margin: 20px 0; }
         .currency { font-size: 1rem; color: #888; }
     </style>
+    <link rel="stylesheet" href="attached-ui.css?v=1">
+    <link rel="stylesheet" href="attached-pages.css?v=1">
+    <script src="attached-theme.js?v=1" defer></script>
 </head>
-<body>
+<body class="light-mode">
     <div class="card">
         <h1>🧪 E2E Payment Test</h1>
         <p>Test Razorpay integration with a real ₹1 charge</p>
@@ -71,7 +74,7 @@
                     key: RAZORPAY_KEY_ID,
                     amount: orderData.amount,
                     currency: orderData.currency,
-                    name: 'QuantMentor',
+                    name: 'Desk2Quant',
                     description: 'E2E Test - ₹1',
                     order_id: orderData.order_id,
                     handler: function (response) {

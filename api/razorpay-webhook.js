@@ -41,7 +41,7 @@ export default async function handler(req, res) {
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
     const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'jha.8@alumni.iitj.ac.in';
     const SENDER_EMAIL = process.env.SENDER_EMAIL || 'jha.8@alumni.iitj.ac.in';
-    const SENDER_NAME = process.env.SENDER_NAME || 'QuantMentor';
+    const SENDER_NAME = process.env.SENDER_NAME || 'Desk2Quant';
 
     // 1. Capture Raw Body for Signature Verification
     let rawBody;
@@ -299,14 +299,14 @@ async function handleProductPurchase(data) {
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
                 <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                     <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
-                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Desk2Quant</span>
                     </div>
                     <div style="padding: 30px;">
                         <div style="margin-bottom: 20px;">
                             <span style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-right: 10px;">New Purchase</span>
                             <span style="display: inline-block; background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;">Confirmed</span>
                         </div>
-                        <p style="font-size: 16px; margin-bottom: 25px;">Hi <strong>${customerName}</strong>, thank you for purchasing from QuantMentor.</p>
+                        <p style="font-size: 16px; margin-bottom: 25px;">Hi <strong>${customerName}</strong>, thank you for purchasing from Desk2Quant.</p>
                         
                         <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
                             <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 10px 0; letter-spacing: 0.5px;">Digital Product</p>
@@ -348,7 +348,7 @@ async function handleProductPurchase(data) {
                         </div>
                     </div>
                     <div style="background-color: #1a1a1a; padding: 25px 20px; text-align: center; color: #888; font-size: 12px;">
-                        <p style="margin: 0 0 10px 0;">Sent by QuantMentor</p>
+                        <p style="margin: 0 0 10px 0;">Sent by Desk2Quant</p>
                         <p style="margin: 0;">Have an issue? Reply to this email.</p>
                     </div>
                 </div>
@@ -368,7 +368,7 @@ async function handleProductPurchase(data) {
                     to: [{ email: customerEmail, name: customerName }],
                     subject: `Your Purchase: ${productName}`,
                     htmlContent: customerHtml,
-                    textContent: `Hi ${customerName},\n\nThank you for your purchase!\n\nProduct: ${productName}\nAmount: ${currency} ${amount}\n\nPlease download your resource using this link:\n${downloadLink}\n\nIf the button does not work, copy and paste the same link into your browser.\n\nPayment ID: ${paymentId}\n\nHave an issue? Reply to this email.\n\nSent by QuantMentor`
+                    textContent: `Hi ${customerName},\n\nThank you for your purchase!\n\nProduct: ${productName}\nAmount: ${currency} ${amount}\n\nPlease download your resource using this link:\n${downloadLink}\n\nIf the button does not work, copy and paste the same link into your browser.\n\nPayment ID: ${paymentId}\n\nHave an issue? Reply to this email.\n\nSent by Desk2Quant`
                 })
             });
 
@@ -388,7 +388,7 @@ async function handleProductPurchase(data) {
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
                 <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                     <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
-                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor Admin</span>
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Desk2Quant Admin</span>
                     </div>
                     <div style="padding: 30px;">
                         <div style="margin-bottom: 20px;">
@@ -530,7 +530,7 @@ async function handleProductPurchase(data) {
                     <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
                         <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                             <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
-                                <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                                <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Desk2Quant</span>
                             </div>
                             <div style="padding: 30px;">
                                 <p style="font-size: 16px; margin-bottom: 8px;">Hi <strong>${customerName}</strong>,</p>
@@ -543,12 +543,12 @@ async function handleProductPurchase(data) {
                                     <a href="https://quant-mentor.vercel.app/#products" style="display:inline-block; background:#e95836; color:#ffffff; font-weight:bold; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:16px;">Browse All Products</a>
                                 </div>
                                 <p style="font-size: 13px; color: #999; margin-top: 30px; text-align: center; line-height: 1.5;">
-                                    You're receiving this because you recently purchased from QuantMentor.<br>
+                                    You're receiving this because you recently purchased from Desk2Quant.<br>
                                     If you have any questions, simply reply to this email.
                                 </p>
                             </div>
                             <div style="background-color: #1a1a1a; padding: 20px; text-align: center; color: #888; font-size: 12px;">
-                                <p style="margin: 0;">Sent by QuantMentor</p>
+                                <p style="margin: 0;">Sent by Desk2Quant</p>
                             </div>
                         </div>
                     </div>`;
@@ -692,7 +692,7 @@ async function handleSessionBooking(data) {
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
                 <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                     <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
-                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Desk2Quant</span>
                     </div>
                     <div style="padding: 30px;">
                         <div style="margin-bottom: 20px;">
@@ -736,7 +736,7 @@ async function handleSessionBooking(data) {
                         </div>
                     </div>
                     <div style="background-color: #1a1a1a; padding: 25px 20px; text-align: center; color: #888; font-size: 12px;">
-                        <p style="margin: 0 0 10px 0;">Sent by QuantMentor</p>
+                        <p style="margin: 0 0 10px 0;">Sent by Desk2Quant</p>
                         <p style="margin: 0;">Have an issue? Reply to this email.</p>
                     </div>
                 </div>
@@ -756,7 +756,7 @@ async function handleSessionBooking(data) {
                     to: [{ email: customerEmail, name: customerName }],
                     subject: `Booking Confirmed: ${sessionName}`,
                     htmlContent: customerHtml,
-                    textContent: `Hi ${customerName},\n\nYour session is confirmed!\n\nSession: ${sessionName}\nDate: ${sessionDate}\nTime: ${displayTime} (${sessionDuration} mins)\nAmount Paid: ₹${sessionPrice}\n\nJoin Meeting Link:\n${meetLink}\n\nPayment ID: ${paymentId}\n\nNeed to reschedule? You can view and manage your bookings on our website.\n\nHave an issue? Reply to this email.\n\nSent by QuantMentor`
+                    textContent: `Hi ${customerName},\n\nYour session is confirmed!\n\nSession: ${sessionName}\nDate: ${sessionDate}\nTime: ${displayTime} (${sessionDuration} mins)\nAmount Paid: ₹${sessionPrice}\n\nJoin Meeting Link:\n${meetLink}\n\nPayment ID: ${paymentId}\n\nNeed to reschedule? You can view and manage your bookings on our website.\n\nHave an issue? Reply to this email.\n\nSent by Desk2Quant`
                 })
             });
 
@@ -777,7 +777,7 @@ async function handleSessionBooking(data) {
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
                 <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                     <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
-                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor Admin</span>
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Desk2Quant Admin</span>
                     </div>
                     <div style="padding: 30px;">
                         <div style="margin-bottom: 20px;">

@@ -53,7 +53,7 @@ CREATE TRIGGER update_blogs_updated_at
 -- Insert sample blog post (optional - remove if not needed)
 -- INSERT INTO blogs (title, slug, excerpt, content, is_published) 
 -- VALUES (
---   'Welcome to QuantMentor Blog',
+--   'Welcome to Desk2Quant Blog',
 --   'welcome-to-quantmentor-blog',
 --   'Your journey to becoming a quantitative finance expert starts here.',
 --   '<p>Welcome to our blog where we share insights, tips, and resources for quantitative finance professionals.</p>',

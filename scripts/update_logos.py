@@ -19,13 +19,13 @@ files_to_update = [
 base_dir = r"C:\Users\iitak\.gemini\antigravity\scratch\quant_notes\website"
 
 # Regex pattern to find the logo link
-# Matches <a href="index.html" class="logo">QuantMentor</a> with flexibility
-pattern = re.compile(r'<a\s+href="index\.html"\s+class="logo"[^>]*>\s*QuantMentor\s*</a>', re.IGNORECASE)
+# Matches <a href="index.html" class="logo">Desk2Quant</a> with flexibility
+pattern = re.compile(r'<a\s+href="index\.html"\s+class="logo"[^>]*>\s*Desk2Quant\s*</a>', re.IGNORECASE)
 
 # Replacement HTML
 replacement = '''<a href="index.html" class="logo" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
-                <img src="assets/images/quantmentor-logo-icon-QM-1024.png" alt="QuantMentor Logo" style="height: 32px; width: auto;">
-                <span style="font-weight: 700; font-size: 1.2rem; background: linear-gradient(135deg, white 0%, #a5b4fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">QuantMentor</span>
+                <img src="assets/images/quantmentor-logo-icon-QM-1024.png" alt="Desk2Quant Logo" style="height: 32px; width: auto;">
+                <span style="font-weight: 700; font-size: 1.2rem; background: linear-gradient(135deg, white 0%, #a5b4fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Desk2Quant</span>
             </a>'''
 
 for filename in files_to_update:

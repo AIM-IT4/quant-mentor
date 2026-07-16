@@ -51,7 +51,7 @@ export default async function handler(req, res) {
         const free = formatted.filter(p => p.priceINR === 0);
 
         return res.status(200).json({
-            site: 'QuantMentor - quant-mentor.vercel.app',
+            site: 'Desk2Quant - quant-mentor.vercel.app',
             description: 'Premium digital products for quantitative finance professionals. Curated study materials, coding scripts, and interview guides.',
             totalProducts: formatted.length,
             paidProducts: { count: paid.length, items: paid },

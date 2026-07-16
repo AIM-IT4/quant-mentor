@@ -1,0 +1,459 @@
+/* Supporting page layouts for the attached Desk2Quant design branch. */
+
+/* Shared inner-page shell */
+body {
+    background: var(--bg-primary);
+}
+
+main[style*="max-width"] {
+    width: min(100% - 40px, 1080px) !important;
+    max-width: 1080px !important;
+    margin-top: 112px !important;
+}
+
+main[style*="max-width"] > h1,
+.container > h1,
+.playground-header h1,
+.setup-hero h1 {
+    color: var(--d2q-navy-deep);
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    letter-spacing: 0;
+}
+
+main[style*="max-width"] > div {
+    border-color: var(--d2q-line) !important;
+    border-radius: 18px !important;
+}
+
+/* Product detail */
+.product-page-container {
+    max-width: 1180px;
+    padding: 118px 20px 64px;
+    align-items: start;
+}
+
+.product-detail-card {
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 48px;
+    padding: 34px;
+    background: #ffffff;
+    border: 1px solid var(--d2q-line);
+    border-radius: 24px;
+    box-shadow: var(--d2q-shadow);
+}
+
+.product-detail-image {
+    height: auto;
+    min-height: 470px;
+    background: linear-gradient(145deg, #f8fbff, #eef6fa);
+    border: 1px solid var(--d2q-line);
+    border-radius: 18px;
+}
+
+.product-info {
+    position: static;
+    align-self: center;
+}
+
+.product-info h1 {
+    color: var(--d2q-navy-deep);
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    line-height: 1.08;
+    letter-spacing: 0;
+}
+
+.product-price-tag {
+    color: var(--d2q-navy);
+}
+
+.product-badge-item {
+    color: var(--d2q-teal-dark) !important;
+    background: var(--d2q-teal-soft) !important;
+    border: 1px solid rgba(8, 169, 162, 0.2) !important;
+    border-radius: 999px !important;
+}
+
+.product-preview-section {
+    max-width: none;
+    margin: 0;
+    padding: 72px 20px;
+    background: var(--d2q-paper);
+}
+
+.product-preview-section > * {
+    width: min(100%, 1180px);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.product-preview-title {
+    color: var(--d2q-navy-deep);
+    letter-spacing: 0;
+}
+
+.preview-panel {
+    background: #ffffff;
+    border: 1px solid var(--d2q-line);
+    border-radius: 18px;
+    box-shadow: none;
+}
+
+.preview-panel:hover {
+    border-color: #b7deda;
+    box-shadow: var(--d2q-shadow);
+}
+
+.preview-toc-list li::before {
+    color: var(--d2q-teal-dark);
+    background: var(--d2q-teal-soft);
+    border-color: rgba(8, 169, 162, 0.22);
+}
+
+/* Testimonials page */
+.testimonials-stats {
+    gap: 18px;
+}
+
+.stat-card,
+.testimonial-card {
+    background: #ffffff;
+    border: 1px solid var(--d2q-line);
+    border-radius: 18px;
+    box-shadow: none;
+}
+
+.stat-card:hover,
+.testimonial-card:hover {
+    border-color: #b7deda;
+    box-shadow: var(--d2q-shadow);
+}
+
+.stat-number {
+    color: var(--d2q-navy);
+    background: none;
+    -webkit-text-fill-color: currentColor;
+}
+
+.filter-btn {
+    color: var(--d2q-navy);
+    background: #ffffff;
+    border-color: var(--d2q-line);
+    border-radius: 999px;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    color: #ffffff;
+    background: var(--d2q-navy);
+    border-color: var(--d2q-navy);
+}
+
+/* Booking lookup */
+.booking-card,
+.search-box,
+.reschedule-form,
+.no-bookings {
+    background: #ffffff !important;
+    border: 1px solid var(--d2q-line) !important;
+    border-radius: 18px !important;
+    box-shadow: none !important;
+}
+
+.booking-card::before {
+    background: var(--d2q-teal) !important;
+}
+
+.booking-card:hover {
+    border-color: #b7deda !important;
+    box-shadow: var(--d2q-shadow) !important;
+}
+
+.booking-header,
+.booking-details,
+.reschedule-section {
+    border-color: var(--d2q-line) !important;
+}
+
+.detail-item i,
+.no-bookings i {
+    color: var(--d2q-teal) !important;
+}
+
+.booking-status {
+    border-radius: 999px !important;
+}
+
+.meet-link {
+    color: var(--d2q-teal-dark) !important;
+    background: var(--d2q-teal-soft) !important;
+    border-color: rgba(8, 169, 162, 0.22) !important;
+}
+
+/* Salary explorer */
+.sal-hero,
+.salary-hero {
+    padding-top: 120px;
+    background: linear-gradient(145deg, #f8fbff, #eef6fa) !important;
+}
+
+.sal-stat-card,
+.sal-chart-card,
+.sal-table-wrap,
+.sal-form-wrapper,
+.sal-widget-card {
+    background: #ffffff !important;
+    border: 1px solid var(--d2q-line) !important;
+    border-radius: 18px !important;
+    box-shadow: none !important;
+}
+
+.sal-stat-card:hover,
+.sal-chart-card:hover {
+    border-color: #b7deda !important;
+    box-shadow: var(--d2q-shadow) !important;
+}
+
+.sal-stat-icon,
+.sal-form-icon {
+    color: var(--d2q-teal-dark) !important;
+    background: var(--d2q-teal-soft) !important;
+}
+
+.sal-table thead {
+    color: #ffffff;
+    background: var(--d2q-navy-deep);
+}
+
+.sal-table tbody tr:hover {
+    background: rgba(8, 169, 162, 0.06);
+}
+
+.lb-tc {
+    color: var(--d2q-teal-dark);
+}
+
+/* AI interview */
+.setup-screen,
+.chat-screen {
+    color: var(--d2q-ink);
+    background: #ffffff;
+}
+
+.setup-screen .particles-bg {
+    display: none;
+}
+
+.setup-wrapper {
+    max-width: 1180px;
+}
+
+.setup-hero h1,
+.setup-card h1,
+.chat-header-info h3,
+.scorecard-box h2 {
+    color: var(--d2q-navy-deep);
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    letter-spacing: 0;
+}
+
+.setup-card {
+    background: #ffffff;
+    border: 1px solid var(--d2q-line);
+    border-radius: 22px;
+    box-shadow: var(--d2q-shadow);
+}
+
+.setup-card::before {
+    background: var(--d2q-teal);
+    opacity: 0.16;
+}
+
+.setup-card .badge-row span,
+.chat-header-badges span {
+    color: var(--d2q-teal-dark);
+    background: var(--d2q-teal-soft);
+}
+
+.chat-header,
+.chat-input-area {
+    background: #ffffff;
+    border-color: var(--d2q-line);
+}
+
+.message.ai .bubble {
+    color: var(--d2q-ink);
+    background: var(--d2q-paper);
+    border: 1px solid var(--d2q-line);
+}
+
+.message.user .bubble {
+    color: #ffffff;
+    background: var(--d2q-navy);
+}
+
+.scorecard-overlay {
+    background: rgba(3, 26, 62, 0.72);
+    backdrop-filter: blur(8px);
+}
+
+.scorecard-box {
+    color: var(--d2q-ink);
+    background: #ffffff;
+    border: 1px solid var(--d2q-line);
+    border-radius: 22px;
+    box-shadow: 0 30px 90px rgba(3, 26, 62, 0.28);
+}
+
+/* Code playground */
+.playground-container {
+    color: var(--d2q-ink);
+    background: #ffffff;
+}
+
+.language-tabs {
+    padding: 6px;
+    background: var(--d2q-paper);
+    border: 1px solid var(--d2q-line);
+    border-radius: 14px;
+}
+
+.lang-tab {
+    color: var(--d2q-navy);
+    background: transparent;
+    border: 0;
+}
+
+.lang-tab.active {
+    color: #ffffff;
+    background: var(--d2q-navy);
+}
+
+.python-editor-container,
+.godbolt-container {
+    border: 1px solid var(--d2q-line);
+    border-radius: 18px;
+    box-shadow: var(--d2q-shadow);
+}
+
+.godbolt-container .panel-header {
+    color: #ffffff;
+    background: var(--d2q-navy-deep);
+}
+
+/* Admin */
+.login-container {
+    color: var(--d2q-ink);
+    background: linear-gradient(145deg, #f8fbff, #eef6fa);
+}
+
+.login-card,
+.admin-card,
+.dashboard-card,
+.stat-card,
+.data-card {
+    color: var(--d2q-ink);
+    background: #ffffff;
+    border: 1px solid var(--d2q-line);
+    border-radius: 18px;
+    box-shadow: none;
+}
+
+.admin-layout,
+.admin-main {
+    color: var(--d2q-ink);
+    background: var(--d2q-paper);
+}
+
+.admin-sidebar {
+    color: #dbe8f5;
+    background: var(--d2q-navy-deep);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-sidebar .nav-item {
+    color: #b9cbe0;
+    border-radius: 10px;
+}
+
+.admin-sidebar .nav-item:hover,
+.admin-sidebar .nav-item.active {
+    color: #ffffff;
+    background: rgba(8, 169, 162, 0.18);
+    border-color: transparent;
+}
+
+.admin-main h1,
+.admin-main h2,
+.admin-main h3,
+.admin-main h4 {
+    color: var(--d2q-navy-deep);
+    letter-spacing: 0;
+}
+
+.stat-card .icon {
+    color: var(--d2q-teal-dark);
+    background: var(--d2q-teal-soft);
+}
+
+.stat-card .value {
+    color: var(--d2q-navy);
+}
+
+.admin-table thead {
+    color: #ffffff;
+    background: var(--d2q-navy-deep);
+}
+
+.admin-main input,
+.admin-main select,
+.admin-main textarea,
+.ql-toolbar,
+.ql-container {
+    color: var(--d2q-ink);
+    background: #fbfdff;
+    border-color: #ccd7e4;
+}
+
+/* Generic dialog surfaces */
+#alternativeModal > div,
+#cropperModal > div,
+#user-details-modal > div {
+    color: var(--d2q-ink) !important;
+    background: #ffffff !important;
+    border: 1px solid var(--d2q-line) !important;
+    border-radius: 22px !important;
+    box-shadow: 0 30px 90px rgba(3, 26, 62, 0.28) !important;
+}
+
+@media (max-width: 900px) {
+    .product-detail-card,
+    .product-preview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-detail-image {
+        min-height: 360px;
+    }
+}
+
+@media (max-width: 560px) {
+    main[style*="max-width"] {
+        width: min(100% - 24px, 1080px) !important;
+    }
+
+    .product-detail-card,
+    .preview-panel,
+    .setup-card,
+    .login-card {
+        padding: 22px !important;
+        border-radius: 16px !important;
+    }
+
+    .product-detail-image {
+        min-height: 300px;
+    }
+}

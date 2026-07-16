@@ -13,7 +13,7 @@ export default async function handler(req, res) {
 
         const brevoApiKey = process.env.BREVO_API_KEY;
         const senderEmail = process.env.SENDER_EMAIL || 'jha.8@alumni.iitj.ac.in';
-        const senderName = process.env.SENDER_NAME || 'QuantMentor';
+        const senderName = process.env.SENDER_NAME || 'Desk2Quant';
 
         if (!brevoApiKey) {
             console.error('SERVER ERROR: BREVO_API_KEY is not configured in Vercel');

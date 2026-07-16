@@ -1,6 +1,6 @@
 /**
  * Supabase Database Fix Script
- * Run this in the browser console on the QuantMentor website (where Supabase is already initialized)
+ * Run this in the browser console on the Desk2Quant website (where Supabase is already initialized)
  * 
  * Fixes:
  * 1. "Formulea" → "Formula" in product names
@@ -9,7 +9,7 @@
 
 (async function () {
     if (!window.supabaseClient) {
-        console.error('❌ Supabase not initialized. Open this on the QuantMentor website first.');
+        console.error('❌ Supabase not initialized. Open this on the Desk2Quant website first.');
         return;
     }
 

@@ -1,5 +1,5 @@
 -- 0001_initial_schema.sql
--- Consolidated schema for QuantMentor Supabase
+-- Consolidated schema for Desk2Quant Supabase
 -- Created: 2026-02-14
 
 -- ---------------------------------------------------------

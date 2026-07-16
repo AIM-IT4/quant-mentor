@@ -1,6 +1,6 @@
 # Logo Instructions
 
-Please save your QuantMentor logo as: `assets/images/logo.png`
+Please save your Desk2Quant logo as: `assets/images/logo.png`
 
 This logo will be used as:
 - Website favicon (browser tab icon)

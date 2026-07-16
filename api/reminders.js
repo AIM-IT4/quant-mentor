@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
     const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'jha.8@alumni.iitj.ac.in';
     const SENDER_EMAIL = process.env.SENDER_EMAIL || 'jha.8@alumni.iitj.ac.in';
-    const SENDER_NAME = process.env.SENDER_NAME || 'QuantMentor';
+    const SENDER_NAME = process.env.SENDER_NAME || 'Desk2Quant';
 
     if (!BREVO_API_KEY) {
         return res.status(500).json({ error: 'BREVO_API_KEY not configured' });
@@ -156,7 +156,7 @@ async function sendReminder(booking, type, config) {
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
                 <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                     <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
-                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Desk2Quant</span>
                     </div>
                     <div style="padding: 30px;">
                         <div style="margin-bottom: 20px;">
@@ -180,7 +180,7 @@ async function sendReminder(booking, type, config) {
                         </div>
                     </div>
                     <div style="background-color: #1a1a1a; padding: 25px 20px; text-align: center; color: #888; font-size: 12px;">
-                        <p style="margin: 0 0 10px 0;">Sent by QuantMentor</p>
+                        <p style="margin: 0 0 10px 0;">Sent by Desk2Quant</p>
                         <p style="margin: 0;">Have an issue? Reply to this email.</p>
                     </div>
                 </div>
@@ -192,7 +192,7 @@ async function sendReminder(booking, type, config) {
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
                 <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                     <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
-                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Desk2Quant</span>
                     </div>
                     <div style="padding: 30px;">
                         <div style="margin-bottom: 20px;">
@@ -221,7 +221,7 @@ async function sendReminder(booking, type, config) {
                     </div>
                     <div style="background-color: #1a1a1a; padding: 25px 20px; text-align: center; color: #888; font-size: 12px;">
                         <p style="margin: 0 0 10px 0;">Please be ready with your questions.</p>
-                        <p style="margin: 0;">Sent by QuantMentor</p>
+                        <p style="margin: 0;">Sent by Desk2Quant</p>
                     </div>
                 </div>
             </div>
@@ -232,7 +232,7 @@ async function sendReminder(booking, type, config) {
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
                 <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 2px solid #ef4444;">
                     <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
-                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Desk2Quant</span>
                     </div>
                     <div style="padding: 30px;">
                         <div style="margin-bottom: 20px; text-align: center;">

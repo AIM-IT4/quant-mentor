@@ -1,7 +1,7 @@
 # How to Add Your Logo
 
 ## Step 1: Save Your Logo
-Save the QuantMentor logo image you uploaded as:
+Save the Desk2Quant logo image you uploaded as:
 **`assets/images/logo.png`**
 
 ## Step 2: Verify It Works
@@ -16,7 +16,7 @@ After deployment, your logo will automatically appear as:
 ```bash
 # Add the logo file to your repo
 git add assets/images/logo.png
-git commit -m "Add QuantMentor logo"
+git commit -m "Add Desk2Quant logo"
 git push origin main
 ```
 

@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
     const SENDER_EMAIL = process.env.SENDER_EMAIL || 'jha.8@alumni.iitj.ac.in';
-    const SENDER_NAME = process.env.SENDER_NAME || 'QuantMentor';
+    const SENDER_NAME = process.env.SENDER_NAME || 'Desk2Quant';
 
     if (!BREVO_API_KEY) {
         return res.status(500).json({ error: 'BREVO_API_KEY not configured' });
@@ -114,7 +114,7 @@ export default async function handler(req, res) {
 
                 // Get the most recent product they bought (for personalization)
                 const recentProduct = allPurchases.find(p => (p.customer_email || '').toLowerCase().trim() === email);
-                const recentProductName = recentProduct?.product_name || 'a QuantMentor product';
+                const recentProductName = recentProduct?.product_name || 'a Desk2Quant product';
 
                 // Build email HTML
                 const productCards = recommendations.map(p => {
@@ -138,12 +138,12 @@ export default async function handler(req, res) {
                     <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
                         <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                             <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
-                                <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                                <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Desk2Quant</span>
                             </div>
                             <div style="padding: 30px;">
                                 <p style="font-size: 16px; margin-bottom: 8px;">Hi ${customerName},</p>
                                 <p style="font-size: 15px; color: #444; margin-bottom: 25px; line-height: 1.6;">
-                                    You recently purchased <strong>${escapeHtml(recentProductName)}</strong> from QuantMentor.
+                                    You recently purchased <strong>${escapeHtml(recentProductName)}</strong> from Desk2Quant.
                                     Here are 2 more resources that will accelerate your quant career:
                                 </p>
                                 ${productCards}
@@ -151,18 +151,18 @@ export default async function handler(req, res) {
                                     <a href="https://quant-mentor.vercel.app/#products" style="display:inline-block; background:#e95836; color:#ffffff; font-weight:bold; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:16px;">Browse All Products</a>
                                 </div>
                                 <p style="font-size: 13px; color: #999; margin-top: 30px; text-align: center; line-height: 1.5;">
-                                    You're receiving this because you previously purchased from QuantMentor.<br>
+                                    You're receiving this because you previously purchased from Desk2Quant.<br>
                                     If you have any questions, simply reply to this email.
                                 </p>
                             </div>
                             <div style="background-color: #1a1a1a; padding: 20px; text-align: center; color: #888; font-size: 12px;">
-                                <p style="margin: 0;">Sent by QuantMentor • <a href="https://quant-mentor.vercel.app" style="color:#6366f1; text-decoration:none;">quant-mentor.vercel.app</a></p>
+                                <p style="margin: 0;">Sent by Desk2Quant • <a href="https://quant-mentor.vercel.app" style="color:#6366f1; text-decoration:none;">quant-mentor.vercel.app</a></p>
                             </div>
                         </div>
                     </div>`;
 
                 const recNames = recommendations.map(p => `• ${p.name} — ₹${p.price}`).join('\n');
-                const emailText = `Hi ${customerName},\n\nYou recently purchased "${recentProductName}" from QuantMentor.\n\nHere are 2 more resources you might like:\n\n${recNames}\n\nBrowse all: https://quant-mentor.vercel.app/#products\n\nSent by QuantMentor`;
+                const emailText = `Hi ${customerName},\n\nYou recently purchased "${recentProductName}" from Desk2Quant.\n\nHere are 2 more resources you might like:\n\n${recNames}\n\nBrowse all: https://quant-mentor.vercel.app/#products\n\nSent by Desk2Quant`;
 
                 // Send via Brevo
                 const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
