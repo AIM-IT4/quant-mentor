@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resources | QuantMentor</title>
-    <link rel="canonical" href="https://quant-mentor.vercel.app/resources.html">
+    <link rel="canonical" href="https://quantmentor.in/resources.html">
     <link rel="icon" type="image/png" href="assets/images/quantmentor-logo-icon-QM-1024.png">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
@@ -36,12 +36,9 @@
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;"
-            id="resources-grid">
-            <!-- Resources will be added dynamically or manually here -->
-            <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
-                <i class="fas fa-folder-open" style="font-size: 3em; margin-bottom: 20px; opacity: 0.5;"></i>
-                <h3 style="margin-bottom: 10px;">Resources Coming Soon</h3>
-                <p>Check back later for free quant finance resources and guides.</p>
+            id="resources-grid"><div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2em; margin-bottom: 16px;"></i>
+                <p>Loading free resources...</p>
             </div>
         </div>
 
@@ -62,6 +59,40 @@
             <p>&copy; 2026 QuantMentor. All rights reserved.</p>
         </div>
     </footer>
+    <script>
+        function escapeHtml(value) {
+            return String(value || '').replace(/[&<>'"]/g, character => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[character]));
+        }
+
+        async function loadFreeResources() {
+            const grid = document.getElementById('resources-grid');
+            try {
+                const response = await fetch('/api/catalog');
+                if (!response.ok) throw new Error('Catalog unavailable');
+                const { products = [] } = await response.json();
+                const freeProducts = products.filter(product => Number(product.price) === 0);
+                if (!freeProducts.length) {
+                    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted);"><i class="fas fa-folder-open" style="font-size:3em;margin-bottom:20px;opacity:.5;"></i><h2>No free resources are published yet.</h2><p>Browse premium products while new free material is prepared.</p></div>';
+                    return;
+                }
+                grid.innerHTML = freeProducts.map(product => {
+                    const title = escapeHtml(product.name);
+                    const description = escapeHtml(product.description || 'Free quantitative finance resource.');
+                    const cover = product.cover_image_url
+                        ? `<img src="${escapeHtml(product.cover_image_url)}" alt="${title}" style="width:100%;height:190px;object-fit:contain;background:var(--bg-tertiary);padding:12px;box-sizing:border-box;">`
+                        : '<div style="height:190px;display:grid;place-items:center;background:var(--bg-tertiary);font-size:3em;color:var(--accent-primary);"><i class="fas fa-file-lines"></i></div>';
+                    const href = product.download_url || `product.html?id=${encodeURIComponent(product.id)}`;
+                    const label = product.download_url ? 'Download free' : 'View resource';
+                    return `<article style="background:var(--bg-card);border:1px solid var(--border-light);overflow:hidden;"><a href="${escapeHtml(href)}" target="${product.download_url ? '_blank' : '_self'}" rel="${product.download_url ? 'noopener' : ''}" style="display:block;color:inherit;text-decoration:none;">${cover}<div style="padding:22px;"><span style="color:#22c55e;font-size:.78rem;font-weight:700;">FREE RESOURCE</span><h2 style="font-size:1.2rem;margin:10px 0;">${title}</h2><p style="color:var(--text-muted);line-height:1.6;margin:0 0 18px;">${description}</p><span class="btn btn-primary">${label} <i class="fas fa-arrow-right"></i></span></div></a></article>`;
+                }).join('');
+            } catch (error) {
+                grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted);"><i class="fas fa-triangle-exclamation" style="font-size:2em;margin-bottom:16px;color:#f59e0b;"></i><h2>Resources are temporarily unavailable.</h2><p>Please try again shortly.</p></div>';
+            }
+        }
+        loadFreeResources();
+    </script>
 </body>
 
 </html>

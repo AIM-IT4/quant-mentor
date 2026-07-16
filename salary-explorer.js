@@ -26,8 +26,9 @@
     return symbol + amt;
   }
 
-  // All data (user submitted + seed data)
-  let allData = (typeof SEED_DATA !== 'undefined' && Array.isArray(SEED_DATA)) ? [...SEED_DATA] : [];
+  const MIN_CHART_SAMPLE_SIZE = 5;
+  // Only approved user submissions feed public compensation statistics.
+  let allData = [];
 
   // --- Region/City Cascading Dropdowns ---
   function setupRegionCascade(regionSel, countrySel, citySel) {
@@ -75,9 +76,9 @@
     const topFirm = el('stat-top-firm');
     const topRole = el('stat-top-role');
 
-    if (!data.length) {
-      if (totalSubs) totalSubs.textContent = '0';
-      if (medianTC) medianTC.textContent = '$0';
+    if (data.length < MIN_CHART_SAMPLE_SIZE) {
+      if (totalSubs) totalSubs.textContent = data.length ? String(data.length) : '—';
+      if (medianTC) medianTC.textContent = 'Insufficient data';
       if (topRegion) topRegion.textContent = '—';
       if (topFirm) topFirm.textContent = '—';
       if (topRole) topRole.textContent = '—';
@@ -104,7 +105,7 @@
           p.innerHTML = `
             <div class="sal-chart-empty-state" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; color:var(--text-muted); font-size:0.85rem; border: 1px dashed var(--border-light); border-radius: var(--radius-sm); padding:20px; background:rgba(0,0,0,0.05);">
               <i class="fas fa-chart-line" style="font-size:1.8rem; margin-bottom:8px; color:var(--accent-secondary); opacity:0.6;"></i>
-              <span>No data yet. Share your salary anonymously below to populate this dashboard!</span>
+              <span>At least 5 approved submissions are required before charts are shown.</span>
             </div>
           `;
         }
@@ -356,7 +357,7 @@
       if (stored) localSubmissions = JSON.parse(stored);
     } catch (e) { console.warn('Failed to load local salaries:', e); }
 
-    const seeds = (typeof SEED_DATA !== 'undefined' && Array.isArray(SEED_DATA)) ? SEED_DATA : [];
+    const seeds = [];
     allData = [...seeds, ...localSubmissions];
     renderDashboard(allData);
     if (typeof renderSalaryWidget === 'function') renderSalaryWidget();
@@ -534,10 +535,10 @@
     const ws2 = document.getElementById('widgetStatMedian');
     const ws3 = document.getElementById('widgetStatRegions');
 
-    if (!allData.length) {
-      if (ws1) ws1.textContent = '0';
-      if (ws2) ws2.textContent = '$0';
-      if (ws3) ws3.textContent = '0';
+    if (allData.length < MIN_CHART_SAMPLE_SIZE) {
+      if (ws1) ws1.textContent = allData.length ? String(allData.length) : '—';
+      if (ws2) ws2.textContent = 'Insufficient data';
+      if (ws3) ws3.textContent = '—';
 
       const c1Wrap = document.getElementById('widgetChartRegionWrap');
       const c2Wrap = document.getElementById('widgetChartDistWrap');
@@ -546,7 +547,7 @@
         c1Wrap.innerHTML = `
           <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; color:var(--text-muted); font-size:0.75rem; border: 1px dashed var(--border-light); border-radius: var(--radius-sm); padding:10px; background:rgba(0,0,0,0.05); min-height:160px;">
             <i class="fas fa-chart-bar" style="font-size:1.4rem; margin-bottom:6px; color:var(--accent-secondary); opacity:0.6;"></i>
-            <span>No salary data yet.</span>
+            <span>Insufficient data for public salary charts.</span>
           </div>
         `;
       }
@@ -554,7 +555,7 @@
         c2Wrap.innerHTML = `
           <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; color:var(--text-muted); font-size:0.75rem; border: 1px dashed var(--border-light); border-radius: var(--radius-sm); padding:10px; background:rgba(0,0,0,0.05); min-height:160px;">
             <i class="fas fa-chart-pie" style="font-size:1.4rem; margin-bottom:6px; color:var(--accent-secondary); opacity:0.6;"></i>
-            <span>No data yet.</span>
+            <span>Insufficient data for public salary charts.</span>
           </div>
         `;
       }

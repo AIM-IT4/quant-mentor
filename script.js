@@ -108,49 +108,20 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // --- Dynamic Stats & Supabase Init ---
-    const STATS_CONFIG = {
-        students: { base: 50, id: 'stat-students' },
-        experience: { startYear: 2022, id: 'stat-experience' },
-        products: { base: 0, id: 'stat-products' }
+    const STATS_CONFIG = window.QUANT_MENTOR?.stats || {
+        products: 36,
+        reviews: 25,
+        mentees: 50,
+        resourceUsers: 500
     };
 
-    if (typeof window.supabase !== 'undefined' && !window.supabaseClient) {
-        const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDEyNjUsImV4cCI6MjA4NTY3NzI2NX0.PYpNd_t_px09zi2d5WGjFVOB23sjb3ZPuAnxagYshe0';
-        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    }
-
-    async function updateStats() {
-        // Experience
-        const elExp = document.getElementById(STATS_CONFIG.experience.id);
-        if (elExp) {
-            const exp = new Date().getFullYear() - STATS_CONFIG.experience.startYear;
-            elExp.textContent = `${exp}+`;
-        }
-
-        if (!window.supabaseClient) return;
-
-        try {
-            // Products
-            const { count: prodCount } = await window.supabaseClient
-                .from('products')
-                .select('*', { count: 'exact', head: true });
-
-            const elProd = document.getElementById(STATS_CONFIG.products.id);
-            if (elProd && prodCount !== null) {
-                elProd.textContent = `${STATS_CONFIG.products.base + prodCount}+`;
-            }
-
-            // Students (Bookings)
-            const { count: bookCount } = await window.supabaseClient
-                .from('bookings')
-                .select('*', { count: 'exact', head: true });
-
-            const elStud = document.getElementById(STATS_CONFIG.students.id);
-            if (elStud && bookCount !== null) {
-                elStud.textContent = `${STATS_CONFIG.students.base + bookCount}+`;
-            }
-        } catch (e) { console.error('Stats Update Error:', e); }
+    function updateStats() {
+        const studentStat = document.getElementById('stat-students');
+        const reachStat = document.getElementById('stat-experience');
+        const productStat = document.getElementById('stat-products');
+        if (studentStat) studentStat.textContent = `${STATS_CONFIG.mentees}+`;
+        if (reachStat) reachStat.textContent = `${STATS_CONFIG.resourceUsers}+`;
+        if (productStat) productStat.textContent = String(STATS_CONFIG.products);
     }
     updateStats();
 
