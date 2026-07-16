@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     try {
         // Use fetch (same pattern as razorpay-webhook.js and reminders.js)
         const response = await fetch(
-            `${SUPABASE_URL}/rest/v1/products?select=id,name,description,price,cover_image_url,created_at&order=created_at.desc`,
+            `${SUPABASE_URL}/rest/v1/products?select=id,name,description,price,cover_image_url,file_url,created_at&order=created_at.desc`,
             {
                 headers: {
                     'apikey': SUPABASE_KEY,
@@ -34,11 +34,13 @@ export default async function handler(req, res) {
 
         // Format for readability (strip HTML, clean up for LLMs and bots)
         const formatted = products.map(p => ({
+            id: p.id,
             name: p.name,
             description: stripHtml(p.description),
             price: p.price === 0 ? 'Free' : `₹${p.price}`,
             priceINR: p.price,
             coverImage: p.cover_image_url || null,
+            downloadUrl: Number(p.price) === 0 ? p.file_url : null,
             purchaseUrl: p.price > 0
                 ? `https://quant-mentor.vercel.app/?id=${p.id}`
                 : 'https://quant-mentor.vercel.app/#resources',
@@ -49,7 +51,7 @@ export default async function handler(req, res) {
         const free = formatted.filter(p => p.priceINR === 0);
 
         return res.status(200).json({
-            site: 'QuantMentor - quantmentor.in',
+            site: 'QuantMentor - quant-mentor.vercel.app',
             description: 'Premium digital products for quantitative finance professionals. Curated study materials, coding scripts, and interview guides.',
             totalProducts: formatted.length,
             paidProducts: { count: paid.length, items: paid },

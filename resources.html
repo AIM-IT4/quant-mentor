@@ -69,7 +69,7 @@
         async function loadFreeResources() {
             const grid = document.getElementById('resources-grid');
             try {
-                const response = await fetch('/api/catalog');
+                const response = await fetch('/api/products');
                 if (!response.ok) throw new Error('Catalog unavailable');
                 const { products = [] } = await response.json();
                 const freeProducts = products.filter(product => Number(product.price) === 0);
@@ -80,12 +80,12 @@
                 grid.innerHTML = freeProducts.map(product => {
                     const title = escapeHtml(product.name);
                     const description = escapeHtml(product.description || 'Free quantitative finance resource.');
-                    const cover = product.cover_image_url
-                        ? `<img src="${escapeHtml(product.cover_image_url)}" alt="${title}" style="width:100%;height:190px;object-fit:contain;background:var(--bg-tertiary);padding:12px;box-sizing:border-box;">`
+                    const cover = product.coverImage
+                        ? `<img src="${escapeHtml(product.coverImage)}" alt="${title}" style="width:100%;height:190px;object-fit:contain;background:var(--bg-tertiary);padding:12px;box-sizing:border-box;">`
                         : '<div style="height:190px;display:grid;place-items:center;background:var(--bg-tertiary);font-size:3em;color:var(--accent-primary);"><i class="fas fa-file-lines"></i></div>';
-                    const href = product.download_url || `product.html?id=${encodeURIComponent(product.id)}`;
-                    const label = product.download_url ? 'Download free' : 'View resource';
-                    return `<article style="background:var(--bg-card);border:1px solid var(--border-light);overflow:hidden;"><a href="${escapeHtml(href)}" target="${product.download_url ? '_blank' : '_self'}" rel="${product.download_url ? 'noopener' : ''}" style="display:block;color:inherit;text-decoration:none;">${cover}<div style="padding:22px;"><span style="color:#22c55e;font-size:.78rem;font-weight:700;">FREE RESOURCE</span><h2 style="font-size:1.2rem;margin:10px 0;">${title}</h2><p style="color:var(--text-muted);line-height:1.6;margin:0 0 18px;">${description}</p><span class="btn btn-primary">${label} <i class="fas fa-arrow-right"></i></span></div></a></article>`;
+                    const href = product.downloadUrl || `product.html?id=${encodeURIComponent(product.id)}`;
+                    const label = product.downloadUrl ? 'Download free' : 'View resource';
+                    return `<article style="background:var(--bg-card);border:1px solid var(--border-light);overflow:hidden;"><a href="${escapeHtml(href)}" target="${product.downloadUrl ? '_blank' : '_self'}" rel="${product.downloadUrl ? 'noopener' : ''}" style="display:block;color:inherit;text-decoration:none;">${cover}<div style="padding:22px;"><span style="color:#22c55e;font-size:.78rem;font-weight:700;">FREE RESOURCE</span><h2 style="font-size:1.2rem;margin:10px 0;">${title}</h2><p style="color:var(--text-muted);line-height:1.6;margin:0 0 18px;">${description}</p><span class="btn btn-primary">${label} <i class="fas fa-arrow-right"></i></span></div></a></article>`;
                 }).join('');
             } catch (error) {
                 grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted);"><i class="fas fa-triangle-exclamation" style="font-size:2em;margin-bottom:16px;color:#f59e0b;"></i><h2>Resources are temporarily unavailable.</h2><p>Please try again shortly.</p></div>';
