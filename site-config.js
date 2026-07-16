@@ -1,6 +1,6 @@
 /* Shared public copy and trust signals. Keep numbers here; do not duplicate them in pages. */
 window.QUANT_MENTOR = Object.freeze({
-    canonicalOrigin: 'https://quantmentor.in',
+    canonicalOrigin: 'https://quant-mentor.vercel.app',
     brandName: 'QuantMentor',
     brandDescriptor: 'Desk-Ready Quant Finance Preparation',
     stats: Object.freeze({
