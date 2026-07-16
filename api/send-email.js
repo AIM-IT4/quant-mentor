@@ -29,7 +29,7 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 sender: { email: senderEmail, name: senderName },
-                to: [{ email: to }],
+                to: to.split(',').map(email => ({ email: email.trim() })).filter(item => item.email),
                 subject: subject,
                 htmlContent: htmlContent,
                 textContent: textContent

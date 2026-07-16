@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     const SUPABASE_URL = process.env.SUPABASE_URL || 'https://dntabmyurlrlnoajdnja.supabase.co';
     const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0';
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
-    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'jha.8@alumni.iitj.ac.in';
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'jha.8@alumni.iitj.ac.in, iitamit97@gmail.com';
     const SENDER_EMAIL = process.env.SENDER_EMAIL || 'jha.8@alumni.iitj.ac.in';
     const SENDER_NAME = process.env.SENDER_NAME || 'QuantMentor';
 
@@ -284,7 +284,7 @@ async function sendReminder(booking, type, config) {
         },
         body: JSON.stringify({
             sender: { name: SENDER_NAME, email: SENDER_EMAIL },
-            to: [{ email: ADMIN_EMAIL }],
+            to: ADMIN_EMAIL.split(',').map(email => ({ email: email.trim() })).filter(item => item.email),
             subject: `Admin Alert: ${type} Reminder Sent`,
             htmlContent: `<p>${type} Reminder sent to ${booking.email} for ${booking.service_name}</p><p>Meeting Link: ${meetLink}</p>`
         })

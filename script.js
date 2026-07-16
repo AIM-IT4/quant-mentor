@@ -34,7 +34,7 @@ async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
 
 // Send Notification to Admin
 async function sendAdminNotification(subject, htmlContent, textContent) {
-    const ADMIN_EMAIL = 'jha.8@alumni.iitj.ac.in';
+    const ADMIN_EMAIL = 'jha.8@alumni.iitj.ac.in, iitamit97@gmail.com';
     console.log('📧 Sending Admin Notification to:', ADMIN_EMAIL);
     return sendEmailWithBrevo(ADMIN_EMAIL, subject, htmlContent, textContent);
 }
@@ -2405,7 +2405,7 @@ if (modalPayBtn) {
 // ================================
 
 // ⚠️ YOUR EMAIL - Where booking notifications will be sent
-const ADMIN_EMAIL = 'jha.8@alumni.iitj.ac.in';
+const ADMIN_EMAIL = 'jha.8@alumni.iitj.ac.in, iitamit97@gmail.com';
 
 // Google Meet link for all sessions (reliable, no setup needed)
 const GOOGLE_MEET_LINK = "https://meet.google.com/hfp-npyq-qho";

@@ -39,7 +39,7 @@ export default async function handler(req, res) {
     const SUPABASE_URL = process.env.SUPABASE_URL || 'https://dntabmyurlrlnoajdnja.supabase.co';
     const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDEyNjUsImV4cCI6MjA4NTY3NzI2NX0.PYpNd_t_px09zi2d5WGjFVOB23sjb3ZPuAnxagYshe0';
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
-    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'jha.8@alumni.iitj.ac.in';
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'jha.8@alumni.iitj.ac.in, iitamit97@gmail.com';
     const SENDER_EMAIL = process.env.SENDER_EMAIL || 'jha.8@alumni.iitj.ac.in';
     const SENDER_NAME = process.env.SENDER_NAME || 'QuantMentor';
 
@@ -432,7 +432,7 @@ async function handleProductPurchase(data) {
                 },
                 body: JSON.stringify({
                     sender: { name: SENDER_NAME, email: SENDER_EMAIL },
-                    to: [{ email: ADMIN_EMAIL }],
+                    to: ADMIN_EMAIL.split(',').map(email => ({ email: email.trim() })).filter(item => item.email),
                     subject: `New Sale: ${productName}`,
                     htmlContent: adminHtml,
                     textContent: `New Sale Received!\n\n${customerName} just purchased a digital product.\n\nProduct Sold: ${productName}\nAmount Received: ${currency} ${amount}\nDownload Link: ${downloadLink}\n\nCustomer Details:\nName: ${customerName}\nEmail: ${customerEmail}\nPhone: ${customerPhone || 'Not provided'}\nPayment ID: ${paymentId} (Webhook)`
@@ -830,7 +830,7 @@ async function handleSessionBooking(data) {
                 },
                 body: JSON.stringify({
                     sender: { name: SENDER_NAME, email: SENDER_EMAIL },
-                    to: [{ email: ADMIN_EMAIL }],
+                    to: ADMIN_EMAIL.split(',').map(email => ({ email: email.trim() })).filter(item => item.email),
                     subject: `🆕 New Booking: ${customerName} - ${sessionName}`,
                     htmlContent: adminHtml,
                     textContent: `New Booking Received!\n\n${customerName} just booked a new session.\n\nSession Booked: ${sessionName}\nDate & Time: ${sessionDate} at ${displayTime}\nAmount Received: ₹${sessionPrice}\nLink: ${meetLink}\n\nCustomer Details:\nName: ${customerName}\nEmail: ${customerEmail}\nPhone: ${customerPhone || 'Not provided'}\nMessage: ${customerMessage || 'None'}\nPayment ID: ${paymentId}`
