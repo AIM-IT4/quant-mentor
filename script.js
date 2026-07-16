@@ -1388,6 +1388,36 @@ async function loadProductsFromSupabase(prefetchPromise) {
     }
 }
 
+function getProductCardVisual(productName) {
+    const name = (productName || '').toLowerCase();
+    const visuals = [
+        { match: 'numerical methods', signal: 'Σ', label: 'Numerical Methods', tag: 'New release' },
+        { match: 'cheatcode', signal: '75×', label: 'Speed Hacks', tag: 'Interview' },
+        { match: 'trade lifecycle', signal: 'T→R', label: 'Trade Lifecycle', tag: 'Banking' },
+        { match: 'model validation', signal: '✓', label: 'Validation', tag: 'Case studies' },
+        { match: 'exotic options', signal: '∂V', label: 'Exotics', tag: 'Pricing' },
+        { match: 'fixed income', signal: 'DV01', label: 'Fixed Income', tag: 'Rates' },
+        { match: 'problem book', signal: '1000+', label: 'Problems', tag: 'Problem book' },
+        { match: 'greek explainer', signal: 'Γ', label: 'Greek Lab', tag: 'Notebooks' },
+        { match: 'python', signal: 'Py', label: 'Python', tag: 'Code' },
+        { match: 'c++', signal: 'C++', label: 'C++', tag: 'Code' },
+        { match: 'stochastic', signal: 'dW', label: 'Stochastic', tag: 'Mathematics' },
+        { match: 'xva', signal: 'XVA', label: 'XVA', tag: 'Risk' }
+    ];
+    return visuals.find(item => name.includes(item.match)) || {
+        signal: (productName || 'Q').trim().charAt(0).toUpperCase(),
+        label: 'Quant Resource',
+        tag: 'Premium'
+    };
+}
+
+window.toggleCatalogue = function () {
+    const grid = document.querySelector('#products .products-grid');
+    const button = document.getElementById('catalogueToggle');
+    if (!grid || !button) return;
+    const collapsed = grid.classList.toggle('catalogue-collapsed');
+    button.textContent = collapsed ? 'View full catalogue' : 'Show featured only';
+};
 // Display products from Supabase in the products grid
 // Display products separated by Paid and Free
 async function displaySupabaseProducts(products) {
@@ -1397,7 +1427,24 @@ async function displaySupabaseProducts(products) {
     if (productsGrid) productsGrid.innerHTML = '';
     if (resourcesGrid) resourcesGrid.innerHTML = '';
 
-    const paidProducts = products.filter(p => p.price > 0);
+    const preferredProductOrder = [
+        'numerical methods for quants',
+        'quant desk cheatcode',
+        'trade lifecycle for quants',
+        'model validation quant case study',
+        'exotic options pricing guide',
+        'fixed income math & bond pricing',
+        'quant interview problem book',
+        'greek explainer lab'
+    ];
+    const paidProducts = products.filter(p => p.price > 0).sort((a, b) => {
+        const rank = product => {
+            const name = (product.name || '').toLowerCase();
+            const index = preferredProductOrder.findIndex(pattern => name.includes(pattern));
+            return index === -1 ? preferredProductOrder.length + (product.display_order || 999) : index;
+        };
+        return rank(a) - rank(b);
+    });
     const freeProducts = products.filter(p => p.price === 0);
 
     const renderList = [
@@ -1423,7 +1470,7 @@ async function displaySupabaseProducts(products) {
             continue;
         } else if (items.length > 0 && isFree) {
             const section = document.getElementById('resources');
-            if (section) section.style.display = 'block';
+            if (section && !section.hasAttribute('hidden')) section.style.display = 'block';
         }
 
         for (const product of items) {
@@ -1493,28 +1540,29 @@ async function displaySupabaseProducts(products) {
                 originalPriceDisplay = priceDisplay;
             }
 
+            const visual = getProductCardVisual(product.name);
+            const productHref = `${window.location.pathname.includes('-test') ? 'product-test.html' : 'product.html'}?id=${product.id}`;
+            productCard.setAttribute('role', 'link');
+            productCard.setAttribute('tabindex', '0');
+            productCard.setAttribute('aria-label', `Preview ${product.name}`);
+            productCard.addEventListener('click', () => { window.location.href = productHref; });
+            productCard.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    window.location.href = productHref;
+                }
+            });
             productCard.innerHTML = `
-                ${imageSection}
+                <div class="product-image reference-cover">
+                    <span class="reference-signal">${visual.signal}</span>
+                    <span class="reference-cover-label">${visual.label}</span>
+                </div>
                 <div class="product-content">
-                    <h3 class="product-title">
-                        ${product.name}${currencyBadge}
-                        <button class="share-btn" onclick="copyProductLink('${product.id}')" title="Copy share link" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.8em; margin-left:10px; transition:color 0.3s ease;">
-                            <i class="fas fa-share-alt"></i>
-                        </button>
-                    </h3>
-                    <div class="product-description">${displayDesc.replace(/<[^>]*>?/gm, '').substring(0, 150) + '...'}</div>
-                    <div class="product-meta">
-                        <span><i class="fas fa-file-alt"></i> ${isFree ? 'Resource' : 'Premium Note'}</span>
-                        <span><i class="fas fa-download"></i> Instant Access</span>
-                    </div>
+                    <h3 class="product-title">${product.name}</h3>
+                    <div class="product-description">${displayDesc.replace(/<[^>]*>?/gm, '').substring(0, 170)}</div>
                     <div class="product-footer">
-                        ${originalPriceDisplay}
-                        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
-                            <a class="btn btn-secondary" href="${window.location.pathname.includes('-test') ? 'product-test.html' : 'product.html'}?id=${product.id}" style="padding:10px 14px; font-size:0.9rem;">
-                                <i class="fas fa-eye"></i> Preview
-                            </a>
-                            <button class="btn btn-product" onclick="openProductModal('${product.id}')" data-price="${product.price}">${btnText}</button>
-                        </div>
+                        <div class="product-price-action" role="button" tabindex="0" title="Buy now" onclick="event.stopPropagation(); openProductModal('${product.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openProductModal('${product.id}')}">${originalPriceDisplay}</div>
+                        <span class="product-reference-tag">${isFree ? 'Free resource' : visual.tag}</span>
                     </div>
                 </div>
             `;
@@ -1691,36 +1739,21 @@ async function updateServicesSection(sessions) {
                 ? `<span style="font-weight:700;">${formatPrice(localPrice)}</span>`
                 : `₹${session.price}`;
 
+        serviceCard.dataset.service = session.name;
+        serviceCard.setAttribute('role', 'button');
+        serviceCard.setAttribute('tabindex', '0');
         serviceCard.innerHTML = `
-            <div class="service-header">
-                <div class="service-icon">
-                    <i class="fas fa-${index === 0 ? 'headset' : index === 1 ? 'comments' : index === 2 ? 'graduation-cap' : 'briefcase'}"></i>
-                </div>
-                <h3 class="service-title">${session.name}</h3>
-                ${session.is_popular ? '<span class="popular-badge">Most Popular</span>' : ''}
+            <div class="session-row-copy">
+                <strong class="service-title">${session.name}</strong>
+                <small>${session.duration} minutes</small>
             </div>
-            <div class="service-content">
-                <div class="service-price">
-                    ${priceDisplay}
-                    <span class="price-duration">/${session.duration} min</span>
-                </div>
-                <p class="service-description">${session.description || 'Personalized mentorship session.'}</p>
-                <ul class="service-features" style="list-style: none; padding: 0; margin: 0;">
-                    ${featuresHtml}
-                </ul>
-            </div>
-            <div class="service-footer">
-                <a href="#contact" class="btn btn-product btn-full btn-service" data-service="${session.name}">
-                    ${session.price === 0 ? '🆓 Book Free Session' : 'Book Session'}
-                </a>
-            </div>
-`;
-
+            <span class="service-price">${priceDisplay}</span>
+        `;
         servicesContainer.appendChild(serviceCard);
         if (window.revealObserver) window.revealObserver.observe(serviceCard);
 
         // Add event listener for the booking button
-        const bookBtn = serviceCard.querySelector('.btn-service');
+        const bookBtn = serviceCard;
         if (bookBtn) {
             bookBtn.addEventListener('click', function (e) {
                 const service = this.dataset.service;
@@ -3145,7 +3178,7 @@ function displayApprovedTestimonials(testimonials) {
 
     // If on index.html (or root), limit to 5 reviews. Otherwise, show all.
     const isHomePage = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/');
-    const reviewsToShow = isHomePage ? testimonials.slice(0, 5) : testimonials;
+    const reviewsToShow = isHomePage ? testimonials.slice(0, 3) : testimonials;
 
     reviewsToShow.forEach(t => {
         const stars = '★'.repeat(t.rating) + '☆'.repeat(5 - t.rating);

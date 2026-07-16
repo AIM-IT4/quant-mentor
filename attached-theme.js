@@ -1,12 +1,28 @@
 (function () {
-    function applyTheme() {
+    function initializeReferenceTheme() {
         if (!document.body) return;
-        const savedTheme = localStorage.getItem('theme');
-        document.body.classList.toggle('light-mode', savedTheme !== 'dark');
+        document.body.classList.add('light-mode');
+
+        if (!document.querySelector('script[src*="script.js"]')) {
+            const menuButton = document.getElementById('mobileMenuBtn');
+            const navLinks = document.querySelector('.nav-links');
+            if (menuButton && navLinks && !menuButton.dataset.referenceBound) {
+                menuButton.dataset.referenceBound = 'true';
+                menuButton.addEventListener('click', function () {
+                    navLinks.classList.toggle('mobile-active');
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('fa-bars');
+                        icon.classList.toggle('fa-times');
+                    }
+                });
+            }
+        }
     }
 
-    applyTheme();
-    if (!document.body) {
-        document.addEventListener('DOMContentLoaded', applyTheme, { once: true });
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeReferenceTheme, { once: true });
+    } else {
+        initializeReferenceTheme();
     }
 })();
