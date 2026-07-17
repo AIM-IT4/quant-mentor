@@ -4,83 +4,467 @@
  * Existing IDs, visibility classes, handlers, and API integrations remain unchanged.
  */
 
+/* ============================================================
+   AUTO-RESPONSIVE CONFIGURATION — Single source of truth
+   ============================================================ */
+:root {
+  /* Breakpoints — all sizing derives from these */
+  --bp-xs: 360px;   /* Small phones */
+  --bp-sm: 560px;   /* Large phones */
+  --bp-md: 768px;   /* Tablets */
+  --bp-lg: 900px;   /* Small laptops */
+  --bp-xl: 1100px;  /* Desktops */
+  --bp-2xl: 1400px; /* Large screens */
+
+  /* Fluid spacing scale — clamp() for smooth scaling */
+  --space-1: clamp(4px, 0.5vw, 8px);
+  --space-2: clamp(8px, 1vw, 16px);
+  --space-3: clamp(16px, 2vw, 24px);
+  --space-4: clamp(24px, 3vw, 36px);
+  --space-5: clamp(32px, 4vw, 48px);
+  --space-6: clamp(48px, 5vw, 72px);
+  --space-7: clamp(64px, 6vw, 96px);
+  --space-8: clamp(80px, 8vw, 128px);
+
+  /* Fluid container max-width per breakpoint */
+  --container-xs: 100%;
+  --container-sm: 100%;
+  --container-md: 720px;
+  --container-lg: 960px;
+  --container-xl: 1180px;
+  --container-2xl: 1320px;
+
+  /* Fluid typography scale */
+  --text-xs: clamp(0.7rem, 0.6rem + 0.2vw, 0.85rem);
+  --text-sm: clamp(0.8rem, 0.7rem + 0.3vw, 1rem);
+  --text-base: clamp(0.95rem, 0.85rem + 0.4vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  --text-xl: clamp(1.5rem, 1.25rem + 0.8vw, 2.25rem);
+  --text-2xl: clamp(2rem, 1.5rem + 1.2vw, 3.5rem);
+  --text-3xl: clamp(2.5rem, 1.75rem + 1.8vw, 5rem);
+  --text-4xl: clamp(3.5rem, 2rem + 2.5vw, 7rem);
+
+  /* Fluid gap for grids/flex */
+  --gap-xs: clamp(8px, 1.5vw, 16px);
+  --gap-sm: clamp(12px, 2vw, 24px);
+  --gap-md: clamp(16px, 2.5vw, 32px);
+  --gap-lg: clamp(24px, 3vw, 48px);
+  --gap-xl: clamp(32px, 4vw, 64px);
+
+  /* Border radius scale */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-2xl: 30px;
+
+  /* Shadow scale */
+  --shadow-sm: 0 2px 8px rgba(6,39,91,0.06);
+  --shadow-md: 0 8px 24px rgba(6,39,91,0.09);
+  --shadow-lg: 0 18px 48px rgba(6,39,91,0.12);
+  --shadow-xl: 0 30px 90px rgba(3,26,62,0.28);
+
+  /* Z-index layers */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --z-toast: 800;
+}
+
+/* ============================================================
+   CONTAINER QUERIES — Element-aware responsive
+   ============================================================ */
+.hero-container,
+.products-grid,
+.testimonials-grid,
+.services-grid,
+.contact-wrapper,
+.mentor-band-inner,
+.flow-grid,
+.section-container {
+  container-type: inline-size;
+  container-name: layout;
+}
+
+/* ============================================================
+   FLUID LAYOUT UTILITIES — Reusable responsive patterns
+   ============================================================ */
+
+/* Auto-fit grid — columns adapt to container width */
+.auto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: var(--gap-md);
+}
+
+/* Auto-fill grid — strict column control */
+.auto-grid-strict {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: var(--gap-md);
+}
+
+/* Fluid flex — wraps at container boundary */
+.fluid-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-sm);
+}
+
+/* Fluid flex with center alignment */
+.fluid-flex-center {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--gap-sm);
+}
+
+/* Stack on small, row on large — configurable breakpoint via container query */
+@container layout (max-width: 600px) {
+  .stack-sm {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+@container layout (min-width: 601px) {
+  .stack-sm {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+/* ============================================================
+   HERO — Fully auto-responsive (replaces manual media queries)
+   ============================================================ */
+.hero-auto {
+  padding: var(--space-6) 0 var(--space-4);
+  min-height: auto;
+}
+
+.hero-auto .hero-container {
+  display: grid;
+  gap: var(--gap-lg);
+  align-items: start;
+  /* Mobile-first: single column, content first */
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "content"
+    "visual";
+}
+
+/* Tablet+ — two columns */
+@container layout (min-width: 700px) {
+  .hero-auto .hero-container {
+    grid-template-columns: 1.05fr 0.95fr;
+    grid-template-areas:
+      "content visual";
+    align-items: center;
+  }
+  .hero-auto .hero-content {
+    text-align: left;
+    align-items: flex-start;
+  }
+  .hero-auto .hero-cta {
+    flex-direction: row;
+    width: auto;
+  }
+  .hero-auto .hero-cta .btn {
+    width: auto;
+  }
+  .hero-auto .hero-stats {
+    justify-content: flex-start;
+    width: auto;
+  }
+}
+
+/* Large desktop — more generous gap */
+@container layout (min-width: 1000px) {
+  .hero-auto .hero-container {
+    gap: var(--gap-xl);
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+}
+
+/* Hero elements — fluid sizing */
+.hero-auto .hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.hero-auto .hero-headline {
+  margin: var(--space-3) 0 var(--space-2);
+  font-size: var(--text-3xl);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  max-width: clamp(320px, 85%, 720px);
+}
+
+.hero-auto .hero-subcopy {
+  font-size: var(--text-lg);
+  line-height: 1.7;
+  color: var(--text-muted);
+  max-width: clamp(320px, 90%, 680px);
+}
+
+.hero-auto .hero-cta {
+  margin-top: var(--space-4);
+  gap: var(--space-2);
+}
+
+.hero-auto .hero-stats {
+  margin-top: var(--space-5);
+}
+
+.hero-auto .stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: clamp(90px, 20vw, 120px);
+}
+
+.hero-auto .stat-value {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.hero-auto .stat-label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   SECTIONS — Auto-responsive sections
+   ============================================================ */
+.section-auto {
+  padding: var(--space-7) 0;
+}
+
+.section-auto .section-container {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+.section-auto .section-header {
+  margin-bottom: var(--space-5);
+  text-align: center;
+}
+
+@container layout (min-width: 768px) {
+  .section-auto .section-header {
+    text-align: left;
+  }
+}
+
+/* ============================================================
+   PRODUCTS / CARDS — Auto grid
+   ============================================================ */
+.products-auto {
+  display: grid;
+  gap: var(--gap-md);
+  grid-template-columns: 1fr;
+}
+
+@container layout (min-width: 560px) {
+  .products-auto {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@container layout (min-width: 900px) {
+  .products-auto {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@container layout (min-width: 1200px) {
+  .products-auto {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ============================================================
+   TERMINAL — Auto-responsive
+   ============================================================ */
+.terminal-auto {
+  width: 100%;
+  min-height: clamp(300px, 50vw, 430px);
+}
+
+.terminal-auto .terminal-panel {
+  min-height: clamp(250px, 40vw, 370px);
+}
+
+.terminal-auto .terminal-float-card {
+  position: absolute;
+  padding: clamp(10px, 2vw, 14px) clamp(12px, 2.5vw, 16px);
+  border-radius: var(--radius-md);
+}
+
+@container layout (max-width: 560px) {
+  .terminal-auto .terminal-float-card {
+    position: static;
+    width: 100%;
+    max-width: none;
+    margin: var(--space-2) 0;
+  }
+}
+
+/* ============================================================
+   STATS GRID — Auto columns based on container width
+   ============================================================ */
+.stats-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  gap: var(--gap-sm);
+  width: 100%;
+}
+
+@container layout (max-width: 480px) {
+  .stats-auto {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   NAVBAR — Auto-responsive
+   ============================================================ */
+.navbar-auto {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  height: clamp(64px, 8vh, 76px);
+}
+
+.navbar-auto .nav-container {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-sm);
+}
+
+/* ============================================================
+   D2Q THEME OVERRIDES — Apply auto-responsive to reference mode
+   ============================================================ */
+body.d2q-reference {
+  /* Use fluid spacing from config */
+  --section-padding: var(--space-7);
+  --container-width: var(--container-xl);
+  --section-gap: var(--gap-lg);
+  --content-gap: var(--gap-md);
+}
+
+/* Hero overrides for d2q-reference mode */
+body.d2q-reference .hero-auto .hero-headline {
+  color: var(--d2q-navy-deep);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+body.d2q-reference .hero-auto .hero-subcopy {
+  color: var(--d2q-muted);
+}
+
+body.d2q-reference .hero-auto .stat-value {
+  color: var(--d2q-navy);
+}
+
+body.d2q-reference .hero-auto .stat-label {
+  color: #4e607a;
+}
+
+/* ============================================================
+   LIGHT MODE THEME
+   ============================================================ */
 :root,
 body.light-mode {
-    --d2q-navy: #06275b;
-    --d2q-navy-deep: #031a3e;
-    --d2q-navy-hover: #0a3476;
-    --d2q-teal: #08a9a2;
-    --d2q-teal-dark: #087d78;
-    --d2q-teal-soft: #dff8f5;
-    --d2q-ink: #10213d;
-    --d2q-muted: #60708a;
-    --d2q-line: #dce5ef;
-    --d2q-paper: #f6f9fc;
-    --d2q-white: #ffffff;
-    --d2q-shadow: 0 18px 55px rgba(6, 39, 91, 0.1);
+  --d2q-navy: #06275b;
+  --d2q-navy-deep: #031a3e;
+  --d2q-navy-hover: #0a3476;
+  --d2q-teal: #08a9a2;
+  --d2q-teal-dark: #087d78;
+  --d2q-teal-soft: #dff8f5;
+  --d2q-ink: #10213d;
+  --d2q-muted: #60708a;
+  --d2q-line: #dce5ef;
+  --d2q-paper: #f6f9fc;
+  --d2q-white: #ffffff;
+  --d2q-shadow: 0 18px 55px rgba(6,39,91,0.10);
 
-    --bg-primary: #ffffff;
-    --bg-secondary: #f6f9fc;
-    --bg-tertiary: #edf4f8;
-    --bg-card: #ffffff;
-    --bg-nav: rgba(255, 255, 255, 0.94);
-    --bg-glass: rgba(6, 39, 91, 0.04);
-    --text-primary: #10213d;
-    --text-secondary: #60708a;
-    --text-muted: #60708a;
-    --accent-primary: #08a9a2;
-    --accent-secondary: #06275b;
-    --accent-tertiary: #0a3476;
-    --accent-gradient: linear-gradient(135deg, #06275b 0%, #0a3476 58%, #08a9a2 100%);
-    --border-subtle: #e9eff5;
-    --border-light: #dce5ef;
-    --border-rim: #cbd8e5;
-    --shadow-sm: 0 4px 16px rgba(6, 39, 91, 0.06);
-    --shadow-md: 0 14px 38px rgba(6, 39, 91, 0.09);
-    --shadow-lg: 0 24px 60px rgba(6, 39, 91, 0.12);
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 22px;
-    --container-width: 1180px;
-    --section-padding: 82px 0;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f9fc;
+  --bg-tertiary: #edf4f8;
+  --bg-card: #ffffff;
+  --bg-nav: rgba(255,255,255,0.94);
+  --bg-glass: rgba(6,39,91,0.04);
+  --text-primary: #10213d;
+  --text-secondary: #60708a;
+  --text-muted: #60708a;
+  --accent-primary: #08a9a2;
+  --accent-secondary: #06275b;
+  --accent-tertiary: #0a3476;
+  --accent-gradient: linear-gradient(135deg, #06275b 0%, #0a3476 58%, #08a9a2 100%);
+  --border-subtle: #e9eff5;
+  --border-light: #dce5ef;
+  --border-rim: #cbd8e5;
+  --shadow-sm: 0 4px 16px rgba(6,39,91,0.06);
+  --shadow-md: 0 14px 38px rgba(6,39,91,0.09);
+  --shadow-lg: 0 24px 60px rgba(6,39,91,0.12);
 }
 
 body:not(.light-mode) {
-    --bg-primary: #031a3e;
-    --bg-secondary: #06275b;
-    --bg-tertiary: #0b346a;
-    --bg-card: #092c5d;
-    --bg-nav: rgba(3, 26, 62, 0.95);
-    --bg-glass: rgba(255, 255, 255, 0.06);
-    --text-primary: #f7fbff;
-    --text-secondary: #bfd0e3;
-    --text-muted: #a9bdd2;
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-light: rgba(255, 255, 255, 0.13);
-    --border-rim: rgba(255, 255, 255, 0.18);
+  --bg-primary: #031a3e;
+  --bg-secondary: #06275b;
+  --bg-tertiary: #0b346a;
+  --bg-card: #092c5d;
+  --bg-nav: rgba(3,26,62,0.95);
+  --bg-glass: rgba(255,255,255,0.06);
+  --text-primary: #f7fbff;
+  --text-secondary: #bfd0e3;
+  --text-muted: #a9bdd2;
+  --border-subtle: rgba(255,255,255,0.08);
+  --border-light: rgba(255,255,255,0.13);
+  --border-rim: rgba(255,255,255,0.18);
 }
 
 *, *::before, *::after {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html {
-    scroll-behavior: smooth;
-    overflow-x: hidden;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
-    margin: 0;
-    overflow-x: hidden;
-    color: var(--text-primary);
-    background: var(--bg-primary);
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-    letter-spacing: 0;
+  margin: 0;
+  overflow-x: hidden;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: 0;
 }
 
 body.light-mode {
-    background: #ffffff;
+  background: #ffffff;
 }
 
 /* Announcement */
@@ -888,16 +1272,6 @@ textarea:focus,
         grid-template-columns: 1fr;
     }
 
-    body.d2q-reference .hero-content {
-        align-items: center;
-        text-align: center;
-        width: 100%;
-    }
-
-    body.d2q-reference .hero-stats {
-        justify-content: center;
-    }
-
     .hero-terminal-visual {
         max-width: 760px;
         margin: 10px auto 0;
@@ -942,38 +1316,6 @@ textarea:focus,
     .logo-img {
         width: 38px;
         height: 38px;
-    }
-
-    .hero {
-        padding-top: 46px;
-    }
-
-    .hero-headline {
-        margin-top: 28px;
-        font-size: 3rem;
-    }
-
-    .hero-subcopy {
-        font-size: 16px;
-    }
-
-    .hero-cta {
-        width: 100%;
-        flex-direction: column;
-    }
-
-    .hero-cta .btn {
-        width: 100%;
-    }
-
-    .hero-stats {
-        grid-template-columns: 1fr;
-        gap: 18px;
-    }
-
-    .stat-item {
-        align-items: center;
-        text-align: center;
     }
 
     .terminal-frame {
@@ -1118,8 +1460,7 @@ body.d2q-reference .navbar,
 .mobile-menu-btn { display: none; }
 
 body.d2q-reference section { padding: 82px 0; }
-body.d2q-reference .section-container,
-body.d2q-reference .hero-container {
+body.d2q-reference .section-container {
     max-width: var(--container-width);
     margin: 0 auto;
     padding: 0 20px;
@@ -1379,7 +1720,6 @@ body.d2q-reference .form-note { color: var(--d2q-muted); }
     .nav-links.mobile-active { display: flex; }
     .nav-book-btn { margin-left: auto; }
     .mobile-menu-btn { width: 42px; height: 42px; display: grid; place-items: center; }
-    body.d2q-reference .hero-container,
     .sessions-layout,
     body.d2q-reference .mentor-band-inner { grid-template-columns: 1fr; }
     body.d2q-reference .hero-content { align-items: center; text-align: center; width: 100%; justify-items: center; }
@@ -1396,15 +1736,6 @@ body.d2q-reference .form-note { color: var(--d2q-muted); }
     .navbar .logo-img { width: 180px; height: 44px; }
     .nav-book-btn { display: none; }
     body.d2q-reference section { padding: 60px 0; }
-    body.d2q-reference .hero {
-    display: block !important; padding-top: 46px; }
-    body.d2q-reference .hero-headline { font-size: 43px; }
-    body.d2q-reference .hero-subcopy { font-size: 16px; }
-    body.d2q-reference .hero-cta { width: 100%; flex-direction: column; }
-    body.d2q-reference .hero-cta .btn { width: 100%; }
-    body.d2q-reference .hero-stats { width: 100%; display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
-    body.d2q-reference .stat-item { min-width: 0; align-items: center; text-align: center; }
-    body.d2q-reference .stat-label { white-space: normal; }
     body.d2q-reference .terminal-frame { padding: 16px; }
     body.d2q-reference .terminal-code { font-size: 10px; overflow-x: auto; }
     body.d2q-reference .practice-score { right: 8px !important; }
