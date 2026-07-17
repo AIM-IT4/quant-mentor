@@ -1616,29 +1616,32 @@ body.d2q-reference .mentor-profile {
     align-self: stretch;
     padding: 30px;
     display: block;
+    overflow: hidden;
 }
 .mentor-profile-copy { position: relative; z-index: 2; width: 62%; }
 body.d2q-reference .mentor-profile > img.mentor-cutout {
-    object-fit: cover !important;
-    object-position: center 30% !important;
-    border-radius: 50% !important;
-    -webkit-mask-image: none !important;
-    mask-image: none !important;
+    width: 55% !important;
+    height: auto !important;
+    max-height: 360px !important;
+    margin: 0 !important;
+    object-fit: contain !important;
+    object-position: bottom right !important;
+    border: 0 !important;
+    border-radius: 0 !important;
 }.mentor-cutout {
     position: absolute;
-    z-index: 0;
-    right: 0;
-    bottom: 0;
-    width: 50%;
+    z-index: 1;
+    right: -18px;
+    bottom: -54px;
+    width: 55%;
     height: auto;
-    max-height: 340px;
-    object-fit: cover;
-    object-position: center 30%;
-    border-radius: 50%;
-    opacity: 1;
-    filter: none;
-    -webkit-mask-image: none;
-    mask-image: none;
+    max-height: 360px;
+    object-fit: contain;
+    object-position: bottom right;
+    opacity: .96;
+    filter: saturate(.9) contrast(1.04);
+    -webkit-mask-image: radial-gradient(ellipse 52% 64% at 52% 48%, #000 48%, rgba(0,0,0,.92) 60%, rgba(0,0,0,.35) 72%, transparent 84%);
+    mask-image: radial-gradient(ellipse 52% 64% at 52% 48%, #000 48%, rgba(0,0,0,.92) 60%, rgba(0,0,0,.35) 72%, transparent 84%);
 }
 body.d2q-reference .mentor-profile h3 { font-size: 24px; }
 body.d2q-reference .mentor-profile p { margin-bottom: 18px; }
@@ -1746,20 +1749,19 @@ body.d2q-reference .form-note { color: var(--d2q-muted); }
     .reference-section-head { align-items: flex-start; flex-direction: column; }
     .reference-section-head .btn { width: 100%; }
     body.d2q-reference .mentor-band-inner { padding: 28px; }
-    body.d2q-reference .mentor-profile { min-height: 440px; padding: 24px; }
-    .mentor-profile-copy { width: 100%; padding-bottom: 100px; }
-    body.d2q-reference .mentor-socials { margin-top: 20px; }
+    body.d2q-reference .mentor-profile { min-height: 500px; padding: 24px; }
+    .mentor-profile-copy { width: 100%; padding-bottom: 180px; }
+    body.d2q-reference .mentor-socials { margin-top: 24px; }
     body.d2q-reference .mentor-profile > img.mentor-cutout {
-    width: 65% !important;
+    width: 55% !important;
     height: auto !important;
-    max-height: 280px !important;
-    margin: 0 auto !important;
-    object-fit: cover !important;
-    object-position: center 30% !important;
-    border-radius: 50% !important;
-    -webkit-mask-image: none !important;
-    mask-image: none !important;
-}body.d2q-reference .mentor-profile > img.mentor-cutout { right: 50%; bottom: -20px; transform: translateX(50%); filter: none; }
+    max-height: 360px !important;
+    margin: 0 !important;
+    object-fit: contain !important;
+    object-position: bottom right !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+}body.d2q-reference .mentor-profile > img.mentor-cutout { right: 50%; bottom: -30px; width: 70% !important; max-height: 250px !important; transform: translateX(50%); opacity: .7; }
     body.d2q-reference .mentor-checks,
     body.d2q-reference .form-row { grid-template-columns: 1fr; }
     .footer-links { grid-template-columns: 1fr; }
