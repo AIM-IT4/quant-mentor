@@ -1,4 +1,4 @@
-// --- Brevo Email Configuration (Global) ---
+﻿// --- Brevo Email Configuration (Global) ---
 // Now handled securely via Vercel backend.
 
 // Send email via secure backend API
@@ -528,7 +528,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // --------------------------------
     // Console welcome message
     // --------------------------------
-    console.log('%c QuantMentor ', 'background: linear-gradient(135deg, #6366f1, #a855f7); color: white; font-size: 20px; padding: 10px 20px; border-radius: 8px;');
+    console.log('%c Desk2Quant ', 'background: linear-gradient(135deg, #6366f1, #a855f7); color: white; font-size: 20px; padding: 10px 20px; border-radius: 8px;');
     console.log('%c Expert Quant Mentorship & Digital Resources ', 'color: #a855f7; font-size: 14px;');
 
     // ================================
@@ -666,7 +666,7 @@ document.addEventListener('DOMContentLoaded', function () {
 const RAZORPAY_KEY_ID = 'rzp_live_TDMg5qFcBBSOxf';
 
 // Your business name
-const BUSINESS_NAME = 'QuantMentor';
+const BUSINESS_NAME = 'Desk2Quant';
 
 // ================================
 // BREVO EMAIL CONFIGURATION (replaces EmailJS - 9,000 emails/month free!)
@@ -2044,7 +2044,7 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
         key: RAZORPAY_KEY_ID,
         amount: orderData ? orderData.amount : Math.round(amount * 100),
         currency: orderData ? orderData.currency : currency.toUpperCase(),
-        name: 'QuantMentor',
+        name: 'Desk2Quant',
         description: productName,
         order_id: orderData ? orderData.order_id : undefined,
         handler: function (response) {
@@ -2115,14 +2115,14 @@ async function sendProductEmail(customerEmail, productName, paymentId, downloadL
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
                 <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                     <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
-                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Desk2Quant</span>
                     </div>
                     <div style="padding: 30px;">
                         <div style="margin-bottom: 20px;">
                             <span style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-right: 10px;">New Purchase</span>
                             <span style="display: inline-block; background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;">Confirmed</span>
                         </div>
-                        <p style="font-size: 16px; margin-bottom: 25px;">Hi <strong>${customerName}</strong>, thank you for purchasing from QuantMentor.</p>
+                        <p style="font-size: 16px; margin-bottom: 25px;">Hi <strong>${customerName}</strong>, thank you for purchasing from Desk2Quant.</p>
                         
                         <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
                             <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 10px 0; letter-spacing: 0.5px;">Digital Product</p>
@@ -2155,7 +2155,7 @@ async function sendProductEmail(customerEmail, productName, paymentId, downloadL
                         </div>
                     </div>
                     <div style="background-color: #1a1a1a; padding: 25px 20px; text-align: center; color: #888; font-size: 12px;">
-                        <p style="margin: 0 0 10px 0;">Sent by QuantMentor</p>
+                        <p style="margin: 0 0 10px 0;">Sent by Desk2Quant</p>
                         <p style="margin: 0;">Have an issue? Reply to this email.</p>
                     </div>
                 </div>
@@ -2820,7 +2820,7 @@ async function initSessionPayment(description, amount, customerEmail, currency =
         key: RAZORPAY_KEY_ID,
         amount: orderData ? orderData.amount : Math.round(amount * 100),
         currency: orderData ? orderData.currency : currency.toUpperCase(),
-        name: 'QuantMentor',
+        name: 'Desk2Quant',
         description: description || 'Mentorship Session',
         order_id: orderData ? orderData.order_id : undefined,
         handler: function (response) {
@@ -2888,7 +2888,7 @@ async function handleSessionPaymentSuccess(response) {
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
                 <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                     <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
-                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Desk2Quant</span>
                     </div>
                     <div style="padding: 30px;">
                         <div style="margin-bottom: 20px;">
@@ -2921,7 +2921,7 @@ async function handleSessionPaymentSuccess(response) {
                         </div>
                     </div>
                     <div style="background-color: #1a1a1a; padding: 25px 20px; text-align: center; color: #888; font-size: 12px;">
-                        <p style="margin: 0 0 10px 0;">Sent by QuantMentor</p>
+                        <p style="margin: 0 0 10px 0;">Sent by Desk2Quant</p>
                         <p style="margin: 0;">Have an issue? Reply to this email.</p>
                     </div>
                 </div>
