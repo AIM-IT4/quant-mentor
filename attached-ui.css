@@ -1724,7 +1724,8 @@ body.d2q-reference .form-note { color: var(--d2q-muted); }
     body.d2q-reference .mentor-band-inner { grid-template-columns: 1fr; }
     body.d2q-reference .hero-container { grid-template-columns: 1fr; gap: 32px; }
     body.d2q-reference .hero-content { align-items: center; text-align: center; width: 100%; justify-items: center; }
-    body.d2q-reference .hero-stats { justify-content: center; }
+    body.d2q-reference .hero-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; justify-items: center; }
+    body.d2q-reference .stat-item { min-width: 0; }
     body.d2q-reference .products-grid { grid-template-columns: repeat(2,1fr); }
     body.d2q-reference .testimonials-grid { grid-template-columns: 1fr; }
     body.d2q-reference .flow-grid { grid-template-columns: 1fr; }
@@ -1748,8 +1749,9 @@ body.d2q-reference .form-note { color: var(--d2q-muted); }
     .reference-section-head { align-items: flex-start; flex-direction: column; }
     .reference-section-head .btn { width: 100%; }
     body.d2q-reference .mentor-band-inner { padding: 28px; }
-    body.d2q-reference .mentor-profile { min-height: 420px; padding: 24px; }
-    .mentor-profile-copy { width: 100%; }
+    body.d2q-reference .mentor-profile { min-height: 480px; padding: 24px; }
+    .mentor-profile-copy { width: 100%; padding-bottom: 140px; }
+    body.d2q-reference .mentor-socials { margin-top: 16px; }
     body.d2q-reference .mentor-profile > img.mentor-cutout {
     width: 55% !important;
     height: auto !important;
