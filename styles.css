@@ -839,8 +839,8 @@ body.d2q-reference .footer .logo-img {
 }
 
 .avatar-more {
-    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
-    color: white;
+    background: var(--d2q-teal-soft);
+    color: var(--d2q-teal-dark);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1112,8 +1112,8 @@ body.d2q-reference .footer .logo-img {
 }
 
 .service-card.popular {
-    border-color: var(--accent-primary);
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(245, 158, 11, 0.08));
+    border-color: var(--d2q-teal);
+    background: #ffffff;
 }
 
 .popular-badge {
@@ -1121,11 +1121,12 @@ body.d2q-reference .footer .logo-img {
     top: 16px;
     right: 32px;
     padding: 6px 16px;
-    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
-    border-radius: 100px;
+    background: var(--d2q-teal-soft) !important;
+    color: var(--d2q-teal-dark) !important;
+    border: 1px solid rgba(8, 169, 162, 0.22) !important;
+    border-radius: 999px !important;
     font-size: 0.75rem;
     font-weight: 600;
-    color: white;
     white-space: nowrap;
     z-index: 10;
 }
@@ -1136,10 +1137,11 @@ body.d2q-reference .footer .logo-img {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
+    background: var(--d2q-teal-soft);
+    border: 1px solid rgba(8, 169, 162, 0.2);
     border-radius: var(--radius-md);
     font-size: 1.4rem;
-    color: white;
+    color: var(--d2q-teal-dark);
     margin-bottom: 20px;
 }
 
@@ -1284,11 +1286,12 @@ body.d2q-reference .footer .logo-img {
     top: 16px;
     right: 16px;
     padding: 6px 12px;
-    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
-    border-radius: 100px;
+    background: var(--d2q-teal-soft) !important;
+    color: var(--d2q-teal-dark) !important;
+    border: 1px solid rgba(8, 169, 162, 0.22) !important;
+    border-radius: 999px !important;
     font-size: 0.7rem;
     font-weight: 600;
-    color: white;
     z-index: 10;
 }
 
@@ -1335,7 +1338,7 @@ body.d2q-reference .footer .logo-img {
 }
 
 .product-placeholder.bundle {
-    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
+    background: var(--d2q-teal-soft);
 }
 
 .product-badge {
@@ -1556,11 +1559,11 @@ body.d2q-reference .footer .logo-img {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
+    background: var(--d2q-teal-soft);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--d2q-teal-dark);
 }
 
 .author-info {
@@ -1725,9 +1728,10 @@ body.d2q-reference .footer .logo-img {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
+    background: var(--d2q-teal-soft);
+    border: 1px solid rgba(8, 169, 162, 0.2);
     border-radius: var(--radius-sm);
-    color: white;
+    color: var(--d2q-teal-dark);
     font-size: 1.2rem;
 }
 
