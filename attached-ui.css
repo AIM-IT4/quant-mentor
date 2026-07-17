@@ -1722,6 +1722,7 @@ body.d2q-reference .form-note { color: var(--d2q-muted); }
     .mobile-menu-btn { width: 42px; height: 42px; display: grid; place-items: center; }
     .sessions-layout,
     body.d2q-reference .mentor-band-inner { grid-template-columns: 1fr; }
+    body.d2q-reference .hero-container { grid-template-columns: 1fr; gap: 32px; }
     body.d2q-reference .hero-content { align-items: center; text-align: center; width: 100%; justify-items: center; }
     body.d2q-reference .hero-stats { justify-content: center; }
     body.d2q-reference .products-grid { grid-template-columns: repeat(2,1fr); }
@@ -1740,6 +1741,8 @@ body.d2q-reference .form-note { color: var(--d2q-muted); }
     body.d2q-reference .terminal-code { font-size: 10px; overflow-x: auto; }
     body.d2q-reference .practice-score { right: 8px !important; }
     body.d2q-reference .interview-framework { left: 8px !important; max-width: calc(100% - 36px); }
+    body.d2q-reference .hero { padding: 48px 0 24px; }
+    body.d2q-reference .hero-container { gap: 24px; }
     body.d2q-reference .hero-trust-grid,
     body.d2q-reference .products-grid { grid-template-columns: 1fr; }
     .reference-section-head { align-items: flex-start; flex-direction: column; }
