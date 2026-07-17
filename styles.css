@@ -536,13 +536,14 @@ h6 {
 }
 
 .logo-img {
-    width: 60px;
-    height: 60px;
+    width: 44px;
+    height: 44px;
     padding: 0;
     object-fit: contain;
     background: transparent;
     border: none;
     border-radius: 10px;
+    flex-shrink: 0;
 }
 
 body.d2q-reference .logo-img,
@@ -3225,9 +3226,11 @@ body.light-mode .hero-bg-effects {
     border: none;
     color: #94a3b8;
     font-size: 1.4rem;
+    padding: 8px;
     cursor: pointer;
     line-height: 1;
     transition: color 0.2s;
+    border-radius: 6px;
 }
 .promo-close-btn:hover {
     color: #fff;

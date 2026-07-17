@@ -1366,7 +1366,9 @@
             const pauseEnd = 2400;
             const pauseStart = 500;
 
-            function render() {
+            let cursorVisible = true;
+
+            function render(showCursor) {
                 let html = '';
                 let inGradient = false;
                 let inCurly = false;
@@ -1395,11 +1397,11 @@
 
                 if (inGradient) html += '</span>';
                 if (inCurly) html += '</span>';
-                headline.innerHTML = html + '<span class="typewriter-cursor">|</span>';
+                headline.innerHTML = html + (showCursor !== false ? '<span class="typewriter-cursor">|</span>' : '');
             }
 
             function tick() {
-                render();
+                render(cursorVisible);
 
                 if (deleting) {
                     if (charIndex > 0) {
@@ -1411,7 +1413,12 @@
                     deleting = false;
                     phraseIndex = (phraseIndex + 1) % phrases.length;
                     chars = charsFor(phrases[phraseIndex]);
-                    setTimeout(tick, pauseStart);
+                    cursorVisible = false;
+                    render(false);
+                    setTimeout(function() {
+                        cursorVisible = true;
+                        tick();
+                    }, pauseStart);
                     return;
                 }
 
@@ -1422,10 +1429,15 @@
                 }
 
                 deleting = true;
-                setTimeout(tick, pauseEnd);
+                cursorVisible = false;
+                render(false);
+                setTimeout(function() {
+                    cursorVisible = true;
+                    tick();
+                }, pauseEnd);
             }
 
-            render();
+            render(true);
             setTimeout(tick, pauseStart);
         })();
     </script>

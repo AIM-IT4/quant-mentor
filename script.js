@@ -47,6 +47,34 @@ async function sendAdminNotification(subject, htmlContent, textContent) {
     }
 })();
 
+function stripMarkdown(text) {
+    if (!text) return '';
+    return text
+        .replace(/^#{1,6}\s+/gm, '')
+        .replace(/\*\*(.+?)\*\*/g, '$1')
+        .replace(/\*(.+?)\*/g, '$1')
+        .replace(/~~(.+?)~~/g, '$1')
+        .replace(/`(.+?)`/g, '$1')
+        .replace(/^>\s+/gm, '')
+        .replace(/^[-*+]\s+/gm, '')
+        .replace(/^\d+\.\s+/gm, '')
+        .replace(/\[(.+?)\]\(.+?\)/g, '$1')
+        .replace(/!\[.*?\]\(.+?\)/g, '')
+        .replace(/---+/g, '')
+        .replace(/\n{2,}/g, ' ')
+        .trim();
+}
+
+function truncateText(text, maxLen) {
+    if (!text || text.length <= maxLen) return text;
+    const truncated = text.substring(0, maxLen);
+    const lastSpace = truncated.lastIndexOf(' ');
+    if (lastSpace > maxLen * 0.6) {
+        return truncated.substring(0, lastSpace);
+    }
+    return truncated;
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log('🚀 DOM loaded, initializing all components...');
 
@@ -1522,7 +1550,7 @@ async function displaySupabaseProducts(products) {
                 </div>
                 <div class="product-content">
                     <h3 class="product-title">${product.name} <button class="share-btn" onclick="event.stopPropagation();copyProductLink('${product.id}')" title="Copy share link" aria-label="Copy share link for ${product.name}" style="background:none;border:none;color:var(--d2q-muted);cursor:pointer;font-size:0.75em;margin-left:6px;transition:color 0.2s;vertical-align:middle;"><i class="fas fa-share-alt"></i></button></h3>
-                    <div class="product-description">${displayDesc.replace(/<[^>]*>?/gm, '').substring(0, 170)}</div>
+                    <div class="product-description">${truncateText(stripMarkdown(displayDesc.replace(/<[^>]*>?/gm, '')), 250)}</div>
                     <div class="product-footer">
                         <div class="product-card-price-row">
                             <div class="product-price-action">${originalPriceDisplay}</div>
@@ -1685,10 +1713,14 @@ async function updateServicesSection(sessions) {
     // Clear existing services (except hardcoded structure, we'll replace content)
     servicesContainer.innerHTML = '';
 
+    let popularAssigned = false;
+
     for (let index = 0; index < sessions.length; index++) {
         const session = sessions[index];
         const serviceCard = document.createElement('div');
-        serviceCard.className = session.is_popular ? 'service-card popular reveal-up' : 'service-card reveal-up';
+        const showPopular = session.is_popular && !popularAssigned;
+        if (showPopular) popularAssigned = true;
+        serviceCard.className = showPopular ? 'service-card popular reveal-up' : 'service-card reveal-up';
 
         // Generate features HTML
         const featuresHtml = session.features ? session.features.map(feature =>
@@ -1711,7 +1743,7 @@ async function updateServicesSection(sessions) {
                     <i class="fas fa-${index === 0 ? 'headset' : index === 1 ? 'comments' : index === 2 ? 'graduation-cap' : 'briefcase'}"></i>
                 </div>
                 <h3 class="service-title">${session.name}</h3>
-                ${session.is_popular ? '<span class="popular-badge">Most Popular</span>' : ''}
+                ${showPopular ? '<span class="popular-badge">Most Popular</span>' : ''}
             </div>
             <div class="service-content">
                 <div class="service-price">
