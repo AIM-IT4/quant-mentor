@@ -1272,16 +1272,6 @@ textarea:focus,
         grid-template-columns: 1fr;
     }
 
-    body.d2q-reference .hero-content {
-        align-items: center;
-        text-align: center;
-        width: 100%;
-    }
-
-    body.d2q-reference .hero-stats {
-        justify-content: center;
-    }
-
     .hero-terminal-visual {
         max-width: 760px;
         margin: 10px auto 0;
@@ -1326,38 +1316,6 @@ textarea:focus,
     .logo-img {
         width: 38px;
         height: 38px;
-    }
-
-    .hero {
-        padding-top: 46px;
-    }
-
-    .hero-headline {
-        margin-top: 28px;
-        font-size: 3rem;
-    }
-
-    .hero-subcopy {
-        font-size: 16px;
-    }
-
-    .hero-cta {
-        width: 100%;
-        flex-direction: column;
-    }
-
-    .hero-cta .btn {
-        width: 100%;
-    }
-
-    .hero-stats {
-        grid-template-columns: 1fr;
-        gap: 18px;
-    }
-
-    .stat-item {
-        align-items: center;
-        text-align: center;
     }
 
     .terminal-frame {
@@ -1502,62 +1460,11 @@ body.d2q-reference .navbar,
 .mobile-menu-btn { display: none; }
 
 body.d2q-reference section { padding: 82px 0; }
-body.d2q-reference .section-container,
-body.d2q-reference .hero-container {
+body.d2q-reference .section-container {
     max-width: var(--container-width);
     margin: 0 auto;
     padding: 0 20px;
 }
-body.d2q-reference .hero {
-    display: block !important;
-    min-height: auto;
-    padding: 76px 0 36px;
-    background: #fff;
-}
-body.d2q-reference .hero-container {
-    display: grid;
-    grid-template-columns: 1.02fr .98fr;
-    align-items: center;
-    gap: 56px;
-}
-body.d2q-reference .hero-content { display: flex; align-items: flex-start; text-align: left; }
-body.d2q-reference .hero-badge { padding: 8px 12px; font-size: 13px; }
-body.d2q-reference .hero-headline {
-    margin: 22px 0 20px;
-    color: var(--d2q-navy-deep);
-    font-size: clamp(42px,5vw,64px);
-    line-height: 1.02;
-    letter-spacing: 0;
-}
-body.d2q-reference .hero-subcopy { max-width: 650px; font-size: 18px; line-height: 1.72; }
-body.d2q-reference .hero-cta { margin: 30px 0 0; gap: 12px; }
-body.d2q-reference .hero-cta .btn { min-height: 50px; padding: 13px 18px; }
-body.d2q-reference .hero-stats {
-    width: auto;
-    margin-top: 26px;
-    display: flex;
-    gap: 24px;
-    flex-wrap: wrap;
-}
-body.d2q-reference .stat-item { min-width: 110px; }
-body.d2q-reference .stat-value { font-size: 19px; }
-body.d2q-reference .stat-label { color: #4e607a; font-size: 13px; white-space: nowrap; }
-body.d2q-reference .terminal-frame {
-    min-height: 430px;
-    padding: 30px;
-    background: linear-gradient(145deg,#f8fbff,#eef6fa);
-    border-radius: 30px;
-}
-body.d2q-reference .terminal-panel { min-height: 370px; padding: 24px; border-radius: 20px; }
-body.d2q-reference .terminal-dots { gap: 7px; margin-bottom: 30px; }
-body.d2q-reference .terminal-dots i { width: 9px; height: 9px; }
-body.d2q-reference .terminal-code { font-size: 13px; line-height: 1.9; }
-body.d2q-reference .terminal-chart { height: 130px; margin-top: 24px; }
-body.d2q-reference .terminal-float-card { padding: 14px 16px; border-radius: 14px; }
-body.d2q-reference .terminal-float-card small { font-size: 11px; }
-body.d2q-reference .terminal-float-card strong { font-size: 19px; }
-body.d2q-reference .practice-score { right: -18px; top: 72px; }
-body.d2q-reference .interview-framework { left: -18px; bottom: 42px; }
 body.d2q-reference .hero-trust-grid {
     margin-top: 52px;
     grid-template-columns: repeat(5,1fr);
@@ -1763,11 +1670,8 @@ body.d2q-reference .form-note { color: var(--d2q-muted); }
     .nav-links.mobile-active { display: flex; }
     .nav-book-btn { margin-left: auto; }
     .mobile-menu-btn { width: 42px; height: 42px; display: grid; place-items: center; }
-    body.d2q-reference .hero-container,
     .sessions-layout,
     body.d2q-reference .mentor-band-inner { grid-template-columns: 1fr; }
-    body.d2q-reference .hero-content { align-items: center; text-align: center; width: 100%; }
-    body.d2q-reference .hero-stats { justify-content: center; }
     body.d2q-reference .products-grid { grid-template-columns: repeat(2,1fr); }
     body.d2q-reference .testimonials-grid { grid-template-columns: 1fr; }
     body.d2q-reference .flow-grid { grid-template-columns: 1fr; }
@@ -1780,15 +1684,6 @@ body.d2q-reference .form-note { color: var(--d2q-muted); }
     .navbar .logo-img { width: 180px; height: 44px; }
     .nav-book-btn { display: none; }
     body.d2q-reference section { padding: 60px 0; }
-    body.d2q-reference .hero {
-    display: block !important; padding-top: 46px; }
-    body.d2q-reference .hero-headline { font-size: 43px; }
-    body.d2q-reference .hero-subcopy { font-size: 16px; }
-    body.d2q-reference .hero-cta { width: 100%; flex-direction: column; }
-    body.d2q-reference .hero-cta .btn { width: 100%; }
-    body.d2q-reference .hero-stats { width: 100%; display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
-    body.d2q-reference .stat-item { min-width: 0; align-items: center; text-align: center; }
-    body.d2q-reference .stat-label { white-space: normal; }
     body.d2q-reference .terminal-frame { padding: 16px; }
     body.d2q-reference .terminal-code { font-size: 10px; overflow-x: auto; }
     body.d2q-reference .practice-score { right: 8px !important; }
