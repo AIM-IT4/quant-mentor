@@ -32,6 +32,7 @@
 
     --d2q-navy: #06275b;
     --d2q-navy-deep: #031a3e;
+    --d2q-navy-hover: #041f4a;
     --d2q-teal: #08a9a2;
     --d2q-teal-dark: #065c58;
     --d2q-teal-soft: rgba(8, 169, 162, 0.08);
@@ -423,15 +424,16 @@ h6 {
 }
 
 .btn-primary {
-    background: #ffffff;
-    color: #000000;
-    box-shadow: 0 0 50px rgba(255, 255, 255, 0.15);
+    background: var(--d2q-navy);
+    color: #ffffff;
+    border: 1px solid var(--d2q-navy);
+    box-shadow: 0 10px 25px rgba(6, 39, 91, 0.18);
 }
 
 .btn-primary:hover {
-    transform: scale(1.05);
-    background: #f8fafc;
-    box-shadow: 0 0 60px rgba(255, 255, 255, 0.25);
+    background: var(--d2q-navy-deep);
+    color: #ffffff;
+    transform: translateY(-2px);
 }
 
 .btn-secondary {
@@ -2221,8 +2223,12 @@ body.d2q-reference .footer .logo-img {
     align-items: center;
     gap: 8px;
     margin-bottom: 16px;
+    padding: 12px;
     font-size: 0.85rem;
-    color: var(--text-muted);
+    color: var(--d2q-muted);
+    background: #ffffff;
+    border: 1px solid var(--d2q-line);
+    border-radius: 12px;
 }
 
 .modal-note i {
@@ -2261,7 +2267,7 @@ body.d2q-reference .footer .logo-img {
     word-wrap: break-word;
     overflow-wrap: break-word;
     line-height: 1.6;
-    color: var(--text-secondary);
+    color: var(--d2q-muted);
     font-size: 0.95rem;
 }
 
@@ -2327,23 +2333,30 @@ body.d2q-reference .footer .logo-img {
     flex: 1;
     padding: 12px;
     border-radius: 8px;
-    border: 1px solid var(--border-light);
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
+    border: 1px solid var(--d2q-line);
+    background: #ffffff;
+    color: var(--d2q-navy);
     font-size: 0.95rem;
     transition: all var(--transition-fast);
 }
 
 .coupon-row input:focus {
-    border-color: var(--accent-secondary);
-    outline: 2px solid var(--accent-secondary);
+    border-color: var(--d2q-teal);
+    outline: 2px solid var(--d2q-teal);
     outline-offset: 2px;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 0 4px rgba(8, 169, 162, 0.15);
 }
 
 .coupon-row .btn-secondary {
     padding: 12px 20px;
     white-space: nowrap;
+    background: #ffffff;
+    color: var(--d2q-navy);
+    border: 1px solid var(--d2q-line);
+}
+
+.coupon-row .btn-secondary:hover {
+    background: var(--d2q-paper);
 }
 
 #modalCouponFeedback,
