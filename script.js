@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const reachStat = document.getElementById('stat-experience');
         const productStat = document.getElementById('stat-products');
         if (studentStat) studentStat.textContent = `${STATS_CONFIG.mentees}+`;
-        if (reachStat) reachStat.textContent = `${STATS_CONFIG.resourceUsers}+`;
+        if (reachStat) reachStat.textContent = `${STATS_CONFIG.experienceYears || 4}+`;
         if (productStat) productStat.textContent = String(STATS_CONFIG.products);
     }
     updateStats();
@@ -151,11 +151,19 @@ document.addEventListener('DOMContentLoaded', function () {
     if (mobileMenuBtn) {
         mobileMenuBtn.addEventListener('click', function () {
             navLinks.classList.toggle('mobile-active');
+            document.body.classList.toggle('mobile-nav-open', navLinks.classList.contains('mobile-active'));
             const icon = this.querySelector('i');
             icon.classList.toggle('fa-bars');
             icon.classList.toggle('fa-times');
         });
-        console.log('✅ Mobile navigation initialized');
+        navLinks?.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+            navLinks.classList.remove('mobile-active');
+            document.body.classList.remove('mobile-nav-open');
+            const icon = mobileMenuBtn.querySelector('i');
+            icon?.classList.remove('fa-times');
+            icon?.classList.add('fa-bars');
+        }));
+        console.log('Mobile navigation initialized');
     }
 
     // --------------------------------
@@ -529,7 +537,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Console welcome message
     // --------------------------------
     console.log('%c Desk2Quant ', 'background: linear-gradient(135deg, #6366f1, #a855f7); color: white; font-size: 20px; padding: 10px 20px; border-radius: 8px;');
-    console.log('%c Expert Quant Mentorship & Digital Resources ', 'color: #a855f7; font-size: 14px;');
+    console.log('%c Desk2Quant | Quant Finance Learning & Resources ', 'color: #a855f7; font-size: 14px;');
 
     // ================================
     // HERO PARTICLE ANIMATION
@@ -3541,139 +3549,6 @@ ${BUSINESS_NAME}`;
 // Make it available globally so admin.html can use it
 window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
 
-
-
-// --- LAUNCH PROMOTION CAMPAIGN LOGIC ---
-(function() {
-    console.log('🎉 Initializing Launch Promotion Campaign for Numerical Methods...');
-
-    // Expose promo functions globally so inline HTML onclick handlers can trigger them
-    window.dismissPromoBanner = function(e) {
-        if (e) {
-            e.stopPropagation();
-            e.preventDefault();
-        }
-        const banner = document.getElementById('launchPromoBanner');
-        if (banner) {
-            banner.style.transform = 'translateY(-100%)';
-            banner.style.marginTop = '-' + banner.offsetHeight + 'px';
-            setTimeout(() => banner.remove(), 300);
-        }
-        localStorage.setItem('launch_promo_banner_dismissed', 'true');
-    };
-
-    window.triggerPromoModal = function() {
-        const modal = document.getElementById('launchPromoModal');
-        if (!modal) return;
-
-        // Convert prices to local currency if available
-        const originalInr = 1299;
-        const discountedInr = 679;
-        const origEl = document.getElementById('launchOriginalPrice');
-        const discEl = document.getElementById('launchDiscountedPrice');
-
-        const localPrice = window.userLocalPrice;
-        if (localPrice && localPrice.rate && localPrice.currency && localPrice.currency.code !== 'INR' && typeof window.formatPrice === 'function') {
-            const rate = localPrice.rate;
-            const convertedOrig = { amount: Math.round(originalInr * rate), currency: localPrice.currency };
-            const convertedDisc = { amount: Math.round(discountedInr * rate), currency: localPrice.currency };
-            if (origEl) origEl.textContent = window.formatPrice(convertedOrig);
-            if (discEl) discEl.textContent = window.formatPrice(convertedDisc);
-        } else {
-            // Fallback: keep INR
-            if (origEl) origEl.textContent = '\u20b91,299';
-            if (discEl) discEl.textContent = '\u20b9679';
-        }
-
-        modal.classList.add('active');
-        sessionStorage.setItem('launch_promo_shown', 'true');
-    };
-
-    window.closePromoModal = function() {
-        const modal = document.getElementById('launchPromoModal');
-        if (modal) {
-            modal.classList.remove('active');
-        }
-    };
-
-    window.copyPromoCoupon = function() {
-        const couponText = 'LAUNCH15';
-        navigator.clipboard.writeText(couponText).then(() => {
-            const btnText = document.getElementById('copyCouponBtnText');
-            if (btnText) {
-                btnText.textContent = 'Copied!';
-                setTimeout(() => {
-                    btnText.textContent = 'Copy';
-                }, 2000);
-            }
-        }).catch(err => {
-            console.error('Failed to copy coupon code:', err);
-        });
-    };
-
-    window.buyLaunchProduct = function() {
-        window.closePromoModal();
-        
-        // Scroll to products section
-        const productsSec = document.getElementById('products');
-        if (productsSec) {
-            productsSec.scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        // Open the product checkout modal
-        setTimeout(() => {
-            if (typeof window.openProductModal === 'function') {
-                window.openProductModal('6b78550d-e130-41d1-9409-92335ce82a6c');
-                
-                // Auto-fill and apply LAUNCH15 coupon in the checkout modal
-                setTimeout(() => {
-                    const couponInput = document.getElementById('couponInput');
-                    const applyBtn = document.getElementById('applyCouponBtn');
-                    if (couponInput && applyBtn) {
-                        couponInput.value = 'LAUNCH15';
-                        applyBtn.click();
-                    }
-                }, 800);
-            }
-        }, 500);
-    };
-
-    window.previewLaunchProduct = function() {
-        window.closePromoModal();
-        const isTest = window.location.pathname.includes('-test');
-        window.location.href = (isTest ? 'product-test.html' : 'product.html') + '?id=6b78550d-e130-41d1-9409-92335ce82a6c';
-    };
-
-    // Setup Triggers
-    document.addEventListener('DOMContentLoaded', () => {
-        // 1. Check banner dismissal
-        const bannerDismissed = localStorage.getItem('launch_promo_banner_dismissed');
-        const banner = document.getElementById('launchPromoBanner');
-        if (bannerDismissed === 'true' && banner) {
-            banner.remove();
-        }
-
-        // 2. Setup Popup Triggers (Only if not already shown in this session)
-        const promoShown = sessionStorage.getItem('launch_promo_shown');
-        if (promoShown !== 'true') {
-            // Trigger 2a: Time-delay (20 seconds)
-            setTimeout(() => {
-                if (sessionStorage.getItem('launch_promo_shown') !== 'true') {
-                    window.triggerPromoModal();
-                }
-            }, 20000);
-
-            // Trigger 2b: Exit Intent (mouse moves out of top viewport)
-            document.addEventListener('mouseleave', (e) => {
-                if (e.clientY < 20) { // mouse moved out towards address bar
-                    if (sessionStorage.getItem('launch_promo_shown') !== 'true') {
-                        window.triggerPromoModal();
-                    }
-                }
-            });
-        }
-    });
-})();
 
 
 // --- PURCHASE SUCCESS & CROSS-SELL RECOMMENDATION SYSTEM ---

@@ -9,6 +9,7 @@ window.QUANT_MENTOR = Object.freeze({
         reviews: 25,
         averageRating: 5.0,
         mentees: 50,
-        resourceUsers: 500
+        resourceUsers: 500,
+        experienceYears: 4
     })
 });
