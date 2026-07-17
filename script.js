@@ -2885,23 +2885,46 @@ async function handleSessionPaymentSuccess(response) {
     console.log('📧 Sending customer email securely via API...');
 
         const htmlContent = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #2563eb;">🎉 Your session has been booked!</h2>
-                <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
-                <p>Hi <strong>${booking.name}</strong>,</p>
-                <p>Your session is confirmed. Here are the details:</p>
-                <p><strong>📋 Session:</strong> ${booking.sessionType} (${booking.duration} mins)</p>
-                <p><strong>📅 Date:</strong> ${booking.date}</p>
-                <p><strong>⏰ Time:</strong> ${booking.time}</p>
-                <p><strong>💰 Amount Paid:</strong> ${booking.pay_currency === 'INR' ? '₹' : '$'}${booking.pay_currency === 'INR' ? booking.price : Math.round(booking.price * 0.012)}</p>
-                <p><strong>🆔 Payment ID:</strong> ${paymentId}</p>
-                <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
-                <p><strong>🔗 JOIN YOUR SESSION HERE:</strong></p>
-                <a href="${uniqueMeetLink}" style="display: inline-block; background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0;">Join Meeting</a>
-                <p style="margin-top: 20px;"><strong>🔄 Need to Reschedule?</strong></p>
-                <p>Visit: <a href="${window.location.origin}/my-bookings.html">My Bookings</a></p>
-                <p>Enter your email (${booking.email}) to view and reschedule your session.</p>
-                <p style="margin-top: 20px; color: #6b7280;">Best regards,<br>${BUSINESS_NAME}</p>
+            <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
+                <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
+                        <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">QuantMentor</span>
+                    </div>
+                    <div style="padding: 30px;">
+                        <div style="margin-bottom: 20px;">
+                            <span style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-right: 10px;">Booking Confirmed</span>
+                            <span style="display: inline-block; background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;">Paid</span>
+                        </div>
+                        <p style="font-size: 16px; margin-bottom: 25px;">Hi <strong>${booking.name}</strong>, your mentoring session is confirmed.</p>
+
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 10px 0; letter-spacing: 0.5px;">Session Details</p>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                <tr><td style="padding: 5px 0; color: #666; width: 30%;">Session</td><td style="padding: 5px 0; color: #1a1a1a; font-weight: bold;">${booking.sessionType}</td></tr>
+                                <tr><td style="padding: 5px 0; color: #666;">Duration</td><td style="padding: 5px 0; color: #1a1a1a;">${booking.duration} mins</td></tr>
+                                <tr><td style="padding: 5px 0; color: #666;">Date</td><td style="padding: 5px 0; color: #1a1a1a;">${booking.date}</td></tr>
+                                <tr><td style="padding: 5px 0; color: #666;">Time</td><td style="padding: 5px 0; color: #1a1a1a;">${booking.time}</td></tr>
+                                <tr><td style="padding: 5px 0; color: #666;">Amount Paid</td><td style="padding: 5px 0; color: #1a1a1a;">${booking.pay_currency === 'INR' ? '₹' : '$'}${booking.pay_currency === 'INR' ? booking.price : Math.round(booking.price * 0.012)}</td></tr>
+                                <tr><td style="padding: 5px 0; color: #666;">Payment ID</td><td style="padding: 5px 0; color: #1a1a1a;">${paymentId}</td></tr>
+                            </table>
+                        </div>
+
+                        <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 15px 0; letter-spacing: 0.5px;">Join Your Session</p>
+                            <a href="${uniqueMeetLink}" style="display: inline-block; background: #10b981; color: #ffffff; font-weight: bold; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-size: 14px;">Join Meeting</a>
+                            <p style="margin-top: 10px; font-size: 13px; color: #666; word-break: break-all;">${uniqueMeetLink}</p>
+                        </div>
+
+                        <div style="background: #fffbeb; padding: 20px; border-radius: 6px; border-left: 4px solid #f59e0b;">
+                            <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 10px 0; letter-spacing: 0.5px;">Need to Reschedule?</p>
+                            <p style="margin: 0; font-size: 14px; color: #1a1a1a;">Visit <a href="${window.location.origin}/my-bookings.html" style="color: #2563eb; text-decoration: none;">My Bookings</a> and enter your email (<strong>${booking.email}</strong>) to view and reschedule.</p>
+                        </div>
+                    </div>
+                    <div style="background-color: #1a1a1a; padding: 25px 20px; text-align: center; color: #888; font-size: 12px;">
+                        <p style="margin: 0 0 10px 0;">Sent by QuantMentor</p>
+                        <p style="margin: 0;">Have an issue? Reply to this email.</p>
+                    </div>
+                </div>
             </div>
         `;
 
