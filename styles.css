@@ -27,9 +27,17 @@
     --accent-secondary: #3b82f6;
     /* Blue - Secondary feature */
     --accent-tertiary: #f59e0b;
-    --d2q-line: #dce5ef;
     /* Amber - Warm highlights */
     --accent-gradient: linear-gradient(135deg, #06275b 0%, #0a3476 58%, #08a9a2 100%);
+
+    --d2q-navy: #06275b;
+    --d2q-navy-deep: #031a3e;
+    --d2q-teal: #08a9a2;
+    --d2q-teal-dark: #065c58;
+    --d2q-teal-soft: rgba(8, 169, 162, 0.08);
+    --d2q-muted: #60708a;
+    --d2q-paper: #f6f9fc;
+    --d2q-shadow: 0 18px 55px rgba(6, 39, 91, 0.10);
 
     /* Status Colors */
     --success: #22c55e;
@@ -1300,8 +1308,8 @@ body.d2q-reference .footer .logo-img {
 
 .product-image {
     position: relative;
-    height: 180px !important;
-    background: linear-gradient(135deg, var(--d2q-navy-deep), #0b4c84) !important;
+    height: 180px;
+    background: linear-gradient(135deg, var(--d2q-navy-deep), #0b4c84);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1314,11 +1322,11 @@ body.d2q-reference .footer .logo-img {
 
 .product-image.reference-cover {
     position: relative;
-    height: 150px !important;
-    padding: 20px !important;
+    height: 150px;
+    padding: 20px;
     display: block;
     color: #fff;
-    background: linear-gradient(135deg, var(--d2q-navy-deep), #0b4c84) !important;
+    background: linear-gradient(135deg, var(--d2q-navy-deep), #0b4c84);
     overflow: hidden;
 }
 
