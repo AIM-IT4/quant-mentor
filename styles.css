@@ -1007,7 +1007,7 @@ body.d2q-reference .footer .logo-img {
    -------------------------------- */
 .home-flow {
     padding: 36px 0 40px;
-    background: var(--bg-secondary);
+    background: var(--d2q-paper);
 }
 
 .flow-grid {
@@ -1018,27 +1018,31 @@ body.d2q-reference .footer .logo-img {
 
 .flow-card {
     position: relative;
-    min-height: 220px;
-    padding: 24px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    transition: border-color var(--transition-fast), transform var(--transition-fast), background var(--transition-fast);
+    min-height: 170px;
+    padding: 26px;
+    background: #ffffff;
+    border: 1px solid var(--d2q-line);
+    border-radius: 22px;
+    display: block;
+    color: inherit;
+    transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .flow-card:hover {
     transform: translateY(-4px);
-    border-color: rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.055);
+    border-color: #b7deda;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .flow-step {
+    padding: 0;
+    color: var(--d2q-teal);
+    background: transparent;
+    border: 0;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
     font-family: var(--font-mono);
-    color: var(--text-muted);
-    font-size: 0.78rem;
 }
 
 .flow-icon {
@@ -1047,18 +1051,22 @@ body.d2q-reference .footer .logo-img {
     border-radius: var(--radius-sm);
     display: grid;
     place-items: center;
-    color: #ffffff;
-    background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
+    color: var(--d2q-teal-dark);
+    background: var(--d2q-teal-soft);
+    border-color: rgba(8, 169, 162, 0.2);
 }
 
 .flow-card h2 {
-    font-size: 1.12rem;
+    margin: 14px 0 10px;
+    color: var(--d2q-navy);
+    font-size: 20px;
 }
 
 .flow-card p {
-    color: var(--text-secondary);
-    font-size: 0.94rem;
-    line-height: 1.55;
+    margin: 0;
+    color: var(--d2q-muted);
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 /* --------------------------------
