@@ -472,7 +472,7 @@ body.light-mode {
     min-height: 40px;
     padding: 8px 18px;
     color: #ffffff;
-    background: var(--d2q-navy-deep);
+    background: linear-gradient(135deg, #0a7a74 0%, #06275b 100%);
     border: 0;
     box-shadow: none;
 }
@@ -485,9 +485,21 @@ body.light-mode {
     font-size: 13px;
 }
 
-.promo-tag,
+.promo-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    color: #ffffff;
+    background: #e67e22;
+    border-radius: 3px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-size: 11px;
+}
+
 .promo-code-box {
-    color: #6ee7df;
+    color: #f0c040;
+    font-weight: 700;
 }
 
 .promo-code-box {
@@ -498,11 +510,12 @@ body.light-mode {
 
 .btn-promo-cta {
     min-height: auto;
-    padding: 0;
+    padding: 2px 10px;
     color: #ffffff;
-    background: transparent;
-    border: 0;
-    text-decoration: underline;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 4px;
+    font-weight: 700;
     box-shadow: none;
 }
 
