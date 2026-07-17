@@ -27,6 +27,7 @@
     --accent-secondary: #3b82f6;
     /* Blue - Secondary feature */
     --accent-tertiary: #f59e0b;
+    --d2q-line: #dce5ef;
     /* Amber - Warm highlights */
     --accent-gradient: linear-gradient(135deg, #f43f5e 0%, #3b82f6 50%, #f59e0b 100%);
 
@@ -521,11 +522,26 @@ h6 {
 }
 
 .logo-img {
-    width: 60px;
-    /* Professional size (larger than 40px, but not huge) */
-    height: 60px;
-    border-radius: 10px;
+    width: 44px;
+    height: 44px;
+    padding: 2px;
     object-fit: contain;
+    background: #ffffff;
+    border: 1px solid var(--d2q-line);
+    border-radius: 10px;
+}
+
+.footer .logo-img,
+.footer-brand .logo-img {
+    width: 220px;
+    height: 52px;
+    max-width: none;
+    padding: 0;
+    object-fit: contain;
+    object-position: left center;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
 }
 
 .nav-links {
@@ -2428,8 +2444,14 @@ body.light-mode .theme-toggle .fa-moon {
     }
 
     .logo-img {
-        width: 40px;
-        height: 40px;
+        width: 180px;
+        height: 44px;
+    }
+
+    .footer .logo-img,
+    .footer-brand .logo-img {
+        width: 180px;
+        height: 44px;
     }
 
     .hero {
