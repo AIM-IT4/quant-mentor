@@ -1,72 +1,278 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>Recommendation Email Preview</title></head>
-<body style="margin:0; padding:0; background:#e5e5e5;">
+<head>
+<meta charset="UTF-8">
+<title>Email Templates Preview — Desk2Quant</title>
+<style>
+  body { margin:0; padding:20px; background:#1a1a1a; font-family:system-ui,sans-serif; }
+  h1 { color:#fff; text-align:center; margin:0 0 30px; font-size:24px; }
+  .template { margin:0 auto 40px; max-width:640px; border-radius:12px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,.3); }
+  .template-label { background:#333; color:#aaa; padding:10px 20px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; border-bottom:1px solid #444; }
+  .template iframe { width:100%; border:0; display:block; }
+</style>
+</head>
+<body>
+<h1>📧 Desk2Quant Email Templates</h1>
 
-<!-- This is the exact HTML template that will be sent to customers -->
-<div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
-    <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-        
-        <!-- Header -->
-        <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
-            <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Desk2Quant</span>
-        </div>
-
-        <!-- Body -->
-        <div style="padding: 30px;">
-            <p style="font-size: 16px; margin-bottom: 8px;">Hi <strong>Rahul</strong>,</p>
-            <p style="font-size: 15px; color: #444; margin-bottom: 25px; line-height: 1.6;">
-                You recently purchased <strong>Python for Quants: Complete Interview Guide</strong> from Desk2Quant.
-                Here are 3 more resources that will accelerate your quant career:
-            </p>
-
-            <!-- Product Card 1 -->
-            <div style="background:#ffffff; border:1px solid #e5e5e5; border-radius:8px; padding:20px; margin-bottom:16px;">
-                <h3 style="margin:0 0 8px 0; font-size:16px; color:#1a1a1a;">Quant Interview Problem Book (1000+ Problems with solutions)</h3>
-                <p style="margin:0 0 12px 0; font-size:13px; color:#666; line-height:1.5;">1000+ unique problems with full solutions covering Linear Algebra, Probability, Stochastic Calculus, Black-Scholes, Monte Carlo...</p>
-                <div style="display:flex; align-items:center; justify-content:space-between;">
-                    <span style="font-size:18px; font-weight:bold; color:#1a1a1a;">₹899</span>
-                    <a href="#" style="display:inline-block; background:#6366f1; color:#ffffff; font-weight:600; text-decoration:none; padding:8px 20px; border-radius:6px; font-size:14px;">View Product</a>
-                </div>
-            </div>
-
-            <!-- Product Card 2 -->
-            <div style="background:#ffffff; border:1px solid #e5e5e5; border-radius:8px; padding:20px; margin-bottom:16px;">
-                <h3 style="margin:0 0 8px 0; font-size:16px; color:#1a1a1a;">Quant Models for Each Asset Class Master Pack: IR, FX, Credits, Equity</h3>
-                <p style="margin:0 0 12px 0; font-size:13px; color:#666; line-height:1.5;">4 focused playbooks covering Interest Rate, FX, Credit, and Equity models. Model intuition, calibration mindset...</p>
-                <div style="display:flex; align-items:center; justify-content:space-between;">
-                    <span style="font-size:18px; font-weight:bold; color:#1a1a1a;">₹1,999</span>
-                    <a href="#" style="display:inline-block; background:#6366f1; color:#ffffff; font-weight:600; text-decoration:none; padding:8px 20px; border-radius:6px; font-size:14px;">View Product</a>
-                </div>
-            </div>
-
-            <!-- Product Card 3 -->
-            <div style="background:#ffffff; border:1px solid #e5e5e5; border-radius:8px; padding:20px; margin-bottom:16px;">
-                <h3 style="margin:0 0 8px 0; font-size:16px; color:#1a1a1a;">Greek Explainer Lab – The Production Quant Edition</h3>
-                <p style="margin:0 0 12px 0; font-size:13px; color:#666; line-height:1.5;">16 interactive Jupyter modules from Delta/Gamma basics to Vanna, Charm, Volga, Color. 3D visualizations...</p>
-                <div style="display:flex; align-items:center; justify-content:space-between;">
-                    <span style="font-size:18px; font-weight:bold; color:#1a1a1a;">₹799</span>
-                    <a href="#" style="display:inline-block; background:#6366f1; color:#ffffff; font-weight:600; text-decoration:none; padding:8px 20px; border-radius:6px; font-size:14px;">View Product</a>
-                </div>
-            </div>
-
-            <!-- CTA -->
-            <div style="text-align:center; margin-top:25px;">
-                <a href="https://quant-mentor.vercel.app/#products" style="display:inline-block; background:#e95836; color:#ffffff; font-weight:bold; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:16px;">Browse All Products</a>
-            </div>
-
-            <!-- Footer note -->
-            <p style="font-size: 13px; color: #999; margin-top: 30px; text-align: center; line-height: 1.5;">
-                You're receiving this because you previously purchased from Desk2Quant.<br>
-                If you have any questions, simply reply to this email.
-            </p>
-        </div>
-
-        <!-- Footer -->
-        <div style="background-color: #1a1a1a; padding: 20px; text-align: center; color: #888; font-size: 12px;">
-            <p style="margin: 0;">Sent by Desk2Quant • <a href="https://quant-mentor.vercel.app" style="color:#6366f1; text-decoration:none;">quant-mentor.vercel.app</a></p>
-        </div>
+<!-- 1. Purchase Confirmation -->
+<div class="template">
+  <div class="template-label">1/4 — Product Purchase Confirmation (Customer)</div>
+  <iframe srcdoc='
+<div style="font-family:Arial,sans-serif;background-color:#f9f8f4;padding:40px 20px;color:#1a1a1a;">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+    <div style="background-color:#1a1a1a;padding:20px;text-align:center;">
+      <span style="color:#ffffff;font-size:24px;font-weight:bold;letter-spacing:1px;">Desk2Quant</span>
     </div>
+    <div style="padding:30px;">
+      <div style="margin-bottom:20px;">
+        <span style="display:inline-block;background:#fee2e2;color:#991b1b;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:bold;text-transform:uppercase;margin-right:10px;">New Purchase</span>
+        <span style="display:inline-block;background:#d1fae5;color:#065f46;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:bold;text-transform:uppercase;">Confirmed</span>
+      </div>
+      <p style="font-size:16px;margin-bottom:25px;">Hi <strong>Rahul Sharma</strong>, thank you for purchasing from Desk2Quant.</p>
+      <div style="background:#f9f8f4;padding:20px;border-radius:6px;margin-bottom:25px;">
+        <p style="font-size:11px;color:#666;text-transform:uppercase;font-weight:bold;margin:0 0 10px 0;letter-spacing:0.5px;">Digital Product</p>
+        <h3 style="margin:0 0 20px 0;font-size:18px;color:#1a1a1a;border-bottom:1px solid #e5e5e5;padding-bottom:15px;">Numerical Methods for Quants</h3>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="font-size:11px;color:#666;text-transform:uppercase;font-weight:bold;">Status</td>
+            <td style="font-size:14px;font-weight:bold;text-align:right;color:#16a34a;">Payment Processed</td>
+          </tr>
+        </table>
+      </div>
+      <center>
+        <a href="#" style="display:inline-block;background:#e95836;color:#ffffff;font-weight:bold;text-decoration:none;padding:14px 30px;border-radius:6px;font-size:16px;margin-bottom:30px;">Download Resource</a>
+      </center>
+      <div style="background:#f9f8f4;padding:20px;border-radius:6px;margin-bottom:20px;">
+        <p style="font-size:11px;color:#666;text-transform:uppercase;font-weight:bold;margin:0 0 15px 0;letter-spacing:0.5px;">Direct Link Backup</p>
+        <p style="font-size:14px;margin:0 0 8px 0;color:#1a1a1a;">If the button does not open in your email app, copy and paste this link into your browser:</p>
+        <p style="font-size:13px;margin:0;word-break:break-all;">
+          <a href="#" style="color:#2563eb;text-decoration:underline;">https://drive.google.com/your-download-link</a>
+        </p>
+      </div>
+      <div style="background:#f9f8f4;padding:20px;border-radius:6px;">
+        <p style="font-size:11px;color:#666;text-transform:uppercase;font-weight:bold;margin:0 0 15px 0;letter-spacing:0.5px;">Order Details</p>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <tr><td style="padding:5px 0;color:#666;width:30%;">Payment ID</td><td style="padding:5px 0;color:#1a1a1a;">pay_Nm7s8Kx9R2tL3c</td></tr>
+        </table>
+      </div>
+    </div>
+    <div style="background-color:#1a1a1a;padding:25px 20px;text-align:center;color:#888;font-size:12px;">
+      <p style="margin:0 0 10px 0;">Sent by Desk2Quant</p>
+      <p style="margin:0;">Have an issue? Reply to this email.</p>
+    </div>
+  </div>
+</div>
+  '></iframe>
+</div>
+
+<!-- 2. Booking Confirmation -->
+<div class="template">
+  <div class="template-label">2/4 — Session Booking Confirmation (Customer)</div>
+  <iframe srcdoc='
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+  <h2 style="color:#2563eb;">🎉 Your session has been booked!</h2>
+  <hr style="border:1px solid #e5e7eb;margin:20px 0;">
+  <p>Hi <strong>Rahul Sharma</strong>,</p>
+  <p>Your session is confirmed. Here are the details:</p>
+  <p><strong>📋 Session:</strong> Quant Interview Prep (60 mins)</p>
+  <p><strong>📅 Date:</strong> July 20, 2026</p>
+  <p><strong>⏰ Time:</strong> 3:00 PM IST</p>
+  <p><strong>💰 Amount Paid:</strong> ₹1,999</p>
+  <p><strong>🆔 Payment ID:</strong> pay_Nm7s8Kx9R2tL3c</p>
+  <hr style="border:1px solid #e5e7eb;margin:20px 0;">
+  <p><strong>🔗 JOIN YOUR SESSION HERE:</strong></p>
+  <a href="#" style="display:inline-block;background:#10b981;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;margin:10px 0;">Join Meeting</a>
+  <p style="margin-top:20px;"><strong>🔄 Need to Reschedule?</strong></p>
+  <p>Visit: <a href="#">My Bookings</a></p>
+  <p>Enter your email (rahul@example.com) to view and reschedule your session.</p>
+  <p style="margin-top:20px;color:#6b7280;">Best regards,<br>Desk2Quant</p>
+</div>
+  '></iframe>
+</div>
+
+<!-- 3. Cancellation / Refund -->
+<div class="template">
+  <div class="template-label">3/4 — Booking Cancellation / Refund (Customer)</div>
+  <iframe srcdoc='
+<div style="font-family:&apos;Segoe UI&apos;,system-ui,sans-serif;font-size:14px;color:#333;padding:20px;background-color:#0a0a0f;">
+  <div style="max-width:600px;margin:auto;background:linear-gradient(135deg,#1a1a25 0%,#12121a 100%);border-radius:16px;overflow:hidden;box-shadow:0 4px 30px rgba(239,68,68,0.2);">
+    <div style="background:linear-gradient(135deg,#ef4444 0%,#dc2626 50%,#b91c1c 100%);padding:24px;text-align:center;">
+      <h1 style="margin:0;color:#fff;font-size:24px;font-weight:700;">Desk2Quant</h1>
+      <p style="margin:8px 0 0;color:rgba(255,255,255,0.9);font-size:14px;">Desk-Ready Quant Finance Resources</p>
+    </div>
+    <div style="background:rgba(239,68,68,0.1);padding:16px 24px;border-bottom:1px solid rgba(255,255,255,0.1);">
+      <strong style="color:#ef4444;font-size:16px;">❌ Booking Cancellation Confirmed</strong>
+    </div>
+    <div style="padding:24px;color:#e0e0e0;">
+      <p style="margin:0 0 16px;font-size:16px;">Hi <strong style="color:#fff;">Rahul</strong>,</p>
+      <p style="margin:0 0 20px;color:#94a3b8;">Your cancellation request has been processed. See details below.</p>
+      <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:20px;border-left:4px solid #ef4444;margin-bottom:20px;">
+        <div style="margin-bottom:12px;"><span style="color:#888;font-size:12px;">BOOKING ID</span><br><strong style="color:#fff;font-size:14px;">BK-2026-0715-001</strong></div>
+        <div style="margin-bottom:12px;"><span style="color:#888;font-size:12px;">SESSION</span><br><strong style="color:#fff;font-size:14px;">Quant Interview Prep</strong></div>
+        <div style="display:flex;gap:20px;">
+          <div><span style="color:#888;font-size:12px;">ORIGINAL DATE</span><br><span style="color:#fff;">July 20, 2026</span></div>
+          <div><span style="color:#888;font-size:12px;">TIME</span><br><span style="color:#fff;">3:00 PM IST</span></div>
+        </div>
+      </div>
+      <div style="background:rgba(34,197,94,0.1);border-radius:12px;padding:20px;border-left:4px solid #22c55e;margin-bottom:20px;">
+        <div style="font-size:16px;font-weight:bold;color:#22c55e;margin-bottom:16px;">💰 Refund Details</div>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:8px 0;color:#94a3b8;">Original Amount:</td><td style="padding:8px 0;text-align:right;color:#fff;">₹1,999</td></tr>
+          <tr><td style="padding:8px 0;color:#94a3b8;">Refund Policy Applied:</td><td style="padding:8px 0;text-align:right;color:#fff;">100%</td></tr>
+          <tr style="border-top:1px solid rgba(34,197,94,0.3);">
+            <td style="padding:12px 0;color:#22c55e;font-weight:bold;font-size:16px;">Refund Amount:</td>
+            <td style="padding:12px 0;text-align:right;color:#22c55e;font-weight:bold;font-size:18px;">₹1,999</td>
+          </tr>
+        </table>
+      </div>
+      <div style="background:rgba(245,158,11,0.1);border-radius:12px;padding:16px;border-left:4px solid #f59e0b;margin-bottom:20px;">
+        <span style="color:#f59e0b;">⏱️</span>
+        <span style="color:#fbbf24;"> <strong>Processing Time:</strong></span>
+        <span style="color:#94a3b8;"> Your refund will be credited to your original payment method within </span>
+        <strong style="color:#fff;">5-7 business days</strong>.
+      </div>
+    </div>
+  </div>
+</div>
+  '></iframe>
+</div>
+
+<!-- 4. Recommendation / Upsell -->
+<div class="template">
+  <div class="template-label">4/4 — Product Recommendation (1hr after purchase)</div>
+  <iframe srcdoc='
+<div style="font-family:Arial,sans-serif;background-color:#f9f8f4;padding:40px 20px;color:#1a1a1a;">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+    <div style="background-color:#1a1a1a;padding:20px;text-align:center;">
+      <span style="color:#ffffff;font-size:24px;font-weight:bold;letter-spacing:1px;">Desk2Quant</span>
+    </div>
+    <div style="padding:30px;">
+      <p style="font-size:16px;margin-bottom:8px;">Hi <strong>Rahul</strong>,</p>
+      <p style="font-size:15px;color:#444;margin-bottom:25px;line-height:1.6;">
+        You recently purchased <strong>Python for Quants: Complete Interview Guide</strong> from Desk2Quant.
+        Here are 3 more resources that will accelerate your quant career:
+      </p>
+      <div style="background:#ffffff;border:1px solid #e5e5e5;border-radius:8px;padding:20px;margin-bottom:16px;">
+        <h3 style="margin:0 0 8px 0;font-size:16px;color:#1a1a1a;">Quant Interview Problem Book (1000+ Problems)</h3>
+        <p style="margin:0 0 12px 0;font-size:13px;color:#666;line-height:1.5;">1000+ unique problems covering Linear Algebra, Probability, Stochastic Calculus...</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:18px;font-weight:bold;color:#1a1a1a;">₹899</span>
+          <a href="#" style="display:inline-block;background:#6366f1;color:#ffffff;font-weight:600;text-decoration:none;padding:8px 20px;border-radius:6px;font-size:14px;">View Product</a>
+        </div>
+      </div>
+      <div style="background:#ffffff;border:1px solid #e5e5e5;border-radius:8px;padding:20px;margin-bottom:16px;">
+        <h3 style="margin:0 0 8px 0;font-size:16px;color:#1a1a1a;">Quant Models for Each Asset Class Master Pack</h3>
+        <p style="margin:0 0 12px 0;font-size:13px;color:#666;line-height:1.5;">4 focused playbooks covering Interest Rate, FX, Credit, and Equity models...</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:18px;font-weight:bold;color:#1a1a1a;">₹1,999</span>
+          <a href="#" style="display:inline-block;background:#6366f1;color:#ffffff;font-weight:600;text-decoration:none;padding:8px 20px;border-radius:6px;font-size:14px;">View Product</a>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:25px;">
+        <a href="#" style="display:inline-block;background:#e95836;color:#ffffff;font-weight:bold;text-decoration:none;padding:14px 30px;border-radius:6px;font-size:16px;">Browse All Products</a>
+      </div>
+      <p style="font-size:13px;color:#999;margin-top:30px;text-align:center;line-height:1.5;">
+        You&apos;re receiving this because you previously purchased from Desk2Quant.<br>
+        If you have any questions, simply reply to this email.
+      </p>
+    </div>
+    <div style="background-color:#1a1a1a;padding:20px;text-align:center;color:#888;font-size:12px;">
+      <p style="margin:0;">Sent by Desk2Quant</p>
+    </div>
+  </div>
+</div>
+  '></iframe>
+</div>
+
+
+<!-- 5. Admin — Product Sale Notification -->
+<div class="template">
+  <div class="template-label">5/4 — Admin: Product Sale Notification</div>
+  <iframe srcdoc='
+<div style="font-family:Arial,sans-serif;background-color:#f9f8f4;padding:40px 20px;color:#1a1a1a;">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+    <div style="background-color:#1a1a1a;padding:20px;text-align:center;">
+      <span style="color:#ffffff;font-size:24px;font-weight:bold;letter-spacing:1px;">Desk2Quant Admin</span>
+    </div>
+    <div style="padding:30px;">
+      <div style="margin-bottom:20px;">
+        <span style="display:inline-block;background:#d1fae5;color:#065f46;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:bold;text-transform:uppercase;">New Sale Received</span>
+      </div>
+      <p style="font-size:16px;margin-bottom:25px;"><strong>Rahul Sharma</strong> just purchased a digital product.</p>
+      <div style="background:#f9f8f4;padding:20px;border-radius:6px;margin-bottom:25px;">
+        <p style="font-size:11px;color:#666;text-transform:uppercase;font-weight:bold;margin:0 0 10px 0;letter-spacing:0.5px;">Product Sold</p>
+        <h3 style="margin:0 0 20px 0;font-size:18px;color:#1a1a1a;border-bottom:1px solid #e5e5e5;padding-bottom:15px;">Numerical Methods for Quants</h3>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="font-size:11px;color:#666;text-transform:uppercase;font-weight:bold;">Amount</td><td style="font-size:14px;font-weight:bold;text-align:right;color:#16a34a;">INR</td></tr>
+        </table>
+      </div>
+      <div style="background:#f9f8f4;padding:20px;border-radius:6px;">
+        <p style="font-size:11px;color:#666;text-transform:uppercase;font-weight:bold;margin:0 0 15px 0;letter-spacing:0.5px;">Customer Details</p>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <tr><td style="padding:5px 0;color:#666;width:30%;">Name</td><td style="padding:5px 0;color:#1a1a1a;">Rahul Sharma</td></tr>
+          <tr><td style="padding:5px 0;color:#666;">Email</td><td style="padding:5px 0;color:#1a1a1a;">rahul@example.com</td></tr>
+          <tr><td style="padding:5px 0;color:#666;">Payment ID</td><td style="padding:5px 0;color:#1a1a1a;">pay_Nm7s8Kx9R2tL3c</td></tr>
+          <tr><td style="padding:5px 0;color:#666;">Download Link</td><td style="padding:5px 0;color:#1a1a1a;word-break:break-all;"><a href="#" style="color:#2563eb;">https://drive.google.com/...</a></td></tr>
+        </table>
+      </div>
+    </div>
+    <div style="background-color:#1a1a1a;padding:20px;text-align:center;color:#888;font-size:12px;">
+      <p style="margin:0;">Sent by Desk2Quant</p>
+    </div>
+  </div>
+</div>
+  '></iframe>
+</div>
+
+<!-- 6. Admin — Booking Notification -->
+<div class="template">
+  <div class="template-label">6/4 — Admin: Session Booking Notification</div>
+  <iframe srcdoc='
+<div style="font-family:Arial,sans-serif;background-color:#f9f8f4;padding:40px 20px;color:#1a1a1a;">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+    <div style="background-color:#1a1a1a;padding:20px;text-align:center;">
+      <span style="color:#ffffff;font-size:24px;font-weight:bold;letter-spacing:1px;">Desk2Quant Admin</span>
+    </div>
+    <div style="padding:30px;">
+      <div style="margin-bottom:20px;">
+        <span style="display:inline-block;background:#dbeafe;color:#1e40af;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:bold;text-transform:uppercase;">New Booking Received</span>
+      </div>
+      <p style="font-size:16px;margin-bottom:25px;"><strong>Rahul Sharma</strong> booked a mentoring session.</p>
+      <div style="background:#f9f8f4;padding:20px;border-radius:6px;margin-bottom:25px;">
+        <p style="font-size:11px;color:#666;text-transform:uppercase;font-weight:bold;margin:0 0 10px 0;letter-spacing:0.5px;">Session Details</p>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <tr><td style="padding:5px 0;color:#666;width:30%;">Session</td><td style="padding:5px 0;color:#1a1a1a;font-weight:bold;">Quant Interview Prep</td></tr>
+          <tr><td style="padding:5px 0;color:#666;">Duration</td><td style="padding:5px 0;color:#1a1a1a;">60 mins</td></tr>
+          <tr><td style="padding:5px 0;color:#666;">Date</td><td style="padding:5px 0;color:#1a1a1a;">July 20, 2026</td></tr>
+          <tr><td style="padding:5px 0;color:#666;">Time</td><td style="padding:5px 0;color:#1a1a1a;">3:00 PM IST</td></tr>
+          <tr><td style="padding:5px 0;color:#666;">Amount</td><td style="padding:5px 0;color:#1a1a1a;">₹1,999</td></tr>
+        </table>
+      </div>
+      <div style="background:#f9f8f4;padding:20px;border-radius:6px;margin-bottom:25px;">
+        <p style="font-size:11px;color:#666;text-transform:uppercase;font-weight:bold;margin:0 0 15px 0;letter-spacing:0.5px;">Customer Details</p>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <tr><td style="padding:5px 0;color:#666;width:30%;">Name</td><td style="padding:5px 0;color:#1a1a1a;">Rahul Sharma</td></tr>
+          <tr><td style="padding:5px 0;color:#666;">Email</td><td style="padding:5px 0;color:#1a1a1a;">rahul@example.com</td></tr>
+          <tr><td style="padding:5px 0;color:#666;">Phone</td><td style="padding:5px 0;color:#1a1a1a;">+91-9876543210</td></tr>
+          <tr><td style="padding:5px 0;color:#666;">Payment ID</td><td style="padding:5px 0;color:#1a1a1a;">pay_Nm7s8Kx9R2tL3c</td></tr>
+        </table>
+      </div>
+      <div style="background:#f9f8f4;padding:20px;border-radius:6px;">
+        <p style="font-size:11px;color:#666;text-transform:uppercase;font-weight:bold;margin:0 0 15px 0;letter-spacing:0.5px;">Meeting Link</p>
+        <a href="#" style="display:inline-block;background:#10b981;color:#ffffff;font-weight:bold;text-decoration:none;padding:10px 20px;border-radius:6px;font-size:14px;">Join Meeting</a>
+        <p style="margin-top:10px;font-size:13px;color:#666;word-break:break-all;">https://meet.google.com/abc-defg-hij</p>
+      </div>
+      <div style="background:#fffbeb;padding:20px;border-radius:6px;margin-top:16px;border-left:4px solid #f59e0b;">
+        <p style="font-size:11px;color:#666;text-transform:uppercase;font-weight:bold;margin:0 0 10px 0;letter-spacing:0.5px;">Customer Message</p>
+        <p style="margin:0;color:#1a1a1a;font-size:14px;">I am preparing for quant interviews and would like guidance on stochastic calculus topics.</p>
+      </div>
+    </div>
+    <div style="background-color:#1a1a1a;padding:20px;text-align:center;color:#888;font-size:12px;">
+      <p style="margin:0;">Sent by Desk2Quant</p>
+    </div>
+  </div>
+</div>
+  '></iframe>
 </div>
 
 </body>
