@@ -882,11 +882,6 @@ textarea:focus,
 }
 
 @media (max-width: 900px) {
-    .nav-container,
-    .hero-container {
-        width: min(100% - 28px, var(--container-width));
-    }
-
     .hero-container {
         grid-template-columns: 1fr;
     }
@@ -948,10 +943,6 @@ textarea:focus,
 
     .hero {
         padding-top: 46px;
-    }
-
-    .hero-container {
-        width: min(100% - 24px, var(--container-width));
     }
 
     .hero-headline {
@@ -1080,11 +1071,10 @@ body.d2q-reference .navbar,
     backdrop-filter: blur(14px);
 }
 .nav-container {
-    width: min(var(--container-width), calc(100% - 40px));
-    max-width: none;
+    max-width: var(--container-width);
     height: 100%;
-    margin: auto;
-    padding: 0;
+    margin: 0 auto;
+    padding: 0 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1127,11 +1117,9 @@ body.d2q-reference .navbar,
 body.d2q-reference section { padding: 82px 0; }
 body.d2q-reference .section-container,
 body.d2q-reference .hero-container {
-    width: min(var(--container-width), calc(100% - 40px));
-    max-width: none;
-    margin: auto;
-    padding-left: 0;
-    padding-right: 0;
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 20px;
 }
 body.d2q-reference .hero {
     display: block !important;
@@ -1362,7 +1350,7 @@ body.d2q-reference .contact-form .btn-full { width: 100%; }
 body.d2q-reference .form-note { color: var(--d2q-muted); }
 
 .footer { padding: 48px 0 28px; background: var(--d2q-navy-deep); }
-.footer-container { width: min(var(--container-width), calc(100% - 40px)); max-width: none; margin: auto; }
+.footer-container { max-width: var(--container-width); margin: 0 auto; padding: 0 20px; }
 .footer-main { display: grid; grid-template-columns: 1.6fr 2fr; gap: 34px; }
 .footer .footer-brand { display: block; padding: 0; background: transparent; }
 .footer .footer-brand .logo { width: fit-content; display: inline-flex; padding: 8px 12px; background: #fff; border-radius: 14px; }
