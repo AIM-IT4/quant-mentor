@@ -580,18 +580,20 @@ body.d2q-reference .footer .logo-img {
 }
 
 .nav-cta {
-    padding: 8px 16px !important;
-    background: #ffffff !important;
-    color: #000000 !important;
-    border-radius: var(--radius-pill) !important;
+    padding: 10px 24px !important;
+    background: #1a1a2e !important;
+    color: #ffffff !important;
+    border-radius: var(--radius-lg) !important;
     font-size: 0.875rem !important;
-    font-weight: 500 !important;
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(26, 26, 46, 0.3);
+    border: none !important;
 }
 
 .nav-cta:hover {
+    background: #16213e !important;
     transform: scale(1.05);
-    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(26, 26, 46, 0.4);
 }
 
 .mobile-menu-btn {
@@ -2453,10 +2455,10 @@ body.light-mode .theme-toggle .fa-moon {
     }
 
     .nav-cta {
-        background: linear-gradient(135deg, #be123c 0%, #1d4ed8 50%, #b45309 100%);
-        border-radius: 100px;
+        background: #1a1a2e !important;
+        border-radius: var(--radius-lg);
         margin-top: 10px;
-        box-shadow: 0 10px 20px rgba(45, 212, 191, 0.2);
+        box-shadow: 0 10px 20px rgba(26, 26, 46, 0.3);
     }
 
     .logo-text {
