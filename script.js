@@ -3551,6 +3551,16 @@ window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
 
 
 
+
+// Desk2Quant new-release promotion. Kept separate from checkout so promotion never alters payment state.
+(function () {
+    const releaseProductId = '6b78550d-e130-41d1-9409-92335ce82a6c';
+    window.openReleasePromotion = function () { const modal = document.getElementById('releasePromoModal'); if (!modal) return; modal.classList.add('active'); modal.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; sessionStorage.setItem('desk2quant_release_promo_seen', 'true'); };
+    window.closeReleasePromotion = function () { const modal = document.getElementById('releasePromoModal'); if (!modal) return; modal.classList.remove('active'); modal.setAttribute('aria-hidden', 'true'); if (!document.querySelector('.modal.active')) document.body.style.overflow = ''; };
+    window.buyReleaseProduct = function () { window.closeReleasePromotion(); window.openProductModal?.(releaseProductId); };
+    window.viewReleaseProduct = function () { window.closeReleasePromotion(); const target = window.location.pathname.includes('-test') ? 'product-test.html' : 'product.html'; window.location.href = `${target}?id=${releaseProductId}`; };
+    document.addEventListener('DOMContentLoaded', () => { if (sessionStorage.getItem('desk2quant_release_promo_seen') !== 'true') window.setTimeout(() => window.openReleasePromotion(), 15000); });
+})();
 // --- PURCHASE SUCCESS & CROSS-SELL RECOMMENDATION SYSTEM ---
 (function() {
     console.log('🛍️ Initializing Purchase Success & Cross-Sell Recommendation System...');

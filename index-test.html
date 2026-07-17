@@ -763,6 +763,24 @@
     <button class="scroll-top-btn" id="scrollTopBtn" title="Back to top">
         <i class="fas fa-chevron-up"></i>
     </button>
+
+    <!-- Desk2Quant new-release promotion -->
+    <div id="releasePromoModal" class="release-promo-modal" aria-hidden="true">
+        <div class="release-promo-overlay" onclick="closeReleasePromotion()"></div>
+        <section class="release-promo-card" role="dialog" aria-modal="true" aria-labelledby="releasePromoTitle">
+            <button class="release-promo-close" type="button" onclick="closeReleasePromotion()" aria-label="Close new release promotion"><i class="fas fa-times"></i></button>
+            <div class="release-promo-visual" aria-hidden="true"><span>Σ</span><small>Numerical methods</small></div>
+            <div class="release-promo-copy">
+                <span class="release-promo-kicker">New release</span>
+                <h2 id="releasePromoTitle">Numerical Methods for Quants</h2>
+                <p>93 pages of practical root finding, calibration, Monte Carlo, COS methods, and runnable Python implementation.</p>
+                <div class="release-promo-actions">
+                    <button class="btn btn-primary" type="button" onclick="buyReleaseProduct()">Buy now</button>
+                    <button class="btn btn-secondary" type="button" onclick="viewReleaseProduct()">Preview contents</button>
+                </div>
+            </div>
+        </section>
+    </div>
     <!-- Purchase Success & Recommendation Modal -->
     <div id="purchaseSuccessModal" class="success-modal">
         <div class="success-modal-overlay" onclick="closeSuccessModal()"></div>

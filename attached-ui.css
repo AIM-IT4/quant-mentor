@@ -1453,3 +1453,29 @@ body.d2q-reference .form-note { color: var(--d2q-muted); }
     body.d2q-reference .practice-score,
     body.d2q-reference .interview-framework { text-align: center; }
 }
+/* Checkout modal: reserve a stable payment column and prevent coupon controls from overflowing. */
+#productModal .modal-content { width: min(1080px, calc(100% - 48px)); max-width: 1080px; grid-template-columns: minmax(0, 1fr) minmax(320px, 360px); }
+#productModal .modal-header { padding-right: 82px; }
+#productModal .modal-header h3 { max-width: 100%; overflow-wrap: anywhere; }
+#productModal .coupon-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; width: 100%; margin: 0 0 12px !important; }
+#productModal .coupon-row input { width: 100%; min-width: 0; box-sizing: border-box; }
+#productModal .coupon-row .btn { min-width: 92px; }
+#productModal .modal-footer .btn-full { width: 100%; box-sizing: border-box; }
+
+/* New-release promotion uses Desk2Quant layout, not the retired dark launch popup. */
+.release-promo-modal { position: fixed; z-index: 3000; inset: 0; display: grid; place-items: center; padding: 24px; opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+.release-promo-modal.active { opacity: 1; pointer-events: auto; }
+.release-promo-overlay { position: absolute; inset: 0; background: rgba(3, 26, 62, .72); backdrop-filter: blur(8px); }
+.release-promo-card { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(240px, .72fr) minmax(0, 1.28fr); width: min(780px, 100%); overflow: hidden; color: var(--d2q-ink); background: #ffffff; border: 1px solid var(--d2q-line); border-radius: 18px; box-shadow: 0 30px 90px rgba(3, 26, 62, .3); }
+.release-promo-visual { display: grid; align-content: center; justify-items: center; min-height: 330px; padding: 32px; color: #ffffff; background: var(--d2q-navy-deep); }
+.release-promo-visual span { color: #57e4dc; font-family: Georgia, serif; font-size: 104px; line-height: 1; }
+.release-promo-visual small { margin-top: 14px; font-size: 14px; font-weight: 750; text-transform: uppercase; letter-spacing: .08em; }
+.release-promo-copy { padding: 46px 44px 36px; }
+.release-promo-kicker { display: inline-block; margin-bottom: 14px; padding: 6px 10px; color: var(--d2q-teal-dark); background: var(--d2q-teal-soft); border-radius: 999px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; }
+.release-promo-copy h2 { margin: 0 0 14px; color: var(--d2q-navy-deep); font-size: clamp(28px, 3vw, 40px); line-height: 1.08; }
+.release-promo-copy p { margin: 0; color: var(--d2q-muted); font-size: 17px; line-height: 1.65; }
+.release-promo-actions { display: flex; gap: 12px; margin-top: 30px; }
+.release-promo-actions .btn { flex: 1; justify-content: center; }
+.release-promo-close { position: absolute; z-index: 2; top: 16px; right: 16px; display: grid; width: 42px; height: 42px; place-items: center; color: var(--d2q-navy); background: #ffffff; border: 1px solid var(--d2q-line); border-radius: 10px; cursor: pointer; }
+.release-promo-close:hover { color: #ffffff; background: var(--d2q-navy); }
+@media (max-width: 700px) { #productModal .modal-content { width: calc(100% - 24px); max-height: calc(100dvh - 24px); display: flex; flex-direction: column; } #productModal .modal-header { padding: 20px 64px 18px 20px; } #productModal .modal-header h3 { font-size: 20px; } #productModal .modal-body { min-height: 0; padding: 20px; } #productModal .modal-footer { padding: 20px; border-top: 1px solid var(--d2q-line); border-left: 0; } .release-promo-modal { padding: 14px; } .release-promo-card { grid-template-columns: 1fr; max-height: calc(100dvh - 28px); overflow-y: auto; } .release-promo-visual { min-height: 128px; padding: 22px; } .release-promo-visual span { font-size: 64px; } .release-promo-visual small { margin-top: 4px; } .release-promo-copy { padding: 28px 24px 24px; } .release-promo-copy p { font-size: 15px; } .release-promo-actions { flex-direction: column; margin-top: 24px; } }
