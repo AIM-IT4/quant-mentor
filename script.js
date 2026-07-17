@@ -3102,12 +3102,12 @@ New Booking Details:
                         <a href="${uniqueMeetLink}" style="display: inline-block; background: #10b981; color: #ffffff; font-weight: bold; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-size: 14px;">Join Meeting</a>
                         <p style="margin-top: 10px; font-size: 13px; color: #666; word-break: break-all;">${uniqueMeetLink}</p>
                     </div>
-                    ${booking.message ? \`
+                    ${booking.message ? `
                     <div style="background: #fffbeb; padding: 20px; border-radius: 6px; margin-top: 16px; border-left: 4px solid #f59e0b;">
                         <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 10px 0; letter-spacing: 0.5px;">Customer Message</p>
-                        <p style="margin: 0; color: #1a1a1a; font-size: 14px;">\${booking.message}</p>
+                        <p style="margin: 0; color: #1a1a1a; font-size: 14px;">${booking.message}</p>
                     </div>
-                    \` : ''}
+                    ` : ''}
                 </div>
                 <div style="background-color: #1a1a1a; padding: 20px; text-align: center; color: #888; font-size: 12px;">
                     <p style="margin: 0;">Sent by Desk2Quant</p>
