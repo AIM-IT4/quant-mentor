@@ -536,6 +536,20 @@ h6 {
     border-radius: 10px;
 }
 
+body.d2q-reference .logo-img,
+body.d2q-reference .navbar .logo-img,
+body.d2q-reference .footer .logo-img {
+    width: 220px;
+    height: 52px;
+    max-width: none;
+    padding: 0;
+    object-fit: contain;
+    object-position: left center;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+}
+
 .footer .logo-img,
 .footer-brand .logo-img {
     width: 180px;
@@ -2451,6 +2465,12 @@ body.light-mode .theme-toggle .fa-moon {
     .logo-img {
         width: 50px;
         height: 50px;
+    }
+
+    body.d2q-reference .logo-img,
+    body.d2q-reference .navbar .logo-img {
+        width: 180px;
+        height: 44px;
     }
 
     .footer .logo-img,
