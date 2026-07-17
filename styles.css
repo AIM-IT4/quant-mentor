@@ -1963,11 +1963,6 @@ body.d2q-reference .footer .logo-img {
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
 }
 
-.coupon-row {
-    display: flex;
-    gap: 10px;
-}
-
 .booking-price span {
     color: var(--text-secondary);
     font-size: 0.95rem;
@@ -2191,11 +2186,51 @@ body.d2q-reference .footer .logo-img {
     padding: 28px;
     overflow-y: auto;
     min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--d2q-line) transparent;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: var(--d2q-line);
+    border-radius: 3px;
+}
+
+.modal-body h2,
+.modal-body h3 {
+    color: var(--d2q-navy-deep);
+    font-size: 1.25rem;
+    margin: 24px 0 12px;
+}
+
+.modal-body h2:first-child,
+.modal-body h3:first-child {
+    margin-top: 0;
 }
 
 .modal-body p {
     color: var(--d2q-muted);
     margin-bottom: 16px;
+    line-height: 1.6;
+}
+
+.modal-body ul,
+.modal-body ol {
+    color: var(--d2q-muted);
+    margin-bottom: 16px;
+    padding-left: 20px;
+}
+
+.modal-body li {
+    margin-bottom: 8px;
+    line-height: 1.5;
 }
 
 .modal-price {
@@ -2323,14 +2358,16 @@ body.d2q-reference .footer .logo-img {
    Coupon Code Styles
    -------------------------------- */
 .coupon-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-top: 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 12px;
 }
 
 .coupon-row input {
-    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
     padding: 12px;
     border-radius: 8px;
     border: 1px solid var(--d2q-line);
@@ -2348,6 +2385,7 @@ body.d2q-reference .footer .logo-img {
 }
 
 .coupon-row .btn-secondary {
+    min-width: 92px;
     padding: 12px 20px;
     white-space: nowrap;
     background: #ffffff;
