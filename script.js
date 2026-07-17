@@ -1448,7 +1448,11 @@ async function displaySupabaseProducts(products) {
     // Exclude test/1 INR products from display
     const realProducts = products.filter(p => {
         const name = (p.name || '').toLowerCase();
-        return p.price !== 1 && !name.includes('test');
+        const price = Number(p.price);
+        const isInactive = p.is_active === false;
+        const isTestPrice = price === 1;
+        const isTestName = name.includes('test') || name.includes('dummy') || name.includes('sample');
+        return !isInactive && !isTestPrice && !isTestName;
     });
     const paidProducts = realProducts.filter(p => p.price > 0).sort((a, b) => {
         const rank = product => {

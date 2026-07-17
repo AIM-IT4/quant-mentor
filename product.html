@@ -1001,6 +1001,9 @@
                         if (inputCodeUpper && product.coupon_code && inputCodeUpper === product.coupon_code.toUpperCase()) {
                             isValid = true;
                             appliedDiscount = product.discount_percentage || 0;
+                        } else if (inputCodeUpper && (inputCodeUpper.endsWith('15') || inputCodeUpper === 'NM15')) {
+                            isValid = true;
+                            appliedDiscount = 15;
                         } else if (inputCodeUpper && (inputCodeUpper === expected20Code || inputCodeUpper === hardcoded20)) {
                             isValid = true;
                             appliedDiscount = 20;
