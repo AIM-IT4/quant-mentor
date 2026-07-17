@@ -400,6 +400,16 @@
     <!-- Skip Navigation (Accessibility) -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
+    <!-- New Release Promotion Banner -->
+    <div class="promo-announcement-bar" role="banner" aria-label="New release announcement">
+        <div class="promo-content" style="display:flex;align-items:center;flex-wrap:wrap;">
+            <span class="promo-tag" style="font-weight:800;text-transform:uppercase;letter-spacing:0.07em;font-size:11px;">New release</span>
+            <span>Numerical Methods for Quants — 93 pages of desk-ready solvers &amp; Python code</span>
+            <span class="promo-code-box" style="font-weight:700;white-space:nowrap;">Use code <span style="color:#fff;">NUMERICAL20</span></span>
+            <button class="btn-promo-cta" type="button" onclick="document.getElementById('releasePromoModal')?.classList.add('active');document.body.style.overflow='hidden';" style="font-weight:700;">Learn more →</button>
+            <button class="promo-close-btn" type="button" onclick="this.closest('.promo-announcement-bar').style.display='none'" aria-label="Dismiss announcement" style="background:none;border:0;cursor:pointer;margin-left:auto;font-size:16px;line-height:1;">×</button>
+        </div>
+    </div>
     <!-- Reference navigation -->
     <nav class="navbar">
         <div class="nav-container">
@@ -502,6 +512,11 @@
                         <h3>Amit Kumar Jha</h3>
                         <p>Quant Developer | Model Risk Quant | Mentor</p>
                         <div class="mentor-chips"><span>XVA</span><span>Derivatives</span><span>Python</span><span>C++</span><span>Mathematics</span><span>Model Validation</span></div>
+                        <div class="mentor-socials">
+                            <a href="https://www.linkedin.com/in/akjha002/" target="_blank" title="LinkedIn" aria-label="Connect on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="https://github.com/AIM-IT4" target="_blank" title="GitHub" aria-label="View GitHub Profile"><i class="fab fa-github"></i></a>
+                            <a href="https://x.com/Akjha2023" target="_blank" title="X (Twitter)" aria-label="Follow on X"><i class="fab fa-twitter"></i></a>
+                        </div>
                     </div>
                     <img src="assets/images/me_img.png" alt="Amit Kumar Jha" class="mentor-cutout">
                 </div>
@@ -552,7 +567,7 @@
                 <div class="footer-brand"><a href="#hero" class="logo"><img src="assets/images/desk2quant-logo.png?v=1" alt="Desk2Quant logo" class="logo-img"></a><p class="footer-tagline">From classroom concepts to desk-ready quant skills through focused mentorship, interview preparation, and practitioner-built resources.</p><p><a href="mailto:jha.8@alumni.iitj.ac.in">jha.8@alumni.iitj.ac.in</a></p></div>
                 <div class="footer-links"><div class="footer-column"><h4>Quick Links</h4><ul><li><a href="#services">Sessions</a></li><li><a href="#products">Products</a></li><li><a href="#contact">Book Now</a></li></ul></div><div class="footer-column"><h4>Resources</h4><ul><li><a href="resources.html">Free Resources</a></li><li><a href="salary-explorer.html">Salary Explorer</a></li><li><a href="blog.html">Blog &amp; Articles</a></li></ul></div><div class="footer-column"><h4>Legal</h4><ul><li><a href="privacy.html">Privacy Policy</a></li><li><a href="terms.html">Terms of Service</a></li><li><a href="refund.html">Refund Policy</a></li></ul></div></div>
             </div>
-            <div class="footer-bottom"><p>&copy; 2026 Desk2Quant. All rights reserved.</p></div>
+            <div class="footer-bottom" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;"><p>&copy; 2026 Desk2Quant. All rights reserved.</p><div class="footer-social" style="display:flex;gap:12px;"><a href="https://www.linkedin.com/in/akjha002/" target="_blank" title="LinkedIn" aria-label="LinkedIn" style="color:#aebed1;font-size:18px;transition:color 0.2s;"><i class="fab fa-linkedin-in"></i></a><a href="https://github.com/AIM-IT4" target="_blank" title="GitHub" aria-label="GitHub" style="color:#aebed1;font-size:18px;transition:color 0.2s;"><i class="fab fa-github"></i></a><a href="https://x.com/Akjha2023" target="_blank" title="X (Twitter)" aria-label="X (Twitter)" style="color:#aebed1;font-size:18px;transition:color 0.2s;"><i class="fab fa-twitter"></i></a></div></div>
         </div>
     </footer>
     <!-- Product Modal -->

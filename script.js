@@ -1445,7 +1445,12 @@ async function displaySupabaseProducts(products) {
         'quant interview problem book',
         'greek explainer lab'
     ];
-    const paidProducts = products.filter(p => p.price > 0).sort((a, b) => {
+    // Exclude test/1 INR products from display
+    const realProducts = products.filter(p => {
+        const name = (p.name || '').toLowerCase();
+        return p.price !== 1 && !name.includes('test');
+    });
+    const paidProducts = realProducts.filter(p => p.price > 0).sort((a, b) => {
         const rank = product => {
             const name = (product.name || '').toLowerCase();
             const index = preferredProductOrder.findIndex(pattern => name.includes(pattern));
@@ -1453,7 +1458,7 @@ async function displaySupabaseProducts(products) {
         };
         return rank(a) - rank(b);
     });
-    const freeProducts = products.filter(p => p.price === 0);
+    const freeProducts = realProducts.filter(p => p.price === 0);
 
     const renderList = [
         { items: paidProducts, container: productsGrid, isFree: false },
@@ -1566,7 +1571,7 @@ async function displaySupabaseProducts(products) {
                     <span class="reference-cover-label">${visual.label}</span>
                 </div>
                 <div class="product-content">
-                    <h3 class="product-title">${product.name}</h3>
+                    <h3 class="product-title">${product.name} <button class="share-btn" onclick="event.stopPropagation();copyProductLink('${product.id}')" title="Copy share link" aria-label="Copy share link for ${product.name}" style="background:none;border:none;color:var(--d2q-muted);cursor:pointer;font-size:0.75em;margin-left:6px;transition:color 0.2s;vertical-align:middle;"><i class="fas fa-share-alt"></i></button></h3>
                     <div class="product-description">${displayDesc.replace(/<[^>]*>?/gm, '').substring(0, 170)}</div>
                     <div class="product-footer">
                         <div class="product-card-price-row">

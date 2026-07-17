@@ -704,6 +704,9 @@
                     <button id="buy-btn" class="btn btn-primary" style="padding: 16px 40px; font-size: 1.1rem;">
                         <i class="fas fa-shopping-cart"></i> Buy Now
                     </button>
+                    <button class="btn btn-secondary" onclick="copyProductLink(getProductIdFromUrl())" title="Copy share link" style="padding: 16px 24px; font-size: 1.1rem;">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
                     <a href="index.html#products" class="btn btn-secondary">
                         Browse More
                     </a>
@@ -803,6 +806,11 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <script>
+        window.getProductIdFromUrl = function () {
+            const params = new URLSearchParams(window.location.search);
+            let id = params.get('id');
+            return id ? id.replace(/^['"]|['"]$/g, '') : null;
+        };
         window.toggleProductDescription = function () {
             const description = document.getElementById('p-desc');
             const button = document.getElementById('descriptionToggle');
