@@ -1312,6 +1312,47 @@ body.d2q-reference .footer .logo-img {
     background: #ffffff;
 }
 
+.product-image.reference-cover {
+    position: relative;
+    height: 150px !important;
+    padding: 20px !important;
+    display: block;
+    color: #fff;
+    background: linear-gradient(135deg, var(--d2q-navy-deep), #0b4c84) !important;
+    overflow: hidden;
+}
+
+.reference-cover::before {
+    content: "";
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    right: -45px;
+    top: -55px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+}
+
+.reference-signal {
+    position: relative;
+    z-index: 1;
+    display: block;
+    color: #6ee7df;
+    font-family: Georgia, serif;
+    font-size: 38px;
+    line-height: 1.1;
+}
+
+.reference-cover-label {
+    position: relative;
+    z-index: 1;
+    display: block;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 8px;
+}
+
 .product-placeholder {
     width: 80px;
     height: 80px;

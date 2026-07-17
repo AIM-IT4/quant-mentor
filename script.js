@@ -1426,6 +1426,29 @@ async function displaySupabaseProducts(products) {
             if (section) section.style.display = 'block';
         }
 
+        function getProductCardVisual(productName) {
+            const name = (productName || '').toLowerCase();
+            const visuals = [
+                { match: 'numerical methods', signal: 'Σ', label: 'Numerical Methods', tag: 'New release' },
+                { match: 'cheatcode', signal: '75×', label: 'Speed Hacks', tag: 'Interview' },
+                { match: 'trade lifecycle', signal: 'T→R', label: 'Trade Lifecycle', tag: 'Banking' },
+                { match: 'model validation', signal: '✓', label: 'Validation', tag: 'Case studies' },
+                { match: 'exotic options', signal: '∂V', label: 'Exotics', tag: 'Pricing' },
+                { match: 'fixed income', signal: 'DV01', label: 'Fixed Income', tag: 'Rates' },
+                { match: 'problem book', signal: '1000+', label: 'Problems', tag: 'Problem book' },
+                { match: 'greek explainer', signal: 'Γ', label: 'Greek Lab', tag: 'Notebooks' },
+                { match: 'python', signal: 'Py', label: 'Python', tag: 'Code' },
+                { match: 'c++', signal: 'C++', label: 'C++', tag: 'Code' },
+                { match: 'stochastic', signal: 'dW', label: 'Stochastic', tag: 'Mathematics' },
+                { match: 'xva', signal: 'XVA', label: 'XVA', tag: 'Risk' }
+            ];
+            return visuals.find(item => name.includes(item.match)) || {
+                signal: (productName || 'Q').trim().charAt(0).toUpperCase(),
+                label: 'Quant Resource',
+                tag: 'Premium'
+            };
+        }
+
         for (const product of items) {
             const productCard = document.createElement('div');
             const isTargetLaunch = product.id === '6b78550d-e130-41d1-9409-92335ce82a6c';
@@ -1444,16 +1467,18 @@ async function displaySupabaseProducts(products) {
 
             const btnText = isFree ? 'Download' : 'Buy Now';
 
-            const badgeHtml = isTargetLaunch 
-                ? `<div class="product-badge" style="background:linear-gradient(135deg,#fbbf24,#d97706); color:#000; font-weight:800; font-size:0.75rem; letter-spacing:0.05em; border-radius:4px; box-shadow:0 4px 12px rgba(217, 119, 6, 0.4);"><i class="fas fa-fire" style="margin-right:4px;"></i> NEW RELEASE</div>`
-                : `<div class="product-badge">${isFree ? 'FREE' : 'PDF'}</div>`;
-
-            const imageSection = product.cover_image_url ?
-                `<div class="product-image" style="padding:0; height:240px; background:rgba(255,255,255,0.02); display:flex; align-items:center; justify-content:center; overflow:hidden;">
-                    <img src="${product.cover_image_url}" alt="${product.name || 'Product cover image'}" style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; transition:transform 0.5s ease;">
-                    ${badgeHtml}
-                 </div>` :
-                `<div class="product-image"><div class="product-placeholder pdf"><i class="fas fa-file-pdf"></i></div>${badgeHtml}</div>`;
+            const visual = getProductCardVisual(product.name);
+            const productHref = `${window.location.pathname.includes('-test') ? 'product-test.html' : 'product.html'}?id=${product.id}`;
+            productCard.setAttribute('role', 'link');
+            productCard.setAttribute('tabindex', '0');
+            productCard.setAttribute('aria-label', `Preview ${product.name}`);
+            productCard.addEventListener('click', () => { window.location.href = productHref; });
+            productCard.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    window.location.href = productHref;
+                }
+            });
 
             // Handle sanitized description
             const rawDesc = product.description || '';
@@ -1462,9 +1487,6 @@ async function displaySupabaseProducts(products) {
             // Store price info on the card for modal use
             productCard.dataset.localPrice = JSON.stringify(localPrice);
             productCard.dataset.inrPrice = product.price;
-
-            // Currency badge removed - price already shows currency symbol (currency code was redundant)
-            const currencyBadge = '';
 
             // Handle original price display (fix for INR showing when using other currencies)
             let originalPriceDisplay = '';
@@ -1494,27 +1516,19 @@ async function displaySupabaseProducts(products) {
             }
 
             productCard.innerHTML = `
-                ${imageSection}
+                <div class="product-image reference-cover">
+                    <span class="reference-signal">${visual.signal}</span>
+                    <span class="reference-cover-label">${visual.label}</span>
+                </div>
                 <div class="product-content">
-                    <h3 class="product-title">
-                        ${product.name}${currencyBadge}
-                        <button class="share-btn" onclick="copyProductLink('${product.id}')" title="Copy share link" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.8em; margin-left:10px; transition:color 0.3s ease;">
-                            <i class="fas fa-share-alt"></i>
-                        </button>
-                    </h3>
-                    <div class="product-description">${displayDesc.replace(/<[^>]*>?/gm, '').substring(0, 150) + '...'}</div>
-                    <div class="product-meta">
-                        <span><i class="fas fa-file-alt"></i> ${isFree ? 'Resource' : 'Premium Note'}</span>
-                        <span><i class="fas fa-download"></i> Instant Access</span>
-                    </div>
+                    <h3 class="product-title">${product.name} <button class="share-btn" onclick="event.stopPropagation();copyProductLink('${product.id}')" title="Copy share link" aria-label="Copy share link for ${product.name}" style="background:none;border:none;color:var(--d2q-muted);cursor:pointer;font-size:0.75em;margin-left:6px;transition:color 0.2s;vertical-align:middle;"><i class="fas fa-share-alt"></i></button></h3>
+                    <div class="product-description">${displayDesc.replace(/<[^>]*>?/gm, '').substring(0, 170)}</div>
                     <div class="product-footer">
-                        ${originalPriceDisplay}
-                        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
-                            <a class="btn btn-secondary" href="${window.location.pathname.includes('-test') ? 'product-test.html' : 'product.html'}?id=${product.id}" style="padding:10px 14px; font-size:0.9rem;">
-                                <i class="fas fa-eye"></i> Preview
-                            </a>
-                            <button class="btn btn-product" onclick="openProductModal('${product.id}')" data-price="${product.price}">${btnText}</button>
+                        <div class="product-card-price-row">
+                            <div class="product-price-action">${originalPriceDisplay}</div>
+                            <span class="product-reference-tag">${isFree ? 'Free resource' : visual.tag}</span>
                         </div>
+                        <button class="btn product-buy-button" type="button" onclick="event.stopPropagation();openProductModal('${product.id}')" aria-label="${btnText} ${product.name}">${btnText}</button>
                     </div>
                 </div>
             `;
