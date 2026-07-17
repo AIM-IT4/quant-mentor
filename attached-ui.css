@@ -1136,7 +1136,7 @@ body.d2q-reference .hero-container {
     align-items: center;
     gap: 56px;
 }
-body.d2q-reference .hero-content { display: flex; align-items: flex-start; text-align: left; max-width: none; }
+body.d2q-reference .hero-content { display: flex; align-items: flex-start; text-align: left; }
 body.d2q-reference .hero-badge { padding: 8px 12px; font-size: 13px; }
 body.d2q-reference .hero-headline {
     margin: 22px 0 20px;
@@ -1382,7 +1382,7 @@ body.d2q-reference .form-note { color: var(--d2q-muted); }
     body.d2q-reference .hero-container,
     .sessions-layout,
     body.d2q-reference .mentor-band-inner { grid-template-columns: 1fr; }
-    body.d2q-reference .hero-content { align-items: center; text-align: center; width: 100%; justify-items: center; }
+    body.d2q-reference .hero-content { align-items: center; text-align: center; width: 100%; }
     body.d2q-reference .hero-stats { justify-content: center; }
     body.d2q-reference .products-grid { grid-template-columns: repeat(2,1fr); }
     body.d2q-reference .testimonials-grid { grid-template-columns: 1fr; }
