@@ -1,3 +1,10 @@
 User-agent: *
 Allow: /
+Disallow: /admin.html
+Disallow: /admin*
+Disallow: /test-payment.html
+Disallow: /email-preview.html
+Disallow: /email-preview-all.html
+Disallow: /my-bookings.html
+
 Sitemap: https://quant-mentor.vercel.app/sitemap.xml
