@@ -1583,6 +1583,10 @@ body.d2q-reference .footer .logo-img {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     transition: all var(--transition-normal);
+    max-height: 380px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .testimonial-card:hover {
@@ -1612,6 +1616,9 @@ body.d2q-reference .footer .logo-img {
     line-height: 1.7;
     margin-bottom: 24px;
     font-style: italic;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
 }
 
 .testimonial-author {

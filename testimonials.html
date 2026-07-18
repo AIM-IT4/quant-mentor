@@ -80,6 +80,10 @@
             border-radius: 12px;
             padding: 30px;
             transition: all 0.3s ease;
+            max-height: 380px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         .testimonial-card:hover {
@@ -98,6 +102,9 @@
             line-height: 1.8;
             margin-bottom: 20px;
             font-size: 1.05em;
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
         }
 
         .testimonial-author {
