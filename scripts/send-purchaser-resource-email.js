@@ -7,7 +7,7 @@ const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_OhbTYIuMYgGgmKP
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'jha.8@alumni.iitj.ac.in';
 const SENDER_EMAIL = process.env.SENDER_EMAIL || 'jha.8@alumni.iitj.ac.in';
-const SENDER_NAME = process.env.SENDER_NAME || 'QuantMentor';
+const SENDER_NAME = process.env.SENDER_NAME || 'Desk2Quant';
 
 async function main() {
     if (!BREVO_API_KEY) {
@@ -54,7 +54,7 @@ async function main() {
             <p>If you're interested, you can check it out here:<br>
             <a href="https://quant-mentor.vercel.app/product.html?id=df618802-04a8-4fcf-837e-f12dc9db2276">https://quant-mentor.vercel.app/product.html?id=df618802-04a8-4fcf-837e-f12dc9db2276</a></p>
             <p>Best regards,<br>
-            QuantMentor</p>
+            Desk2Quant</p>
         </div>
     `;
 
@@ -78,7 +78,7 @@ async function main() {
                 },
                 body: JSON.stringify({
                     sender: { name: SENDER_NAME, email: SENDER_EMAIL },
-                    to: [{ email: ADMIN_EMAIL, name: 'QuantMentor Admin' }],
+                    to: [{ email: ADMIN_EMAIL, name: 'Desk2Quant Admin' }],
                     bcc: bccList,
                     subject: subject,
                     htmlContent: htmlContent

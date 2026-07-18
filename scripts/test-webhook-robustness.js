@@ -7,7 +7,7 @@ const mockEnv = {
     BREVO_API_KEY: 'mock-brevo-key',
     ADMIN_EMAIL: 'admin@test.com',
     SENDER_EMAIL: 'sender@test.com',
-    SENDER_NAME: 'QuantMentor'
+    SENDER_NAME: 'Desk2Quant'
 };
 
 // Mock fetch to track calls and parameters

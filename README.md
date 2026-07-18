@@ -1,4 +1,4 @@
-# QuantMentor - Expert Quant Mentorship Platform
+# Desk2Quant - Expert Quant Mentorship Platform
 
 A comprehensive platform for booking 1-on-1 mentorship sessions and purchasing digital resources (Notes, Guides) for aspiring quantitative finance professionals.
 
@@ -79,4 +79,4 @@ python -m http.server 8000
 The `admin.html` page implements a basic client-side passcode check. For production, ensure strictly secure authentication via Supabase Auth is enabled or `admin.html` is protected by edge functions.
 
 ---
-**QuantMentor** &copy; 2026. All rights reserved.
+**Desk2Quant** &copy; 2026. All rights reserved.

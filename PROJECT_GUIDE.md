@@ -1,10 +1,10 @@
-# QuantMentor Project Guide
+# Desk2Quant Project Guide
 
 This document gives a practical, end-to-end map of the codebase so new contributors can onboard quickly.
 
 ## 1) What this project is
 
-QuantMentor is a static-first website that combines:
+Desk2Quant is a static-first website that combines:
 - Mentorship session discovery + booking
 - Digital product purchases
 - AI mock interview feature

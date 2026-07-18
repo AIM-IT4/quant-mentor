@@ -255,7 +255,7 @@ async function sendEmailReport(toEmail, toName, reportMarkdown) {
     const htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; color: #333; line-height: 1.6;">
             <div style="background: #1e3a8a; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-                <h1 style="margin:0;">QuantMentor AI Interview Results</h1>
+                <h1 style="margin:0;">Desk2Quant AI Interview Results</h1>
             </div>
             <div style="padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
                 <p>Hi <strong>${toName}</strong>,</p>
@@ -283,7 +283,7 @@ async function sendEmailReport(toEmail, toName, reportMarkdown) {
     };
 
     const body = {
-        sender: { email: 'jha.8@alumni.iitj.ac.in', name: 'QuantMentor AI' },
+        sender: { email: 'jha.8@alumni.iitj.ac.in', name: 'Desk2Quant AI' },
         to: [{ email: toEmail, name: toName }],
         subject: 'Your AI Interview Scorecard 📊',
         htmlContent: htmlContent,
