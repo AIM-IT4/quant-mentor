@@ -42,21 +42,6 @@
         })();
     </script>
     <script>
-        // --- Theme Initial Check (Prevent Flashing) ---
-        (function () {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'light') {
-                const applyLightMode = () => {
-                    if (document.body) document.body.classList.add('light-mode');
-                };
-                applyLightMode();
-                if (!document.body) {
-                    document.addEventListener('DOMContentLoaded', applyLightMode, { once: true });
-                }
-            }
-        })();
-    </script>
-    <script>
         // Send email via secure backend API
         async function sendEmailWithBrevo(to, subject, htmlContent, textContent) {
             try {
@@ -81,48 +66,6 @@
     </script>
     <style>
         :root {
-            /* Backgrounds - Pure Black Foundation */
-            --bg-primary: #000000;
-            --bg-secondary: #050505;
-            --bg-tertiary: #0a0a0a;
-            --bg-card: #111111;
-            --bg-glass: rgba(255, 255, 255, 0.03);
-
-            /* Text Colors */
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-muted: rgba(255, 255, 255, 0.4);
-
-            /* Accents */
-            --accent-primary: #f43f5e;
-            --accent-secondary: #3b82f6;
-            --accent-gradient: linear-gradient(135deg, #f43f5e 0%, #3b82f6 100%);
-
-            /* Borders */
-            --border-subtle: rgba(255, 255, 255, 0.05);
-            --border-light: rgba(255, 255, 255, 0.1);
-            --border-rim: rgba(255, 255, 255, 0.15);
-
-            /* Radius */
-            --radius-md: 12px;
-            --radius-lg: 20px;
-            --radius-pill: 100px;
-
-            /* Shadows */
-            --shadow-glow: 0 0 40px rgba(244, 63, 94, 0.1);
-
-            /* Legacy variables for compatibility */
-            --primary: var(--accent-primary);
-            --secondary: var(--accent-secondary);
-            --surface: var(--bg-card);
-            --text: var(--text-primary);
-            --border: var(--border-subtle);
-
-            /* Sidebar */
-            --sidebar-width: 260px;
-        }
-
-        body.light-mode {
             /* Colors - Light Theme */
             --bg-primary: #f8fafc;
             --bg-secondary: #ffffff;
@@ -135,33 +78,33 @@
             --text-secondary: #475569;
             --text-muted: #64748b;
 
+            /* Accents */
+            --accent-primary: #f43f5e;
+            --accent-secondary: #3b82f6;
+            --accent-gradient: linear-gradient(135deg, #f43f5e 0%, #3b82f6 100%);
+
             /* Borders */
             --border-subtle: rgba(0, 0, 0, 0.08);
             --border-light: rgba(0, 0, 0, 0.12);
             --border-rim: rgba(0, 0, 0, 0.15);
 
+            /* Radius */
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-pill: 100px;
+
             /* Shadows */
             --shadow-glow: 0 0 20px rgba(0, 0, 0, 0.1);
 
             /* Legacy variables for compatibility */
+            --primary: var(--accent-primary);
+            --secondary: var(--accent-secondary);
             --surface: var(--bg-card);
             --text: var(--text-primary);
             --border: var(--border-subtle);
-        }
 
-        body.light-mode h1 {
-            color: var(--text-primary);
-            background: none;
-            -webkit-text-fill-color: initial;
-        }
-
-        body.light-mode button:not(.btn-secondary) {
-            background: var(--text-primary);
-            color: #ffffff;
-        }
-
-        body.light-mode button:not(.btn-secondary):hover {
-            background: #000000;
+            /* Sidebar */
+            --sidebar-width: 260px;
         }
 
         body {
@@ -329,27 +272,6 @@
             margin-bottom: 30px;
         }
 
-        .theme-toggle {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-light);
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 0;
-            font-size: 1.1rem;
-        }
-
-        .theme-toggle:hover {
-            background: var(--bg-card);
-            transform: rotate(15deg);
-        }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -441,24 +363,12 @@
         }
 
         button.btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary);
-            /* Fixed text color */
-            border: 1px solid var(--border-light);
-        }
-
-        body.light-mode button.btn-secondary {
             background: transparent;
             color: var(--text-primary);
             border: 1px solid var(--border-light);
         }
 
         button.btn-secondary:hover:not(:disabled) {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        body.light-mode button.btn-secondary:hover:not(:disabled) {
             background: rgba(0, 0, 0, 0.05);
             border-color: var(--border-rim);
         }
@@ -759,47 +669,28 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(10, 10, 15, 0.95);
+            background: rgba(248, 250, 252, 0.95);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
 
-        /* Overlay blur fallback for light mode login */
-        body.light-mode #loginOverlay {
-            background: rgba(255, 255, 255, 0.95);
-        }
-
         /* Forced Login Styles to prevent visibility issues */
         #loginBtn {
-            background: #ffffff;
-            color: #000000;
+            background: #0f172a;
+            color: #ffffff;
             border: 1px solid transparent;
             margin-top: 10px;
         }
 
-        body.light-mode #loginBtn {
-            background: #0f172a;
-            /* Dark background */
-            color: #ffffff;
-            /* White text */
-            border: 1px solid transparent;
-        }
-
         #adminPassword {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-subtle);
-        }
-
-        body.light-mode #adminPassword {
             background: #ffffff;
             color: #0f172a;
             border: 1px solid #e2e8f0;
         }
 
-        body.light-mode #adminPassword::placeholder {
+        #adminPassword::placeholder {
             color: #64748b;
         }
 
@@ -849,22 +740,12 @@
 </head>
 
 <body>
-    <script>
-        // --- Theme Initial Check (Prevent Flashing) ---
-        (function () {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'light') {
-                document.body.classList.add('light-mode');
-            }
-        })();
-    </script>
-
 
     <!-- Login Overlay -->
-    <div id="loginOverlay" style="background: rgba(10, 10, 15, 0.98) !important;">
+    <div id="loginOverlay" style="background: rgba(248, 250, 252, 0.98) !important;">
         <div class="card"
-            style="width: 300px; text-align: center; background: #111111 !important; border: 1px solid #333 !important; color: white !important;">
-            <h2 style="color: white !important; margin-bottom: 20px;">Admin Access</h2>
+            style="width: 300px; text-align: center; background: #ffffff !important; border: 1px solid rgba(0,0,0,0.12) !important; color: #0f172a !important;">
+            <h2 style="color: #0f172a !important; margin-bottom: 20px;">Admin Access</h2>
             <div class="form-group">
                 <input type="password" id="adminPassword" placeholder="Enter Password"
                     style="background: #222 !important; color: white !important; border: 1px solid #444 !important; outline: none; padding: 12px; border-radius: 8px; width: 100%;">
@@ -906,11 +787,6 @@
             </nav>
 
             <div class="sidebar-footer">
-                <div class="sidebar-utils">
-                    <div class="theme-toggle" id="themeToggleSidebar" title="Switch Theme">
-                        <i class="fas fa-moon"></i>
-                    </div>
-                </div>
                 <button onclick="logout()" class="btn-secondary"
                     style="width: 100%; justify-content: flex-start; gap: 10px; padding: 10px; margin-top: 10px;">
                     <i class="fas fa-sign-out-alt"></i> Logout
@@ -1933,30 +1809,6 @@ Brief Q&A"></textarea>
                 // Initialize when DOM is loaded
                 document.addEventListener('DOMContentLoaded', async function () {
                     console.log('Admin page DOM loaded');
-
-                    // Theme Toggle Logic
-                    const themeToggle = document.getElementById('themeToggleSidebar');
-                    const body = document.body;
-                    const icon = themeToggle.querySelector('i');
-
-                    // Check for saved theme
-                    const savedTheme = localStorage.getItem('theme') || 'dark';
-                    if (savedTheme === 'light') {
-                        body.classList.add('light-mode');
-                        icon.classList.replace('fa-moon', 'fa-sun');
-                    }
-
-                    themeToggle.addEventListener('click', () => {
-                        body.classList.toggle('light-mode');
-                        const isLight = body.classList.contains('light-mode');
-                        localStorage.setItem('theme', isLight ? 'light' : 'dark');
-
-                        if (isLight) {
-                            icon.classList.replace('fa-moon', 'fa-sun');
-                        } else {
-                            icon.classList.replace('fa-sun', 'fa-moon');
-                        }
-                    });
 
                     // Initialize Quill
                     try {

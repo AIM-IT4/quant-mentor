@@ -34,9 +34,6 @@
                 <li><a href="index.html#contact" class="nav-cta">Book Now</a></li>
             </ul>
             <div class="nav-actions">
-                <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
-                    <i class="fas fa-moon"></i><i class="fas fa-sun"></i>
-                </button>
                 <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
             </div>
         </div>
@@ -277,16 +274,11 @@
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Theme
-        (function(){const t=localStorage.getItem('theme');if(t==='light')document.body.classList.add('light-mode');})();
         // Supabase init
         if(typeof window.supabase!=='undefined'){
             window.supabaseClient=window.supabase.createClient('https://dntabmyurlrlnoajdnja.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDEyNjUsImV4cCI6MjA4NTY3NzI2NX0.PYpNd_t_px09zi2d5WGjFVOB23sjb3ZPuAnxagYshe0');
         }
-        // Theme toggle
         document.addEventListener('DOMContentLoaded',()=>{
-            const t=document.getElementById('themeToggle');
-            if(t)t.addEventListener('click',()=>{document.body.classList.toggle('light-mode');localStorage.setItem('theme',document.body.classList.contains('light-mode')?'light':'dark');});
             const m=document.getElementById('mobileMenuBtn'),n=document.querySelector('.nav-links');
             if(m)m.addEventListener('click',()=>{n.classList.toggle('mobile-active');const i=m.querySelector('i');i.classList.toggle('fa-bars');i.classList.toggle('fa-times');});
         });

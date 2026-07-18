@@ -39,14 +39,6 @@ async function sendAdminNotification(subject, htmlContent, textContent) {
     return sendEmailWithBrevo(ADMIN_EMAIL, subject, htmlContent, textContent);
 }
 
-// --- Theme Initial Check (Prevent Flashing) ---
-(function () {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-        document.body.classList.add('light-mode');
-    }
-})();
-
 function stripMarkdown(text) {
     if (!text) return '';
     return text
@@ -113,25 +105,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (scrollTopBtn) {
         scrollTopBtn.addEventListener('click', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
-
-    // --------------------------------
-    // Theme Toggle Logic
-    // --------------------------------
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-        themeToggle.addEventListener('click', function () {
-            document.body.classList.toggle('light-mode');
-
-            // Save preference
-            if (document.body.classList.contains('light-mode')) {
-                localStorage.setItem('theme', 'light');
-            } else {
-                localStorage.setItem('theme', 'dark');
-            }
-
-            console.log('🌓 Theme toggled:', document.body.classList.contains('light-mode') ? 'Light' : 'Dark');
         });
     }
 
@@ -597,9 +570,8 @@ document.addEventListener('DOMContentLoaded', function () {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Detect current theme for particle colors
-            const isLight = document.body.classList.contains('light-mode');
-            const particleColor = isLight ? '15, 23, 42' : '255, 255, 255';     // dark slate or white
-            const lineColor = isLight ? '99, 102, 241' : '244, 63, 94';         // indigo or rose
+            const particleColor = '15, 23, 42';
+            const lineColor = '99, 102, 241';
 
             // Draw connections
             for (let i = 0; i < particles.length; i++) {

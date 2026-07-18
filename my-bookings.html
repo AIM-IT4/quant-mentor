@@ -12,22 +12,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // --- Theme Initial Check (Prevent Flashing) ---
-        (function () {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'light') {
-                const applyLightMode = () => {
-                    if (document.body) document.body.classList.add('light-mode');
-                };
-                applyLightMode();
-                if (!document.body) {
-                    document.addEventListener('DOMContentLoaded', applyLightMode, { once: true });
-                }
-            }
-        })();
-    </script>
-
-    <script>
         // Load config.js if it exists, otherwise gracefully fallback
         (function () {
             const script = document.createElement('script');
@@ -43,17 +27,17 @@
     </script>
     <style>
         :root {
-            /* Backgrounds - Pure Black Foundation */
-            --bg-primary: #000000;
-            --bg-secondary: #050505;
-            --bg-tertiary: #0a0a0a;
-            --bg-card: #111111;
-            --bg-glass: rgba(255, 255, 255, 0.03);
+            /* Colors - Light Theme */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --bg-glass: rgba(0, 0, 0, 0.05);
 
             /* Text Colors */
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-muted: rgba(255, 255, 255, 0.4);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
 
             /* Accents */
             --accent-primary: #f43f5e;
@@ -66,9 +50,9 @@
             --error: #ef4444;
 
             /* Borders */
-            --border-subtle: rgba(255, 255, 255, 0.05);
-            --border-light: rgba(255, 255, 255, 0.1);
-            --border-rim: rgba(255, 255, 255, 0.15);
+            --border-subtle: rgba(0, 0, 0, 0.08);
+            --border-light: rgba(0, 0, 0, 0.12);
+            --border-rim: rgba(0, 0, 0, 0.15);
 
             /* Radius */
             --radius-md: 12px;
@@ -82,25 +66,6 @@
             --background: var(--bg-primary);
             --text: var(--text-primary);
             --border: var(--border-subtle);
-        }
-
-        body.light-mode {
-            /* Colors - Light Theme */
-            --bg-primary: #f8fafc;
-            --bg-secondary: #ffffff;
-            --bg-tertiary: #f1f5f9;
-            --bg-card: rgba(255, 255, 255, 0.9);
-            --bg-glass: rgba(0, 0, 0, 0.05);
-
-            /* Text Colors */
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #64748b;
-
-            /* Borders */
-            --border-subtle: rgba(0, 0, 0, 0.08);
-            --border-light: rgba(0, 0, 0, 0.12);
-            --border-rim: rgba(0, 0, 0, 0.15);
         }
 
 
