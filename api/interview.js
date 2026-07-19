@@ -267,7 +267,7 @@ async function sendEmailReport(toEmail, toName, reportMarkdown) {
                 </div>
 
                 <div style="margin-top: 30px; text-align: center; font-size: 0.9em; color: #64748b;">
-                    <p>Keep practicing! <a href="https://quant-mentor.vercel.app" style="color: #2563eb;">Book a 1:1 session</a> for personalized feedback.</p>
+                    <p>Keep practicing! <a href="https://desk2quant.vercel.app" style="color: #2563eb;">Book a 1:1 session</a> for personalized feedback.</p>
                 </div>
             </div>
         </div>

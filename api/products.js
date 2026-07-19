@@ -42,8 +42,8 @@ export default async function handler(req, res) {
             coverImage: p.cover_image_url || null,
             downloadUrl: Number(p.price) === 0 ? p.file_url : null,
             purchaseUrl: p.price > 0
-                ? `https://quant-mentor.vercel.app/?id=${p.id}`
-                : 'https://quant-mentor.vercel.app/#resources',
+                ? `https://desk2quant.vercel.app/?id=${p.id}`
+                : 'https://desk2quant.vercel.app/#resources',
             createdAt: p.created_at
         }));
 

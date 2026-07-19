@@ -156,7 +156,7 @@ export default async function handler(req, res) {
                                 </p>
                             </div>
                             <div style="background-color: #1a1a1a; padding: 20px; text-align: center; color: #888; font-size: 12px;">
-                                <p style="margin: 0;">Sent by Desk2Quant • <a href="https://desk2quant.vercel.app" style="color:#6366f1; text-decoration:none;">quant-mentor.vercel.app</a></p>
+                                <p style="margin: 0;">Sent by Desk2Quant • <a href="https://desk2quant.vercel.app" style="color:#6366f1; text-decoration:none;">desk2quant.vercel.app</a></p>
                             </div>
                         </div>
                     </div>`;
