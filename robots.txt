@@ -7,4 +7,4 @@ Disallow: /email-preview.html
 Disallow: /email-preview-all.html
 Disallow: /my-bookings.html
 
-Sitemap: https://quant-mentor.vercel.app/sitemap.xml
+Sitemap: https://desk2quant.vercel.app/sitemap.xml
