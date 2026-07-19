@@ -340,6 +340,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 isValid = true;
                 appliedDiscount = 15;
                 window.activeModalCoupon.percent = 15; // Ensure checkout button uses 15%
+            } else if (inputCodeUpper && inputCodeUpper === 'VASUDHA30') {
+                isValid = true;
+                appliedDiscount = 30;
+                window.activeModalCoupon.percent = 30; // Ensure checkout button uses 30%
             } else if (inputCodeUpper && (inputCodeUpper === expected20Code || inputCodeUpper === hardcoded20)) {
                 isValid = true;
                 appliedDiscount = 20;
