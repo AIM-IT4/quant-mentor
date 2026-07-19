@@ -484,146 +484,15 @@ async function handleProductPurchase(data) {
         }
     }
 
-    // 📧 Send recommendation email 1 hour after purchase via Brevo scheduledAt
+    // 📧 Send personalised recommendation email after purchase
     // Skip if the customer bought the Complete Bundle (nothing more to upsell)
     const isBundle = productName.toLowerCase().includes('complete') && productName.toLowerCase().includes('bundle');
     if (!isBundle && BREVO_API_KEY && customerEmail) {
-        try {
-            // Fetch all paid products for recommendations
-            const productsResponse = await fetch(
-                `${SUPABASE_URL}/rest/v1/products?select=id,name,description,price,cover_image_url&price=gt.0&order=price.desc`,
-                {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
-                }
-            );
-
-            let allProducts = [];
-            if (productsResponse.ok) {
-                allProducts = await productsResponse.json();
-            }
-
-            // Fetch customer's purchase history to exclude already-bought products
-            const purchasesResponse = await fetch(
-                `${SUPABASE_URL}/rest/v1/purchases?customer_email=eq.${encodeURIComponent(customerEmail)}&select=product_name`,
-                {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
-                }
-            );
-
-            let purchasedNames = [productName.toLowerCase().trim()];
-            if (purchasesResponse.ok) {
-                const purchases = await purchasesResponse.json();
-                purchasedNames = purchases.map(p => (p.product_name || '').toLowerCase().trim());
-            }
-
-            // Filter out already-purchased products
-            const available = allProducts.filter(p =>
-                !purchasedNames.includes((p.name || '').toLowerCase().trim())
-            );
-
-            if (available.length > 0) {
-                // Pick up to 3 recommendations — prioritize bundles, then by price desc
-                const bundles = available.filter(p => (p.name || '').toLowerCase().includes('bundle') || (p.name || '').toLowerCase().includes('pack'));
-                const nonBundles = available.filter(p => !(p.name || '').toLowerCase().includes('bundle') && !(p.name || '').toLowerCase().includes('pack'));
-
-                const recommendations = [];
-                if (bundles.length > 0) recommendations.push(bundles[0]);
-                for (const p of nonBundles) {
-                    if (recommendations.length >= 3) break;
-                    recommendations.push(p);
-                }
-                for (let i = 1; i < bundles.length && recommendations.length < 3; i++) {
-                    recommendations.push(bundles[i]);
-                }
-
-                // Build product cards HTML
-                const productCards = recommendations.map(p => {
-                    const desc = (p.description || '').replace(/<[^>]*>/g, '').substring(0, 120);
-                    const coverImg = p.cover_image_url
-                        ? `<img src="${p.cover_image_url}" alt="${p.name}" style="width:100%; height:140px; object-fit:contain; border-radius:4px; margin-bottom:12px; background:#f9f8f4;">`
-                        : '';
-                    return `
-                        <div style="background:#ffffff; border:1px solid #e5e5e5; border-radius:8px; padding:20px; margin-bottom:16px;">
-                            ${coverImg}
-                            <h3 style="margin:0 0 8px 0; font-size:16px; color:#1a1a1a;">${p.name}</h3>
-                            <p style="margin:0 0 12px 0; font-size:13px; color:#666; line-height:1.5;">${desc}...</p>
-                            <div style="display:flex; align-items:center; justify-content:space-between;">
-                                <span style="font-size:18px; font-weight:bold; color:#1a1a1a;">₹${p.price}</span>
-                                <a href="https://quant-mentor.vercel.app/?id=${p.id}" style="display:inline-block; background:#6366f1; color:#ffffff; font-weight:600; text-decoration:none; padding:8px 20px; border-radius:6px; font-size:14px;">View Product</a>
-                            </div>
-                        </div>`;
-                }).join('');
-
-                const recHtml = `
-                    <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
-                        <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                            <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
-                                <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Desk2Quant</span>
-                            </div>
-                            <div style="padding: 30px;">
-                                <p style="font-size: 16px; margin-bottom: 8px;">Hi <strong>${customerName}</strong>,</p>
-                                <p style="font-size: 15px; color: #444; margin-bottom: 25px; line-height: 1.6;">
-                                    Thank you for purchasing <strong>${productName}</strong>!
-                                    Based on your interest, here are a few more resources that complement your purchase perfectly:
-                                </p>
-                                ${productCards}
-                                <div style="text-align:center; margin-top:25px;">
-                                    <a href="https://quant-mentor.vercel.app/#products" style="display:inline-block; background:#e95836; color:#ffffff; font-weight:bold; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:16px;">Browse All Products</a>
-                                </div>
-                                <p style="font-size: 13px; color: #999; margin-top: 30px; text-align: center; line-height: 1.5;">
-                                    You're receiving this because you recently purchased from Desk2Quant.<br>
-                                    If you have any questions, simply reply to this email.
-                                </p>
-                            </div>
-                            <div style="background-color: #1a1a1a; padding: 20px; text-align: center; color: #888; font-size: 12px;">
-                                <p style="margin: 0;">Sent by Desk2Quant</p>
-                            </div>
-                        </div>
-                    </div>`;
-
-                const recText = recommendations.map(p =>
-                    `• ${p.name} — ₹${p.price}\n  View: https://quant-mentor.vercel.app/?id=${p.id}`
-                ).join('\n\n');
-
-                // Schedule via Brevo with 1 hour delay
-                const scheduledAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-
-                const recEmailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
-                    method: 'POST',
-                    headers: {
-                        'accept': 'application/json',
-                        'api-key': BREVO_API_KEY,
-                        'content-type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        sender: { name: SENDER_NAME, email: SENDER_EMAIL },
-                        to: [{ email: customerEmail, name: customerName }],
-                        subject: `${customerName}, you might also like these quant resources`,
-                        htmlContent: recHtml,
-                        textContent: `Hi ${customerName},\n\nThank you for purchasing "${productName}"!\n\nYou might also like:\n\n${recText}\n\nBrowse all: https://quant-mentor.vercel.app/#products`,
-                        scheduledAt: scheduledAt
-                    })
-                });
-
-                if (recEmailResponse.ok) {
-                    console.log(`📧 Recommendation email scheduled via Brevo for ${customerEmail} at ${scheduledAt}`);
-                } else {
-                    const errData = await recEmailResponse.text();
-                    console.error(`❌ Failed to schedule recommendation email:`, errData);
-                }
-            } else {
-                console.log('⏭️ No products to recommend — customer may own everything');
-            }
-        } catch (err) {
-            console.error('Error sending recommendation email:', err);
-            // Non-critical — don't fail the webhook
-        }
+        sendPostPurchaseRecommendations({
+            customerEmail, customerName, purchasedProductName: productName,
+            trigger: 'product_purchase',
+            SUPABASE_URL, SUPABASE_KEY, BREVO_API_KEY, SENDER_EMAIL, SENDER_NAME
+        }).catch(err => console.error('Post-purchase recs failed:', err));
     } else if (isBundle) {
         console.log('⏭️ Skipping recommendation for bundle purchase');
     }
@@ -880,5 +749,159 @@ async function handleSessionBooking(data) {
         } catch (err) {
             console.error('Error sending admin booking notification:', err);
         }
+    }
+
+    // 📧 Send personalised recommendation email after session booking
+    if (BREVO_API_KEY && customerEmail) {
+        sendPostPurchaseRecommendations({
+            customerEmail, customerName, purchasedProductName: sessionName,
+            trigger: 'session_booking',
+            SUPABASE_URL, SUPABASE_KEY, BREVO_API_KEY, SENDER_EMAIL, SENDER_NAME
+        }).catch(err => console.error('Post-session recs failed:', err));
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// sendPostPurchaseRecommendations
+// Generates a personalised FIRSTNAME20 coupon (20% off) and emails 3-4
+// relevant products the customer hasn't purchased yet.
+// ─────────────────────────────────────────────────────────────────────────────
+async function sendPostPurchaseRecommendations({
+    customerEmail, customerName, purchasedProductName, trigger,
+    SUPABASE_URL, SUPABASE_KEY, BREVO_API_KEY, SENDER_EMAIL, SENDER_NAME
+}) {
+    // Build personalised coupon: first name (letters only) uppercased + '20'
+    const firstName = (customerName || 'Customer').split(' ')[0].replace(/[^a-zA-Z]/g, '').toUpperCase();
+    const couponCode = `${firstName}20`;
+    const discountPct = 20;
+
+    console.log(`📧 Sending post-${trigger} recommendations to ${customerEmail} with coupon ${couponCode}`);
+
+    // Fetch all paid products
+    let allProducts = [];
+    try {
+        const productsResp = await fetch(
+            `${SUPABASE_URL}/rest/v1/products?select=id,name,description,price,cover_image_url&price=gt.0&order=price.desc`,
+            { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+        );
+        if (productsResp.ok) allProducts = await productsResp.json();
+    } catch (err) { console.error('Failed to fetch products for recs:', err); }
+
+    // Exclude complete bundle and the product just purchased
+    const normPurchased = (purchasedProductName || '').toLowerCase().trim();
+    const recommendable = allProducts.filter(p => {
+        const n = (p.name || '').toLowerCase();
+        const isCompleteBundle = n.includes('complete') && n.includes('bundle');
+        const isJustBought = n === normPurchased;
+        return !isCompleteBundle && !isJustBought;
+    });
+
+    if (recommendable.length === 0) {
+        console.log('⏭️ No products to recommend');
+        return;
+    }
+
+    // Pick up to 4: prioritise complete bundles/packs, then price desc
+    const packs = recommendable.filter(p => (p.name || '').toLowerCase().includes('pack') || (p.name || '').toLowerCase().includes('bundle'));
+    const singles = recommendable.filter(p => !packs.includes(p));
+    const picks = [...packs, ...singles].slice(0, 4);
+
+    // Build premium product cards
+    const productCards = picks.map(p => {
+        const desc = (p.description || '').replace(/<[^>]*>/g, '').substring(0, 110);
+        const originalPrice = p.price;
+        const discountedPrice = Math.round(originalPrice * (1 - discountPct / 100));
+        const coverImg = p.cover_image_url
+            ? `<img src="${p.cover_image_url}" alt="${p.name}" style="width:100%; height:140px; object-fit:contain; border-radius:4px; margin-bottom:12px; background:#f8fafc;">`
+            : '';
+        return `
+            <div style="background:#ffffff; border-radius:12px; overflow:hidden; margin-bottom:20px; box-shadow:0 2px 10px rgba(0,0,0,0.06); border:1px solid #eef2f6;">
+                <div style="background:#f8fafc; padding:12px; text-align:center;">${coverImg}</div>
+                <div style="padding:18px;">
+                    <h3 style="margin:0 0 6px 0; font-size:15px; color:#0f172a; font-weight:700; line-height:1.4;">${p.name}</h3>
+                    <p style="margin:0 0 12px 0; font-size:12px; color:#64748b; line-height:1.5;">${desc}...</p>
+                    <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:14px;">
+                        <span style="font-size:13px; color:#94a3b8; text-decoration:line-through;">₹${originalPrice}</span>
+                        <span style="font-size:20px; font-weight:800; color:#4f46e5;">₹${discountedPrice}</span>
+                        <span style="font-size:11px; color:#10b981; font-weight:700; margin-left:auto;">Save ${discountPct}%</span>
+                    </div>
+                    <a href="https://desk2quant.vercel.app/product.html?id=${p.id}" style="display:block; text-align:center; background:#4f46e5; color:#ffffff; font-weight:700; text-decoration:none; padding:10px 16px; border-radius:8px; font-size:13px;">View &amp; Buy →</a>
+                </div>
+            </div>`;
+    }).join('');
+
+    const triggerText = trigger === 'session_booking'
+        ? 'completing a mentorship session with us'
+        : `purchasing <strong>${purchasedProductName}</strong>`;
+
+    const htmlContent = `
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:#f1f5f9; padding:0; margin:0;">
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f1f5f9; padding:32px 10px;">
+  <tr><td align="center">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:580px; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 8px 24px -4px rgba(0,0,0,0.1);">
+      <!-- Header -->
+      <tr><td style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%); padding:32px; text-align:center;">
+        <h1 style="color:#ffffff; font-size:26px; font-weight:800; margin:0 0 4px 0;">Desk2Quant</h1>
+        <p style="color:#94a3b8; font-size:13px; text-transform:uppercase; letter-spacing:1.5px; margin:0;">Exclusively For You</p>
+      </td></tr>
+      <!-- Intro -->
+      <tr><td style="padding:32px 28px 16px 28px;">
+        <p style="font-size:16px; color:#334155; margin:0 0 10px 0;">Hi <strong>${customerName}</strong>,</p>
+        <p style="font-size:14px; color:#475569; line-height:1.7; margin:0 0 14px 0;">
+          Thank you for ${triggerText}! To help you go even further, here are resources handpicked to complement your journey — with an exclusive discount just for you.
+        </p>
+      </td></tr>
+      <!-- Coupon box -->
+      <tr><td style="padding:0 28px 24px 28px;">
+        <div style="background:linear-gradient(135deg,#e0f2fe,#bae6fd); border:2px dashed #0284c7; border-radius:12px; padding:18px; text-align:center;">
+          <span style="font-size:12px; color:#0369a1; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Your Exclusive ${discountPct}% Coupon — Better Than The Default!</span>
+          <div style="font-size:26px; font-weight:900; color:#0369a1; letter-spacing:4px; margin:8px 0;">${couponCode}</div>
+          <span style="font-size:11px; color:#0284c7;">Apply at checkout on any product below</span>
+        </div>
+      </td></tr>
+      <!-- Products -->
+      <tr><td style="padding:0 28px 16px 28px; background:#f8fafc;">
+        <h2 style="font-size:16px; color:#0f172a; font-weight:700; margin:20px 0 14px 0;">Recommended For You:</h2>
+        ${productCards}
+      </td></tr>
+      <!-- CTA -->
+      <tr><td style="padding:20px 28px; text-align:center;">
+        <a href="https://desk2quant.vercel.app/#products" style="display:inline-block; background:#e95836; color:#ffffff; font-weight:700; text-decoration:none; padding:14px 28px; border-radius:8px; font-size:15px;">Browse All Resources</a>
+      </td></tr>
+      <!-- Footer -->
+      <tr><td style="background:#0f172a; padding:20px; text-align:center; color:#94a3b8; font-size:11px;">
+        <p style="margin:0 0 4px 0;">Desk2Quant &copy; 2026. All rights reserved.</p>
+        <p style="margin:0;"><a href="https://desk2quant.vercel.app" style="color:#38bdf8; text-decoration:none;">desk2quant.vercel.app</a></p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`;
+
+    const recNames = picks.map(p => `• ${p.name} — ₹${Math.round(p.price * 0.8)} (${discountPct}% off with ${couponCode})`).join('\n');
+    const textContent = `Hi ${customerName},\n\nThank you for ${trigger === 'session_booking' ? 'booking your mentorship session' : `purchasing "${purchasedProductName}"`}!\n\nHere are some resources handpicked for you — use code ${couponCode} for ${discountPct}% OFF at checkout:\n\n${recNames}\n\nBrowse all: https://desk2quant.vercel.app/#products\n\nSent by Desk2Quant`;
+
+    // Schedule 1 hour after purchase so confirmation email lands first
+    const scheduledAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+
+    const resp = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: { 'accept': 'application/json', 'api-key': BREVO_API_KEY, 'content-type': 'application/json' },
+        body: JSON.stringify({
+            sender: { name: SENDER_NAME, email: SENDER_EMAIL },
+            to: [{ email: customerEmail, name: customerName }],
+            subject: `${customerName}, here's an exclusive 20% off on our top quant resources 🎯`,
+            htmlContent,
+            textContent,
+            scheduledAt
+        })
+    });
+
+    if (resp.ok) {
+        console.log(`✅ Recommendation email scheduled at ${scheduledAt} for ${customerEmail} [coupon: ${couponCode}]`);
+    } else {
+        const errData = await resp.text();
+        console.error('❌ Failed to schedule recommendation email:', errData);
     }
 }

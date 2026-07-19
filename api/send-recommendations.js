@@ -62,7 +62,7 @@ export default async function handler(req, res) {
                 uniqueCustomers = [[testEmail.toLowerCase().trim(), new Set()]];
             }
         }
-        
+
         results.totalCustomers = uniqueCustomers.length;
         console.log(`📧 Found ${uniqueCustomers.length} unique customers with purchases`);
 
@@ -129,7 +129,7 @@ export default async function handler(req, res) {
                             <p style="margin:0 0 12px 0; font-size:13px; color:#666; line-height:1.5;">${desc}...</p>
                             <div style="display:flex; align-items:center; justify-content:space-between;">
                                 <span style="font-size:18px; font-weight:bold; color:#1a1a1a;">₹${p.price}</span>
-                                <a href="https://quant-mentor.vercel.app/product.html?id=${p.id}" style="display:inline-block; background:#6366f1; color:#ffffff; font-weight:600; text-decoration:none; padding:8px 20px; border-radius:6px; font-size:14px;">View Product</a>
+                                <a href="https://desk2quant.vercel.app/product.html?id=${p.id}" style="display:inline-block; background:#6366f1; color:#ffffff; font-weight:600; text-decoration:none; padding:8px 20px; border-radius:6px; font-size:14px;">View Product</a>
                             </div>
                         </div>`;
                 }).join('');
@@ -148,7 +148,7 @@ export default async function handler(req, res) {
                                 </p>
                                 ${productCards}
                                 <div style="text-align:center; margin-top:25px;">
-                                    <a href="https://quant-mentor.vercel.app/#products" style="display:inline-block; background:#e95836; color:#ffffff; font-weight:bold; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:16px;">Browse All Products</a>
+                                    <a href="https://desk2quant.vercel.app/#products" style="display:inline-block; background:#e95836; color:#ffffff; font-weight:bold; text-decoration:none; padding:14px 30px; border-radius:6px; font-size:16px;">Browse All Products</a>
                                 </div>
                                 <p style="font-size: 13px; color: #999; margin-top: 30px; text-align: center; line-height: 1.5;">
                                     You're receiving this because you previously purchased from Desk2Quant.<br>
@@ -156,13 +156,13 @@ export default async function handler(req, res) {
                                 </p>
                             </div>
                             <div style="background-color: #1a1a1a; padding: 20px; text-align: center; color: #888; font-size: 12px;">
-                                <p style="margin: 0;">Sent by Desk2Quant • <a href="https://quant-mentor.vercel.app" style="color:#6366f1; text-decoration:none;">quant-mentor.vercel.app</a></p>
+                                <p style="margin: 0;">Sent by Desk2Quant • <a href="https://desk2quant.vercel.app" style="color:#6366f1; text-decoration:none;">quant-mentor.vercel.app</a></p>
                             </div>
                         </div>
                     </div>`;
 
                 const recNames = recommendations.map(p => `• ${p.name} — ₹${p.price}`).join('\n');
-                const emailText = `Hi ${customerName},\n\nYou recently purchased "${recentProductName}" from Desk2Quant.\n\nHere are 2 more resources you might like:\n\n${recNames}\n\nBrowse all: https://quant-mentor.vercel.app/#products\n\nSent by Desk2Quant`;
+                const emailText = `Hi ${customerName},\n\nYou recently purchased "${recentProductName}" from Desk2Quant.\n\nHere are 2 more resources you might like:\n\n${recNames}\n\nBrowse all: https://desk2quant.vercel.app/#products\n\nSent by Desk2Quant`;
 
                 // Send via Brevo
                 const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {

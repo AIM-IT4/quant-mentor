@@ -982,6 +982,10 @@
                         } else if (inputCodeUpper && inputCodeUpper === 'VASUDHA30') {
                             isValid = true;
                             appliedDiscount = 30;
+                        } else if (inputCodeUpper && /^[A-Z]+20$/.test(inputCodeUpper)) {
+                            // Personalised post-purchase coupon: FIRSTNAME20 = 20% off
+                            isValid = true;
+                            appliedDiscount = 20;
                         } else if (inputCodeUpper && (inputCodeUpper === expected20Code || inputCodeUpper === hardcoded20)) {
                             isValid = true;
                             appliedDiscount = 20;
