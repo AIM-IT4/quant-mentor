@@ -690,7 +690,8 @@
                 </div>
                 <h1 id="p-title">Product Title</h1>
                 <div class="product-price-tag" id="p-price">₹0</div>
-                <div id="p-ppp-info" style="display:none; margin-top:10px; font-size:0.9em; color:var(--text-muted); background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.05); max-width:fit-content;">
+                <div id="p-ppp-info"
+                    style="display:none; margin-top:10px; font-size:0.9em; color:var(--text-muted); background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.05); max-width:fit-content;">
                     <i class="fas fa-globe" style="color:#6366f1; margin-right:5px;"></i> <span id="p-ppp-text"></span>
                 </div>
                 <div class="product-description-full" id="p-desc">
@@ -736,24 +737,24 @@
             </article>
 
             <aside class="preview-panel">
-            
 
+
+        </div>
+        <div class="preview-fit-stack">
+            <div class="preview-list-block">
+                <h3>Target audience</h3>
+                <ul class="preview-check-list" id="preview-audience-list"></ul>
             </div>
-                <div class="preview-fit-stack">
-                    <div class="preview-list-block">
-                        <h3>Target audience</h3>
-                        <ul class="preview-check-list" id="preview-audience-list"></ul>
-                    </div>
-                    <div class="preview-list-block">
-                        <h3>Prerequisites</h3>
-                        <ul class="preview-check-list" id="preview-prerequisites-list"></ul>
-                    </div>
-                    <div class="preview-list-block">
-                        <h3>Expected outcomes</h3>
-                        <ul class="preview-check-list" id="preview-outcomes-list"></ul>
-                    </div>
-                </div>
-            </aside>
+            <div class="preview-list-block">
+                <h3>Prerequisites</h3>
+                <ul class="preview-check-list" id="preview-prerequisites-list"></ul>
+            </div>
+            <div class="preview-list-block">
+                <h3>Expected outcomes</h3>
+                <ul class="preview-check-list" id="preview-outcomes-list"></ul>
+            </div>
+        </div>
+        </aside>
         </div>
 
         <article class="preview-panel preview-sample-panel">
@@ -970,7 +971,7 @@
                         const productName = (product.name || '').toLowerCase().trim();
                         const mapKey = Object.keys(COUPON_MAP_20).find(k => productName.includes(k));
                         const hardcoded20 = mapKey ? COUPON_MAP_20[mapKey].toUpperCase() : null;
-                        
+
                         const inputCodeUpper = code.toUpperCase();
 
                         let appliedDiscount = 0;
@@ -979,6 +980,9 @@
                         if (inputCodeUpper && product.coupon_code && inputCodeUpper === product.coupon_code.toUpperCase()) {
                             isValid = true;
                             appliedDiscount = product.discount_percentage || 0;
+                        } else if (inputCodeUpper && inputCodeUpper === 'VASUDHA30') {
+                            isValid = true;
+                            appliedDiscount = 30;
                         } else if (inputCodeUpper && (inputCodeUpper === expected20Code || inputCodeUpper === hardcoded20)) {
                             isValid = true;
                             appliedDiscount = 20;
@@ -1252,11 +1256,13 @@
                             title: 'Rannacher Smoothing',
                             content: [
                                 { type: 'paragraph', text: 'Crank-Nicolson (CN) is unconditionally stable and second-order accurate. However, if the initial payoff has discontinuous derivatives (e.g. digital options, barrier options), the CN scheme exhibits spurious oscillations that decay very slowly. To fix this, we use Rannacher smoothing:' },
-                                { type: 'list', items: [
-                                    'Replace the first 2 or 4 time steps of the Crank-Nicolson run with 4 or 8 half-steps of the fully implicit (Backward Euler) scheme.',
-                                    'Backward Euler has strong L-stability properties which damp out the high-frequency numerical noise immediately.',
-                                    'After the initial smoothing steps, revert to standard Crank-Nicolson to preserve the global second-order temporal accuracy.'
-                                ]}
+                                {
+                                    type: 'list', items: [
+                                        'Replace the first 2 or 4 time steps of the Crank-Nicolson run with 4 or 8 half-steps of the fully implicit (Backward Euler) scheme.',
+                                        'Backward Euler has strong L-stability properties which damp out the high-frequency numerical noise immediately.',
+                                        'After the initial smoothing steps, revert to standard Crank-Nicolson to preserve the global second-order temporal accuracy.'
+                                    ]
+                                }
                             ],
                             note: 'Excerpt from Module 3: Finite Difference Methods'
                         },
