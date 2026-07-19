@@ -1728,7 +1728,7 @@ async function updateServicesSection(sessions) {
                 </ul>
             </div>
             <div class="service-footer">
-                <a href="#contact" class="btn btn-product btn-full btn-service" data-service="${session.name}">
+                <a href="#" class="btn btn-product btn-full btn-service" data-service="${session.name}">
                     ${session.price === 0 ? '🆓 Book Free Session' : 'Book Session'}
                 </a>
             </div>
@@ -1741,6 +1741,7 @@ async function updateServicesSection(sessions) {
         const bookBtn = serviceCard.querySelector('.btn-service');
         if (bookBtn) {
             bookBtn.addEventListener('click', function (e) {
+                e.preventDefault(); // Prevent hash from being added to URL (breaks Razorpay)
                 const service = this.dataset.service;
                 const serviceSelect = document.getElementById('bookingService');
                 if (serviceSelect) {
@@ -2783,7 +2784,12 @@ if (bookingForm) {
  * Initialize Razorpay for session booking payment
  */
 async function initSessionPayment(description, amount, customerEmail, currency = 'INR', inrAmountForLogging = null, bookingData = null) {
-    // Handle FREE sessions (0 value)
+ // Safety net: remove any URL hash before opening Razorpay (hash breaks domain verification)
+ if (window.location.hash) {
+ history.replaceState(null, '', window.location.pathname + window.location.search);
+ }
+
+ // Handle FREE sessions (0 value)
     if (amount <= 0) {
         handleSessionPaymentSuccess({ payment_id: 'FREE_SESSION_' + Date.now() });
         return;
@@ -2875,6 +2881,7 @@ async function initSessionPayment(description, amount, customerEmail, currency =
 async function handleSessionPaymentSuccess(response) {
     const paymentId = response.payment_id;
 
+    try {
     // Try to get booking from window, fallback to localStorage
     let booking = window.pendingBooking;
     if (!booking) {
@@ -2896,6 +2903,23 @@ async function handleSessionPaymentSuccess(response) {
     // Generate unique meeting link for this booking
     const uniqueMeetLink = generateUniqueMeetLink(booking.name, booking.date);
     console.log('🔗 Generated unique meeting link:', uniqueMeetLink);
+
+    // ===== STEP 0: DEDUP CHECK (prevent webhook + client-side double-fire) =====
+    if (window.supabaseClient) {
+        try {
+            const { data: existing } = await window.supabaseClient
+                .from('bookings')
+                .select('id')
+                .eq('payment_id', paymentId)
+                .limit(1);
+            if (existing && existing.length > 0) {
+                console.log('ℹ️ Booking already exists for payment', paymentId, '— skipping duplicate client-side insert');
+                alert(`✅ Booking already confirmed!\nPayment ID: ${paymentId}\nCheck your email for details.`);
+                try { localStorage.removeItem('pendingBooking'); } catch (e) { }
+                return;
+            }
+        } catch (e) { console.warn('Dedup check failed (proceeding):', e); }
+    }
 
     // ===== STEP 1: SEND CUSTOMER EMAIL FIRST (HIGHEST PRIORITY) =====
     console.log('📧 Sending session confirmation to customer:', booking.email);
@@ -3014,10 +3038,19 @@ ${BUSINESS_NAME}`;
             console.error('❌ Error storing booking in database:', error);
         }
     } else {
-        console.error('❌ Supabase client not available');
+        console.warn('⚠️ Supabase client not available — saving booking to localStorage for webhook pickup');
+        try {
+            localStorage.setItem('pendingBooking', JSON.stringify({
+                ...booking,
+                payment_id: paymentId,
+                meet_link: uniqueMeetLink,
+                saved_at: Date.now()
+            }));
+        } catch (e) { console.warn('localStorage save failed:', e); }
     }
 
     // ===== STEP 3: SEND ADMIN NOTIFICATION (TERTIARY) =====
+    try {
     const emailBody = `
 New Booking Details:
 ━━━━━━━━━━━━━━━━━━━━
@@ -3089,6 +3122,9 @@ New Booking Details:
         </div>
     `;
     await sendAdminNotification(`New Booking: ${booking.name} - ${booking.sessionType}`, adminHtml, emailBody);
+    } catch (adminErr) {
+        console.error('⚠️ Admin notification failed (non-blocking):', adminErr);
+    }
 
     // Clear localStorage backup
     try { localStorage.removeItem('pendingBooking'); } catch (e) { }
@@ -3114,13 +3150,15 @@ Enter your email to view and reschedule your session.
 Thank you for booking!`);
 
     // Reset form
-    document.getElementById('bookingForm').reset();
-    document.getElementById('bookingPrice').style.display = 'none';
+    const bookingForm = document.getElementById('bookingForm');
+    if (bookingForm) bookingForm.reset();
+    const bookingPrice = document.getElementById('bookingPrice');
+    if (bookingPrice) bookingPrice.style.display = 'none';
 
-    // Calendar refresh removed (no longer used)
-    // const month = currentDate.getMonth();
-    // const year = currentDate.getFullYear();
-    // renderCalendar(month, year);
+    } catch (outerErr) {
+        console.error('❌ handleSessionPaymentSuccess failed:', outerErr);
+        alert('Payment received (ID: ' + paymentId + '). If you did not get a confirmation email, please contact support.');
+    }
 }
 
 // --- BLOG & RESOURCES LOGIC ---

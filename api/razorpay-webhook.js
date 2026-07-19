@@ -36,6 +36,8 @@ export default async function handler(req, res) {
 
     // Configuration
     const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET;
+    const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID;
+    const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
     const SUPABASE_URL = process.env.SUPABASE_URL || 'https://dntabmyurlrlnoajdnja.supabase.co';
     const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDEyNjUsImV4cCI6MjA4NTY3NzI2NX0.PYpNd_t_px09zi2d5WGjFVOB23sjb3ZPuAnxagYshe0';
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
@@ -95,8 +97,40 @@ export default async function handler(req, res) {
             const customerPhone = payment.notes?.customer_phone || '';
             const customerCountry = payment.notes?.customer_country || payment.notes?.country || 'Unknown';
             const inrAmount = payment.notes?.inr_amount ? parseFloat(payment.notes.inr_amount) : amount;
-            const productName = payment.notes?.product_name;
-            const productType = payment.notes?.type || 'product'; // 'product' or 'session'
+            let productName = payment.notes?.product_name;
+            let productType = payment.notes?.type; // 'product' or 'session'
+
+            // Razorpay does NOT copy order notes to payment notes.
+            // Fallback: fetch the order to get the original notes.
+            if (!productType && payment.order_id && RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET) {
+                try {
+                    const orderResp = await fetch(
+                        `https://api.razorpay.com/v1/orders/${payment.order_id}`,
+                        {
+                            headers: {
+                                'Authorization': 'Basic ' + Buffer.from(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`).toString('base64')
+                            }
+                        }
+                    );
+                    if (orderResp.ok) {
+                        const order = await orderResp.json();
+                        const orderNotes = order.notes || {};
+                        console.log('Fetched order notes as fallback:', orderNotes);
+                        // Use order notes as the source of truth
+                        productType = orderNotes.type || productType;
+                        if (!productName) productName = orderNotes.product_name;
+                        // Merge: prefer payment.notes, fall back to order.notes
+                        payment.notes = { ...orderNotes, ...payment.notes };
+                    } else {
+                        console.warn('Could not fetch order for notes fallback:', orderResp.status);
+                    }
+                } catch (err) {
+                    console.error('Error fetching order for notes fallback:', err.message);
+                }
+            }
+
+            // Default to 'product' if still no type detected
+            productType = productType || 'product';
 
             console.log('Payment captured:', { paymentId, amount, inrAmount, customerEmail, customerCountry, productName, productType });
 
