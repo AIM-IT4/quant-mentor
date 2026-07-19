@@ -1,0 +1,97 @@
+/* Blog Article Reader - Style Overrides */
+.modal.active .modal-overlay {
+    background: rgba(0, 0, 0, 0.85) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.modal.active .modal-content {
+    max-width: 780px !important;
+    max-height: 95vh !important;
+    background: #0f0f1a !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 92, 246, 0.1) !important;
+    overflow: hidden !important;
+}
+.modal-close {
+    position: sticky !important;
+    top: 12px !important;
+    float: right !important;
+    margin: 12px 12px 0 0 !important;
+    width: 36px !important;
+    height: 36px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px !important;
+    color: #94a3b8 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 5 !important;
+    transition: all 0.2s ease !important;
+}
+.modal-close:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+    color: #ef4444 !important;
+}
+.modal-header {
+    padding: 0 32px 16px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    background: transparent !important;
+}
+.modal-header h3 {
+    font-size: 1.5em !important;
+    font-weight: 700 !important;
+    color: #f1f5f9 !important;
+    line-height: 1.3 !important;
+}
+.modal-body {
+    padding: 24px 32px 40px !important;
+    max-height: calc(95vh - 120px) !important;
+    overflow-y: auto !important;
+    background: transparent !important;
+}
+.modal-body::-webkit-scrollbar { width: 6px !important; }
+.modal-body::-webkit-scrollbar-track { background: transparent !important; }
+.modal-body::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3) !important; border-radius: 3px !important; }
+#blogModalCover {
+    margin-bottom: 24px !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+#blogModalCover img { width: 100% !important; height: auto !important; display: block !important; }
+#blogShareBar { display: flex !important; gap: 8px !important; align-items: center !important; }
+#blogShareBar button {
+    width: 36px !important; height: 36px !important; border-radius: 10px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #e0e0e0 !important;
+    transition: all 0.2s ease !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+}
+#blogShareBar button:hover {
+    background: rgba(139, 92, 246, 0.25) !important;
+    transform: translateY(-1px) !important;
+}
+.modal-body h2 { margin-top: 36px; font-size: 1.45em; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; color: #f1f5f9; }
+.modal-body h3 { margin-top: 28px; font-size: 1.2em; color: #a5b4fc; }
+.modal-body p { margin-bottom: 18px; line-height: 1.75; color: #cbd5e1; }
+.modal-body strong { color: #f1f5f9; }
+.modal-body a { color: #818cf8; text-underline-offset: 2px; }
+.modal-body a:hover { color: #a5b4fc; }
+.modal-body ul, .modal-body ol { margin: 16px 0; padding-left: 28px; }
+.modal-body li { margin-bottom: 8px; color: #cbd5e1; }
+.modal-body img { max-width: 100%; border-radius: 10px; margin: 20px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+.modal-body blockquote { border-left: 3px solid #8b5cf6; padding: 12px 20px; margin: 20px 0; background: rgba(139,92,246,0.06); border-radius: 0 8px 8px 0; color: #94a3b8; font-style: italic; }
+.modal-body pre { background: #1a1a2e; color: #e0e0e0; padding: 16px 20px; border-radius: 8px; overflow-x: auto; font-size: 0.88em; line-height: 1.6; border-left: 3px solid #8b5cf6; margin: 16px 0; }
+.modal-body code { background: rgba(139,92,246,0.12); color: #c4b5fd; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+.modal-body pre code { background: none; padding: 0; color: inherit; }
+.modal-body table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.92em; }
+.modal-body th { background: rgba(139,92,246,0.15); font-weight: 600; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.1); text-align: left; color: #f1f5f9; }
+.modal-body td { padding: 10px 14px; border: 1px solid rgba(255,255,255,0.08); color: #cbd5e1; }
+@media (max-width: 640px) {
+    .modal.active .modal-content { max-width: 100% !important; border-radius: 12px !important; margin: 8px !important; }
+    .modal-header { padding: 0 20px 12px !important; }
+    .modal-body { padding: 16px 20px 32px !important; }
+}
