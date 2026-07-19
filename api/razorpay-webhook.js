@@ -749,7 +749,7 @@ async function handleSessionBooking(data) {
                                 </tr>
                                 <tr>
                                     <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; padding: 5px 0; border-top: 1px solid #e5e5e5; margin-top: 5px;">Amount Paid</td>
-                                    <td style="font-size: 14px; font-weight: bold; text-align: right; padding: 5px 0; border-top: 1px solid #e5e5e5; margin-top: 5px;">₹${sessionPrice}</td>
+                                    <td style="font-size: 14px; font-weight: bold; text-align: right; padding: 5px 0; border-top: 1px solid #e5e5e5; margin-top: 5px;">${currency === 'INR' ? '₹' : (currency || '$')}${sessionPrice}</td>
                                 </tr>
                             </table>
                         </div>
@@ -829,7 +829,7 @@ async function handleSessionBooking(data) {
                                 </tr>
                                 <tr>
                                     <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; padding: 5px 0;">Amount Received</td>
-                                    <td style="font-size: 14px; font-weight: bold; text-align: right; color: #16a34a; padding: 5px 0;">₹${sessionPrice}</td>
+                                    <td style="font-size: 14px; font-weight: bold; text-align: right; color: #16a34a; padding: 5px 0;">${currency === 'INR' ? '₹' : (currency || '$')}${sessionPrice}</td>
                                 </tr>
                                 <tr>
                                     <td colspan="2" style="padding: 15px 0 5px 0;">

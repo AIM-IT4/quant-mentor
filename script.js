@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function () {
             couponInput.disabled = false;
         }
         if (feedbackEl) feedbackEl.textContent = '';
-        
+
         const applyBtn = document.getElementById('applyCouponBtn');
         if (applyBtn) {
             applyBtn.disabled = false;
@@ -1147,60 +1147,60 @@ async function fetchExchangeRates() {
 function getFallbackRates() {
     return {
         'INR': 1,
-        'USD': 0.012,  'GBP': 0.0095, 'EUR': 0.011,
-        'JPY': 1.8,    'KRW': 16.5,   'CNY': 0.087,
-        'AUD': 0.018,  'CAD': 0.016,  'CHF': 0.010,
-        'SEK': 0.13,   'NOK': 0.13,   'DKK': 0.084,
-        'SGD': 0.016,  'HKD': 0.094,  'NZD': 0.020,
-        'BRL': 0.067,  'MXN': 0.24,   'ZAR': 0.22,
-        'RUB': 1.1,    'TRY': 0.42,   'AED': 0.044,
-        'SAR': 0.045,  'PKR': 3.3,    'BDT': 1.4,
-        'LKR': 3.6,    'NPR': 1.6,    'THB': 0.43,
-        'MYR': 0.056,  'IDR': 190,    'PHP': 0.70,
-        'VND': 300,    'EGP': 0.60,   'NGN': 18.5,
-        'KES': 1.6,    'GHS': 0.18,
+        'USD': 0.012, 'GBP': 0.0095, 'EUR': 0.011,
+        'JPY': 1.8, 'KRW': 16.5, 'CNY': 0.087,
+        'AUD': 0.018, 'CAD': 0.016, 'CHF': 0.010,
+        'SEK': 0.13, 'NOK': 0.13, 'DKK': 0.084,
+        'SGD': 0.016, 'HKD': 0.094, 'NZD': 0.020,
+        'BRL': 0.067, 'MXN': 0.24, 'ZAR': 0.22,
+        'RUB': 1.1, 'TRY': 0.42, 'AED': 0.044,
+        'SAR': 0.045, 'PKR': 3.3, 'BDT': 1.4,
+        'LKR': 3.6, 'NPR': 1.6, 'THB': 0.43,
+        'MYR': 0.056, 'IDR': 190, 'PHP': 0.70,
+        'VND': 300, 'EGP': 0.60, 'NGN': 18.5,
+        'KES': 1.6, 'GHS': 0.18,
         // Middle East
-        'KWD': 0.0037, 'QAR': 0.044,  'BHD': 0.0045,
+        'KWD': 0.0037, 'QAR': 0.044, 'BHD': 0.0045,
         'OMR': 0.0046, 'JOD': 0.0085, 'IQD': 15.7,
-        'LBP': 180,    'ILS': 0.045,  'IRR': 500,
-        'SYP': 156,    'YER': 3.0,
+        'LBP': 180, 'ILS': 0.045, 'IRR': 500,
+        'SYP': 156, 'YER': 3.0,
         // Europe non-Euro
-        'HUF': 4.35,   'PLN': 0.048,  'CZK': 0.28,
-        'RON': 0.055,  'RSD': 1.29,   'UAH': 0.49,
-        'BYN': 0.039,  'GEL': 0.032,  'AMD': 4.6,
-        'AZN': 0.020,  'ISK': 1.65,   'MKD': 0.68,
-        'BAM': 0.022,  'ALL': 1.1,    'MDL': 0.21,
-        'BGN': 0.022,  'TWD': 0.39,
+        'HUF': 4.35, 'PLN': 0.048, 'CZK': 0.28,
+        'RON': 0.055, 'RSD': 1.29, 'UAH': 0.49,
+        'BYN': 0.039, 'GEL': 0.032, 'AMD': 4.6,
+        'AZN': 0.020, 'ISK': 1.65, 'MKD': 0.68,
+        'BAM': 0.022, 'ALL': 1.1, 'MDL': 0.21,
+        'BGN': 0.022, 'TWD': 0.39,
         // Asia
-        'KZT': 5.7,    'UZS': 150,    'MMK': 25,
-        'KHR': 49,     'LAK': 250,    'MNT': 41,
-        'BTN': 1.0,    'MVR': 0.18,   'AFN': 0.84,
-        'KGS': 1.05,   'TJS': 0.13,   'TMT': 0.042,
+        'KZT': 5.7, 'UZS': 150, 'MMK': 25,
+        'KHR': 49, 'LAK': 250, 'MNT': 41,
+        'BTN': 1.0, 'MVR': 0.18, 'AFN': 0.84,
+        'KGS': 1.05, 'TJS': 0.13, 'TMT': 0.042,
         // Latin America
-        'COP': 48,     'ARS': 10.8,   'CLP': 11,
-        'PEN': 0.045,  'VES': 0.43,   'UYU': 0.47,
-        'PYG': 88,     'BOB': 0.083,  'GTQ': 0.093,
-        'HNL': 0.30,   'NIO': 0.44,   'CRC': 6.2,
-        'CUP': 0.29,   'DOP': 0.71,   'JMD': 1.85,
-        'TTD': 0.081,  'BBD': 0.024,  'GYD': 2.5,
-        'SRD': 0.42,   'BZD': 0.024,  'HTG': 1.58,
+        'COP': 48, 'ARS': 10.8, 'CLP': 11,
+        'PEN': 0.045, 'VES': 0.43, 'UYU': 0.47,
+        'PYG': 88, 'BOB': 0.083, 'GTQ': 0.093,
+        'HNL': 0.30, 'NIO': 0.44, 'CRC': 6.2,
+        'CUP': 0.29, 'DOP': 0.71, 'JMD': 1.85,
+        'TTD': 0.081, 'BBD': 0.024, 'GYD': 2.5,
+        'SRD': 0.42, 'BZD': 0.024, 'HTG': 1.58,
         'BSD': 0.012,
         // Africa
-        'ETB': 0.68,   'TZS': 31,     'UGX': 45,
-        'RWF': 15.5,   'XOF': 7.2,    'XAF': 7.2,
-        'AOA': 11,     'MZN': 0.77,   'MGA': 55,
-        'ZMW': 0.31,   'ZWL': 0.037,  'SDG': 7.2,
-        'SSP': 1.56,   'SOS': 6.85,   'DZD': 1.6,
-        'MAD': 0.12,   'TND': 0.037,  'LYD': 0.058,
-        'MWK': 20,     'NAD': 0.22,   'BWP': 0.16,
-        'LSL': 0.22,   'SZL': 0.22,   'MUR': 0.55,
-        'SCR': 0.16,   'MRU': 0.48,   'GMD': 0.84,
-        'SLE': 0.27,   'LRD': 2.3,    'GNF': 103,
-        'BIF': 34,     'KMF': 5.4,    'CVE': 1.2,
-        'STN': 0.27,   'DJF': 2.13,   'ERN': 0.18,
+        'ETB': 0.68, 'TZS': 31, 'UGX': 45,
+        'RWF': 15.5, 'XOF': 7.2, 'XAF': 7.2,
+        'AOA': 11, 'MZN': 0.77, 'MGA': 55,
+        'ZMW': 0.31, 'ZWL': 0.037, 'SDG': 7.2,
+        'SSP': 1.56, 'SOS': 6.85, 'DZD': 1.6,
+        'MAD': 0.12, 'TND': 0.037, 'LYD': 0.058,
+        'MWK': 20, 'NAD': 0.22, 'BWP': 0.16,
+        'LSL': 0.22, 'SZL': 0.22, 'MUR': 0.55,
+        'SCR': 0.16, 'MRU': 0.48, 'GMD': 0.84,
+        'SLE': 0.27, 'LRD': 2.3, 'GNF': 103,
+        'BIF': 34, 'KMF': 5.4, 'CVE': 1.2,
+        'STN': 0.27, 'DJF': 2.13, 'ERN': 0.18,
         // Oceania
-        'PGK': 0.046,  'FJD': 0.027,  'SBD': 0.10,
-        'VUV': 1.42,   'WST': 0.033,  'TOP': 0.028,
+        'PGK': 0.046, 'FJD': 0.027, 'SBD': 0.10,
+        'VUV': 1.42, 'WST': 0.033, 'TOP': 0.028,
     };
 }
 
@@ -1411,7 +1411,7 @@ async function displaySupabaseProducts(products) {
         const refPrice = await convertPrice(1000, userCountryCode, false);
         window.userLocalPrice = refPrice;
         window.formatPrice = formatPrice; // expose formatter too
-    } catch(e) {
+    } catch (e) {
         console.warn('Could not set userLocalPrice:', e);
     }
 
@@ -1699,11 +1699,11 @@ async function updateServicesSection(sessions) {
             `<li><i class="fas fa-check" style="color: #22c55e; margin-right: 8px;"></i>${feature}</li>`
         ).join('') : '';
 
- // Convert price to local currency
- const localPrice = await convertPrice(session.price, userCountryCode, true);
- const isLocalCurrency = localPrice.currency.code !== 'INR';
+        // Convert price to local currency
+        const localPrice = await convertPrice(session.price, userCountryCode, true);
+        const isLocalCurrency = localPrice.currency.code !== 'INR';
 
- const priceDisplay = session.price === 0
+        const priceDisplay = session.price === 0
             ? '<span class="price-free">FREE</span>'
             : isLocalCurrency
                 ? `<span style="font-weight:700;">${formatPrice(localPrice)}</span>`
@@ -1992,7 +1992,7 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
             const customerEmail = (userDetails && userDetails.email) ? userDetails.email : prompt('Enter your email to receive the free download:');
 
             if (customerEmail && customerEmail.includes('@')) {
-                sendProductEmail(customerEmail, productName, 'FREE', downloadLink, customerName);
+                sendProductEmail(customerEmail, productName, 'FREE', downloadLink, customerName, 0, 'INR');
             }
             if (typeof window.showSuccessModal === 'function') {
                 window.showSuccessModal(productName, downloadLink);
@@ -2084,7 +2084,7 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
             }
 
             if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE' && customerEmail) {
-                sendProductEmail(customerEmail, productName, paymentId, downloadLink, userDetails ? userDetails.name : 'Customer');
+                sendProductEmail(customerEmail, productName, paymentId, downloadLink, userDetails ? userDetails.name : 'Customer', amount, currency);
             }
 
             if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
@@ -2124,13 +2124,13 @@ window.initRazorpayCheckout = initRazorpayCheckout;
  * Send product purchase email to customer via Brevo (replaces EmailJS)
  * Free tier: 300 emails/day = 9,000/month
  */
-async function sendProductEmail(customerEmail, productName, paymentId, downloadLink, customerName = 'Customer') {
+async function sendProductEmail(customerEmail, productName, paymentId, downloadLink, customerName = 'Customer', amount = '', currency = 'INR') {
     console.log('📧 sendProductEmail called with:', customerEmail);
 
     // Send to CUSTOMER via Brevo backend
     console.log('📧 Attempting to send via Brevo secure API...');
 
-        const htmlContent = `
+    const htmlContent = `
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
                 <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                     <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
@@ -2181,7 +2181,7 @@ async function sendProductEmail(customerEmail, productName, paymentId, downloadL
             </div>
         `;
 
-        const textContent = `🎉 Thank you for your purchase!
+    const textContent = `🎉 Thank you for your purchase!
 
 Hi ${customerName},
 
@@ -2195,22 +2195,22 @@ If you have any questions, simply reply to this email.
 Best regards,
 ${BUSINESS_NAME}`;
 
-        try {
-            const result = await sendEmailWithBrevo(
-                customerEmail,
-                `Your Purchase: ${productName}`,
-                htmlContent,
-                textContent
-            );
+    try {
+        const result = await sendEmailWithBrevo(
+            customerEmail,
+            `Your Purchase: ${productName}`,
+            htmlContent,
+            textContent
+        );
 
-            if (result.success) {
-                console.log('✅ Brevo SUCCESS: Email sent to', customerEmail);
-            } else {
-                console.error('❌ Brevo FAILED:', result.error);
-            }
-        } catch (error) {
-            console.error('❌ Brevo email failed:', error);
+        if (result.success) {
+            console.log('✅ Brevo SUCCESS: Email sent to', customerEmail);
+        } else {
+            console.error('❌ Brevo FAILED:', result.error);
         }
+    } catch (error) {
+        console.error('❌ Brevo email failed:', error);
+    }
 
     // ===== ADMIN NOTIFICATION (NEW) =====
     try {
@@ -2218,6 +2218,7 @@ ${BUSINESS_NAME}`;
 New Product Purchase:
 ━━━━━━━━━━━━━━━━━━━━
 📦 Product: ${productName}
+💰 Amount: ${currency} ${amount}
 🆔 Payment ID: ${paymentId}
 
 👤 Customer Details:
@@ -2234,7 +2235,7 @@ New Product Purchase:
                 <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                     <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
                         <span style="color: #ffffff; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Desk2Quant Admin</span>
-                    </div>
+                      </div>
                     <div style="padding: 30px;">
                         <div style="margin-bottom: 20px;">
                             <span style="display: inline-block; background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;">New Sale Received</span>
@@ -2246,7 +2247,7 @@ New Product Purchase:
                             <table style="width: 100%; border-collapse: collapse;">
                                 <tr>
                                     <td style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold;">Amount</td>
-                                    <td style="font-size: 14px; font-weight: bold; text-align: right; color: #16a34a;">INR</td>
+                                    <td style="font-size: 14px; font-weight: bold; text-align: right; color: #16a34a;">${currency} ${amount}</td>
                                 </tr>
                             </table>
                         </div>
@@ -2746,8 +2747,8 @@ if (bookingForm) {
         // Check for Local Currency (use local price for Razorpay checkout)
         try {
             if (userCountryCode && userCountryCode !== 'IN') {
- const localPrice = await convertPrice(sessionInfo.price, userCountryCode, true);
- if (localPrice.currency.code !== 'INR') {
+                const localPrice = await convertPrice(sessionInfo.price, userCountryCode, true);
+                if (localPrice.currency.code !== 'INR') {
                     payAmount = localPrice.amount;
                     payCurrency = localPrice.currency.code;
                     console.log(`🌍 Booking International: Paying ${payCurrency} ${payAmount} (INR ${logAmountInr} tracked in backend)`);
@@ -2784,12 +2785,12 @@ if (bookingForm) {
  * Initialize Razorpay for session booking payment
  */
 async function initSessionPayment(description, amount, customerEmail, currency = 'INR', inrAmountForLogging = null, bookingData = null) {
- // Safety net: remove any URL hash before opening Razorpay (hash breaks domain verification)
- if (window.location.hash) {
- history.replaceState(null, '', window.location.pathname + window.location.search);
- }
+    // Safety net: remove any URL hash before opening Razorpay (hash breaks domain verification)
+    if (window.location.hash) {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
 
- // Handle FREE sessions (0 value)
+    // Handle FREE sessions (0 value)
     if (amount <= 0) {
         handleSessionPaymentSuccess({ payment_id: 'FREE_SESSION_' + Date.now() });
         return;
@@ -2882,49 +2883,49 @@ async function handleSessionPaymentSuccess(response) {
     const paymentId = response.payment_id;
 
     try {
-    // Try to get booking from window, fallback to localStorage
-    let booking = window.pendingBooking;
-    if (!booking) {
-        try {
-            const stored = localStorage.getItem('pendingBooking');
-            if (stored) booking = JSON.parse(stored);
-        } catch (e) { console.warn('Could not retrieve booking from localStorage:', e); }
-    }
+        // Try to get booking from window, fallback to localStorage
+        let booking = window.pendingBooking;
+        if (!booking) {
+            try {
+                const stored = localStorage.getItem('pendingBooking');
+                if (stored) booking = JSON.parse(stored);
+            } catch (e) { console.warn('Could not retrieve booking from localStorage:', e); }
+        }
 
-    if (!booking || !booking.email) {
-        console.error('❌ No booking data found!');
-        alert('Error: Booking data was lost. Please contact support with Payment ID: ' + paymentId);
-        return;
-    }
+        if (!booking || !booking.email) {
+            console.error('❌ No booking data found!');
+            alert('Error: Booking data was lost. Please contact support with Payment ID: ' + paymentId);
+            return;
+        }
 
-    console.log('📧 Booking object:', booking);
-    console.log('📧 Email to send to:', booking.email);
+        console.log('📧 Booking object:', booking);
+        console.log('📧 Email to send to:', booking.email);
 
-    // Generate unique meeting link for this booking
-    const uniqueMeetLink = generateUniqueMeetLink(booking.name, booking.date);
-    console.log('🔗 Generated unique meeting link:', uniqueMeetLink);
+        // Generate unique meeting link for this booking
+        const uniqueMeetLink = generateUniqueMeetLink(booking.name, booking.date);
+        console.log('🔗 Generated unique meeting link:', uniqueMeetLink);
 
-    // ===== STEP 0: DEDUP CHECK (prevent webhook + client-side double-fire) =====
-    if (window.supabaseClient) {
-        try {
-            const { data: existing } = await window.supabaseClient
-                .from('bookings')
-                .select('id')
-                .eq('payment_id', paymentId)
-                .limit(1);
-            if (existing && existing.length > 0) {
-                console.log('ℹ️ Booking already exists for payment', paymentId, '— skipping duplicate client-side insert');
-                alert(`✅ Booking already confirmed!\nPayment ID: ${paymentId}\nCheck your email for details.`);
-                try { localStorage.removeItem('pendingBooking'); } catch (e) { }
-                return;
-            }
-        } catch (e) { console.warn('Dedup check failed (proceeding):', e); }
-    }
+        // ===== STEP 0: DEDUP CHECK (prevent webhook + client-side double-fire) =====
+        if (window.supabaseClient) {
+            try {
+                const { data: existing } = await window.supabaseClient
+                    .from('bookings')
+                    .select('id')
+                    .eq('payment_id', paymentId)
+                    .limit(1);
+                if (existing && existing.length > 0) {
+                    console.log('ℹ️ Booking already exists for payment', paymentId, '— skipping duplicate client-side insert');
+                    alert(`✅ Booking already confirmed!\nPayment ID: ${paymentId}\nCheck your email for details.`);
+                    try { localStorage.removeItem('pendingBooking'); } catch (e) { }
+                    return;
+                }
+            } catch (e) { console.warn('Dedup check failed (proceeding):', e); }
+        }
 
-    // ===== STEP 1: SEND CUSTOMER EMAIL FIRST (HIGHEST PRIORITY) =====
-    console.log('📧 Sending session confirmation to customer:', booking.email);
+        // ===== STEP 1: SEND CUSTOMER EMAIL FIRST (HIGHEST PRIORITY) =====
+        console.log('📧 Sending session confirmation to customer:', booking.email);
 
-    console.log('📧 Sending customer email securely via API...');
+        console.log('📧 Sending customer email securely via API...');
 
         const htmlContent = `
             <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
@@ -3007,51 +3008,51 @@ ${BUSINESS_NAME}`;
             console.error('❌ Session email failed:', error);
         }
 
-    // ===== STEP 2: STORE IN SUPABASE (SECONDARY) =====
-    console.log('📋 Attempting to store booking in Supabase...');
-    if (window.supabaseClient) {
-        try {
-            const { data, error } = await window.supabaseClient
-                .from('bookings')
-                .insert({
-                    email: booking.email,
-                    name: booking.name,
-                    phone: booking.phone,
-                    service_name: booking.sessionType,
-                    service_price: booking.price,
-                    service_duration: booking.duration,
-                    booking_date: booking.date,
-                    booking_time: booking.time,
-                    message: booking.message,
-                    status: 'upcoming',
-                    payment_id: paymentId,
-                    meet_link: uniqueMeetLink
-                })
-                .select();
+        // ===== STEP 2: STORE IN SUPABASE (SECONDARY) =====
+        console.log('📋 Attempting to store booking in Supabase...');
+        if (window.supabaseClient) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('bookings')
+                    .insert({
+                        email: booking.email,
+                        name: booking.name,
+                        phone: booking.phone,
+                        service_name: booking.sessionType,
+                        service_price: booking.price,
+                        service_duration: booking.duration,
+                        booking_date: booking.date,
+                        booking_time: booking.time,
+                        message: booking.message,
+                        status: 'upcoming',
+                        payment_id: paymentId,
+                        meet_link: uniqueMeetLink
+                    })
+                    .select();
 
-            if (error) {
-                console.error('❌ Supabase insert failed:', error);
-            } else {
-                console.log('✅ Booking stored in Supabase:', data);
+                if (error) {
+                    console.error('❌ Supabase insert failed:', error);
+                } else {
+                    console.log('✅ Booking stored in Supabase:', data);
+                }
+            } catch (error) {
+                console.error('❌ Error storing booking in database:', error);
             }
-        } catch (error) {
-            console.error('❌ Error storing booking in database:', error);
+        } else {
+            console.warn('⚠️ Supabase client not available — saving booking to localStorage for webhook pickup');
+            try {
+                localStorage.setItem('pendingBooking', JSON.stringify({
+                    ...booking,
+                    payment_id: paymentId,
+                    meet_link: uniqueMeetLink,
+                    saved_at: Date.now()
+                }));
+            } catch (e) { console.warn('localStorage save failed:', e); }
         }
-    } else {
-        console.warn('⚠️ Supabase client not available — saving booking to localStorage for webhook pickup');
-        try {
-            localStorage.setItem('pendingBooking', JSON.stringify({
-                ...booking,
-                payment_id: paymentId,
-                meet_link: uniqueMeetLink,
-                saved_at: Date.now()
-            }));
-        } catch (e) { console.warn('localStorage save failed:', e); }
-    }
 
-    // ===== STEP 3: SEND ADMIN NOTIFICATION (TERTIARY) =====
-    try {
-    const emailBody = `
+        // ===== STEP 3: SEND ADMIN NOTIFICATION (TERTIARY) =====
+        try {
+            const emailBody = `
 New Booking Details:
 ━━━━━━━━━━━━━━━━━━━━
 📋 Session: ${booking.sessionType} (${booking.duration} mins)
@@ -3075,7 +3076,7 @@ New Booking Details:
 ━━━━━━━━━━━━━━━━━━━━
     `.trim();
 
-    const adminHtml = `
+            const adminHtml = `
         <div style="font-family: Arial, sans-serif; background-color: #f9f8f4; padding: 40px 20px; color: #1a1a1a;">
             <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                 <div style="background-color: #1a1a1a; padding: 20px; text-align: center;">
@@ -3093,7 +3094,7 @@ New Booking Details:
                             <tr><td style="padding: 5px 0; color: #666;">Duration</td><td style="padding: 5px 0; color: #1a1a1a;">${booking.duration} mins</td></tr>
                             <tr><td style="padding: 5px 0; color: #666;">Date</td><td style="padding: 5px 0; color: #1a1a1a;">${booking.date}</td></tr>
                             <tr><td style="padding: 5px 0; color: #666;">Time</td><td style="padding: 5px 0; color: #1a1a1a;">${booking.time}</td></tr>
-                            <tr><td style="padding: 5px 0; color: #666;">Amount</td><td style="padding: 5px 0; color: #1a1a1a;">₹${booking.price}</td></tr>
+                            <tr><td style="padding: 5px 0; color: #666;">Amount</td><td style="padding: 5px 0; color: #1a1a1a;">${booking.pay_currency === 'INR' ? '₹' : (booking.pay_currency || '$')}${booking.pay_currency === 'INR' ? booking.price : Math.round(booking.price * 0.012)}</td></tr>
                         </table>
                     </div>
                     <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
@@ -3121,17 +3122,17 @@ New Booking Details:
             </div>
         </div>
     `;
-    await sendAdminNotification(`New Booking: ${booking.name} - ${booking.sessionType}`, adminHtml, emailBody);
-    } catch (adminErr) {
-        console.error('⚠️ Admin notification failed (non-blocking):', adminErr);
-    }
+            await sendAdminNotification(`New Booking: ${booking.name} - ${booking.sessionType}`, adminHtml, emailBody);
+        } catch (adminErr) {
+            console.error('⚠️ Admin notification failed (non-blocking):', adminErr);
+        }
 
-    // Clear localStorage backup
-    try { localStorage.removeItem('pendingBooking'); } catch (e) { }
+        // Clear localStorage backup
+        try { localStorage.removeItem('pendingBooking'); } catch (e) { }
 
 
-    // Show success message to customer
-    alert(`🎉 Session Booked Successfully!
+        // Show success message to customer
+        alert(`🎉 Session Booked Successfully!
 
 Payment ID: ${paymentId}
 
@@ -3149,11 +3150,11 @@ Enter your email to view and reschedule your session.
 
 Thank you for booking!`);
 
-    // Reset form
-    const bookingForm = document.getElementById('bookingForm');
-    if (bookingForm) bookingForm.reset();
-    const bookingPrice = document.getElementById('bookingPrice');
-    if (bookingPrice) bookingPrice.style.display = 'none';
+        // Reset form
+        const bookingForm = document.getElementById('bookingForm');
+        if (bookingForm) bookingForm.reset();
+        const bookingPrice = document.getElementById('bookingPrice');
+        if (bookingPrice) bookingPrice.style.display = 'none';
 
     } catch (outerErr) {
         console.error('❌ handleSessionPaymentSuccess failed:', outerErr);
@@ -3567,7 +3568,7 @@ async function sendTestimonialRequestEmail(bookingData) {
     const testimonialLink = window.location.origin + '/index.html#testimonials'; // Point to testimonials section
     const customerName = userName || 'Valued Learner';
 
-        const htmlContent = `
+    const htmlContent = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <h2 style="color: #2563eb;">🚀 Session Completed!</h2>
                 <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
@@ -3587,7 +3588,7 @@ async function sendTestimonialRequestEmail(bookingData) {
             </div>
         `;
 
-        const textContent = `🚀 Session Completed!
+    const textContent = `🚀 Session Completed!
 
 Hi ${customerName},
 
@@ -3602,25 +3603,25 @@ It helps others trust the process.
 Best regards,
 ${BUSINESS_NAME}`;
 
-        try {
-            const result = await sendEmailWithBrevo(
-                userEmail,
-                `Thanks for the session! How was it? 🚀`,
-                htmlContent,
-                textContent
-            );
+    try {
+        const result = await sendEmailWithBrevo(
+            userEmail,
+            `Thanks for the session! How was it? 🚀`,
+            htmlContent,
+            textContent
+        );
 
-            if (result.success) {
-                console.log('✅ Testimonial email sent successfully.');
-                return true;
-            } else {
-                console.error('❌ Failed to send testimonial email:', result.error);
-                return false;
-            }
-        } catch (error) {
-            console.error('❌ Error sending testimonial email:', error);
+        if (result.success) {
+            console.log('✅ Testimonial email sent successfully.');
+            return true;
+        } else {
+            console.error('❌ Failed to send testimonial email:', result.error);
             return false;
         }
+    } catch (error) {
+        console.error('❌ Error sending testimonial email:', error);
+        return false;
+    }
 }
 
 // Make it available globally so admin.html can use it
@@ -3629,11 +3630,11 @@ window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
 
 
 // --- LAUNCH PROMOTION CAMPAIGN LOGIC ---
-(function() {
+(function () {
     console.log('🎉 Initializing Launch Promotion Campaign for Numerical Methods...');
 
     // Expose promo functions globally so inline HTML onclick handlers can trigger them
-    window.dismissPromoBanner = function(e) {
+    window.dismissPromoBanner = function (e) {
         if (e) {
             e.stopPropagation();
             e.preventDefault();
@@ -3647,7 +3648,7 @@ window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
         localStorage.setItem('launch_promo_banner_dismissed', 'true');
     };
 
-    window.triggerPromoModal = function() {
+    window.triggerPromoModal = function () {
         const modal = document.getElementById('launchPromoModal');
         if (!modal) return;
 
@@ -3674,14 +3675,14 @@ window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
         sessionStorage.setItem('launch_promo_shown', 'true');
     };
 
-    window.closePromoModal = function() {
+    window.closePromoModal = function () {
         const modal = document.getElementById('launchPromoModal');
         if (modal) {
             modal.classList.remove('active');
         }
     };
 
-    window.copyPromoCoupon = function() {
+    window.copyPromoCoupon = function () {
         const couponText = 'LAUNCH15';
         navigator.clipboard.writeText(couponText).then(() => {
             const btnText = document.getElementById('copyCouponBtnText');
@@ -3696,20 +3697,20 @@ window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
         });
     };
 
-    window.buyLaunchProduct = function() {
+    window.buyLaunchProduct = function () {
         window.closePromoModal();
-        
+
         // Scroll to products section
         const productsSec = document.getElementById('products');
         if (productsSec) {
             productsSec.scrollIntoView({ behavior: 'smooth' });
         }
-        
+
         // Open the product checkout modal
         setTimeout(() => {
             if (typeof window.openProductModal === 'function') {
                 window.openProductModal('6b78550d-e130-41d1-9409-92335ce82a6c');
-                
+
                 // Auto-fill and apply LAUNCH15 coupon in the checkout modal
                 setTimeout(() => {
                     const couponInput = document.getElementById('couponInput');
@@ -3723,7 +3724,7 @@ window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
         }, 500);
     };
 
-    window.previewLaunchProduct = function() {
+    window.previewLaunchProduct = function () {
         window.closePromoModal();
         const isTest = window.location.pathname.includes('-test');
         window.location.href = (isTest ? 'product-test.html' : 'product.html') + '?id=6b78550d-e130-41d1-9409-92335ce82a6c';
@@ -3762,7 +3763,7 @@ window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
 
 
 // --- PURCHASE SUCCESS & CROSS-SELL RECOMMENDATION SYSTEM ---
-(function() {
+(function () {
     console.log('🛍️ Initializing Purchase Success & Cross-Sell Recommendation System...');
 
     // Mapping for product categories to recommend complements
@@ -3834,7 +3835,7 @@ window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
         }
     };
 
-    window.closeSuccessModal = function() {
+    window.closeSuccessModal = function () {
         const modal = document.getElementById('purchaseSuccessModal');
         if (modal) {
             modal.classList.remove('active');
@@ -3842,9 +3843,9 @@ window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
         }
     };
 
-    window.showSuccessModal = async function(purchasedName, downloadLink) {
+    window.showSuccessModal = async function (purchasedName, downloadLink) {
         console.log('🏆 Triggering Purchase Success Modal for:', purchasedName);
-        
+
         // 1. Set the main download button
         const dlBtn = document.getElementById('successDownloadBtn');
         if (dlBtn) {
@@ -3854,7 +3855,7 @@ window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
         // 2. Identify the strategy keys
         const nameLower = purchasedName.toLowerCase();
         let strategy = CROSS_SELL_STRATEGY['default'];
-        
+
         for (const [key, config] of Object.entries(CROSS_SELL_STRATEGY)) {
             if (key === 'default') continue;
             if (config.keys.some(k => nameLower.includes(k))) {
@@ -3867,18 +3868,18 @@ window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
         const grid = document.getElementById('crossSellGrid');
         if (grid) {
             grid.innerHTML = '';
-            
+
             // Loop through the 2 target recommendations
             for (const rec of strategy.recs) {
                 // Find matching product in globally loaded window.allProducts
                 let matchingProduct = null;
                 if (window.allProducts) {
-                    matchingProduct = window.allProducts.find(p => 
-                        p.name.toLowerCase().includes(rec.name.toLowerCase()) || 
+                    matchingProduct = window.allProducts.find(p =>
+                        p.name.toLowerCase().includes(rec.name.toLowerCase()) ||
                         rec.name.toLowerCase().includes(p.name.toLowerCase())
                     );
                 }
-                
+
                 // If not found in dynamic products, use default mock config or search by parts
                 const prodName = matchingProduct ? matchingProduct.name : rec.name;
                 const prodPrice = matchingProduct ? matchingProduct.price : 799;
