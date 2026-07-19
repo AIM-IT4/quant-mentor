@@ -1692,10 +1692,10 @@ async function updateServicesSection(sessions) {
         ).join('') : '';
 
         // Convert price to local currency
-        const localPrice = await convertPrice(session.price, userCountryCode);
-        const isLocalCurrency = localPrice.currency.code !== 'INR';
+ const localPrice = await convertPrice(session.price, userCountryCode, true);
+ const isLocalCurrency = localPrice.currency.code !== 'INR';
 
-        const priceDisplay = session.price === 0
+ const priceDisplay = session.price === 0
             ? '<span class="price-free">FREE</span>'
             : isLocalCurrency
                 ? `<span style="font-weight:700;">${formatPrice(localPrice)}</span>`
@@ -1720,7 +1720,7 @@ async function updateServicesSection(sessions) {
                 </ul>
             </div>
             <div class="service-footer">
-                <a href="#contact" class="btn btn-product btn-full btn-service" data-service="${session.name}">
+                <a href="#" class="btn btn-product btn-full btn-service" data-service="${session.name}">
                     ${session.price === 0 ? '🆓 Book Free Session' : 'Book Session'}
                 </a>
             </div>
@@ -1732,8 +1732,9 @@ async function updateServicesSection(sessions) {
         // Add event listener for the booking button
         const bookBtn = serviceCard.querySelector('.btn-service');
         if (bookBtn) {
-            bookBtn.addEventListener('click', function (e) {
-                const service = this.dataset.service;
+ bookBtn.addEventListener('click', function (e) {
+ e.preventDefault(); // Prevent hash from being added to URL (breaks Razorpay)
+ const service = this.dataset.service;
                 const serviceSelect = document.getElementById('bookingService');
                 if (serviceSelect) {
                     // Find the option with matching session name
@@ -1776,9 +1777,9 @@ async function updateBookingForm(sessions) {
         const option = document.createElement('option');
         const valueType = session.name.toLowerCase().replace(/\s+/g, '_');
 
-        // Convert price to local currency for display
-        const localPrice = await convertPrice(session.price, userCountryCode);
-        const isLocalCurrency = localPrice.currency.code !== 'INR';
+ // Convert price to local currency for display
+ const localPrice = await convertPrice(session.price, userCountryCode, true);
+ const isLocalCurrency = localPrice.currency.code !== 'INR';
 
         option.value = `${valueType}| ${session.price}| ${session.duration} `;
         if (session.price === 0) {
@@ -2712,8 +2713,8 @@ if (bookingForm) {
         // Check for Local Currency (use local price for Razorpay checkout)
         try {
             if (userCountryCode && userCountryCode !== 'IN') {
-                const localPrice = await convertPrice(sessionInfo.price, userCountryCode);
-                if (localPrice.currency.code !== 'INR') {
+ const localPrice = await convertPrice(sessionInfo.price, userCountryCode, true);
+ if (localPrice.currency.code !== 'INR') {
                     payAmount = localPrice.amount;
                     payCurrency = localPrice.currency.code;
                     console.log(`🌍 Booking International: Paying ${payCurrency} ${payAmount} (INR ${logAmountInr} tracked in backend)`);
@@ -2750,7 +2751,12 @@ if (bookingForm) {
  * Initialize Razorpay for session booking payment
  */
 async function initSessionPayment(description, amount, customerEmail, currency = 'INR', inrAmountForLogging = null, bookingData = null) {
-    // Handle FREE sessions (0 value)
+ // Safety net: remove any URL hash before opening Razorpay (hash breaks domain verification)
+ if (window.location.hash) {
+ history.replaceState(null, '', window.location.pathname + window.location.search);
+ }
+
+ // Handle FREE sessions (0 value)
     if (amount <= 0) {
         handleSessionPaymentSuccess({ payment_id: 'FREE_SESSION_' + Date.now() });
         return;
