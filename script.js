@@ -1699,11 +1699,11 @@ async function updateServicesSection(sessions) {
             `<li><i class="fas fa-check" style="color: #22c55e; margin-right: 8px;"></i>${feature}</li>`
         ).join('') : '';
 
-        // Convert price to local currency
-        const localPrice = await convertPrice(session.price, userCountryCode);
-        const isLocalCurrency = localPrice.currency.code !== 'INR';
+ // Convert price to local currency
+ const localPrice = await convertPrice(session.price, userCountryCode, true);
+ const isLocalCurrency = localPrice.currency.code !== 'INR';
 
-        const priceDisplay = session.price === 0
+ const priceDisplay = session.price === 0
             ? '<span class="price-free">FREE</span>'
             : isLocalCurrency
                 ? `<span style="font-weight:700;">${formatPrice(localPrice)}</span>`
@@ -1786,7 +1786,7 @@ async function updateBookingForm(sessions) {
         const valueType = session.name.toLowerCase().replace(/\s+/g, '_');
 
         // Convert price to local currency for display
-        const localPrice = await convertPrice(session.price, userCountryCode);
+        const localPrice = await convertPrice(session.price, userCountryCode, true);
         const isLocalCurrency = localPrice.currency.code !== 'INR';
 
         option.value = `${valueType}| ${session.price}| ${session.duration} `;
@@ -2746,8 +2746,8 @@ if (bookingForm) {
         // Check for Local Currency (use local price for Razorpay checkout)
         try {
             if (userCountryCode && userCountryCode !== 'IN') {
-                const localPrice = await convertPrice(sessionInfo.price, userCountryCode);
-                if (localPrice.currency.code !== 'INR') {
+ const localPrice = await convertPrice(sessionInfo.price, userCountryCode, true);
+ if (localPrice.currency.code !== 'INR') {
                     payAmount = localPrice.amount;
                     payCurrency = localPrice.currency.code;
                     console.log(`🌍 Booking International: Paying ${payCurrency} ${payAmount} (INR ${logAmountInr} tracked in backend)`);
