@@ -1,4 +1,4 @@
-/* Blog Modal Fix - full-screen article reader */
+/* Blog Modal Fix - full-screen article reader (LIGHT THEME) */
 
 #blogModal.active {
     display: flex !important;
@@ -11,7 +11,8 @@
 }
 
 #blogModal.active .modal-overlay {
-    background: #0f0f1a !important;
+    background: #f8fafc !important;
+    /* solid light background */
     opacity: 1 !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -27,7 +28,8 @@
     margin: 0 !important;
     border-radius: 0 !important;
     border: none !important;
-    background: #0f0f1a !important;
+    background: #f8fafc !important;
+    /* solid light background */
     box-shadow: none !important;
     overflow-y: auto !important;
     display: flex !important;
@@ -41,10 +43,11 @@
     right: 24px !important;
     width: 40px !important;
     height: 40px !important;
-    background: rgba(255, 255, 255, 0.08) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    background: rgba(15, 23, 42, 0.05) !important;
+    /* light button */
+    border: 1px solid rgba(15, 23, 42, 0.1) !important;
     border-radius: 12px !important;
-    color: #94a3b8 !important;
+    color: #475569 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -54,8 +57,9 @@
     float: none !important;
     margin: 0 !important;
 }
+
 #blogModalClose:hover {
-    background: rgba(239, 68, 68, 0.25) !important;
+    background: rgba(239, 68, 68, 0.15) !important;
     color: #ef4444 !important;
 }
 
@@ -64,16 +68,18 @@
     width: 100% !important;
     margin: 0 auto !important;
     padding: 60px 20px 20px 20px !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08) !important;
     background: transparent !important;
     flex-shrink: 0 !important;
     position: relative !important;
     box-sizing: border-box !important;
 }
+
 #blogModal.active .modal-header h3 {
     font-size: 2em !important;
     font-weight: 700 !important;
-    color: #f1f5f9 !important;
+    color: #0f172a !important;
+    /* dark slate title */
     line-height: 1.3 !important;
     margin: 0 0 16px 0 !important;
     padding-right: 48px !important;
@@ -85,27 +91,32 @@
     align-items: center !important;
     flex-wrap: wrap !important;
 }
+
 #blogShareBar span {
     font-size: 0.85em !important;
-    color: #94a3b8 !important;
+    color: #475569 !important;
+    /* dark slate secondary */
     margin-right: 4px !important;
 }
+
 #blogShareBar button {
     width: 34px !important;
     height: 34px !important;
     border-radius: 8px !important;
-    background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    color: #e0e0e0 !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #334155 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     transition: all 0.2s ease !important;
     cursor: pointer !important;
 }
+
 #blogShareBar button:hover {
-    background: rgba(139, 92, 246, 0.25) !important;
+    background: rgba(139, 92, 246, 0.15) !important;
     transform: translateY(-1px) !important;
+    color: #6d28d9 !important;
 }
 
 #blogModal.active .modal-body {
@@ -120,10 +131,16 @@
     display: block !important;
 }
 
-.modal-body::-webkit-scrollbar { width: 6px !important; }
-.modal-body::-webkit-scrollbar-track { background: transparent !important; }
+.modal-body::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
 .modal-body::-webkit-scrollbar-thumb {
-    background: rgba(139, 92, 246, 0.3) !important;
+    background: rgba(139, 92, 246, 0.2) !important;
     border-radius: 3px !important;
 }
 
@@ -131,8 +148,9 @@
     margin-bottom: 24px !important;
     border-radius: 14px !important;
     overflow: hidden !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;
 }
+
 #blogModalCover img {
     width: 100% !important;
     height: auto !important;
@@ -142,59 +160,88 @@
 .modal-body h2 {
     margin-top: 36px !important;
     font-size: 1.45em !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08) !important;
     padding-bottom: 10px !important;
-    color: #f1f5f9 !important;
+    color: #0f172a !important;
+    /* dark slate h2 */
 }
+
 .modal-body h3 {
     margin-top: 28px !important;
     font-size: 1.2em !important;
-    color: #a5b4fc !important;
+    color: #4f46e5 !important;
+    /* deep indigo h3 */
 }
+
 .modal-body p {
     margin-bottom: 18px !important;
     line-height: 1.75 !important;
-    color: #cbd5e1 !important;
+    color: #334155 !important;
+    /* slate body text */
 }
-.modal-body strong { color: #f1f5f9 !important; }
-.modal-body a { color: #818cf8 !important; text-underline-offset: 2px !important; }
-.modal-body a:hover { color: #a5b4fc !important; }
-.modal-body ul, .modal-body ol {
+
+.modal-body strong {
+    color: #0f172a !important;
+}
+
+.modal-body a {
+    color: #4f46e5 !important;
+    text-underline-offset: 2px !important;
+}
+
+.modal-body a:hover {
+    color: #312e81 !important;
+}
+
+.modal-body ul,
+.modal-body ol {
     margin: 16px 0 !important;
     padding-left: 28px !important;
 }
-.modal-body li { margin-bottom: 8px !important; color: #cbd5e1 !important; }
+
+.modal-body li {
+    margin-bottom: 8px !important;
+    color: #334155 !important;
+}
+
 .modal-body img {
     max-width: 100% !important;
     border-radius: 10px !important;
     margin: 20px 0 !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
 }
+
 .modal-body blockquote {
     border-left: 3px solid #8b5cf6 !important;
     padding: 12px 20px !important;
     margin: 20px 0 !important;
-    background: rgba(139, 92, 246, 0.06) !important;
+    background: rgba(139, 92, 246, 0.04) !important;
     border-radius: 0 8px 8px 0 !important;
-    color: #a5b4fc !important;
+    color: #475569 !important;
     font-style: italic !important;
 }
+
 .modal-body pre {
-    background: rgba(0, 0, 0, 0.3) !important;
-    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    background: #f1f5f9 !important;
+    /* light gray panel */
+    border: 1px solid rgba(15, 23, 42, 0.08) !important;
     border-radius: 10px !important;
     padding: 16px 20px !important;
     overflow-x: auto !important;
     margin: 16px 0 !important;
 }
+
 .modal-body code {
-    background: rgba(139, 92, 246, 0.1) !important;
+    background: rgba(139, 92, 246, 0.05) !important;
     padding: 2px 6px !important;
     border-radius: 4px !important;
     font-size: 0.9em !important;
-    color: #c4b5fd !important;
+    color: #6d28d9 !important;
+    /* violet code */
 }
+
 .modal-body pre code {
     background: none !important;
     padding: 0 !important;
+    color: #0f172a !important;
 }
