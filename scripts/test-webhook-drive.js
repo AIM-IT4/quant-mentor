@@ -51,8 +51,8 @@ process.env.SUPABASE_URL = process.env.SUPABASE_URL || 'https://dntabmyurlrlnoaj
 process.env.SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDEyNjUsImV4cCI6MjA4NTY3NzI2NX0.PYpNd_t_px09zi2d5WGjFVOB23sjb3ZPuAnxagYshe0';
 
 // Set up recipient/mock purchase details
-// Let's use the owner's Gmail since we verified it works without Workspace restrictions
-const mockCustomerEmail = 'amitjha20250305@gmail.com';
+// Let's use an external test email to verify sharing permission grants
+const mockCustomerEmail = 'jha.8@alumni.iitj.ac.in';
 const mockCustomerName = 'Amit Jha (Test)';
 const googleDriveFolderLink = 'https://drive.google.com/drive/folders/1348-cdCTCvQlzvdcArxA__4N6t0cIBy6?usp=drive_link';
 const testProductName = 'Complete Front Office & Risk Quant Professional Bundle (40+ PDFs & 60+ scripts)';
