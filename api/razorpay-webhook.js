@@ -183,8 +183,93 @@ export default async function handler(req, res) {
     }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Google Drive API Helpers for Secure Sharing
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Helper function to extract File/Folder ID from Google Drive URL
+function extractDriveFileId(url) {
+    if (!url) return null;
+    let match = url.match(/[?&]id=([^&]+)/);
+    if (match) return match[1];
+    match = url.match(/\/file\/d\/([^/]+)/);
+    if (match) return match[1];
+    match = url.match(/\/drive\/folders\/([^/?]+)/);
+    if (match) return match[1];
+    match = url.match(/\/open\?id=([^&]+)/);
+    if (match) return match[1];
+    return null;
+}
+
+// Helper function to authenticate service account and grant reader permission
+async function grantDrivePermission(clientEmail, privateKey, fileId, customerEmail) {
+    if (!clientEmail || !privateKey) {
+        console.warn('Google Drive credentials missing in environment; skipping permission grant');
+        return null;
+    }
+
+    // 1. Get access token via JWT authentication flow
+    const header = { alg: 'RS256', typ: 'JWT' };
+    const now = Math.floor(Date.now() / 1000);
+    const claimSet = {
+        iss: clientEmail,
+        scope: 'https://www.googleapis.com/auth/drive',
+        aud: 'https://oauth2.googleapis.com/token',
+        exp: now + 3600,
+        iat: now
+    };
+
+    const base64Encode = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64url');
+    const tokenInput = `${base64Encode(header)}.${base64Encode(claimSet)}`;
+
+    const signer = crypto.createSign('RSA-SHA256');
+    signer.write(tokenInput);
+    signer.end();
+
+    // Format newlines if private key is stored as single line string in env
+    const formattedKey = privateKey.replace(/\\n/g, '\n');
+    const signature = signer.sign(formattedKey, 'base64url');
+
+    const jwt = `${tokenInput}.${signature}`;
+
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`
+    });
+
+    if (!tokenResponse.ok) {
+        const errorText = await tokenResponse.text();
+        throw new Error(`Google Drive API auth token creation failed: ${errorText}`);
+    }
+
+    const tokenData = await tokenResponse.json();
+    const token = tokenData.access_token;
+
+    // 2. Add reader permission via Google Drive API
+    const permissionResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions?sendNotificationEmail=false`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            role: 'reader',
+            type: 'user',
+            emailAddress: customerEmail
+        })
+    });
+
+    if (!permissionResponse.ok) {
+        const errorText = await permissionResponse.text();
+        throw new Error(`Google Drive share permissions failed: ${errorText}`);
+    }
+
+    return await permissionResponse.json();
+}
+
 // Handle product purchase - send email and log to Supabase
-async function handleProductPurchase(data) {
+export async function handleProductPurchase(data) {
     const {
         paymentId, amount, inrAmount, currency, customerEmail, customerName, customerPhone, customerCountry, productName,
         downloadLink: checkoutDownloadLink,
@@ -295,6 +380,36 @@ async function handleProductPurchase(data) {
         downloadLink = '#';
     }
 
+    // Google Drive Secure Sharing Flow
+    let hasSharedSecurely = false;
+    let fallbackToManualInfo = false;
+    const driveFileId = extractDriveFileId(downloadLink);
+
+    if (driveFileId) {
+        const GOOGLE_SERVICE_ACCOUNT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+        const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY;
+
+        if (GOOGLE_SERVICE_ACCOUNT_EMAIL && GOOGLE_PRIVATE_KEY) {
+            console.log(`Google Drive Secure Flow: Sharing ID ${driveFileId} with ${customerEmail}...`);
+            try {
+                await grantDrivePermission(GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY, driveFileId, customerEmail);
+                console.log(`✅ Successfully shared Drive ID ${driveFileId} with ${customerEmail}`);
+                hasSharedSecurely = true;
+            } catch (err) {
+                console.error(`❌ Failed to share Google Drive item: ${err.message}`);
+                fallbackToManualInfo = true;
+            }
+
+            // Secure viewer URL instead of direct download link
+            const isFolder = downloadLink.includes('/folders/') || downloadLink.includes('/drive/folders/');
+            downloadLink = isFolder
+                ? `https://drive.google.com/drive/folders/${driveFileId}?usp=drivesdk`
+                : `https://drive.google.com/file/d/${driveFileId}/view?usp=drivesdk`;
+        } else {
+            console.warn('GCP Google Drive credentials not configured in environment variables. Sharing bypassed.');
+        }
+    }
+
     if (!frontendAlreadyProcessed) {
         try {
             const insertResp = await fetch(`${SUPABASE_URL}/rest/v1/purchases`, {
@@ -342,6 +457,18 @@ async function handleProductPurchase(data) {
                         </div>
                         <p style="font-size: 16px; margin-bottom: 25px;">Hi <strong>${customerName}</strong>, thank you for purchasing from Desk2Quant.</p>
                         
+                        ${hasSharedSecurely ? `
+                        <div style="background: #e0f2fe; padding: 15px; border-radius: 6px; border-left: 4px solid #0284c7; margin-bottom: 25px; font-size: 13px; color: #0369a1; line-height: 1.5;">
+                            <strong>🔒 Secured Resource:</strong> We have shared this resource with your email address <strong>${customerEmail}</strong>. Please ensure you are logged into Google Drive with this email address to view it.
+                        </div>
+                        ` : ''}
+                        
+                        ${fallbackToManualInfo ? `
+                        <div style="background: #fffbeb; padding: 15px; border-radius: 6px; border-left: 4px solid #d97706; margin-bottom: 25px; font-size: 13px; color: #b45309; line-height: 1.5;">
+                            <strong>⚠️ Custom Share Access:</strong> We attempted to automatically share this secure Google Drive resource with <strong>${customerEmail}</strong>. If your email is not associated with a Google Account, or if you cannot access the link, please reply to this email with your Google/Gmail address, and we will grant access manually!
+                        </div>
+                        ` : ''}
+
                         <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
                             <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 10px 0; letter-spacing: 0.5px;">Digital Product</p>
                             <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #1a1a1a; border-bottom: 1px solid #e5e5e5; padding-bottom: 15px;">${productName}</h3>
@@ -354,9 +481,9 @@ async function handleProductPurchase(data) {
                         </div>
                         
                         <center>
-                            <a href="${downloadLink}" style="display: inline-block; background: #e95836; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; border-radius: 6px; font-size: 16px; margin-bottom: 30px;">Download Resource</a>
+                            <a href="${downloadLink}" style="display: inline-block; background: #e95836; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; border-radius: 6px; font-size: 16px; margin-bottom: 30px;">Download / View Resource</a>
                         </center>
-
+ 
                         <div style="background: #f9f8f4; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
                             <p style="font-size: 11px; color: #666; text-transform: uppercase; font-weight: bold; margin: 0 0 15px 0; letter-spacing: 0.5px;">Direct Link Backup</p>
                             <p style="font-size: 14px; margin: 0 0 8px 0; color: #1a1a1a;">If the button does not open in your email app, copy and paste this link into your browser:</p>
