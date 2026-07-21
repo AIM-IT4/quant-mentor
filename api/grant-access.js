@@ -104,8 +104,16 @@ export default async function handler(req, res) {
             return res.status(404).json({ error: 'Payment not found' });
         }
         const payment = await payResp.json();
-        if (!['captured', 'authorized'].includes(payment.status)) {
+        if (payment.status !== 'captured') {
             return res.status(402).json({ error: `Payment not captured (status: ${payment.status})` });
+        }
+
+        // Email must match the payment's email or the email recorded in notes —
+        // prevents third parties with a payment_id from granting themselves access
+        const knownEmails = [payment.email, payment.notes?.customer_email]
+            .filter(Boolean).map(e => String(e).trim().toLowerCase());
+        if (knownEmails.length && !knownEmails.includes(String(email).trim().toLowerCase())) {
+            return res.status(403).json({ error: 'Email does not match payment record' });
         }
 
         // 2. Resolve product name + link from payment/order notes

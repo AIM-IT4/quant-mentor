@@ -54,8 +54,12 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'Could not read request body' });
     }
 
-    // 2. Verify Webhook Signature
-    if (RAZORPAY_WEBHOOK_SECRET) {
+    // 2. Verify Webhook Signature (mandatory — reject if secret not configured)
+    if (!RAZORPAY_WEBHOOK_SECRET) {
+        console.error('CRITICAL: RAZORPAY_WEBHOOK_SECRET not configured — rejecting webhook');
+        return res.status(500).json({ error: 'Webhook secret not configured' });
+    }
+    {
         const signature = req.headers['x-razorpay-signature'];
 
         const expectedSignature = crypto
