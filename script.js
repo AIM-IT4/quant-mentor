@@ -2074,6 +2074,17 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
             const paymentId = response.razorpay_payment_id;
             const customerEmail = (userDetails && userDetails.email) ? userDetails.email : prompt('Enter your email to receive the download link:');
 
+            // Grant Drive access server-side (fallback if webhook fails)
+            if (customerEmail) {
+                fetch('/api/grant-access', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ payment_id: paymentId, email: customerEmail })
+                }).then(r => r.json())
+                    .then(d => console.log('🔑 grant-access:', d.drive_access_granted ? 'Drive access granted' : (d.drive_error || 'no Drive grant needed')))
+                    .catch(err => console.warn('grant-access call failed:', err));
+            }
+
             if (window.supabaseClient && customerEmail) {
                 const loggedAmount = inrAmountForLogging !== null ? inrAmountForLogging : ((currency === 'INR') ? amount : 0);
                 window.supabaseClient.from('purchases').insert({
