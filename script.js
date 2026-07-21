@@ -681,7 +681,7 @@ const BUSINESS_NAME = 'Desk2Quant';
 // SUPABASE INTEGRATION (for dynamic file links)
 // ================================
 const SUPABASE_URL = 'https://dntabmyurlrlnoajdnja.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_OhbTYIuMYgGgmKPQJ9W7RA_rhKyaad0'; // Using provided public key
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRudGFibXl1cmxybG5vYWpkbmphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMDEyNjUsImV4cCI6MjA4NTY3NzI2NX0.PYpNd_t_px09zi2d5WGjFVOB23sjb3ZPuAnxagYshe0';
 
 // Use global supabase reference (avoid local declaration)
 // Initialize Supabase immediately (SDK loads synchronously before this script)
