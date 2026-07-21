@@ -1008,6 +1008,8 @@
                     <div id="recentActivityFeed"
                         style="display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto;">
                         <div style="text-align: center; padding: 20px; color: var(--text-muted);">Loading
+                            activity...
+                        </div>
                     </div>
                 </div>
             </div>
@@ -5672,6 +5674,7 @@ Desk2Quant
                         link.setAttribute('download', filename);
                         link.style.visibility = 'hidden';
                         document.body.appendChild(link);
+                        link.click();
                         document.body.removeChild(link);
                     }
                 }
