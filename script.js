@@ -2098,9 +2098,8 @@ async function initRazorpayCheckout(productName, amount, currency = 'INR', inrAm
                 }).then(() => console.log('✅ Purchase logged to Supabase')).catch(err => console.error('❌ Failed to log purchase:', err));
             }
 
-            if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE' && customerEmail) {
-                sendProductEmail(customerEmail, productName, paymentId, downloadLink, userDetails ? userDetails.name : 'Customer', amount, currency);
-            }
+            // NOTE: purchase emails (customer + admin) are sent server-side by
+            // /api/razorpay-webhook — do not send from frontend (caused duplicates)
 
             if (downloadLink && downloadLink !== 'YOUR_DRIVE_LINK_HERE') {
                 if (typeof window.showSuccessModal === 'function') {
