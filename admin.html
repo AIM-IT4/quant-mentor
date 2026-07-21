@@ -1008,8 +1008,34 @@
                     <div id="recentActivityFeed"
                         style="display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto;">
                         <div style="text-align: center; padding: 20px; color: var(--text-muted);">Loading
-                            activity...
-                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Promo Tracking Section (XVA Lab & Beyond) -->
+            <div class="promo-tracking-container" style="margin-top: 30px; margin-bottom: 30px;">
+                <div style="background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+                    <h4 style="margin: 0 0 20px 0; color: var(--text-secondary); display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-ticket-alt" style="color: #ec4899;"></i> Promo & Returning Customers (XVA Lab)
+                    </h4>
+                    <div class="table-container" style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 0.85em; text-align: left;">
+                                    <th style="padding: 10px;">Customer Email</th>
+                                    <th style="padding: 10px; text-align: center;">Lifetime Purchases</th>
+                                    <th style="padding: 10px;">Latest Product & Amount</th>
+                                    <th style="padding: 10px; text-align: right;">Promo Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="promoTrackingList">
+                                <tr>
+                                    <td colspan="4" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                                        Loading promo usage...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -5646,10 +5672,102 @@ Desk2Quant
                         link.setAttribute('download', filename);
                         link.style.visibility = 'hidden';
                         document.body.appendChild(link);
-                        link.click();
                         document.body.removeChild(link);
                     }
                 }
+
+                // Promo Tracking Logic
+                async function loadPromoTracking() {
+                    const promoList = document.getElementById('promoTrackingList');
+                    if (!promoList || !window.supabaseAdminClient) return;
+                    
+                    try {
+                        const { data, error } = await window.supabaseAdminClient
+                            .from('purchases')
+                            .select('*')
+                            .order('created_at', { ascending: false });
+
+                        if (error) {
+                            promoList.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Failed to load data</td></tr>';
+                            return;
+                        }
+
+                        if (!data || data.length === 0) {
+                            promoList.innerHTML = '<tr><td colspan="4" style="text-align:center;">No purchases found</td></tr>';
+                            return;
+                        }
+
+                        // Group by customer_email
+                        const customerMap = {};
+                        data.forEach(p => {
+                            const email = p.customer_email.toLowerCase().trim();
+                            if (!customerMap[email]) {
+                                customerMap[email] = {
+                                    email: email,
+                                    purchases: [],
+                                    totalSpend: 0
+                                };
+                            }
+                            customerMap[email].purchases.push(p);
+                            customerMap[email].totalSpend += parseFloat(p.amount) || 0;
+                        });
+
+                        // Filter and render
+                        let html = '';
+                        const XVA_PROMO_AMOUNT = 639; // 799 * 0.8
+                        const LAB_KEYWORD = 'XVA Calculus Lab';
+
+                        Object.values(customerMap).forEach(c => {
+                            const purchases = c.purchases;
+                            const isReturning = purchases.length > 1;
+                            
+                            // Check if latest or any purchase matches promo logic
+                            const latestPurchase = purchases[0]; // ordered decsending
+                            
+                            // Anomaly logic: Did they buy XVA Lab at discounted 639 price?
+                            let usedPromo = false;
+                            purchases.forEach(p => {
+                                if (p.product_name && p.product_name.includes(LAB_KEYWORD) && parseInt(p.amount) === XVA_PROMO_AMOUNT) {
+                                    usedPromo = true;
+                                }
+                            });
+
+                            // Show returning customers who used a promo, OR anyone who used the promo
+                            if (usedPromo) {
+                                const badge = isReturning 
+                                    ? '<span style="background: rgba(34, 197, 94, 0.15); color: #22c55e; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;">Returning + Promo</span>'
+                                    : '<span style="background: rgba(99, 102, 241, 0.15); color: #6366f1; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase;">New + Promo</span>';
+
+                                html += `
+                                    <tr style="border-bottom: 1px solid var(--border);">
+                                        <td style="padding: 12px 10px;">${c.email}</td>
+                                        <td style="padding: 12px 10px; text-align: center;"><b>${purchases.length}</b></td>
+                                        <td style="padding: 12px 10px; font-size: 0.9em;">
+                                            ${latestPurchase.product_name}<br>
+                                            <span style="color: var(--text-muted);">Paid: ₹${latestPurchase.amount}</span>
+                                        </td>
+                                        <td style="padding: 12px 10px; text-align: right;">${badge}</td>
+                                    </tr>
+                                `;
+                            }
+                        });
+
+                        if (html === '') {
+                            promoList.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--text-muted);">No promotional purchases detected yet.</td></tr>';
+                        } else {
+                            promoList.innerHTML = html;
+                        }
+
+                    } catch (err) {
+                        console.error('Promo tracking error:', err);
+                        promoList.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Error processing tracking data</td></tr>';
+                    }
+                }
+
+                // Bind to initial load after Supabase initialization
+                document.addEventListener('DOMContentLoaded', () => {
+                    setTimeout(loadPromoTracking, 2000); 
+                });
 
             </script>
 </body>
