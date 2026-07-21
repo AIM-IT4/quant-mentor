@@ -67,10 +67,10 @@ export default async function handler(req, res) {
             .update(rawBody)
             .digest('hex');
 
-        if (signature !== expectedSignature) {
+        const sigBuf = Buffer.from(signature || '', 'utf8');
+        const expBuf = Buffer.from(expectedSignature, 'utf8');
+        if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
             console.error('CRITICAL: Webhook signature verification failed');
-            console.log('Received signature:', signature);
-            console.log('Expected signature (raw_match):', expectedSignature);
             console.log('Raw body preview (50 chars):', rawBody.toString('utf8').substring(0, 50));
             return res.status(401).json({ error: 'Invalid signature' });
         }
