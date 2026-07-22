@@ -2569,15 +2569,12 @@ if (bookingForm) {
                         .eq('booking_date', dateValue); // Use dateValue (YYYY-MM-DD) directly
 
                     if (bookingsData) {
-                        // DB returns booking_time as "14:00:00" (TIME type)
-                        // We need to match it with our generated label "2:00 PM"
-                        // So let's convert DB times to our display format for comparison
+                        // DB stores times in IST. Normalize them in IST before comparing
+                        // them with generated slot labels, regardless of visitor timezone.
                         existingBookings = bookingsData.map(b => {
-                            // b.booking_time is likely "14:00:00"
-                            const [h, m] = b.booking_time.split(':');
-                            const date = new Date();
-                            date.setHours(parseInt(h), parseInt(m));
-                            return date.toLocaleTimeString('en-US', {
+                            const istDate = new Date(`1970-01-01T${b.booking_time}+05:30`);
+                            return istDate.toLocaleTimeString('en-US', {
+                                timeZone: 'Asia/Kolkata',
                                 hour: 'numeric',
                                 minute: '2-digit',
                                 hour12: true
@@ -2625,8 +2622,9 @@ if (bookingForm) {
                 const endHour = parseInt(availability.end_time.split(':')[0]);
 
                 // Helper to format time
-                const formatTime = (date) => {
+                const formatIstTime = (date) => {
                     return date.toLocaleTimeString('en-US', {
+                        timeZone: 'Asia/Kolkata',
                         hour: 'numeric',
                         minute: '2-digit',
                         hour12: true
@@ -2661,7 +2659,7 @@ if (bookingForm) {
                     // Format timezone name (e.g., IST, GMT, EST)
                     const tzName = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short', timeZone: userTimeZone }).formatToParts(currentSlot).find(p => p.type === 'timeZoneName')?.value || '';
 
-                    const istTimeLabel = formatTime(currentSlot); // e.g. "10:00 AM" or "10:30 AM"
+                    const istTimeLabel = formatIstTime(currentSlot); // e.g. "10:00 AM" or "10:30 AM"
 
                     const option = document.createElement('option');
                     option.value = istTimeLabel;
@@ -2781,6 +2779,7 @@ if (bookingForm) {
             duration: sessionInfo.duration,
             price: Math.round(logAmountInr), // Store INR price in DB
             pay_currency: payCurrency, // Store actual payment currency for email display
+            bookingDate: date, // ISO YYYY-MM-DD for Supabase DATE column
             date: formattedDate,
             time,
             message
@@ -3035,7 +3034,9 @@ ${BUSINESS_NAME}`;
                         service_name: booking.sessionType,
                         service_price: booking.price,
                         service_duration: booking.duration,
-                        booking_date: booking.date,
+                        // Keep display date for emails, but persist a valid DATE value.
+                        // Fallback supports an in-flight booking created before this fix.
+                        booking_date: booking.bookingDate || new Date(booking.date).toISOString().split('T')[0],
                         booking_time: booking.time,
                         message: booking.message,
                         status: 'upcoming',
