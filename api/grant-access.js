@@ -57,17 +57,22 @@ async function grantDrivePermission(clientEmail, privateKey, fileId, customerEma
     }
     const { access_token: token } = await tokenResponse.json();
 
-    const permissionResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions?sendNotificationEmail=false&supportsAllDrives=true`, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ role: 'writer', type: 'user', emailAddress: customerEmail })
+    const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+    const permissionsUrl = `https://www.googleapis.com/drive/v3/files/${fileId}/permissions?fields=permissions(id,emailAddress,type)&supportsAllDrives=true`;
+    const listResponse = await fetch(permissionsUrl, { headers });
+    if (!listResponse.ok) throw new Error(`Drive permission lookup failed: ${await listResponse.text()}`);
+
+    const { permissions = [] } = await listResponse.json();
+    const existing = permissions.find(permission => permission.type === 'user' && String(permission.emailAddress).toLowerCase() === String(customerEmail).toLowerCase());
+    const permissionUrl = existing
+        ? `https://www.googleapis.com/drive/v3/files/${fileId}/permissions/${existing.id}?supportsAllDrives=true`
+        : `https://www.googleapis.com/drive/v3/files/${fileId}/permissions?sendNotificationEmail=false&supportsAllDrives=true`;
+    const permissionResponse = await fetch(permissionUrl, {
+        method: existing ? 'PATCH' : 'POST',
+        headers,
+        body: JSON.stringify(existing ? { role: 'writer' } : { role: 'writer', type: 'user', emailAddress: customerEmail })
     });
-    if (!permissionResponse.ok) {
-        throw new Error(`Drive permission failed: ${await permissionResponse.text()}`);
-    }
+    if (!permissionResponse.ok) throw new Error(`Drive permission update failed: ${await permissionResponse.text()}`);
     return permissionResponse.json();
 }
 
