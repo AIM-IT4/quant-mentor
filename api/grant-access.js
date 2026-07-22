@@ -63,7 +63,7 @@ async function grantDrivePermission(clientEmail, privateKey, fileId, customerEma
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ role: 'reader', type: 'user', emailAddress: customerEmail })
+        body: JSON.stringify({ role: 'writer', type: 'user', emailAddress: customerEmail })
     });
     if (!permissionResponse.ok) {
         throw new Error(`Drive permission failed: ${await permissionResponse.text()}`);

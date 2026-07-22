@@ -250,7 +250,7 @@ async function grantDrivePermission(clientEmail, privateKey, fileId, customerEma
     const tokenData = await tokenResponse.json();
     const token = tokenData.access_token;
 
-    // 2. Add reader permission via Google Drive API
+    // 2. Add editor permission via Google Drive API
     const permissionResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions?sendNotificationEmail=false`, {
         method: 'POST',
         headers: {
@@ -258,7 +258,7 @@ async function grantDrivePermission(clientEmail, privateKey, fileId, customerEma
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            role: 'reader',
+            role: 'writer',
             type: 'user',
             emailAddress: customerEmail
         })
