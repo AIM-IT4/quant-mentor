@@ -574,6 +574,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Detect current theme for particle colors
+            const isLight = document.body.classList.contains('light-mode') || document.documentElement.dataset.theme === 'light';
             const particleColor = '15, 23, 42';
             const lineColor = '99, 102, 241';
 
@@ -3669,7 +3670,7 @@ window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
 
         // Convert prices to local currency if available
         const originalInr = 1299;
-        const discountedInr = 679;
+        const discountedInr = 699;
         const origEl = document.getElementById('launchOriginalPrice');
         const discEl = document.getElementById('launchDiscountedPrice');
 
@@ -3683,7 +3684,7 @@ window.sendTestimonialRequestEmail = sendTestimonialRequestEmail;
         } else {
             // Fallback: keep INR
             if (origEl) origEl.textContent = '\u20b91,299';
-            if (discEl) discEl.textContent = '\u20b9679';
+            if (discEl) discEl.textContent = '\u20b9699';
         }
 
         modal.classList.add('active');

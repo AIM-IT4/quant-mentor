@@ -976,9 +976,9 @@
                         let appliedDiscount = 0;
                         let isValid = false;
 
-                        if (inputCodeUpper && product.coupon_code && inputCodeUpper === product.coupon_code.toUpperCase()) {
+                        if ((inputCodeUpper && product.coupon_code && inputCodeUpper === product.coupon_code.toUpperCase()) || (inputCodeUpper === 'LAUNCH15' && product.id === '6b78550d-e130-41d1-9409-92335ce82a6c')) {
                             isValid = true;
-                            appliedDiscount = product.discount_percentage || 0;
+                            appliedDiscount = inputCodeUpper === 'LAUNCH15' ? 15 : (product.discount_percentage || 0);
                         } else if (inputCodeUpper && inputCodeUpper === 'VASUDHA30') {
                             isValid = true;
                             appliedDiscount = 30;
